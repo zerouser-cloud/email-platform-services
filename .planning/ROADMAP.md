@@ -72,11 +72,10 @@ Plans:
   2. Domain layer contains no NestJS imports -- pure TypeScript only
   3. Port interfaces exist in `application/ports/` and adapter implementations in `infrastructure/adapters/`
   4. Architecture-validator agent passes for the auth service without violations
-**Plans:** 3 plans
+**Plans:** 2 plans
 Plans:
-- [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [ ] 04-01-PLAN.md -- Domain entity, application ports, and use-case stub (inner layers)
+- [ ] 04-02-PLAN.md -- Infrastructure adapters and auth.module.ts DI wiring (outer layer)
 
 ### Phase 5: Architecture Replication & Boundaries
 **Goal**: All remaining services (sender, parser, audience, notifier, gateway) follow the validated reference pattern, with strict isolation between services and correct proto-aligned controller stubs
