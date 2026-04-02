@@ -89,7 +89,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [x] 05-01-PLAN.md -- Sender and parser hexagonal scaffolding with gRPC stubs for all proto RPCs
-- [ ] 05-02-PLAN.md -- Audience hexagonal scaffolding with gRPC stubs, notifier as RabbitMQ event-consumer
+- [x] 05-02-PLAN.md -- Audience hexagonal scaffolding with gRPC stubs, notifier as RabbitMQ event-consumer
 - [ ] 05-03-PLAN.md -- Gateway infrastructure/clients layer and cross-service boundary verification
 
 ### Phase 6: Health & Resilience
