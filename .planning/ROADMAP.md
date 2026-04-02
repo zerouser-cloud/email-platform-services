@@ -88,9 +88,9 @@ Plans:
   4. Controller stubs in auth, sender, parser, audience use `@GrpcMethod` decorators matching their proto RPC definitions
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [ ] 05-01-PLAN.md -- Sender and parser hexagonal scaffolding with gRPC stubs for all proto RPCs
+- [ ] 05-02-PLAN.md -- Audience hexagonal scaffolding with gRPC stubs, notifier as RabbitMQ event-consumer
+- [ ] 05-03-PLAN.md -- Gateway infrastructure/clients layer and cross-service boundary verification
 
 ### Phase 6: Health & Resilience
 **Goal**: Health checking is fast, reliable, and Kubernetes-ready with configurable retry behavior
