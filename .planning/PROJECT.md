@@ -33,9 +33,12 @@
 
 - ✓ Auth service: Clean/Hexagonal reference (domain/application/infrastructure) — Phase 4
 
-### Active
+- ✓ All services: Clean/Hexagonal scaffolding (sender 11, parser 6, audience 9 gRPC stubs) — Phase 5
+- ✓ Notifier: event-consumer-only с RabbitMQ health indicator — Phase 5
+- ✓ Gateway: infrastructure/clients layer (REST facade) — Phase 5
+- ✓ Zero cross-service imports enforced — Phase 5
 
-- [ ] Clean/Hexagonal Architecture реплицирована в остальных сервисах (sender, parser, audience, notifier, gateway)
+### Active
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
 - [ ] Правильные контракты между сервисами (proto как единый источник истины)
 - [ ] Устранение размазанности кода — общий код в packages/, специфичный в apps/
@@ -94,4 +97,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 4 completion*
+*Last updated: 2026-04-02 after Phase 5 completion*
