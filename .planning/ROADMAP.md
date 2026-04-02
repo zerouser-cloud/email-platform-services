@@ -46,7 +46,7 @@ Plans:
   3. MinIO credentials in docker-compose.yml use `${VAR:-default}` substitution, not hardcoded values
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
 - [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
 - [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
