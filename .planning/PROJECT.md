@@ -24,11 +24,13 @@
 - ✓ Единый источник сгенерированных контрактов (src/generated/ only) — Phase 1
 - ✓ Proto генерация в Turbo pipeline с кэшированием — Phase 1
 - ✓ Команда `pnpm generate:contracts` на верхнем уровне — Phase 1
+- ✓ Config через DI (ConfigService), loadGlobalConfig только в main.ts — Phase 2
+- ✓ CORS wildcard запрещён в production (Zod refine) — Phase 2
+- ✓ MinIO credentials через env var substitution — Phase 2
 
 ### Active
 
 - [ ] Clean/Hexagonal Architecture соблюдена во всех apps/ (проверка через architecture-validator агент)
-- [ ] Единый источник истины для конфигурации (убрать множественные вызовы loadGlobalConfig)
 - [ ] Исправление бага с metadata array access в logging module
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
 - [ ] Правильные контракты между сервисами (proto как единый источник истины)
@@ -88,4 +90,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 1 completion*
+*Last updated: 2026-04-02 after Phase 2 completion*
