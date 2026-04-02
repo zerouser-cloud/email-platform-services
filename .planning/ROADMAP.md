@@ -58,11 +58,10 @@ Plans:
   1. Logging module handles missing metadata gracefully -- empty metadata array does not crash, falls back to `crypto.randomUUID()`
   2. gRPC error details are logged server-side but never exposed to clients -- clients see generic safe messages
   3. All service error responses follow the shape `{ statusCode, message, error, correlationId }` via a global exception filter
-**Plans:** 3 plans
+**Plans:** 2 plans
 Plans:
-- [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [x] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [ ] 03-01-PLAN.md -- Fix metadata bug, expand ERROR_MESSAGE, sanitize error messages by gRPC code
+- [ ] 03-02-PLAN.md -- Inject ClsService, add correlationId to all error responses
 
 ### Phase 4: Architecture Reference Implementation
 **Goal**: Auth service is restructured into correct Clean/Hexagonal layers (domain/application/infrastructure), serving as the validated reference for all other services
