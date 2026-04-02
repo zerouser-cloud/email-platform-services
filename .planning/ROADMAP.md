@@ -44,7 +44,11 @@ Plans:
   1. Each service calls `loadGlobalConfig()` exactly once (at bootstrap), and all modules receive config through injectable `ConfigService`
   2. Starting a service with `NODE_ENV=production` and `CORS_ORIGINS=*` fails with a clear Zod validation error
   3. MinIO credentials in docker-compose.yml use `${VAR:-default}` substitution, not hardcoded values
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 3: Error Handling & Safety
 **Goal**: Errors are safe for clients, structured for debugging, and consistent across all services
@@ -54,7 +58,11 @@ Plans:
   1. Logging module handles missing metadata gracefully -- empty metadata array does not crash, falls back to `crypto.randomUUID()`
   2. gRPC error details are logged server-side but never exposed to clients -- clients see generic safe messages
   3. All service error responses follow the shape `{ statusCode, message, error, correlationId }` via a global exception filter
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 4: Architecture Reference Implementation
 **Goal**: Auth service is restructured into correct Clean/Hexagonal layers (domain/application/infrastructure), serving as the validated reference for all other services
@@ -65,7 +73,11 @@ Plans:
   2. Domain layer contains no NestJS imports -- pure TypeScript only
   3. Port interfaces exist in `application/ports/` and adapter implementations in `infrastructure/adapters/`
   4. Architecture-validator agent passes for the auth service without violations
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 5: Architecture Replication & Boundaries
 **Goal**: All remaining services (sender, parser, audience, notifier, gateway) follow the validated reference pattern, with strict isolation between services and correct proto-aligned controller stubs
@@ -76,7 +88,11 @@ Plans:
   2. Notifier is structured as an event-consumer-only service with RabbitMQ health check and no gRPC server
   3. No cross-service imports exist between apps/ -- shared code lives exclusively in packages/
   4. Controller stubs in auth, sender, parser, audience use `@GrpcMethod` decorators matching their proto RPC definitions
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 6: Health & Resilience
 **Goal**: Health checking is fast, reliable, and Kubernetes-ready with configurable retry behavior
@@ -86,7 +102,11 @@ Plans:
   1. Gateway checks health of all gRPC services in parallel via `Promise.all()`, not sequentially
   2. Retry configuration values are reasonable (not aggressive) and overridable via environment variables
   3. Each service exposes separate liveness (process alive) and readiness (dependencies connected) probe endpoints
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 7: Logging, Security & Operations
 **Goal**: Logs are structured and useful, production security is enforced, and services shut down cleanly
@@ -97,7 +117,11 @@ Plans:
   2. A NestJS interceptor logs request/response timing with `{ method, path, statusCode, durationMs }` on every request
   3. `.env.example` contains safe CORS defaults with comments explaining production requirements -- wildcard is rejected at startup in production
   4. Services handle SIGTERM gracefully: in-flight requests complete, gRPC connections drain, DB/RabbitMQ pools close via `enableShutdownHooks()` and `onModuleDestroy`
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 8: Verification
 **Goal**: The entire platform starts and operates correctly end-to-end -- infrastructure, services, health, and proxying all verified manually
@@ -108,7 +132,11 @@ Plans:
   2. All 6 services start successfully via their package.json commands with no runtime errors in logs
   3. Curling health endpoints of every service returns correct status responses
   4. Gateway successfully proxies a request to a gRPC service and returns an error in the unified format `{ statusCode, message, error, correlationId }`
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ## Progress
 
