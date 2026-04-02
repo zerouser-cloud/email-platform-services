@@ -3,7 +3,6 @@ import { SkipThrottle } from '@nestjs/throttler';
 import {
   HealthCheckService,
   HealthCheck,
-  MemoryHealthIndicator,
   GRPCHealthIndicator,
 } from '@nestjs/terminus';
 import { type GrpcOptions } from '@nestjs/microservices';
@@ -22,7 +21,6 @@ export class HealthController {
 
   constructor(
     private readonly health: HealthCheckService,
-    private readonly memory: MemoryHealthIndicator,
     private readonly grpc: GRPCHealthIndicator,
     private readonly configService: ConfigService,
   ) {
@@ -37,24 +35,29 @@ export class HealthController {
   @Get(HEALTH.LIVE)
   @HealthCheck()
   liveness() {
-    return this.health.check([
-      () => this.memory.checkHeap(HEALTH.INDICATOR.MEMORY_HEAP, HEALTH.HEAP_LIMIT),
-    ]);
+    return this.health.check([]);
   }
 
   @Get(HEALTH.READY)
   @HealthCheck()
-  readiness() {
-    return this.health.check(
-      this.grpcServices.map(
-        ({ key, url }) =>
-          () =>
-            this.grpc.checkService<GrpcOptions>(key, key, {
-              url,
-              timeout: HEALTH.CHECK_TIMEOUT,
-              healthServiceCheck: checkOverallHealth,
-            }),
+  async readiness() {
+    const results = await Promise.allSettled(
+      this.grpcServices.map(({ key, url }) =>
+        this.grpc.checkService<GrpcOptions>(key, key, {
+          url,
+          timeout: HEALTH.CHECK_TIMEOUT,
+          healthServiceCheck: checkOverallHealth,
+        }),
       ),
+    );
+
+    return this.health.check(
+      results.map((result) => () => {
+        if (result.status === 'fulfilled') {
+          return result.value;
+        }
+        throw result.reason;
+      }),
     );
   }
 }
