@@ -32,7 +32,9 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Running `pnpm generate:contracts` from the monorepo root regenerates all proto types
   3. Running `turbo build` triggers proto generation automatically before dependent packages compile
   4. All existing import paths across apps/ and packages/ resolve correctly after consolidation
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 01-01-PLAN.md -- Delete duplicate generated dirs, wire Turbo generate task, rename root script
 
 ### Phase 2: Configuration Management
 **Goal**: Configuration loads once at application bootstrap and is injected via NestJS DI -- no module-scope side effects, no hardcoded secrets
@@ -115,7 +117,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Contract Consolidation | 0/TBD | Not started | - |
+| 1. Contract Consolidation | 0/1 | Planned | - |
 | 2. Configuration Management | 0/TBD | Not started | - |
 | 3. Error Handling & Safety | 0/TBD | Not started | - |
 | 4. Architecture Reference Implementation | 0/TBD | Not started | - |
