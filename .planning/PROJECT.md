@@ -27,11 +27,13 @@
 - ✓ Config через DI (ConfigService), loadGlobalConfig только в main.ts — Phase 2
 - ✓ CORS wildcard запрещён в production (Zod refine) — Phase 2
 - ✓ MinIO credentials через env var substitution — Phase 2
+- ✓ Metadata bug fix (optional chaining, оба места) — Phase 3
+- ✓ Error sanitization по gRPC code, safe messages для клиентов — Phase 3
+- ✓ Unified error shape `{ statusCode, message, error, correlationId, timestamp }` — Phase 3
 
 ### Active
 
 - [ ] Clean/Hexagonal Architecture соблюдена во всех apps/ (проверка через architecture-validator агент)
-- [ ] Исправление бага с metadata array access в logging module
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
 - [ ] Правильные контракты между сервисами (proto как единый источник истины)
 - [ ] Устранение размазанности кода — общий код в packages/, специфичный в apps/
@@ -90,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 2 completion*
+*Last updated: 2026-04-02 after Phase 3 completion*
