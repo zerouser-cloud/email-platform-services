@@ -102,7 +102,7 @@ Plans:
   3. Each service exposes separate liveness (process alive) and readiness (dependencies connected) probe endpoints
 **Plans:** 3 plans
 Plans:
-- [ ] 06-01-PLAN.md -- Tune retry defaults, add jitter, env var override
+- [x] 06-01-PLAN.md -- Tune retry defaults, add jitter, env var override
 - [ ] 06-02-PLAN.md -- Per-service liveness/readiness with correct dependency checks
 - [ ] 06-03-PLAN.md -- Gateway parallel gRPC health checks via Promise.allSettled
 
