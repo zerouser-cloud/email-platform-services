@@ -74,7 +74,7 @@ Plans:
   4. Architecture-validator agent passes for the auth service without violations
 **Plans:** 2 plans
 Plans:
-- [ ] 04-01-PLAN.md -- Domain entity, application ports, and use-case stub (inner layers)
+- [x] 04-01-PLAN.md -- Domain entity, application ports, and use-case stub (inner layers)
 - [ ] 04-02-PLAN.md -- Infrastructure adapters and auth.module.ts DI wiring (outer layer)
 
 ### Phase 5: Architecture Replication & Boundaries

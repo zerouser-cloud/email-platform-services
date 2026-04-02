@@ -26,7 +26,7 @@
 
 ### Architectural Boundaries
 
-- [ ] **ARCH-01**: Каждый app в apps/ имеет корректную Clean/Hexagonal структуру (domain/application/infrastructure) — валидация через architecture-validator агент
+- [x] **ARCH-01**: Каждый app в apps/ имеет корректную Clean/Hexagonal структуру (domain/application/infrastructure) — валидация через architecture-validator агент
 - [ ] **ARCH-02**: Shared код живёт в packages/, service-specific в apps/. Нет cross-service импортов между apps/
 - [ ] **ARCH-03**: Notifier оформлен как event-consumer-only сервис с RabbitMQ health check (без gRPC)
 
@@ -105,7 +105,7 @@
 | ERR-01 | Phase 3 | Complete |
 | ERR-02 | Phase 3 | Complete |
 | ERR-03 | Phase 3 | Complete |
-| ARCH-01 | Phase 4 | Pending |
+| ARCH-01 | Phase 4 | Complete |
 | ARCH-02 | Phase 5 | Pending |
 | ARCH-03 | Phase 5 | Pending |
 | HLTH-01 | Phase 6 | Pending |
