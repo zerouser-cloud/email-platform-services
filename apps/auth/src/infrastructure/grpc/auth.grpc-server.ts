@@ -1,5 +1,5 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
-import { AuthProto } from '@email-platform/contracts';
+import { AuthProto, CommonProto } from '@email-platform/contracts';
 import { LoginPort } from '../../application/ports/inbound/login.port';
 
 @Controller()
@@ -10,8 +10,8 @@ export class AuthGrpcServer implements AuthProto.AuthServiceController {
   ) {}
 
   async healthCheck(
-    _request: AuthProto.Empty,
-  ): Promise<AuthProto.HealthStatus> {
+    _request: CommonProto.Empty,
+  ): Promise<CommonProto.HealthStatus> {
     throw new NotImplementedException('healthCheck not yet implemented');
   }
 
@@ -35,7 +35,7 @@ export class AuthGrpcServer implements AuthProto.AuthServiceController {
 
   async revokeToken(
     _request: AuthProto.RevokeRequest,
-  ): Promise<AuthProto.Empty> {
+  ): Promise<CommonProto.Empty> {
     throw new NotImplementedException('revokeToken not yet implemented');
   }
 
