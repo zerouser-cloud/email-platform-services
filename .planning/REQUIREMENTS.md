@@ -34,7 +34,7 @@
 
 - [ ] **HLTH-01**: Gateway проверяет health gRPC сервисов параллельно через `Promise.all()`
 - [x] **HLTH-02**: Retry configuration уменьшена до разумных значений и конфигурируема через env vars
-- [ ] **HLTH-03**: Раздельные liveness (процесс жив) и readiness (зависимости готовы) probe endpoints
+- [x] **HLTH-03**: Раздельные liveness (процесс жив) и readiness (зависимости готовы) probe endpoints
 
 ### Logging & Observability
 
@@ -110,7 +110,7 @@
 | ARCH-03 | Phase 5 | Complete |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Complete |
-| HLTH-03 | Phase 6 | Pending |
+| HLTH-03 | Phase 6 | Complete |
 | LOG-01 | Phase 7 | Pending |
 | LOG-02 | Phase 7 | Pending |
 | SEC-01 | Phase 7 | Pending |

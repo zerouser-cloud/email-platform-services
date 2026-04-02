@@ -103,7 +103,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [x] 06-01-PLAN.md -- Tune retry defaults, add jitter, env var override
-- [ ] 06-02-PLAN.md -- Per-service liveness/readiness with correct dependency checks
+- [x] 06-02-PLAN.md -- Per-service liveness/readiness with correct dependency checks
 - [ ] 06-03-PLAN.md -- Gateway parallel gRPC health checks via Promise.allSettled
 
 ### Phase 7: Logging, Security & Operations
