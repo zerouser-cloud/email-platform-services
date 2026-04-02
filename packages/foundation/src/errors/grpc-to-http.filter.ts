@@ -1,6 +1,7 @@
 import { Catch, ExceptionFilter, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 import { PinoLogger } from 'nestjs-pino';
+import { ClsService } from 'nestjs-cls';
 import type { Response } from 'express';
 import { ERROR_MESSAGE } from './error-messages';
 
@@ -44,14 +45,30 @@ const ERROR_CODE_TO_MESSAGE: Record<number, string> = {
 
 @Catch()
 export class GrpcToHttpExceptionFilter implements ExceptionFilter {
-  constructor(private readonly logger: PinoLogger) {}
+  constructor(
+    private readonly logger: PinoLogger,
+    private readonly cls: ClsService,
+  ) {}
 
   catch(exception: unknown, host: ArgumentsHost): void {
     if (exception instanceof HttpException) {
       const ctx = host.switchToHttp();
       const response = ctx.getResponse<Response>();
       const status = exception.getStatus();
-      response.status(status).json(exception.getResponse());
+      const body = exception.getResponse();
+      const correlationId = this.cls.getId() ?? 'no-correlation-id';
+      const timestamp = new Date().toISOString();
+      const responseBody =
+        typeof body === 'object'
+          ? { ...(body as Record<string, unknown>), correlationId, timestamp }
+          : {
+              statusCode: status,
+              message: body,
+              error: HttpStatus[status] ?? 'Internal Server Error',
+              correlationId,
+              timestamp,
+            };
+      response.status(status).json(responseBody);
       return;
     }
 
@@ -69,6 +86,8 @@ export class GrpcToHttpExceptionFilter implements ExceptionFilter {
       statusCode: httpStatus,
       message: safeMessage,
       error: HttpStatus[httpStatus] ?? 'Internal Server Error',
+      correlationId: this.cls.getId() ?? 'no-correlation-id',
+      timestamp: new Date().toISOString(),
     });
   }
 
