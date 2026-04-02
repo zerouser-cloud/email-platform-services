@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. All existing import paths across apps/ and packages/ resolve correctly after consolidation
 **Plans:** 1 plan
 Plans:
-- [ ] 01-01-PLAN.md -- Delete duplicate generated dirs, wire Turbo generate task, rename root script
+- [x] 01-01-PLAN.md -- Delete duplicate generated dirs, wire Turbo generate task, rename root script
 
 ### Phase 2: Configuration Management
 **Goal**: Configuration loads once at application bootstrap and is injected via NestJS DI -- no module-scope side effects, no hardcoded secrets

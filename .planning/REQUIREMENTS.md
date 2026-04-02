@@ -7,9 +7,9 @@
 
 ### Contract Hygiene
 
-- [ ] **CONT-01**: Единственный источник сгенерированных типов — `contracts/src/generated/`, дубликат `contracts/generated/` удалён
-- [ ] **CONT-02**: Proto генерация встроена в Turbo pipeline и запускается автоматически при сборке
-- [ ] **CONT-03**: Команда `pnpm generate:contracts` доступна на верхнем уровне монорепо
+- [x] **CONT-01**: Единственный источник сгенерированных типов — `contracts/src/generated/`, дубликат `contracts/generated/` удалён
+- [x] **CONT-02**: Proto генерация встроена в Turbo pipeline и запускается автоматически при сборке
+- [x] **CONT-03**: Команда `pnpm generate:contracts` доступна на верхнем уровне монорепо
 - [ ] **CONT-04**: Controller stubs в auth, sender, parser, audience содержат `@GrpcMethod` декораторы, соответствующие proto RPC методам (без бизнес-логики)
 
 ### Configuration Management
@@ -95,9 +95,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONT-01 | Phase 1 | Pending |
-| CONT-02 | Phase 1 | Pending |
-| CONT-03 | Phase 1 | Pending |
+| CONT-01 | Phase 1 | Complete |
+| CONT-02 | Phase 1 | Complete |
+| CONT-03 | Phase 1 | Complete |
 | CONT-04 | Phase 5 | Pending |
 | CONF-01 | Phase 2 | Pending |
 | CONF-02 | Phase 2 | Pending |
