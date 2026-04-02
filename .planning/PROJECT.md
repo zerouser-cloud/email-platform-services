@@ -31,9 +31,11 @@
 - ✓ Error sanitization по gRPC code, safe messages для клиентов — Phase 3
 - ✓ Unified error shape `{ statusCode, message, error, correlationId, timestamp }` — Phase 3
 
+- ✓ Auth service: Clean/Hexagonal reference (domain/application/infrastructure) — Phase 4
+
 ### Active
 
-- [ ] Clean/Hexagonal Architecture соблюдена во всех apps/ (проверка через architecture-validator агент)
+- [ ] Clean/Hexagonal Architecture реплицирована в остальных сервисах (sender, parser, audience, notifier, gateway)
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
 - [ ] Правильные контракты между сервисами (proto как единый источник истины)
 - [ ] Устранение размазанности кода — общий код в packages/, специфичный в apps/
@@ -92,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 3 completion*
+*Last updated: 2026-04-02 after Phase 4 completion*
