@@ -15,8 +15,8 @@
 ### Configuration Management
 
 - [x] **CONF-01**: `loadGlobalConfig()` вызывается один раз, конфигурация доступна через injectable `ConfigService` во всех сервисах
-- [ ] **CONF-02**: Zod-схема конфигурации отклоняет `CORS_ORIGINS=*` при `NODE_ENV=production`
-- [ ] **CONF-03**: MinIO credentials в docker-compose используют env var substitution `${VAR:-default}` вместо хардкода
+- [x] **CONF-02**: Zod-схема конфигурации отклоняет `CORS_ORIGINS=*` при `NODE_ENV=production`
+- [x] **CONF-03**: MinIO credentials в docker-compose используют env var substitution `${VAR:-default}` вместо хардкода
 
 ### Error Handling & Safety
 
@@ -100,8 +100,8 @@
 | CONT-03 | Phase 1 | Complete |
 | CONT-04 | Phase 5 | Pending |
 | CONF-01 | Phase 2 | Complete |
-| CONF-02 | Phase 2 | Pending |
-| CONF-03 | Phase 2 | Pending |
+| CONF-02 | Phase 2 | Complete |
+| CONF-03 | Phase 2 | Complete |
 | ERR-01 | Phase 3 | Pending |
 | ERR-02 | Phase 3 | Pending |
 | ERR-03 | Phase 3 | Pending |

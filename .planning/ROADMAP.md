@@ -48,7 +48,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
 - [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [x] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 3: Error Handling & Safety
 **Goal**: Errors are safe for clients, structured for debugging, and consistent across all services
@@ -60,7 +60,7 @@ Plans:
   3. All service error responses follow the shape `{ statusCode, message, error, correlationId }` via a global exception filter
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
 - [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
 - [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
