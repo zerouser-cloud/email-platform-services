@@ -21,11 +21,13 @@
 - ✓ Health checks по gRPC протоколу — existing
 - ✓ Structured logging через Pino с correlation IDs — existing
 - ✓ Retry/resilience для gRPC подключений — existing
+- ✓ Единый источник сгенерированных контрактов (src/generated/ only) — Phase 1
+- ✓ Proto генерация в Turbo pipeline с кэшированием — Phase 1
+- ✓ Команда `pnpm generate:contracts` на верхнем уровне — Phase 1
 
 ### Active
 
 - [ ] Clean/Hexagonal Architecture соблюдена во всех apps/ (проверка через architecture-validator агент)
-- [ ] Устранение дублирования сгенерированных контрактов (contracts/generated/ vs contracts/src/generated/)
 - [ ] Единый источник истины для конфигурации (убрать множественные вызовы loadGlobalConfig)
 - [ ] Исправление бага с metadata array access в logging module
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
@@ -86,4 +88,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after initialization*
+*Last updated: 2026-04-02 after Phase 1 completion*
