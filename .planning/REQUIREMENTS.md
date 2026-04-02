@@ -20,8 +20,8 @@
 
 ### Error Handling & Safety
 
-- [ ] **ERR-01**: Metadata array access в logging module использует optional chaining с fallback на `crypto.randomUUID()`
-- [ ] **ERR-02**: gRPC error messages маппятся на безопасные клиентские сообщения, оригиналы логируются server-side
+- [x] **ERR-01**: Metadata array access в logging module использует optional chaining с fallback на `crypto.randomUUID()`
+- [x] **ERR-02**: gRPC error messages маппятся на безопасные клиентские сообщения, оригиналы логируются server-side
 - [ ] **ERR-03**: Все сервисы возвращают ошибки в едином формате `{ statusCode, message, error, correlationId }` через global exception filter
 
 ### Architectural Boundaries
@@ -102,8 +102,8 @@
 | CONF-01 | Phase 2 | Complete |
 | CONF-02 | Phase 2 | Complete |
 | CONF-03 | Phase 2 | Complete |
-| ERR-01 | Phase 3 | Pending |
-| ERR-02 | Phase 3 | Pending |
+| ERR-01 | Phase 3 | Complete |
+| ERR-02 | Phase 3 | Complete |
 | ERR-03 | Phase 3 | Pending |
 | ARCH-01 | Phase 4 | Pending |
 | ARCH-02 | Phase 5 | Pending |

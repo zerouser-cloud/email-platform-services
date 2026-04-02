@@ -60,7 +60,7 @@ Plans:
   3. All service error responses follow the shape `{ statusCode, message, error, correlationId }` via a global exception filter
 **Plans:** 2 plans
 Plans:
-- [ ] 03-01-PLAN.md -- Fix metadata bug, expand ERROR_MESSAGE, sanitize error messages by gRPC code
+- [x] 03-01-PLAN.md -- Fix metadata bug, expand ERROR_MESSAGE, sanitize error messages by gRPC code
 - [ ] 03-02-PLAN.md -- Inject ClsService, add correlationId to all error responses
 
 ### Phase 4: Architecture Reference Implementation
