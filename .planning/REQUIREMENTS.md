@@ -95,36 +95,36 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONT-01 | Pending | Pending |
-| CONT-02 | Pending | Pending |
-| CONT-03 | Pending | Pending |
-| CONT-04 | Pending | Pending |
-| CONF-01 | Pending | Pending |
-| CONF-02 | Pending | Pending |
-| CONF-03 | Pending | Pending |
-| ERR-01 | Pending | Pending |
-| ERR-02 | Pending | Pending |
-| ERR-03 | Pending | Pending |
-| ARCH-01 | Pending | Pending |
-| ARCH-02 | Pending | Pending |
-| ARCH-03 | Pending | Pending |
-| HLTH-01 | Pending | Pending |
-| HLTH-02 | Pending | Pending |
-| HLTH-03 | Pending | Pending |
-| LOG-01 | Pending | Pending |
-| LOG-02 | Pending | Pending |
-| SEC-01 | Pending | Pending |
-| OPS-01 | Pending | Pending |
-| VER-01 | Pending | Pending |
-| VER-02 | Pending | Pending |
-| VER-03 | Pending | Pending |
-| VER-04 | Pending | Pending |
+| CONT-01 | Phase 1 | Pending |
+| CONT-02 | Phase 1 | Pending |
+| CONT-03 | Phase 1 | Pending |
+| CONT-04 | Phase 5 | Pending |
+| CONF-01 | Phase 2 | Pending |
+| CONF-02 | Phase 2 | Pending |
+| CONF-03 | Phase 2 | Pending |
+| ERR-01 | Phase 3 | Pending |
+| ERR-02 | Phase 3 | Pending |
+| ERR-03 | Phase 3 | Pending |
+| ARCH-01 | Phase 4 | Pending |
+| ARCH-02 | Phase 5 | Pending |
+| ARCH-03 | Phase 5 | Pending |
+| HLTH-01 | Phase 6 | Pending |
+| HLTH-02 | Phase 6 | Pending |
+| HLTH-03 | Phase 6 | Pending |
+| LOG-01 | Phase 7 | Pending |
+| LOG-02 | Phase 7 | Pending |
+| SEC-01 | Phase 7 | Pending |
+| OPS-01 | Phase 7 | Pending |
+| VER-01 | Phase 8 | Pending |
+| VER-02 | Phase 8 | Pending |
+| VER-03 | Phase 8 | Pending |
+| VER-04 | Phase 8 | Pending |
 
 **Coverage:**
 - v1 requirements: 24 total
-- Mapped to phases: 0
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-02*
-*Last updated: 2026-04-02 after initial definition*
+*Last updated: 2026-04-02 after roadmap creation*
