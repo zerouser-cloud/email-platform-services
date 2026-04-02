@@ -1,0 +1,31 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "globalEnv": ["NODE_ENV"],
+    "tasks": {
+        "generate": {
+            "inputs": ["proto/**/*.proto", "scripts/generate.sh"],
+            "outputs": ["src/generated/**"]
+        },
+        "build": {
+            "dependsOn": ["^build", "generate"],
+            "outputs": ["dist/**"]
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true,
+            "passThroughEnv": ["*"]
+        },
+        "lint": {
+            "dependsOn": ["^lint"]
+        },
+        "typecheck": {
+            "dependsOn": ["^build"]
+        },
+        "start": {
+            "dependsOn": ["^build"],
+            "cache": false,
+            "persistent": true,
+            "passThroughEnv": ["*"]
+        }
+    }
+}
