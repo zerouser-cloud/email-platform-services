@@ -61,7 +61,7 @@ Plans:
 **Plans:** 2 plans
 Plans:
 - [x] 03-01-PLAN.md -- Fix metadata bug, expand ERROR_MESSAGE, sanitize error messages by gRPC code
-- [ ] 03-02-PLAN.md -- Inject ClsService, add correlationId to all error responses
+- [x] 03-02-PLAN.md -- Inject ClsService, add correlationId to all error responses
 
 ### Phase 4: Architecture Reference Implementation
 **Goal**: Auth service is restructured into correct Clean/Hexagonal layers (domain/application/infrastructure), serving as the validated reference for all other services
