@@ -47,7 +47,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
+- [x] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
 - [x] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 3: Error Handling & Safety
@@ -62,7 +62,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
 - [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [x] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
 ### Phase 4: Architecture Reference Implementation
 **Goal**: Auth service is restructured into correct Clean/Hexagonal layers (domain/application/infrastructure), serving as the validated reference for all other services
@@ -75,7 +75,7 @@ Plans:
   4. Architecture-validator agent passes for the auth service without violations
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
+- [x] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
 - [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
 - [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
 
