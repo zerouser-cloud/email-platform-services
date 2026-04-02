@@ -10,7 +10,7 @@
 - [x] **CONT-01**: Единственный источник сгенерированных типов — `contracts/src/generated/`, дубликат `contracts/generated/` удалён
 - [x] **CONT-02**: Proto генерация встроена в Turbo pipeline и запускается автоматически при сборке
 - [x] **CONT-03**: Команда `pnpm generate:contracts` доступна на верхнем уровне монорепо
-- [ ] **CONT-04**: Controller stubs в auth, sender, parser, audience содержат `@GrpcMethod` декораторы, соответствующие proto RPC методам (без бизнес-логики)
+- [x] **CONT-04**: Controller stubs в auth, sender, parser, audience содержат `@GrpcMethod` декораторы, соответствующие proto RPC методам (без бизнес-логики)
 
 ### Configuration Management
 
@@ -27,7 +27,7 @@
 ### Architectural Boundaries
 
 - [x] **ARCH-01**: Каждый app в apps/ имеет корректную Clean/Hexagonal структуру (domain/application/infrastructure) — валидация через architecture-validator агент
-- [ ] **ARCH-02**: Shared код живёт в packages/, service-specific в apps/. Нет cross-service импортов между apps/
+- [x] **ARCH-02**: Shared код живёт в packages/, service-specific в apps/. Нет cross-service импортов между apps/
 - [ ] **ARCH-03**: Notifier оформлен как event-consumer-only сервис с RabbitMQ health check (без gRPC)
 
 ### Health & Resilience
@@ -98,7 +98,7 @@
 | CONT-01 | Phase 1 | Complete |
 | CONT-02 | Phase 1 | Complete |
 | CONT-03 | Phase 1 | Complete |
-| CONT-04 | Phase 5 | Pending |
+| CONT-04 | Phase 5 | Complete |
 | CONF-01 | Phase 2 | Complete |
 | CONF-02 | Phase 2 | Complete |
 | CONF-03 | Phase 2 | Complete |
@@ -106,7 +106,7 @@
 | ERR-02 | Phase 3 | Complete |
 | ERR-03 | Phase 3 | Complete |
 | ARCH-01 | Phase 4 | Complete |
-| ARCH-02 | Phase 5 | Pending |
+| ARCH-02 | Phase 5 | Complete |
 | ARCH-03 | Phase 5 | Pending |
 | HLTH-01 | Phase 6 | Pending |
 | HLTH-02 | Phase 6 | Pending |
