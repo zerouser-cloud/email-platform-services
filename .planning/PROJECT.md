@@ -38,6 +38,10 @@
 - ✓ Gateway: infrastructure/clients layer (REST facade) — Phase 5
 - ✓ Zero cross-service imports enforced — Phase 5
 
+- ✓ Parallel gateway health via Promise.allSettled — Phase 6
+- ✓ Retry tuned (5/200ms/5s + jitter + env vars) — Phase 6
+- ✓ Liveness/readiness separation, per-service dependency checks — Phase 6
+
 ### Active
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
 - [ ] Правильные контракты между сервисами (proto как единый источник истины)
@@ -97,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 5 completion*
+*Last updated: 2026-04-02 after Phase 6 completion*
