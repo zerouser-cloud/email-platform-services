@@ -1,0 +1,17 @@
+export const ERROR_MESSAGE = {
+  NOT_FOUND: 'Resource not found',
+  INVALID_ARGUMENT: 'Invalid request data',
+  ALREADY_EXISTS: 'Resource already exists',
+  PERMISSION_DENIED: 'Permission denied',
+  UNAUTHENTICATED: 'Authentication required',
+  INTERNAL: 'Internal server error',
+  UNAVAILABLE: 'Service temporarily unavailable',
+  FAILED_PRECONDITION: 'Request precondition not met',
+  OUT_OF_RANGE: 'Value out of acceptable range',
+  ABORTED: 'Operation was aborted',
+  DEADLINE_EXCEEDED: 'Request timed out',
+  RESOURCE_EXHAUSTED: 'Too many requests',
+  DATA_LOSS: 'Internal server error',
+  CANCELLED: 'Request was cancelled',
+  UNIMPLEMENTED: 'Operation not supported',
+} as const;

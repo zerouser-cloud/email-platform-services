@@ -65,7 +65,7 @@ export class LoggingModule {
             idGenerator: (ctx: ExecutionContext) => {
               if (ctx.getType() === CONTEXT_TYPE.RPC) {
                 const metadata = ctx.switchToRpc().getContext<Metadata>();
-                const id = metadata.get(HEADER.CORRELATION_ID)[0];
+                const id = metadata.get(HEADER.CORRELATION_ID)?.[0];
                 return (id as string) || crypto.randomUUID();
               }
               return crypto.randomUUID();
@@ -147,7 +147,7 @@ export class LoggingModule {
             idGenerator: (ctx: ExecutionContext) => {
               if (ctx.getType() === CONTEXT_TYPE.RPC) {
                 const metadata = ctx.switchToRpc().getContext<Metadata>();
-                const id = metadata.get(HEADER.CORRELATION_ID)[0];
+                const id = metadata.get(HEADER.CORRELATION_ID)?.[0];
                 return (id as string) || crypto.randomUUID();
               }
               return crypto.randomUUID();
