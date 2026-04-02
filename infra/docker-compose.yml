@@ -1,0 +1,212 @@
+services:
+
+  gateway:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args:
+        APP_NAME: gateway
+    ports: [ "4000:3000" ]
+    env_file: ../.env.docker
+    depends_on:
+      auth:
+        condition: service_healthy
+      sender:
+        condition: service_healthy
+      parser:
+        condition: service_healthy
+      audience:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services]
+
+  auth:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args:
+        APP_NAME: auth
+    expose: [ "3001", "50051" ]
+    env_file: ../.env.docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3001/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services, infra]
+
+  sender:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args:
+        APP_NAME: sender
+    expose: [ "3002", "50052" ]
+    env_file: ../.env.docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3002/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services, infra]
+
+  parser:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args:
+        APP_NAME: parser
+    expose: [ "3003", "50053" ]
+    env_file: ../.env.docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3003/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services, infra]
+
+  audience:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args:
+        APP_NAME: audience
+    expose: [ "3004", "50054" ]
+    env_file: ../.env.docker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3004/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services, infra]
+
+  notifier:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args:
+        APP_NAME: notifier
+    expose: [ "3005" ]
+    env_file: ../.env.docker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3005/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services, infra]
+
+  # === Infrastructure ===
+
+  mongodb:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.runCommand('ping').ok" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [infra]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks: [infra]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_running" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [infra]
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [infra]
+
+volumes:
+  mongo_data:
+  rabbitmq_data:
+  minio_data:
+
+networks:
+  services:
+    driver: bridge
+  infra:
+    driver: bridge
