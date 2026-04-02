@@ -102,9 +102,9 @@ Plans:
   3. Each service exposes separate liveness (process alive) and readiness (dependencies connected) probe endpoints
 **Plans:** 3 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [ ] 06-01-PLAN.md -- Tune retry defaults, add jitter, env var override
+- [ ] 06-02-PLAN.md -- Per-service liveness/readiness with correct dependency checks
+- [ ] 06-03-PLAN.md -- Gateway parallel gRPC health checks via Promise.allSettled
 
 ### Phase 7: Logging, Security & Operations
 **Goal**: Logs are structured and useful, production security is enforced, and services shut down cleanly
