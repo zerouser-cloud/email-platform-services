@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule } from '@email-platform/foundation';
 import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
@@ -21,4 +21,12 @@ export const START_PARSING_PORT = 'StartParsingPort';
     { provide: START_PARSING_PORT, useClass: StartParsingUseCase },
   ],
 })
-export class ParserModule {}
+export class ParserModule implements OnModuleDestroy {
+  private readonly logger = new Logger(ParserModule.name);
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down parser service...');
+    // TODO: drain gRPC server connections
+    // TODO: close MongoDB connection
+  }
+}

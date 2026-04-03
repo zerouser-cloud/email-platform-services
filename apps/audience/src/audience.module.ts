@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule } from '@email-platform/foundation';
 import { AudienceGrpcServer } from './infrastructure/grpc/audience.grpc-server';
@@ -21,4 +21,12 @@ export const IMPORT_RECIPIENTS_PORT = 'ImportRecipientsPort';
     { provide: IMPORT_RECIPIENTS_PORT, useClass: ImportRecipientsUseCase },
   ],
 })
-export class AudienceModule {}
+export class AudienceModule implements OnModuleDestroy {
+  private readonly logger = new Logger(AudienceModule.name);
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down audience service...');
+    // TODO: drain gRPC server connections
+    // TODO: close MongoDB connection
+  }
+}

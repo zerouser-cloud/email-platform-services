@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule } from '@email-platform/foundation';
 import { AuthGrpcServer } from './infrastructure/grpc/auth.grpc-server';
@@ -21,4 +21,12 @@ export const LOGIN_PORT = 'LoginPort';
     { provide: LOGIN_PORT, useClass: LoginUseCase },
   ],
 })
-export class AuthModule {}
+export class AuthModule implements OnModuleDestroy {
+  private readonly logger = new Logger(AuthModule.name);
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down auth service...');
+    // TODO: drain gRPC server connections
+    // TODO: close MongoDB connection
+  }
+}

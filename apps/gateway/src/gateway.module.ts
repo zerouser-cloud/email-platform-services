@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule, GrpcToHttpExceptionFilter } from '@email-platform/foundation';
 import { HealthModule } from './health/health.module';
@@ -15,4 +15,11 @@ import { GrpcClientsModule } from './infrastructure/clients/grpc-clients.module'
   ],
   providers: [GrpcToHttpExceptionFilter],
 })
-export class GatewayModule {}
+export class GatewayModule implements OnModuleDestroy {
+  private readonly logger = new Logger(GatewayModule.name);
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down gateway service...');
+    // TODO: drain HTTP server connections
+  }
+}

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule } from '@email-platform/foundation';
 import { HealthModule } from './health/health.module';
@@ -21,4 +21,11 @@ export const NOTIFICATION_SENDER_PORT = 'NotificationSenderPort';
     RabbitMQEventSubscriber,
   ],
 })
-export class NotifierModule {}
+export class NotifierModule implements OnModuleDestroy {
+  private readonly logger = new Logger(NotifierModule.name);
+
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down notifier service...');
+    // TODO: close RabbitMQ subscriber connection
+  }
+}
