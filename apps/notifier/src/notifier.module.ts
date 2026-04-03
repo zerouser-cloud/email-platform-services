@@ -12,7 +12,7 @@ export const NOTIFICATION_SENDER_PORT = 'NotificationSenderPort';
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forHttpAsync(),
+    LoggingModule.forHttpAsync('notifier'),
     HealthModule,
   ],
   providers: [

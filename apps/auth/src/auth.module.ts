@@ -12,7 +12,7 @@ export const LOGIN_PORT = 'LoginPort';
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forGrpcAsync(),
+    LoggingModule.forGrpcAsync('auth'),
     HealthModule,
   ],
   controllers: [AuthGrpcServer],

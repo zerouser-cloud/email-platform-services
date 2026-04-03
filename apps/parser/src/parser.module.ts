@@ -12,7 +12,7 @@ export const START_PARSING_PORT = 'StartParsingPort';
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forGrpcAsync(),
+    LoggingModule.forGrpcAsync('parser'),
     HealthModule,
   ],
   controllers: [ParserGrpcServer],

@@ -12,7 +12,7 @@ export const IMPORT_RECIPIENTS_PORT = 'ImportRecipientsPort';
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forGrpcAsync(),
+    LoggingModule.forGrpcAsync('audience'),
     HealthModule,
   ],
   controllers: [AudienceGrpcServer],

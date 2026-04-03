@@ -8,7 +8,7 @@ import { GrpcClientsModule } from './infrastructure/clients/grpc-clients.module'
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forHttpAsync(),
+    LoggingModule.forHttpAsync('gateway'),
     ThrottleModule,
     HealthModule,
     GrpcClientsModule,

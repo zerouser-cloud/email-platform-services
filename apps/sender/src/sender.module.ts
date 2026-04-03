@@ -12,7 +12,7 @@ export const CREATE_CAMPAIGN_PORT = 'CreateCampaignPort';
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forGrpcAsync(),
+    LoggingModule.forGrpcAsync('sender'),
     HealthModule,
   ],
   controllers: [SenderGrpcServer],
