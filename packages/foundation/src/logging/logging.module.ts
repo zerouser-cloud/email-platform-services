@@ -11,12 +11,15 @@ import type { LogFormat, LogLevel } from '@email-platform/config';
 import { HEADER, CONTEXT_TYPE } from '../constants';
 import { GrpcCorrelationInterceptor } from './correlation.interceptor';
 import { GrpcLoggingInterceptor } from './grpc-logging.interceptor';
+import { HttpTimingInterceptor } from './http-timing.interceptor';
 import { AllRpcExceptionsFilter } from '../errors/rpc-exception.filter';
 import { resolveTransport } from './log-transport';
 
+const instanceId = crypto.randomUUID();
+
 @Module({})
 export class LoggingModule {
-  static forHttp(logLevel: LogLevel, logFormat: LogFormat): DynamicModule {
+  static forHttp(logLevel: LogLevel, logFormat: LogFormat, serviceName: string): DynamicModule {
     return {
       module: LoggingModule,
       imports: [
@@ -32,6 +35,11 @@ export class LoggingModule {
         PinoLoggerModule.forRoot({
           pinoHttp: {
             level: logLevel,
+            base: {
+              service: serviceName,
+              environment: process.env.NODE_ENV || 'development',
+              instanceId,
+            },
             genReqId: (req) =>
               ((req as unknown as Request).headers[HEADER.CORRELATION_ID] as string) ||
               crypto.randomUUID(),
@@ -49,11 +57,15 @@ export class LoggingModule {
           },
         }),
       ],
+      providers: [
+        HttpTimingInterceptor,
+        { provide: APP_INTERCEPTOR, useClass: HttpTimingInterceptor },
+      ],
       exports: [ClsModule, PinoLoggerModule],
     };
   }
 
-  static forGrpc(logLevel: LogLevel, logFormat: LogFormat): DynamicModule {
+  static forGrpc(logLevel: LogLevel, logFormat: LogFormat, serviceName: string): DynamicModule {
     return {
       module: LoggingModule,
       imports: [
@@ -75,6 +87,11 @@ export class LoggingModule {
         PinoLoggerModule.forRoot({
           pinoHttp: {
             level: logLevel,
+            base: {
+              service: serviceName,
+              environment: process.env.NODE_ENV || 'development',
+              instanceId,
+            },
             autoLogging: false,
             transport: resolveTransport(logFormat),
           },
@@ -91,7 +108,7 @@ export class LoggingModule {
     };
   }
 
-  static forHttpAsync(): DynamicModule {
+  static forHttpAsync(serviceName: string): DynamicModule {
     return {
       module: LoggingModule,
       imports: [
@@ -112,6 +129,11 @@ export class LoggingModule {
             return {
               pinoHttp: {
                 level: logLevel,
+                base: {
+                  service: serviceName,
+                  environment: configService.get<string>('NODE_ENV'),
+                  instanceId,
+                },
                 genReqId: (req) =>
                   ((req as unknown as Request).headers[HEADER.CORRELATION_ID] as string) ||
                   crypto.randomUUID(),
@@ -131,11 +153,15 @@ export class LoggingModule {
           },
         }),
       ],
+      providers: [
+        HttpTimingInterceptor,
+        { provide: APP_INTERCEPTOR, useClass: HttpTimingInterceptor },
+      ],
       exports: [ClsModule, PinoLoggerModule],
     };
   }
 
-  static forGrpcAsync(): DynamicModule {
+  static forGrpcAsync(serviceName: string): DynamicModule {
     return {
       module: LoggingModule,
       imports: [
@@ -162,6 +188,11 @@ export class LoggingModule {
             return {
               pinoHttp: {
                 level: logLevel,
+                base: {
+                  service: serviceName,
+                  environment: configService.get<string>('NODE_ENV'),
+                  instanceId,
+                },
                 autoLogging: false,
                 transport: resolveTransport(logFormat),
               },
