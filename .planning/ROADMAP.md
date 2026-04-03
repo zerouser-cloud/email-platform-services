@@ -115,11 +115,10 @@ Plans:
   2. A NestJS interceptor logs request/response timing with `{ method, path, statusCode, durationMs }` on every request
   3. `.env.example` contains safe CORS defaults with comments explaining production requirements -- wildcard is rejected at startup in production
   4. Services handle SIGTERM gracefully: in-flight requests complete, gRPC connections drain, DB/RabbitMQ pools close via `enableShutdownHooks()` and `onModuleDestroy`
-**Plans:** 3 plans
+**Plans:** 2 plans
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [ ] 07-01-PLAN.md -- Structured log base fields (service, environment, instanceId) and HTTP timing interceptor
+- [ ] 07-02-PLAN.md -- Graceful shutdown (OnModuleDestroy stubs) and SEC-01 verification
 
 ### Phase 8: Verification
 **Goal**: The entire platform starts and operates correctly end-to-end -- infrastructure, services, health, and proxying all verified manually
@@ -130,11 +129,9 @@ Plans:
   2. All 6 services start successfully via their package.json commands with no runtime errors in logs
   3. Curling health endpoints of every service returns correct status responses
   4. Gateway successfully proxies a request to a gRPC service and returns an error in the unified format `{ statusCode, message, error, correlationId }`
-**Plans:** 3 plans
+**Plans:** TBD
 Plans:
-- [ ] 02-01-PLAN.md -- Add async DI variants to LoggingModule and refactor GrpcClientModule
-- [ ] 02-02-PLAN.md -- Refactor all service modules, ThrottleModule, and HealthController to use ConfigService
-- [ ] 02-03-PLAN.md -- Zod CORS production validation, docker-compose env substitution, .env.example
+- [ ] (to be planned)
 
 ## Progress
 
@@ -149,5 +146,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. Architecture Reference Implementation | 0/TBD | Not started | - |
 | 5. Architecture Replication & Boundaries | 0/TBD | Not started | - |
 | 6. Health & Resilience | 0/TBD | Not started | - |
-| 7. Logging, Security & Operations | 0/TBD | Not started | - |
+| 7. Logging, Security & Operations | 0/2 | Planned | - |
 | 8. Verification | 0/TBD | Not started | - |
