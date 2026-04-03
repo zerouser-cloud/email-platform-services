@@ -38,8 +38,8 @@
 
 ### Logging & Observability
 
-- [ ] **LOG-01**: Pino логи содержат structured fields: service name, environment, instanceId
-- [ ] **LOG-02**: NestJS interceptor логирует request/response timing: `{ method, path, statusCode, durationMs }`
+- [x] **LOG-01**: Pino логи содержат structured fields: service name, environment, instanceId
+- [x] **LOG-02**: NestJS interceptor логирует request/response timing: `{ method, path, statusCode, durationMs }`
 
 ### Security
 
@@ -111,8 +111,8 @@
 | HLTH-01 | Phase 6 | Complete |
 | HLTH-02 | Phase 6 | Complete |
 | HLTH-03 | Phase 6 | Complete |
-| LOG-01 | Phase 7 | Pending |
-| LOG-02 | Phase 7 | Pending |
+| LOG-01 | Phase 7 | Complete |
+| LOG-02 | Phase 7 | Complete |
 | SEC-01 | Phase 7 | Pending |
 | OPS-01 | Phase 7 | Pending |
 | VER-01 | Phase 8 | Pending |

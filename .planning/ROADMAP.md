@@ -117,7 +117,7 @@ Plans:
   4. Services handle SIGTERM gracefully: in-flight requests complete, gRPC connections drain, DB/RabbitMQ pools close via `enableShutdownHooks()` and `onModuleDestroy`
 **Plans:** 2 plans
 Plans:
-- [ ] 07-01-PLAN.md -- Structured log base fields (service, environment, instanceId) and HTTP timing interceptor
+- [x] 07-01-PLAN.md -- Structured log base fields (service, environment, instanceId) and HTTP timing interceptor
 - [ ] 07-02-PLAN.md -- Graceful shutdown (OnModuleDestroy stubs) and SEC-01 verification
 
 ### Phase 8: Verification
