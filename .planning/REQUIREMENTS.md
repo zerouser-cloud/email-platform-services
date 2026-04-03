@@ -43,11 +43,11 @@
 
 ### Security
 
-- [ ] **SEC-01**: CORS wildcard запрещён в production, `.env.example` содержит безопасные defaults с комментариями
+- [x] **SEC-01**: CORS wildcard запрещён в production, `.env.example` содержит безопасные defaults с комментариями
 
 ### Operational
 
-- [ ] **OPS-01**: Graceful shutdown: in-flight requests завершаются, gRPC connections drainятся, DB/RabbitMQ pools закрываются через `enableShutdownHooks()` и `onModuleDestroy`
+- [x] **OPS-01**: Graceful shutdown: in-flight requests завершаются, gRPC connections drainятся, DB/RabbitMQ pools закрываются через `enableShutdownHooks()` и `onModuleDestroy`
 
 ### Verification
 
@@ -113,8 +113,8 @@
 | HLTH-03 | Phase 6 | Complete |
 | LOG-01 | Phase 7 | Complete |
 | LOG-02 | Phase 7 | Complete |
-| SEC-01 | Phase 7 | Pending |
-| OPS-01 | Phase 7 | Pending |
+| SEC-01 | Phase 7 | Complete |
+| OPS-01 | Phase 7 | Complete |
 | VER-01 | Phase 8 | Pending |
 | VER-02 | Phase 8 | Pending |
 | VER-03 | Phase 8 | Pending |
