@@ -129,9 +129,10 @@ Plans:
   2. All 6 services start successfully via their package.json commands with no runtime errors in logs
   3. Curling health endpoints of every service returns correct status responses
   4. Gateway successfully proxies a request to a gRPC service and returns an error in the unified format `{ statusCode, message, error, correlationId }`
-**Plans:** TBD
+**Plans:** 2 plans
 Plans:
-- [ ] (to be planned)
+- [ ] 08-01-PLAN.md -- Docker compose up with build, verify all 10 containers healthy
+- [ ] 08-02-PLAN.md -- Curl health endpoints for all services, verify unified error format
 
 ## Progress
 
@@ -147,4 +148,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 5. Architecture Replication & Boundaries | 0/TBD | Not started | - |
 | 6. Health & Resilience | 0/TBD | Not started | - |
 | 7. Logging, Security & Operations | 0/2 | Planned | - |
-| 8. Verification | 0/TBD | Not started | - |
+| 8. Verification | 0/2 | Planned | - |
