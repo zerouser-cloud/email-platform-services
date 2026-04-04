@@ -118,6 +118,21 @@ Plans:
 Plans:
 - [x] 17.1-01-PLAN.md -- Remove PersistenceModule from HealthModules, verify build and health
 
+### Phase 17.2: No Magic Values Skill & Audit (INSERTED)
+**Goal**: Создать скилл no-magic-values с классификацией нарушений и предписанными структурами данных для каждого случая. Провести аудит кодовой базы на magic numbers/strings, исправить найденные нарушения по правилам скилла.
+**Depends on**: Phase 17.1
+**Requirements**: ARCH-01 (refinement)
+**Success Criteria** (what must be TRUE):
+  1. Скилл `.agents/skills/no-magic-values/SKILL.md` создан с классификацией и decision tree
+  2. Аудит кодовой базы завершён — все magic values найдены и классифицированы
+  3. Все нарушения исправлены по правилам скилла (enum, const, Record, array)
+  4. `pnpm turbo run build` + `pnpm turbo run lint typecheck` проходят
+  5. Скилл добавлен в CLAUDE.md Code Style
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 17.2 to break down)
+
 ### Phase 18: Deployment via Coolify
 **Goal**: Coolify installed on VPS, email-platform deployed via docker-compose resource with auto-deploy from GitHub on push to dev and main
 **Depends on**: Phase 17

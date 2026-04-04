@@ -80,6 +80,7 @@ Progress: [░░░░░░░░░░] 0%
 
 - Phase 16.1 inserted after Phase 16: Docker Port Isolation (URGENT) — infra ports open in full Docker mode, only gateway should be exposed
 - Phase 17.1 inserted after Phase 17: Fix DI Double Registration — PersistenceModule imported twice (app + health), causes PG_POOL resolution failure in Docker
+- Phase 17.2 inserted after Phase 17.1: No Magic Values Skill & Audit — create skill + audit + fix magic numbers/strings
 
 ### Pending Todos
 
