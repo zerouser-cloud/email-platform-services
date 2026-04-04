@@ -54,6 +54,9 @@
 - ✓ Retry tuned (5/200ms/5s + jitter + env vars) — Phase 6
 - ✓ Liveness/readiness separation, per-service dependency checks — Phase 6
 
+- ✓ Docker Compose split (infra + full-stack), env sync, NODE_ENV removal — Phase 15
+- ✓ GitHub Actions CI: lint + typecheck + build on every PR, Turbo affected-only + cache — Phase 16
+
 ### Active
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
 - [ ] Правильные контракты между сервисами (proto как единый источник истины)
@@ -116,4 +119,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after milestone v3.0 start*
+*Last updated: 2026-04-04 after Phase 16 CI Pipeline complete*
