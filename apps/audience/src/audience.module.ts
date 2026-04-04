@@ -1,8 +1,9 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { LoggingModule } from '@email-platform/foundation';
+import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
 import { AudienceGrpcServer } from './infrastructure/grpc/audience.grpc-server';
 import { ImportRecipientsUseCase } from './application/use-cases/import-recipients.use-case';
+import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
 import { HealthModule } from './health/health.module';
 
 export const RECIPIENT_REPOSITORY_PORT = 'RecipientRepositoryPort';
@@ -11,11 +12,13 @@ export const IMPORT_RECIPIENTS_PORT = 'ImportRecipientsPort';
 @Module({
   imports: [
     AppConfigModule,
+    PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('audience'),
     HealthModule,
   ],
   controllers: [AudienceGrpcServer],
   providers: [
+    { provide: RECIPIENT_REPOSITORY_PORT, useClass: PgRecipientRepository },
     { provide: IMPORT_RECIPIENTS_PORT, useClass: ImportRecipientsUseCase },
   ],
 })
