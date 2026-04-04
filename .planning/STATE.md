@@ -85,6 +85,12 @@ Progress: [░░░░░░░░░░] 0%
 
 - Phase 18 blocked on user providing VPS connection details (SSH host, user, key) and domain name
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260404-pja | Fix env schema: strict validation, no defaults | 2026-04-04 | fa29e64 | [260404-pja-fix-env-schema](./quick/260404-pja-fix-env-schema-strict-validation-no-defa/) |
+
 ## Session Continuity
 
 Last session: 2026-04-04T15:03:14.539Z
