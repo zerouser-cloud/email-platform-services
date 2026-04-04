@@ -28,7 +28,7 @@
 - [x] **Phase 9: Config & MongoDB Cleanup** - DATABASE_URL in env-schema, purge all MongoDB references from config and code (completed 2026-04-04)
 - [x] **Phase 10: Foundation DrizzleModule & Health** - Shared DrizzleModule, DatabaseHealthIndicator DI abstraction, pool lifecycle (completed 2026-04-04)
 - [x] **Phase 11: Docker Infrastructure** - PostgreSQL 16 in docker-compose replacing MongoDB, volumes and healthchecks (completed 2026-04-04)
-- [ ] **Phase 12: Auth Schema & Repository (Reference)** - Drizzle schema, migrations, repository adapter for auth as reference implementation
+- [x] **Phase 12: Auth Schema & Repository (Reference)** - Drizzle schema, migrations, repository adapter for auth as reference implementation (completed 2026-04-04)
 - [ ] **Phase 13: Remaining Services Schema & Repository** - Sender, parser, audience schemas, migrations, and repository adapters following auth pattern
 - [ ] **Phase 14: Verification & Documentation** - All services start, health checks pass, documentation updated
 
@@ -83,7 +83,7 @@ Plans:
   5. All 6 services start and health checks pass after auth schema and repository changes
 **Plans**: 1 plan
 Plans:
-- [ ] 12-01-PLAN.md — Auth Drizzle schema, migrations, repository adapter
+- [x] 12-01-PLAN.md — Auth Drizzle schema, migrations, repository adapter
 
 ### Phase 13: Remaining Services Schema & Repository
 **Goal**: Sender, parser, and audience services each have their own Drizzle persistence layer following the auth reference pattern
@@ -129,6 +129,6 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
 | 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete   | 2026-04-04 |
 | 10. Foundation DrizzleModule & Health | v2.0 | 1/1 | Complete   | 2026-04-04 |
 | 11. Docker Infrastructure | v2.0 | 1/1 | Complete   | 2026-04-04 |
-| 12. Auth Schema & Repository (Reference) | v2.0 | 0/TBD | Not started | - |
+| 12. Auth Schema & Repository (Reference) | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 13. Remaining Services Schema & Repository | v2.0 | 0/TBD | Not started | - |
 | 14. Verification & Documentation | v2.0 | 0/TBD | Not started | - |

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: PostgreSQL + Drizzle Migration
 status: completed
-stopped_at: Phase 12 context gathered
-last_updated: "2026-04-04T09:56:28.616Z"
-last_activity: 2026-04-04 — Phase 10 Plan 01 executed
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-04-04T10:19:41Z"
+last_activity: 2026-04-04 — Phase 12 Plan 01 executed
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 33
+  completed_phases: 4
+  total_plans: 4
+  completed_plans: 4
+  percent: 67
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 10 — Foundation DrizzleModule & Health
+**Current focus:** Phase 12 — Auth Schema & Repository (Reference)
 
 ## Current Position
 
-Phase: 10 of 14 (Foundation DrizzleModule & Health)
+Phase: 12 of 14 (Auth Schema & Repository Reference)
 Plan: 1/1 complete
 Status: Phase complete
-Last activity: 2026-04-04 — Phase 10 Plan 01 executed
+Last activity: 2026-04-04 — Phase 12 Plan 01 executed
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -57,6 +57,10 @@ Progress: [███░░░░░░░] 33%
 - [Phase 10-foundation-drizzlemodule-health]: Health check uses raw pool.query('SELECT 1') for driver-level reliability
 - [Phase 10-foundation-drizzlemodule-health]: Pool defaults: max 10, idle 30s, connect timeout 5s
 - [Phase 11]: Used postgres:16-alpine for smaller image size, env-var-driven credentials with defaults
+- [Phase 12]: pgSchema('auth') for namespace isolation, drizzle-kit scoped to auth schema only
+- [Phase 12]: NodePgDatabase without schema generic -- select().from() API sufficient
+- [Phase 12]: PersistenceModule imported in both AuthModule and HealthModule (NestJS deduplicates)
+- [Phase 12]: UserMapper as plain object with toPersistence accepting passwordHash separately from domain entity
 
 ### Pending Todos
 
@@ -68,6 +72,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T09:56:28.614Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-auth-schema-repository-reference/12-CONTEXT.md
+Last session: 2026-04-04T10:19:41Z
+Stopped at: Completed 12-01-PLAN.md
+Resume file: .planning/phases/12-auth-schema-repository-reference/12-01-SUMMARY.md

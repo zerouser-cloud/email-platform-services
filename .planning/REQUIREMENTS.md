@@ -21,13 +21,13 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 
 ### Schema
 
-- [ ] **SCHM-01**: Drizzle schema per service (auth, sender, parser, audience) с pgSchema isolation
-- [ ] **SCHM-02**: drizzle-kit config и migration workflow настроены для каждого сервиса
-- [ ] **SCHM-03**: Drizzle types не проникают в domain layer — маппинг только в infrastructure
+- [x] **SCHM-01**: Drizzle schema per service (auth, sender, parser, audience) с pgSchema isolation
+- [x] **SCHM-02**: drizzle-kit config и migration workflow настроены для каждого сервиса
+- [x] **SCHM-03**: Drizzle types не проникают в domain layer — маппинг только в infrastructure
 
 ### Repository
 
-- [ ] **REPO-01**: Auth repository adapter реализован с Drizzle (reference implementation)
+- [x] **REPO-01**: Auth repository adapter реализован с Drizzle (reference implementation)
 - [ ] **REPO-02**: Sender, Parser, Audience repository adapters реализованы с Drizzle
 - [ ] **REPO-03**: Repository adapters маппят Drizzle rows в domain entities без утечки типов
 
@@ -73,10 +73,10 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 | FOUND-01 | Phase 10 | Complete |
 | FOUND-02 | Phase 10 | Complete |
 | FOUND-03 | Phase 10 | Complete |
-| SCHM-01 | Phase 12 | Pending |
-| SCHM-02 | Phase 12 | Pending |
-| SCHM-03 | Phase 12 | Pending |
-| REPO-01 | Phase 12 | Pending |
+| SCHM-01 | Phase 12 | Complete |
+| SCHM-02 | Phase 12 | Complete |
+| SCHM-03 | Phase 12 | Complete |
+| REPO-01 | Phase 12 | Complete |
 | REPO-02 | Phase 13 | Pending |
 | REPO-03 | Phase 13 | Pending |
 | VRFY-01 | Phase 14 | Pending |
