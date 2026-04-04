@@ -4,7 +4,7 @@ import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
 import { AuthGrpcServer } from './infrastructure/grpc/auth.grpc-server';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
-import { HealthModule } from './health/health.module';
+import { HealthController } from './health/health.controller';
 
 export const USER_REPOSITORY_PORT = 'UserRepositoryPort';
 export const LOGIN_PORT = 'LoginPort';
@@ -14,9 +14,8 @@ export const LOGIN_PORT = 'LoginPort';
     AppConfigModule,
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('auth'),
-    HealthModule,
   ],
-  controllers: [AuthGrpcServer],
+  controllers: [AuthGrpcServer, HealthController],
   providers: [
     { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
     { provide: LOGIN_PORT, useClass: LoginUseCase },

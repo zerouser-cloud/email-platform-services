@@ -100,6 +100,24 @@
 | MongoDB → PostgreSQL + Drizzle | Реляционные данные (кампании→группы→получатели), типобезопасность, миграции, лучший DDD fit | ✓ Good |
 | Kubernetes откладываем | Docker Compose достаточен для текущего масштаба (6 сервисов) | — Pending |
 | Инфра-изменения только с одобрения | Порты, credentials, docker-compose нельзя менять без согласования | ✓ Good |
+| PersistenceModule — единый фасад для PostgreSQL+Redis | Один модуль, один pool, один scope. Нет отдельных DrizzleModule/HealthModule | ✓ Good |
+| Deployment через Coolify | Self-hosted PaaS для всех проектов, auto-deploy из GitHub, Traefik + auto-TLS | — Pending |
+
+## Infrastructure Module Architecture
+
+Backing services абстрагированы через модули-фасады в packages/foundation. Каждый модуль владеет connection, health indicator и exports для сервисов.
+
+| Модуль | Backing services | Статус |
+|--------|-----------------|--------|
+| **PersistenceModule** | PostgreSQL (pool, Drizzle ORM, health) + Redis (client, health) | PostgreSQL ready, Redis planned |
+| **StorageModule** | MinIO / S3 (client, health) | Planned |
+| **EventModule** | RabbitMQ (connection, publisher, consumer, health) | Planned |
+
+Сервисы собирают только нужные модули:
+- auth, sender, parser, audience → PersistenceModule
+- sender → + EventModule (publish), + CacheModule (если Redis отдельно)
+- notifier → EventModule (consume)
+- gateway → нет backing service модулей (REST facade)
 
 ## Evolution
 

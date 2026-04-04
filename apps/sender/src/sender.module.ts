@@ -1,10 +1,10 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
+import { LoggingModule, PersistenceModule, RedisHealthIndicator } from '@email-platform/foundation';
 import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
 import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
-import { HealthModule } from './health/health.module';
+import { HealthController } from './health/health.controller';
 
 export const CAMPAIGN_REPOSITORY_PORT = 'CampaignRepositoryPort';
 export const CREATE_CAMPAIGN_PORT = 'CreateCampaignPort';
@@ -14,12 +14,12 @@ export const CREATE_CAMPAIGN_PORT = 'CreateCampaignPort';
     AppConfigModule,
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('sender'),
-    HealthModule,
   ],
-  controllers: [SenderGrpcServer],
+  controllers: [SenderGrpcServer, HealthController],
   providers: [
     { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },
     { provide: CREATE_CAMPAIGN_PORT, useClass: CreateCampaignUseCase },
+    RedisHealthIndicator,
   ],
 })
 export class SenderModule implements OnModuleDestroy {

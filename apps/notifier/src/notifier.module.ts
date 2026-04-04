@@ -1,20 +1,23 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
+import { TerminusModule } from '@nestjs/terminus';
 import { AppConfigModule } from '@email-platform/config';
-import { LoggingModule } from '@email-platform/foundation';
-import { HealthModule } from './health/health.module';
+import { LoggingModule, RabbitMqHealthIndicator } from '@email-platform/foundation';
 import { HandleEventUseCase } from './application/use-cases/handle-event.use-case';
 import { TelegramNotificationSender } from './infrastructure/external/telegram-notification.sender';
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
+import { HealthController } from './health/health.controller';
 
 export const HANDLE_EVENT_PORT = 'HandleEventPort';
 export const NOTIFICATION_SENDER_PORT = 'NotificationSenderPort';
 
 @Module({
-  imports: [AppConfigModule, LoggingModule.forHttpAsync('notifier'), HealthModule],
+  imports: [AppConfigModule, TerminusModule, LoggingModule.forHttpAsync('notifier')],
+  controllers: [HealthController],
   providers: [
     { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationSender },
     { provide: HANDLE_EVENT_PORT, useClass: HandleEventUseCase },
     RabbitMQEventSubscriber,
+    RabbitMqHealthIndicator,
   ],
 })
 export class NotifierModule implements OnModuleDestroy {
