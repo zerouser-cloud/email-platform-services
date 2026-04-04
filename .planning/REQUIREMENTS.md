@@ -22,9 +22,9 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 ### Docker Build
 
-- [ ] **DBLD-01**: Docker image build per service via matrix strategy in GitHub Actions
-- [ ] **DBLD-02**: Images published to GHCR (GitHub Container Registry)
-- [ ] **DBLD-03**: Scoped Docker layer cache per service
+- [x] **DBLD-01**: Docker image build per service via matrix strategy in GitHub Actions
+- [x] **DBLD-02**: Images published to GHCR (GitHub Container Registry)
+- [x] **DBLD-03**: Scoped Docker layer cache per service
 
 ### Deployment
 
@@ -86,9 +86,9 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 | CI-01 | Phase 16 | Complete |
 | CI-02 | Phase 16 | Complete |
 | CI-03 | Phase 16 | Complete |
-| DBLD-01 | Phase 17 | Pending |
-| DBLD-02 | Phase 17 | Pending |
-| DBLD-03 | Phase 17 | Pending |
+| DBLD-01 | Phase 17 | Complete |
+| DBLD-02 | Phase 17 | Complete |
+| DBLD-03 | Phase 17 | Complete |
 | DPLY-01 | Phase 18 | Pending |
 | DPLY-02 | Phase 18 | Pending |
 | DPLY-03 | Phase 18 | Pending |

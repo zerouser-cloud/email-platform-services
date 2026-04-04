@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
 status: verifying
-stopped_at: Phase 17 context gathered
-last_updated: "2026-04-04T16:17:47.235Z"
+stopped_at: Completed 17-01-PLAN.md
+last_updated: "2026-04-04T16:35:14.545Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 6
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 4
+  total_plans: 4
+  completed_plans: 4
   percent: 0
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 16.1 — docker-port-isolation
+**Current focus:** Phase 17 — docker-image-build-push
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
+Phase: 17 (docker-image-build-push) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 15 P01 | 3min | 2 tasks | 6 files |
 | Phase 16 P01 | 3min | 2 tasks | 6 files |
 | Phase 16.1 P01 | 2min | 2 tasks | 3 files |
+| Phase 17-docker-image-build-push P01 | 2min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -71,6 +72,7 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 16]: NODE_ENV removed from turbo.json globalEnv for 12-Factor compliance
 - [Phase 16]: Pre-push hook (not pre-commit) for local validation before CI
 - [Phase 16.1]: Docker Compose override pattern for dev ports instead of env-specific compose files
+- [Phase 17]: Docker build workflow uses matrix strategy with per-service scoped GHA cache and branch-aware GHCR tags
 
 ### Roadmap Evolution
 
@@ -93,6 +95,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T16:17:47.234Z
-Stopped at: Phase 17 context gathered
-Resume file: .planning/phases/17-docker-image-build-push/17-CONTEXT.md
+Last session: 2026-04-04T16:35:14.543Z
+Stopped at: Completed 17-01-PLAN.md
+Resume file: None

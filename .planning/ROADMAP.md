@@ -40,7 +40,7 @@
 
 - [x] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files (completed 2026-04-04)
 - [x] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache (completed 2026-04-04)
-- [ ] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache
+- [x] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache (completed 2026-04-04)
 - [ ] **Phase 18: Deployment** - SSH deploy to VPS with Caddy reverse proxy and health verification
 - [ ] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo
 
@@ -100,7 +100,7 @@ Plans:
   4. `docker pull` of a published image and `docker run` starts the service without errors
 **Plans**: 1 plan
 Plans:
-- [ ] 17-01-PLAN.md -- Docker build workflow with matrix strategy, GHCR push, scoped cache
+- [x] 17-01-PLAN.md -- Docker build workflow with matrix strategy, GHCR push, scoped cache
 
 ### Phase 18: Deployment
 **Goal**: Merged changes are deployed to a VPS with HTTPS access and verified health
@@ -149,6 +149,6 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 16. CI Pipeline | v3.0 | 1/1 | Complete    | 2026-04-04 |
 | 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete    | 2026-04-04 |
-| 17. Docker Image Build & Push | v3.0 | 0/1 | Not started | - |
+| 17. Docker Image Build & Push | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
