@@ -1,507 +1,503 @@
-# Architecture Patterns: NestJS Microservices Monorepo with Clean/Hexagonal Architecture
+# Architecture: PostgreSQL + Drizzle in Clean/Hexagonal Monorepo
 
-**Domain:** Email platform microservices foundation audit
-**Researched:** 2026-04-02
-**Confidence:** HIGH (based on direct codebase inspection + established Clean Architecture patterns)
+**Domain:** Database persistence layer migration (MongoDB to PostgreSQL + Drizzle ORM)
+**Researched:** 2026-04-04
+**Overall confidence:** HIGH
 
-## Recommended Architecture
+## Current State
 
-The target architecture described in `docs/TARGET_ARCHITECTURE.md` is sound. The gap is between that target and the current state. This document defines the correct structural boundaries and identifies what needs fixing.
-
-### Current State vs Target
-
-| Aspect | Target | Current | Gap |
-|--------|--------|---------|-----|
-| Service internal layers | `domain/`, `application/`, `infrastructure/` | Flat structure: `*.controller.ts`, `*.module.ts`, `health/` | **Critical** -- no layer separation exists |
-| Controllers | gRPC adapters in `infrastructure/grpc/` | NestJS `@Controller()` at service root, empty | **Critical** -- wrong location, empty stubs |
-| Ports (interfaces) | `application/ports/inbound/` and `outbound/` | Do not exist | **Critical** -- ports are the hex arch cornerstone |
-| Use cases | `application/use-cases/` | Do not exist | Expected (scaffold only, no biz logic) |
-| Domain layer | `domain/entities/`, `domain/value-objects/`, `domain/events/` | Does not exist | Expected (scaffold only) |
-| Proto contracts | Single output in `src/generated/` | Duplicated in `generated/` AND `src/generated/` | **Bug** -- two diverged copies |
-| Event contracts | `packages/contracts/events/` with typed interfaces | Do not exist | **Missing** -- events are untyped |
-| Config loading | Single load via NestJS DI | `loadGlobalConfig()` called at module scope in every service | **Design flaw** -- module-scope side effects |
-| Shared packages | config, contracts, foundation | config, contracts, foundation -- correct | OK |
-| Gateway | REST facade with guards, no biz logic | Correct structure but no route controllers yet | Expected |
-
-## Component Boundaries
-
-### Tier 1: Shared Packages (Bottom of Dependency Graph)
-
-These are utility libraries. They must NOT contain business logic or domain concepts.
-
-```
-packages/config         -- environment validation, service catalog, topology
-packages/contracts      -- proto definitions, generated gRPC types, event type contracts
-packages/foundation     -- NestJS infrastructure modules (logging, gRPC helpers, errors, health, resilience)
-```
-
-**Dependency rules for packages:**
-- `config` depends on: nothing (pure Zod schemas)
-- `contracts` depends on: nothing (proto + generated code)
-- `foundation` depends on: `config`, `contracts` (needs service declarations and proto paths)
-
-**Current violations found:**
-- `foundation` imports from `config` (correct)
-- `foundation` does NOT import from `contracts` directly -- it uses `config`'s `GrpcServiceDeclaration` to resolve protos (correct)
-- No circular dependencies detected between packages (good)
-
-### Tier 2: Application Services (Top of Dependency Graph)
-
-Each service in `apps/` is an independent deployable unit.
-
-```
-apps/gateway    -- REST-to-gRPC facade (no domain layer needed, it is a router)
-apps/auth       -- user management, authentication, token lifecycle
-apps/sender     -- email campaign orchestration
-apps/parser     -- contact data parsing from external APIs
-apps/audience   -- recipient and group management
-apps/notifier   -- event-driven notification delivery (no gRPC server)
-```
-
-**Dependency rules for services:**
-- Each service depends on: `config`, `contracts`, `foundation`
-- Services NEVER depend on each other's code at compile time
-- Inter-service communication is ONLY through gRPC calls or RabbitMQ events
-- Each service owns its own MongoDB collections exclusively
-
-**Current violations found:**
-- No compile-time cross-service imports detected (good)
-- Services do depend on all three packages as expected (good)
-
-### Correct Internal Structure for Domain Services (auth, sender, parser, audience)
+The platform has a clean separation already in place:
 
 ```
 apps/{service}/src/
-  domain/                          -- Pure TypeScript, ZERO framework imports
-    entities/                      -- Domain entities with behavior
-    value-objects/                 -- Immutable domain primitives
-    events/                        -- Domain event definitions
-    services/                      -- Domain services (optional)
-
-  application/                     -- Orchestration layer
-    ports/
-      inbound/                     -- Interfaces that USE CASES implement
-        {action}.port.ts           -- e.g., create-campaign.port.ts
-      outbound/                    -- Interfaces that ADAPTERS implement
-        {name}-repository.port.ts  -- e.g., campaign-repository.port.ts
-        {name}.port.ts             -- e.g., event-publisher.port.ts
-    use-cases/
-      {action}.use-case.ts         -- Implements inbound port, calls outbound ports
-
-  infrastructure/                  -- Framework-aware, external integration
-    grpc/
-      {service}.grpc-server.ts     -- gRPC inbound adapter (replaces current *.controller.ts)
-    persistence/
-      mongo-{entity}.repository.ts -- MongoDB outbound adapter
-    messaging/
-      rabbitmq-event.publisher.ts  -- RabbitMQ outbound adapter
-    clients/
-      {other-service}.grpc-client.ts -- gRPC client outbound adapter
-    external/
-      {api-name}.client.ts         -- External HTTP API outbound adapter
-
-  {service}.module.ts              -- NestJS DI wiring (binds ports to adapters)
-  main.ts                          -- Bootstrap
-```
-
-### Correct Internal Structure for Gateway
-
-Gateway is NOT a domain service. It is a routing facade. No hex arch layers needed.
-
-```
-apps/gateway/src/
-  controllers/                     -- REST route handlers per domain
-    auth.controller.ts             -- /auth/* routes
-    sender.controller.ts           -- /sender/* routes
-    parser.controller.ts           -- /parser/* routes
-    audience.controller.ts         -- /audience/* routes
-  guards/
-    auth.guard.ts                  -- Calls Auth.ValidateToken, injects UserContext
-  interceptors/                    -- Response transformation, logging
-  dto/                             -- Request/Response DTOs with class-validator
-  gateway.module.ts
-  main.ts
-```
-
-### Correct Internal Structure for Notifier
-
-Notifier is an event consumer. Simpler than domain services but still follows hex arch.
-
-```
-apps/notifier/src/
-  domain/
-    events/                        -- Event type definitions (consumed events)
-  application/
-    ports/
-      outbound/
-        notification-sender.port.ts  -- "send notification" abstraction
-        file-storage.port.ts         -- "download file" abstraction
-    use-cases/
-      handle-campaign-completed.use-case.ts
-      handle-parsing-completed.use-case.ts
+  domain/entities/        -- Pure TS classes (User, Campaign, Recipient, ParserTask, Notification)
+  application/ports/
+    inbound/              -- Use case interfaces (LoginPort)
+    outbound/             -- Repository interfaces (UserRepositoryPort, CampaignRepositoryPort, etc.)
+  application/use-cases/  -- Use case implementations
   infrastructure/
-    messaging/
-      rabbitmq-event.subscriber.ts   -- Inbound adapter
-    external/
-      telegram.notification-sender.ts -- Outbound adapter
-      minio-file.storage.ts           -- Outbound adapter
-  notifier.module.ts
-  main.ts
+    persistence/          -- Repository adapters (MongoUserRepository, etc.) -- ALL throw NotImplementedException
+    grpc/                 -- gRPC server controllers
 ```
 
-## Data Flow
+**Key observation:** All repository implementations are stubs that throw `NotImplementedException`. No actual MongoDB driver is installed or wired. This is a greenfield persistence integration -- we are implementing persistence for the first time, not migrating live data.
 
-### Synchronous Path (gRPC Request-Response)
+### Services Needing Database Access
 
+| Service | Repository Port | Domain Entity | Needs PostgreSQL |
+|---------|----------------|---------------|-----------------|
+| auth | UserRepositoryPort | User | YES |
+| sender | CampaignRepositoryPort | Campaign | YES |
+| parser | ParserTaskRepositoryPort | ParserTask | YES |
+| audience | RecipientRepositoryPort | Recipient | YES |
+| notifier | NotificationSenderPort (not a repo) | Notification | NO (event consumer only) |
+| gateway | None (REST facade) | None | NO (proxies to gRPC services) |
+
+**4 services need PostgreSQL. 2 do not.**
+
+### Current Config State
+
+`packages/config/src/infrastructure.ts` currently defines `MONGODB_URI` in the Zod schema. Health indicators in `packages/foundation/src/health/indicators/` include `mongodb.health.ts` (stub returning "no connection configured"). The `HEALTH.INDICATOR.MONGODB` constant is used in health modules.
+
+## Recommended Architecture
+
+### Decision: Shared Database, Separate PostgreSQL Schemas
+
+Use a single PostgreSQL instance with per-service PostgreSQL schemas instead of per-service databases.
+
+**Why this approach:**
+- 4 services in a single monorepo sharing the same deployment infrastructure
+- Simpler connection management (one `DATABASE_URL` env var)
+- PostgreSQL schemas provide logical isolation equivalent to separate databases for query purposes
+- Cross-service queries possible later if needed (but discouraged by architecture constraints)
+- Single backup/restore, single connection pool at infrastructure level
+- Docker Compose already uses a single MongoDB instance for all services -- same pattern
+- Each service's `drizzle-kit` manages only its own schema via `schemaFilter`
+
+**Schema mapping:**
 ```
-Frontend
-  |
-  | HTTPS
-  v
-Nginx (SSL termination)
-  |
-  | HTTP :3000
-  v
-Gateway (REST)
-  |-- AuthGuard ---> Auth Service (gRPC :50051) --- validates token
-  |
-  |-- Route handler translates REST to gRPC call
-  |
-  v
-Domain Service (gRPC :5005x)
-  |
-  | gRPC controller (inbound adapter)
-  v
-Use Case (application layer)
-  |
-  | calls outbound ports
-  v
-MongoDB Repository (outbound adapter)
-  |
-  v
-MongoDB
-```
-
-**Direction:** Outside-in. Infrastructure adapters call application ports. Application calls domain. Domain knows nothing about infrastructure.
-
-### Asynchronous Path (RabbitMQ Events)
-
-```
-Domain Service (e.g., Sender)
-  |
-  | Use case completes
-  v
-Event Publisher Port (application/ports/outbound/)
-  |
-  | implemented by
-  v
-RabbitMQ Publisher Adapter (infrastructure/messaging/)
-  |
-  | publishes to "events" topic exchange
-  v
-RabbitMQ
-  |
-  | routing key: sender.campaign.completed
-  v
-Consumer Queue (e.g., notifier.campaign)
-  |
-  | consumed by
-  v
-RabbitMQ Subscriber Adapter (infrastructure/messaging/)
-  |
-  | calls use case
-  v
-Notifier Use Case
-  |
-  v
-Telegram API / S3 (outbound adapters)
+email_platform (database)
+  auth.*          -- auth service tables (users, refresh_tokens, etc.)
+  sender.*        -- sender service tables (campaigns, email_jobs, etc.)
+  parser.*        -- parser service tables (parser_tasks, etc.)
+  audience.*      -- audience service tables (recipients, groups, etc.)
 ```
 
-### Cross-Service gRPC Calls (Sender -> Audience)
+### Component Placement
 
 ```
-Sender Use Case (execute-campaign)
-  |
-  | calls RecipientProviderPort (outbound port)
-  v
-Audience gRPC Client Adapter (infrastructure/clients/)
-  |
-  | gRPC call
-  v
-Audience gRPC Server Adapter (infrastructure/grpc/)
-  |
-  | calls use case
-  v
-Audience Use Case (get-recipients-by-group)
-  |
-  v
-Audience MongoDB Repository
-```
+packages/
+  foundation/
+    src/
+      database/
+        drizzle.module.ts          -- NestJS DynamicModule wrapping Drizzle + pg Pool
+        drizzle.constants.ts       -- DRIZZLE injection token
+      health/
+        indicators/
+          postgresql.health.ts     -- Replaces mongodb.health.ts
 
-**Key insight:** Sender never knows it is talking to Audience. It calls a `RecipientProviderPort` interface. The gRPC client adapter is injected via DI. This is how hex arch achieves service isolation.
-
-## Contract Management
-
-### Proto Files as Single Source of Truth
-
-```
-packages/contracts/
-  proto/
-    common.proto       -- Shared messages: Empty, HealthStatus, Pagination
-    auth.proto         -- AuthService RPC definitions
-    sender.proto       -- SenderService RPC definitions
-    parser.proto       -- ParserService RPC definitions
-    audience.proto     -- AudienceService RPC definitions
+apps/{service}/                    -- Only services with persistence (auth, sender, parser, audience)
   src/
-    generated/         -- ONLY output directory (scripts/generate.sh targets here)
-      common.ts
-      auth.ts
-      sender.ts
-      parser.ts
-      audience.ts
-    index.ts           -- Re-exports all generated types
-    proto-dir.ts       -- Runtime path to proto files
+    infrastructure/
+      persistence/
+        schema/                    -- Drizzle table definitions using pgSchema
+          {entity}.schema.ts       -- e.g., users.schema.ts
+          index.ts                 -- Barrel export of all schemas for that service
+        migrations/                -- Generated SQL migration files (per-service, committed to repo)
+        {entity}.repository.ts     -- Repository adapter using Drizzle (replaces mongo-*.repository.ts)
+  drizzle.config.ts                -- Per-service drizzle-kit config (for CLI only)
 ```
 
-### Critical Fix: Eliminate Duplicate Generated Directory
+### Layer Placement (Dependency Rule Preserved)
 
-Currently there are TWO generated directories:
-1. `packages/contracts/generated/` -- older output, diverged (missing HealthCheck in auth)
-2. `packages/contracts/src/generated/` -- current output from `scripts/generate.sh`
+| Component | Layer | Rationale |
+|-----------|-------|-----------|
+| Domain entities (User, Campaign, etc.) | domain/ | Pure TS, zero imports. **UNCHANGED.** |
+| Repository port interfaces | application/ports/outbound/ | Define what persistence looks like. **UNCHANGED.** |
+| Drizzle schema definitions | infrastructure/persistence/schema/ | Framework-specific (`pgTable`, `pgSchema`). Infrastructure layer. |
+| Repository implementations | infrastructure/persistence/ | Adapters implementing ports via Drizzle. Infrastructure layer. |
+| DrizzleModule (shared) | packages/foundation/ | Cross-cutting infrastructure concern, same pattern as LoggingModule. |
+| Migration files | infrastructure/persistence/migrations/ | Framework artifact, lives with the adapter that uses it. |
+| drizzle.config.ts (per-service) | apps/{service}/ root | CLI config for drizzle-kit, used only at dev/CI time for generation. |
 
-The `index.ts` exports from `src/generated/` (correct). The top-level `generated/` is orphaned and must be deleted. It creates confusion about which types are authoritative.
+**Critical rule: Domain entities MUST NOT import from Drizzle.** The Drizzle schema files in `infrastructure/` map domain entities to database tables. The mapping is one-directional: infrastructure depends on domain, never the reverse.
 
-### Missing: Event Contract Types
+## New Components
 
-The target architecture specifies `packages/contracts/events/` with typed event interfaces:
+### 1. DrizzleModule (packages/foundation)
+
+Located in `packages/foundation/src/database/`, following the same pattern as `LoggingModule`:
 
 ```typescript
-// packages/contracts/src/events/sender.events.ts
-export const SENDER_EVENTS = {
-  CAMPAIGN_COMPLETED: 'sender.campaign.completed',
-  EMAIL_FAILED: 'sender.email.failed',
-  CAMPAIGN_PROGRESS: 'sender.campaign.progress',
-} as const;
-
-export interface CampaignCompletedEvent {
-  campaignId: string;
-  campaignName: string;
-  sentCount: number;
-  failedCount: number;
-  duration: number;
-  userId: string;
-}
+// packages/foundation/src/database/drizzle.constants.ts
+export const DRIZZLE = Symbol('DRIZZLE');
 ```
 
-This directory does not exist yet. Without typed event contracts, RabbitMQ messages are untyped `any` at boundaries -- defeating the purpose of a contracts package.
-
-## Patterns to Follow
-
-### Pattern 1: Port-Adapter Binding via NestJS Module
-
-**What:** Use NestJS DI tokens to bind outbound port interfaces to concrete adapter implementations.
-
-**When:** Every service module that has use cases calling outbound ports.
-
-**Example:**
 ```typescript
-// application/ports/outbound/campaign-repository.port.ts
-export const CAMPAIGN_REPOSITORY = Symbol('CAMPAIGN_REPOSITORY');
-export interface CampaignRepositoryPort {
-  save(campaign: Campaign): Promise<Campaign>;
-  findById(id: string): Promise<Campaign | null>;
-}
+// packages/foundation/src/database/drizzle.module.ts
+import { DynamicModule, Module, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Pool } from 'pg';
+import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DRIZZLE } from './drizzle.constants';
 
-// infrastructure/persistence/mongo-campaign.repository.ts
-@Injectable()
-export class MongoCampaignRepository implements CampaignRepositoryPort {
-  constructor(@InjectModel('Campaign') private model: Model<CampaignDocument>) {}
-  // ...
-}
+const PG_POOL = Symbol('PG_POOL');
 
-// sender.module.ts
-@Module({
-  providers: [
-    { provide: CAMPAIGN_REPOSITORY, useClass: MongoCampaignRepository },
-    CreateCampaignUseCase,
-  ],
-})
-export class SenderModule {}
-```
-
-### Pattern 2: gRPC Controller as Thin Inbound Adapter
-
-**What:** The gRPC controller does nothing but translate gRPC messages to use case calls and back. No business logic.
-
-**When:** Every domain service gRPC handler.
-
-**Example:**
-```typescript
-// infrastructure/grpc/sender.grpc-server.ts
-@Controller()
-export class SenderGrpcServer implements SenderServiceController {
-  constructor(private readonly createCampaign: CreateCampaignUseCase) {}
-
-  @GrpcMethod('SenderService', 'CreateCampaign')
-  async createCampaign(request: CreateCampaignRequest): Promise<Campaign> {
-    return this.createCampaign.execute(request);
+@Module({})
+export class DrizzleModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: DrizzleModule,
+      global: true,
+      providers: [
+        {
+          provide: PG_POOL,
+          inject: [ConfigService],
+          useFactory: (config: ConfigService): Pool => {
+            return new Pool({
+              connectionString: config.get<string>('DATABASE_URL'),
+            });
+          },
+        },
+        {
+          provide: DRIZZLE,
+          inject: [PG_POOL],
+          useFactory: (pool: Pool): NodePgDatabase => {
+            return drizzle({ client: pool });
+          },
+        },
+      ],
+      exports: [DRIZZLE],
+    };
   }
 }
 ```
 
-### Pattern 3: Config as NestJS Provider (Not Module-Scope Call)
+**Why custom module instead of `@knaadh/nestjs-drizzle`:**
+- The community package adds abstraction over what is already a 15-line wrapper
+- Custom module gives full control over pool configuration, shutdown hooks, logging
+- Follows existing codebase pattern (`LoggingModule.forGrpc()`, `LoggingModule.forHttp()`)
+- No external dependency risk for trivial code
 
-**What:** Load config once via NestJS DI instead of calling `loadGlobalConfig()` at module-definition time.
+**Why Pool is a separate provider:**
+- Enables clean shutdown (`pool.end()`) in `OnModuleDestroy`
+- Health indicator can inject the pool directly for `SELECT 1` checks
+- Testable -- mock pool separately from Drizzle instance
 
-**When:** Everywhere config is needed.
+### 2. PostgreSQL Health Indicator
 
-**Why:** Module-scope `const config = loadGlobalConfig()` executes during module import, before NestJS bootstraps. This makes config loading a side effect of importing a module, not a controlled DI operation. It works (because of caching), but it is fragile and breaks testability.
-
-**Current (wrong):**
 ```typescript
-const config = loadGlobalConfig();  // module-scope side effect
+// packages/foundation/src/health/indicators/postgresql.health.ts
+import { Inject, Injectable } from '@nestjs/common';
+import { type HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus';
+import { sql } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DRIZZLE } from '../../database/drizzle.constants';
 
-@Module({
-  imports: [
-    LoggingModule.forGrpc(config.LOG_LEVEL, config.LOG_FORMAT),
-  ],
-})
-export class AuthModule {}
+@Injectable()
+export class PostgresHealthIndicator {
+  constructor(
+    private readonly healthIndicatorService: HealthIndicatorService,
+    @Inject(DRIZZLE) private readonly db: NodePgDatabase,
+  ) {}
+
+  async isHealthy(key: string): Promise<HealthIndicatorResult> {
+    const indicator = this.healthIndicatorService.check(key);
+    try {
+      await this.db.execute(sql`SELECT 1`);
+      return indicator.up();
+    } catch {
+      return indicator.down({ message: 'PostgreSQL connection failed' });
+    }
+  }
+}
 ```
 
-**Target (correct):**
+### 3. Per-Service Drizzle Schema (Example: auth)
+
 ```typescript
+// apps/auth/src/infrastructure/persistence/schema/users.schema.ts
+import { pgSchema, text, timestamp } from 'drizzle-orm/pg-core';
+
+export const authSchema = pgSchema('auth');
+
+export const users = authSchema.table('users', {
+  id: text('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  role: text('role').notNull(),
+  organization: text('organization').notNull(),
+  team: text('team').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+```
+
+**Key points:**
+- `pgSchema('auth')` creates a named PostgreSQL schema -- all tables are namespace-isolated
+- Table structure mirrors domain entity properties but adds persistence concerns (timestamps)
+- `text('id').primaryKey()` -- domain generates IDs, not the database (no `generatedAlwaysAsIdentity`)
+- No Drizzle `InferSelectModel` types leak outside `infrastructure/`
+
+### 4. Repository Adapter (Example: auth)
+
+```typescript
+// apps/auth/src/infrastructure/persistence/user.repository.ts
+import { Inject, Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { DRIZZLE } from '@email-platform/foundation';
+import { User } from '../../domain/entities/user.entity';
+import { UserRepositoryPort } from '../../application/ports/outbound/user-repository.port';
+import { users } from './schema/users.schema';
+
+@Injectable()
+export class PgUserRepository implements UserRepositoryPort {
+  constructor(@Inject(DRIZZLE) private readonly db: NodePgDatabase) {}
+
+  async findByEmail(email: string): Promise<User | null> {
+    const rows = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    const row = rows[0];
+    if (!row) return null;
+
+    return new User(row.id, row.email, row.role, row.organization, row.team);
+  }
+
+  async save(user: User): Promise<void> {
+    await this.db
+      .insert(users)
+      .values({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        organization: user.organization,
+        team: user.team,
+      })
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          email: user.email,
+          role: user.role,
+          organization: user.organization,
+          team: user.team,
+        },
+      });
+  }
+}
+```
+
+**Design points:**
+- Maps between domain entity (pure TS class) and Drizzle row in the repository
+- Domain entity construction happens here (infrastructure layer) -- correct placement
+- `DRIZZLE` token injected via NestJS DI, not the pool directly
+- No Drizzle types leak into domain or application layers
+
+### 5. Per-Service Drizzle Kit Configuration
+
+```typescript
+// apps/auth/drizzle.config.ts
+import { defineConfig } from 'drizzle-kit';
+
+export default defineConfig({
+  dialect: 'postgresql',
+  schema: './src/infrastructure/persistence/schema/index.ts',
+  out: './src/infrastructure/persistence/migrations',
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+  schemaFilter: ['auth'],
+  migrations: {
+    table: '__drizzle_migrations',
+    schema: 'auth',
+  },
+});
+```
+
+**Why per-service `drizzle.config.ts`:**
+- Each service owns its schema and migrations independently
+- `schemaFilter` ensures drizzle-kit only touches that service's PostgreSQL schema
+- Migration tracking table lives in the service's own schema (no collision between services)
+- Monorepo script: `pnpm --filter auth exec drizzle-kit generate`
+
+### 6. Module Wiring Change (Example: auth)
+
+```typescript
+// apps/auth/src/auth.module.ts -- AFTER migration
+import { DrizzleModule } from '@email-platform/foundation';
+import { PgUserRepository } from './infrastructure/persistence/user.repository';
+
 @Module({
   imports: [
     AppConfigModule,
-    LoggingModule.forRootAsync({
-      inject: [AppConfigService],
-      useFactory: (config) => ({ logLevel: config.LOG_LEVEL, logFormat: config.LOG_FORMAT }),
-    }),
+    DrizzleModule.forRoot(),           // NEW: provides DRIZZLE token
+    LoggingModule.forGrpcAsync('auth'),
+    HealthModule,
+  ],
+  controllers: [AuthGrpcServer],
+  providers: [
+    { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },  // CHANGED: Mongo -> Pg
+    { provide: LOGIN_PORT, useClass: LoginUseCase },
   ],
 })
-export class AuthModule {}
+export class AuthModule implements OnModuleDestroy { ... }
 ```
 
-This is a design improvement, not a blocker. The current approach works due to caching, but async factory registration is the NestJS-idiomatic pattern.
+## Modified Components
+
+### Config Package Changes
+
+`packages/config/src/infrastructure.ts`:
+```
+BEFORE: MONGODB_URI: z.string().min(1)
+AFTER:  DATABASE_URL: z.string().min(1)
+```
+
+Format: `postgresql://user:password@host:5432/email_platform`
+
+### Health Constants Changes
+
+`packages/foundation/src/health/health-constants.ts`:
+```
+BEFORE: INDICATOR: { MONGODB: 'mongodb', ... }
+AFTER:  INDICATOR: { POSTGRESQL: 'postgresql', ... }
+```
+
+### Foundation Index Exports
+
+`packages/foundation/src/index.ts`:
+```
+REMOVE: export * from './health/indicators/mongodb.health';
+ADD:    export * from './health/indicators/postgresql.health';
+ADD:    export * from './database/drizzle.module';
+ADD:    export * from './database/drizzle.constants';
+```
+
+### Docker Compose
+
+Replace `mongodb` service block with `postgresql`:
+
+```yaml
+postgresql:
+  image: postgres:16-alpine
+  environment:
+    POSTGRES_DB: email_platform
+    POSTGRES_USER: ${POSTGRES_USER:-emailplatform}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-emailplatform}
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-emailplatform}"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 10s
+  networks: [infra]
+```
+
+All service `depends_on` entries change from `mongodb` to `postgresql`.
+
+## Removed Components
+
+| Component | Reason |
+|-----------|--------|
+| `packages/foundation/src/health/indicators/mongodb.health.ts` | Replaced by `postgresql.health.ts` |
+| `apps/auth/src/infrastructure/persistence/mongo-user.repository.ts` | Replaced by `user.repository.ts` (Pg) |
+| `apps/sender/src/infrastructure/persistence/mongo-campaign.repository.ts` | Replaced by `campaign.repository.ts` (Pg) |
+| `apps/parser/src/infrastructure/persistence/mongo-parser-task.repository.ts` | Replaced by `parser-task.repository.ts` (Pg) |
+| `apps/audience/src/infrastructure/persistence/mongo-recipient.repository.ts` | Replaced by `recipient.repository.ts` (Pg) |
+
+## Data Flow
+
+```
+HTTP Request
+  -> Gateway (REST, no DB)
+    -> gRPC call to Service
+      -> gRPC Server (infrastructure/grpc/)
+        -> Use Case (application/use-cases/)
+          -> Repository Port (application/ports/outbound/) <-- INTERFACE (unchanged)
+            -> Repository Adapter (infrastructure/persistence/) <-- DRIZZLE IMPL (new)
+              -> Drizzle query builder
+                -> pg Pool
+                  -> PostgreSQL (schema: {service_name})
+```
+
+**What changes in the data flow:** Only the bottom 3 layers. Everything from repository port upward is untouched. This is exactly the benefit of hexagonal architecture -- swapping an adapter behind a port.
+
+## Migration Strategy
+
+### Development: `drizzle-kit push`
+Fast iteration, pushes schema changes directly to database. No migration files generated.
+
+### Production: Generated SQL migrations
+```bash
+# Generate migration SQL
+pnpm --filter auth exec drizzle-kit generate
+
+# Migrations applied at app startup
+```
+
+Migrations run at application startup using `drizzle-orm/node-postgres/migrator`:
+```typescript
+import { migrate } from 'drizzle-orm/node-postgres/migrator';
+await migrate(db, { migrationsFolder: './src/infrastructure/persistence/migrations' });
+```
+
+**Where to run migrate:** In `main.ts` after creating the NestJS app but before starting microservices. This keeps migration execution in the composition root, not in the module.
+
+### Schema Creation
+PostgreSQL schemas (`auth`, `sender`, `parser`, `audience`) are created automatically by Drizzle migrations when the schema definition references `pgSchema('auth')`. The generated SQL includes `CREATE SCHEMA IF NOT EXISTS "auth"`.
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Business Logic in Controllers
+### 1. Domain entities importing Drizzle types
+**What:** Using `InferSelectModel<typeof users>` in domain entities or application ports.
+**Why bad:** Couples domain to ORM. Breaks hexagonal architecture dependency rule.
+**Instead:** Map between Drizzle rows and domain entities in the repository adapter.
 
-**What:** Putting domain logic directly in gRPC handlers.
-**Why bad:** Violates hex arch. Logic becomes coupled to transport. Untestable without gRPC.
-**Instead:** Controllers delegate to use cases. Use cases contain orchestration. Domain contains logic.
+### 2. Shared schema package across services
+**What:** Putting all Drizzle schemas in `packages/contracts/` or a new `packages/database/`.
+**Why bad:** Services must own their data. Shared schemas create coupling and migration conflicts.
+**Instead:** Each service defines schemas in its own `infrastructure/persistence/schema/`.
 
-### Anti-Pattern 2: Cross-Service Database Access
+### 3. Cross-service foreign keys
+**What:** Defining FK from `sender.campaigns.audience_group_id` referencing `audience.groups.id`.
+**Why bad:** Cross-service data ownership violation. Services communicate via gRPC, not shared tables.
+**Instead:** Store IDs as plain text/uuid. Referential integrity enforced at application layer via gRPC calls.
 
-**What:** Service A queries Service B's MongoDB collections directly.
-**Why bad:** Destroys service autonomy. Makes it impossible to change B's schema without breaking A.
-**Instead:** All cross-service data access goes through gRPC calls or event-driven data transfer.
+### 4. Centralized migration runner
+**What:** Running all service migrations from the foundation package or a single script.
+**Why bad:** Migration ordering becomes coupled. One service's migration failure blocks all others.
+**Instead:** Each service runs its own migrations at startup for its own schema only.
 
-### Anti-Pattern 3: Importing Domain Types from Another Service
+### 5. Using Drizzle relational query API across schemas
+**What:** Defining `relations()` between tables in different PostgreSQL schemas.
+**Why bad:** Even though PostgreSQL allows cross-schema joins, it violates service boundaries.
+**Instead:** Keep relations within a single service's schema only.
 
-**What:** `apps/sender/` imports entity types from `apps/audience/`.
-**Why bad:** Creates compile-time coupling between services. Monolith in disguise.
-**Instead:** Shared types go in `packages/contracts/`. Service-specific types stay in that service.
+## Transactions (Future Consideration)
 
-### Anti-Pattern 4: Shared MongoDB Connection String
+The project already uses `nestjs-cls` (v6.2.0) for correlation IDs. When business logic requires transactions, the `@nestjs-cls/transactional` plugin with Drizzle adapter provides request-scoped transaction management without passing `tx` through every method call. This is not needed now (no business logic yet) but the foundation is already in place via CLS.
 
-**What:** All services use the same `MONGODB_URI` and share one database.
-**Why bad:** No isolation. Any service can access any collection. Architectural rules are unenforceable.
-**Current risk:** The `InfrastructureSchema` has a single `MONGODB_URI`. If all services use the same database, collection ownership is a convention not a boundary.
-**Mitigation:** Use per-service databases (e.g., `email_auth`, `email_sender`) or at minimum use NestJS Mongoose connection names to scope models.
+## Build Order (Dependency-Aware)
 
-## Suggested Audit Order
+The build order respects the dependency chain: `config -> foundation -> apps`.
 
-The fixes have dependency ordering. Fixing in the wrong order creates rework.
+1. **Config package** -- Replace `MONGODB_URI` with `DATABASE_URL` in env schema
+2. **Foundation package** -- Create `DrizzleModule`, `PostgresHealthIndicator`; remove MongoDB health indicator; update barrel exports
+3. **Docker infrastructure** -- Replace MongoDB with PostgreSQL in `docker-compose.yml`; update `.env.docker`
+4. **Auth service** (reference implementation) -- Create schema, repository, module wiring, drizzle.config.ts, migrations
+5. **Remaining services** (sender, parser, audience) -- Replicate auth pattern
+6. **Verification** -- Full stack startup, all health checks green
 
-### Phase 1: Contracts Cleanup (foundation layer -- everything depends on this)
+**Why auth first:** It is the established reference Clean/Hexagonal implementation in this codebase. Establish and validate the persistence pattern there, then replicate mechanically to other services.
 
-Fix the contracts package first because every service imports from it.
+**Why notifier and gateway are excluded:** Neither has a repository port or persistence need. They are unaffected by this migration.
 
-1. **Delete `packages/contracts/generated/`** -- eliminate the duplicate output directory
-2. **Verify `scripts/generate.sh`** outputs only to `src/generated/`
-3. **Add `events/` directory** to contracts with typed event interfaces and routing key constants
-4. **Ensure proto files include HealthCheck** consistently (auth.proto has it, verify others)
+## Scalability Path
 
-**Rationale:** Contracts are the lowest shared dependency. Fixing them first ensures all services build on a correct foundation. No service changes required yet.
-
-### Phase 2: Config Loading Fix (cross-cutting -- affects all service modules)
-
-1. **Eliminate module-scope `loadGlobalConfig()` calls** in all `*.module.ts` files
-2. **Either:** make `LoggingModule` accept async factory config, **or:** accept the current cached approach as a deliberate trade-off and document it
-3. **Verify AppConfigModule** provides config via DI correctly
-
-**Rationale:** Config is imported by every service. Fixing the loading pattern before restructuring services avoids redoing module wiring later.
-
-### Phase 3: Service Internal Structure (per-service -- can be parallelized)
-
-For each domain service (auth, sender, parser, audience, notifier):
-
-1. **Create layer directories:** `domain/`, `application/`, `infrastructure/`
-2. **Move controller** from `{service}.controller.ts` to `infrastructure/grpc/{service}.grpc-server.ts`
-3. **Create port interfaces** in `application/ports/inbound/` and `outbound/`
-4. **Create use case stubs** in `application/use-cases/` (no implementation, just empty execute methods)
-5. **Update module** to wire ports to (future) adapters
-6. **Keep health module** in `infrastructure/` or as standalone (health is infrastructure)
-
-**Order within services (by dependency complexity):**
-1. **Auth** -- simplest domain, fewest cross-service dependencies
-2. **Notifier** -- event consumer only, no gRPC server
-3. **Audience** -- standalone domain, consumed by others but does not call others
-4. **Parser** -- external API integration, S3 storage
-5. **Sender** -- most complex, calls Audience via gRPC, publishes events
-6. **Gateway** -- restructure last (depends on understanding all service contracts)
-
-**Rationale:** Start with the simplest services to establish the pattern, then apply to complex ones. Gateway last because its route structure depends on all other services' contracts being finalized.
-
-### Phase 4: Gateway Restructuring
-
-1. **Create domain-specific controllers:** `auth.controller.ts`, `sender.controller.ts`, etc.
-2. **Create AuthGuard** that calls Auth.ValidateToken via gRPC
-3. **Create DTOs** with class-validator decorators
-4. **Wire gRPC clients** for all domain services
-
-**Rationale:** Gateway is the entry point. Its structure depends on all service contracts being stable. Restructure last.
-
-## Build Order Implications
-
-Turbo's `"dependsOn": ["^build"]` means packages build before apps. The build DAG is:
-
-```
-packages/config       (no deps)
-packages/contracts    (no deps)
-       \                /
-        v              v
-packages/foundation   (depends on config)
-        |
-        v
-  apps/* (all depend on config, contracts, foundation)
-```
-
-**Implication for audit:** Changes to packages require rebuilding all downstream apps. Batch package changes together (Phase 1 + 2) before touching apps (Phase 3 + 4).
-
-**Proto generation** is a pre-build step (`scripts/generate.sh`). It should be a Turbo task that runs before `build` in the contracts package. Currently it appears to be manually triggered.
-
-## Scalability Considerations
-
-| Concern | Current (6 services) | At 20 services | Recommendation |
-|---------|---------------------|-----------------|----------------|
-| Proto management | 5 proto files, manual generation | Unwieldy manual process | Add proto generation as Turbo task in contracts |
-| Shared config schema | Single flat `GlobalEnvSchema` with ALL service env vars | Schema grows unboundedly | Consider per-service config schemas composed into global |
-| Foundation package | 20 exports, single barrel index | Becomes a grab-bag | Already well-organized by subdirectory, maintain this |
-| Build times | Fast (small codebase) | Turbo caching mitigates | Current Turbo config is correct |
-| Event contracts | Missing | Essential at scale | Add now while service count is manageable |
+| Concern | At MVP (single PG) | At 10K users | At 100K+ users |
+|---------|---------------------|--------------|-----------------|
+| Connection pool | Single shared pool, default size | Pool size tuning per service | PgBouncer external pooler |
+| Schema isolation | PostgreSQL schemas | Same | Separate databases per service |
+| Migrations | Run at app startup | Same | Separate migration job in CI |
+| Read performance | Single instance | Read replicas | Read replica pool in DrizzleModule |
 
 ## Sources
 
-- Direct codebase inspection of all `apps/` and `packages/` source files
-- `docs/TARGET_ARCHITECTURE.md` -- project's own architectural vision document
-- Clean Architecture (Robert C. Martin) -- layer dependency rules
-- Hexagonal Architecture (Alistair Cockburn) -- ports and adapters pattern
-- NestJS microservices documentation -- gRPC transport, module patterns
+- [Drizzle ORM - pgSchema documentation](https://orm.drizzle.team/docs/schemas) -- HIGH confidence
+- [Drizzle ORM - PostgreSQL setup guide](https://orm.drizzle.team/docs/get-started/postgresql-new) -- HIGH confidence
+- [Drizzle ORM - Config reference](https://orm.drizzle.team/docs/drizzle-config-file) -- HIGH confidence
+- [Drizzle ORM - Migrations](https://orm.drizzle.team/docs/migrations) -- HIGH confidence
+- [Trilon: NestJS and DrizzleORM integration](https://trilon.io/blog/nestjs-drizzleorm-a-great-match) -- MEDIUM confidence
+- [nestjs-cls Drizzle transactional adapter](https://papooch.github.io/nestjs-cls/plugins/available-plugins/transactional/drizzle-orm-adapter) -- MEDIUM confidence (future use)
+- [Wanago: NestJS #149 Drizzle ORM with PostgreSQL](http://wanago.io/2024/05/20/api-nestjs-drizzle-orm-postgresql/) -- MEDIUM confidence
+- [GitHub: drizzle-orm/issues/1365 - Multiple schemas](https://github.com/drizzle-team/drizzle-orm/issues/1365) -- MEDIUM confidence (known limitation awareness)
 
 ---
 
-*Architecture research: 2026-04-02*
+*Architecture research: 2026-04-04*

@@ -1,324 +1,268 @@
-# Technology Stack: Foundation Audit Tooling
+# Technology Stack: PostgreSQL + Drizzle Migration
 
-**Project:** Email Platform Foundation Audit
-**Researched:** 2026-04-02
-**Focus:** Architectural quality enforcement in a NestJS microservices monorepo
+**Project:** Email Platform v2.0 -- PostgreSQL + Drizzle Migration
+**Researched:** 2026-04-04
+**Focus:** Replace MongoDB with PostgreSQL + Drizzle ORM in existing NestJS microservices monorepo
 
-## Current State Assessment
+## Recommended Stack Additions
 
-The project already has:
-- **Turborepo 2.8.14** for build orchestration
-- **pnpm 9.0.0** workspace for package management
-- **ESLint 8** with `.eslintrc.js` legacy config (ESLint 8 reached EOL October 2024)
-- **typescript-eslint v7** (`@typescript-eslint/eslint-plugin ^7.0.0`)
-- **Prettier 3** for formatting
-- **`no-restricted-imports` rules** already enforcing package dependency direction (contracts -> config -> foundation -> apps)
-- **`scripts/check-architecture.sh`** bash script doing grep-based boundary checks
-- **ts-proto 2.6.0** for protobuf code generation
-- **No test framework** installed
+### Database
 
-What is missing: ESLint is outdated (EOL), boundary enforcement is fragile (bash grep scripts), no protobuf linting or breaking change detection, no dead code detection, no dependency graph visualization, no monorepo hygiene tooling.
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| PostgreSQL | 16 (Docker image: `postgres:16-alpine`) | Primary relational database | Relational model fits domain (campaigns -> groups -> recipients), ACID transactions, mature ecosystem. v16 for logical replication improvements and performance. Alpine for smaller image. |
 
-## Recommended Stack
+### ORM and Driver
 
-### 1. ESLint Modernization (CRITICAL)
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| `drizzle-orm` | 0.45.2 | Type-safe SQL ORM | SQL-like API (no magic), zero runtime overhead, schema-as-code in TypeScript, perfect fit with strict TS config. Not Prisma because: no code generation step, no engine binary, lighter footprint in Docker, better monorepo story. |
+| `drizzle-kit` | 0.31.10 | Migration CLI (generate, migrate, push) | Companion tool for drizzle-orm. Generates SQL migration files from schema diff, applies them. Needed as devDependency only. |
+| `pg` | 8.20.0 | PostgreSQL driver (node-postgres) | Most mature and widely-used PostgreSQL driver for Node.js. Explicit `Pool` class integrates cleanly with NestJS lifecycle (inject pool, call `pool.end()` on destroy). First-class `drizzle-orm/node-postgres` adapter. |
+| `@types/pg` | 8.20.0 | TypeScript type definitions for pg | Required for strict TypeScript configuration. |
 
-| Technology | Version | Purpose | Confidence |
-|------------|---------|---------|------------|
-| eslint | ^9.0.0 | Core linter, flat config required | HIGH |
-| typescript-eslint | ^8.58.0 | TypeScript parsing and rules | HIGH |
-| eslint-plugin-boundaries | ^6.0.2 | Architecture boundary enforcement via ESLint rules | HIGH |
-| eslint-plugin-import-x | latest | Import ordering, no-cycle detection (flat config native) | HIGH |
-| eslint-config-prettier | ^10.0.0 | Disable formatting rules that conflict with Prettier | HIGH |
+### Why node-postgres (pg) over postgres.js
 
-**WHY:** ESLint 8 is EOL since October 2024, receiving zero security patches. The project currently uses `.eslintrc.js` (legacy config) with `@typescript-eslint/eslint-plugin ^7.0.0`. ESLint 10 will remove legacy config support entirely. Migrating now prevents being forced into an emergency migration later.
+| Criterion | node-postgres (pg) | postgres.js |
+|-----------|-------------------|-------------|
+| Maturity | 10+ years, dominant in Node.js ecosystem | Newer, smaller community |
+| NestJS integration | `Pool` class maps naturally to NestJS providers and DI | Custom connection management needed |
+| Graceful shutdown | `pool.end()` is explicit and reliable | `sql.end()` works but less conventional in NestJS |
+| Connection pooling | Separate `Pool` class, injectable as NestJS provider | Built-in but opaque, harder to expose for health checks |
+| TypeScript | Needs `@types/pg` (well-maintained, version-synced) | Native TS but tagged template API is unusual |
+| Docker | Pure JS (pg-native is optional, not needed) | Pure JS |
+| Performance | Slightly slower than postgres.js in benchmarks | Fastest pure-JS driver |
+| Drizzle support | First-class via `drizzle-orm/node-postgres` | First-class via `drizzle-orm/postgres-js` |
+| Community examples | Vast majority of NestJS + Drizzle examples use pg | Fewer NestJS examples |
 
-**WHY eslint-plugin-boundaries over the existing `no-restricted-imports` approach:** The current `.eslintrc.js` already defines `no-restricted-imports` rules for package direction (contracts -> config -> foundation -> apps, apps cannot cross-import). This works but is brittle: every new package requires updating 4+ override blocks manually. `eslint-plugin-boundaries` lets you define element types and dependency rules declaratively. It catches violations that `no-restricted-imports` misses (re-exports, dynamic imports, type-only imports). The `boundaries/element-types` and `boundaries/entry-point` rules give richer control than pattern matching alone.
+**Decision:** Use `pg` (node-postgres) because its `Pool` class integrates naturally with NestJS dependency injection and lifecycle hooks. The explicit pool management enables clean health checks (inject pool, run `SELECT 1`) and graceful shutdown (`pool.end()` in `onModuleDestroy`). Performance difference is negligible for this workload. The existing ARCHITECTURE.md research established this pattern with `drizzle-orm/node-postgres`.
 
-**WHY eslint-plugin-import-x over eslint-plugin-import:** The original `eslint-plugin-import` has stalled flat config support. `eslint-plugin-import-x` is a maintained fork with native flat config, better TypeScript support, and significantly faster resolution. The `no-cycle` rule catches circular dependencies that cause runtime issues in NestJS module initialization.
+### Supporting Libraries
 
-**WHY NOT Nx `@nx/eslint-plugin`:** Nx boundary enforcement is excellent but requires buying into the Nx ecosystem. The project already uses Turborepo. Adding Nx just for lint rules would create tooling confusion and dependency bloat. `eslint-plugin-boundaries` provides equivalent boundary enforcement without framework lock-in.
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| `drizzle-orm` | 0.45.2 | Schema definition, query builder, migrations runtime | Every service that accesses PostgreSQL |
+| `drizzle-kit` | 0.31.10 | CLI for migration generation and application | Dev only. Run from shared package or root scripts. |
+| `pg` | 8.20.0 | PostgreSQL connection pool and driver | Injected into Drizzle initialization |
+| `@types/pg` | 8.20.0 | TypeScript definitions for pg | Dev dependency |
 
-**Flat config migration notes:**
-- Rename `.eslintrc.js` to `eslint.config.mjs`
-- Replace `extends` arrays with flat config composition
-- Move `parserOptions` into `languageOptions`
-- The existing `no-restricted-imports` overrides can be preserved alongside `eslint-plugin-boundaries` during transition, then removed once boundaries rules are validated
+### What NOT to Add
 
-Sources:
-- [ESLint v8 EOL announcement](https://eslint.org/blog/2024/09/eslint-v8-eol-version-support/)
-- [eslint-plugin-boundaries GitHub](https://github.com/javierbrea/eslint-plugin-boundaries)
-- [eslint-plugin-import-x GitHub](https://github.com/un-ts/eslint-plugin-import-x)
-- [typescript-eslint v8 announcement](https://typescript-eslint.io/blog/announcing-typescript-eslint-v8/)
+| Library | Why Not |
+|---------|---------|
+| `prisma` / `@prisma/client` | Code generation step, engine binary bloats Docker, worse monorepo DX, overkill for this architecture |
+| `typeorm` | Heavy, decorator-based schema (conflicts with domain-first approach), poor migration story, declining community momentum |
+| `postgres` (postgres.js) | postgres.js Pool is less NestJS-friendly than pg Pool for DI and lifecycle hooks. Considered but pg is better fit for this architecture. |
+| `@knaadh/nestjs-drizzle-pg` | Thin wrapper (v1.2.0) that adds unnecessary abstraction. Manual Drizzle provider in ~15 lines is cleaner, more controllable, and avoids third-party dependency risk. |
+| `mikro-orm` | Good ORM but adds Unit of Work complexity unnecessary for this project's hexagonal architecture where repositories are explicit |
+| `knex` | Query builder without ORM features. Drizzle already covers query building with better type safety. |
+| `@nestjs/typeorm` / `@nestjs/sequelize` | NestJS ORM integrations for ORMs we are not using |
+| `pg-native` | Optional native binding for pg that requires build tools in Docker. Not worth the ~10% speedup vs. added Docker complexity. |
 
----
+## Integration Points with Existing Monorepo
 
-### 2. Dependency Graph Validation
+### Where Drizzle Code Lives
 
-| Technology | Version | Purpose | Confidence |
-|------------|---------|---------|------------|
-| dependency-cruiser | ^17.3.10 | Dependency graph validation, circular dependency detection, architecture rule enforcement | HIGH |
+```
+packages/
+  foundation/
+    src/
+      database/
+        drizzle.module.ts      # NestJS DynamicModule: DrizzleModule.forRoot()
+        drizzle.constants.ts   # Injection token: DRIZZLE (Symbol)
+      health/
+        indicators/
+          postgresql.health.ts # Replaces mongodb.health.ts
 
-**WHY:** `dependency-cruiser` operates at a different level than ESLint. While ESLint checks file-by-file at lint time, dependency-cruiser analyzes the entire dependency graph and can:
-- Detect circular dependencies across package boundaries (not just within a file)
-- Validate that the package DAG (contracts -> config -> foundation -> apps) is acyclic
-- Generate SVG/DOT dependency visualizations for architecture reviews
-- Enforce "orphan" detection (files imported by nothing)
-- Run as a Turbo task in CI with zero runtime cost
-
-**WHY NOT just ESLint:** ESLint rules check individual files. dependency-cruiser sees the whole graph. The bash script `scripts/check-architecture.sh` currently does grep-based cross-import detection -- dependency-cruiser replaces that entirely with proper AST-based analysis that handles re-exports, barrel files, and aliased imports.
-
-**Configuration approach:** Create `.dependency-cruiser.cjs` at root with rules mapping to the existing architecture constraints:
-```javascript
-// Rule: apps cannot import from other apps
-{ from: { path: "^apps/([^/]+)" }, to: { path: "^apps/(?!\\1)" }, severity: "error" }
-// Rule: contracts is a leaf package
-{ from: { path: "^packages/contracts" }, to: { path: "^(packages/(config|foundation)|apps/)" }, severity: "error" }
-// Rule: no circular dependencies
-{ from: {}, to: { circular: true }, severity: "error" }
+apps/
+  auth/
+    src/
+      infrastructure/
+        persistence/
+          schema/              # Drizzle schema files (pgSchema + pgTable definitions)
+          migrations/          # Generated SQL migration files
+          repositories/        # Repository implementations using Drizzle
+    drizzle.config.ts          # Per-service drizzle-kit config (at service root)
 ```
 
-Add to `turbo.json` as a `validate` task and to `package.json` as `"check:deps": "depcruise apps packages --config"`.
+**Rationale:** Schema and migrations are per-service (data ownership). Drizzle provider is shared (foundation package). This preserves hexagonal architecture -- domain layer never imports drizzle-orm.
 
-**Replaces:** `scripts/check-architecture.sh` (the bash grep script). The bash script should be deleted once dependency-cruiser rules are validated to produce equivalent or better results.
+### Environment Changes
 
-Sources:
-- [dependency-cruiser GitHub](https://github.com/sverweij/dependency-cruiser)
-- [dependency-cruiser npm](https://www.npmjs.com/package/dependency-cruiser)
+Current `InfrastructureSchema` (in `packages/config/src/infrastructure.ts`):
 
----
+```typescript
+// REMOVE
+MONGODB_URI: z.string().min(1),
 
-### 3. Protobuf Contract Management
-
-| Technology | Version | Purpose | Confidence |
-|------------|---------|---------|------------|
-| @bufbuild/buf | ^1.66.1 | Proto linting, breaking change detection, code generation orchestration | HIGH |
-
-**WHY:** The project has a critical concern documented in CONCERNS.md: "Double-defined Generated Contract Types" with proto-generated code in two locations. The proto generation pipeline is a bash script (`packages/contracts/scripts/generate.sh`) with no linting or breaking change guards. Buf solves three problems at once:
-
-1. **Proto linting:** Enforces consistent naming conventions, package structure, and best practices across all `.proto` files. Catches issues like missing field numbers, poorly named RPCs, non-standard casing before they become tech debt.
-
-2. **Breaking change detection:** `buf breaking` compares current protos against a git ref (e.g., `main` branch) and catches backward-incompatible changes: removed fields, changed types, renamed services. This is essential because the project has 4 proto files defining extensive RPC methods that controllers don't even implement yet -- when implementation happens, accidental proto breakage will be invisible without automated detection.
-
-3. **Generation orchestration:** `buf generate` with `buf.gen.yaml` replaces the manual bash script, providing deterministic, reproducible code generation with clear output directory configuration. This directly fixes the dual-output-directory problem.
-
-**WHY NOT just keep the bash script:** The bash script has no linting, no breaking change detection, and the dual output directory issue proves it is already causing confusion. Buf is the industry standard for protobuf workflow (comparable to what ESLint is for JavaScript).
-
-**Configuration:**
-```yaml
-# buf.yaml at packages/contracts/
-version: v2
-lint:
-  use:
-    - STANDARD
-breaking:
-  use:
-    - FILE
+// ADD
+DATABASE_URL: z.string().min(1),
 ```
+
+`DATABASE_URL` format: `postgresql://user:password@host:5432/email_platform`
+
+Single database, per-service PostgreSQL schemas (`auth`, `sender`, `parser`, `audience`) for logical isolation.
+
+### Docker Compose Changes
+
+Replace `mongodb` service with `postgresql`:
 
 ```yaml
-# buf.gen.yaml at packages/contracts/
-version: v2
-plugins:
-  - local: protoc-gen-ts_proto
-    out: src/generated
-    opt:
-      - esModuleInterop=true
-      - nestJs=true
+# REMOVE
+mongodb:
+  image: mongo:7
+  volumes:
+    - mongo_data:/data/db
+  healthcheck:
+    test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+
+# ADD
+postgresql:
+  image: postgres:16-alpine
+  environment:
+    POSTGRES_DB: ${POSTGRES_DB:-email_platform}
+    POSTGRES_USER: ${POSTGRES_USER:-emailplatform}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-emailplatform}
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-emailplatform}"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 10s
+  networks: [infra]
 ```
 
-**CI integration:** Add `buf lint` and `buf breaking --against .git#branch=main` to the Turbo `lint` task pipeline.
+Service `depends_on` entries change from `mongodb` to `postgresql`.
+Volume `mongo_data` removed, `postgres_data` added.
 
-Sources:
-- [Buf documentation](https://buf.build/docs/cli/quickstart/)
-- [Buf breaking change detection](https://buf.build/docs/breaking/)
-- [@bufbuild/buf npm](https://www.npmjs.com/package/@bufbuild/buf)
+### Health Indicator Replacement
 
----
+Replace `MongoHealthIndicator` with `PostgresHealthIndicator`. The health indicator injects the Drizzle instance and executes `SELECT 1` to verify connectivity. Update `HEALTH.INDICATOR.MONGODB` to `HEALTH.INDICATOR.POSTGRESQL` in health-constants.ts.
 
-### 4. Dead Code and Dependency Hygiene
+### NestJS Provider Pattern
 
-| Technology | Version | Purpose | Confidence |
-|------------|---------|---------|------------|
-| knip | ^6.0.6 | Detect unused dependencies, exports, files, and types across the monorepo | HIGH |
-| sherif | latest (run via `pnpm dlx`) | Monorepo consistency linting: version alignment, dependency placement, package.json hygiene | MEDIUM |
+No third-party NestJS module needed. Create a dynamic module in foundation:
 
-**WHY knip:** The project is early-stage with stub controllers and health check placeholders. As implementation proceeds, dead code will accumulate fast. Knip catches:
-- Dependencies in `package.json` that no source file imports (common after refactoring)
-- Exported functions/types that nothing imports (the contracts package likely has many unused generated exports)
-- Files that are never imported or referenced
-- Missing dependencies (imported but not in `package.json`)
-
-Knip has first-class pnpm workspace support and understands NestJS module patterns. Configure with `knip.config.ts` at root.
-
-**WHY sherif:** Sherif is a zero-config Rust-based monorepo linter that enforces consistency rules:
-- Same dependency version across all workspace packages (prevents "works on my machine" from version mismatches)
-- `@types/*` in devDependencies not dependencies (the project has private packages where this matters)
-- Alphabetical dependency ordering (cleaner diffs)
-
-Sherif runs without `node_modules` installed and is extremely fast. Use it via `pnpm dlx sherif@latest` in CI rather than installing it as a dependency.
-
-**WHY NOT depcheck:** Knip supersedes depcheck. Knip is actively maintained, TypeScript-native, understands monorepos natively, and finds unused exports/files in addition to unused dependencies. depcheck only finds unused dependencies.
-
-Sources:
-- [Knip documentation](https://knip.dev)
-- [Knip monorepo support](https://knip.dev/features/monorepos-and-workspaces)
-- [Sherif GitHub](https://github.com/QuiiBz/sherif)
-
----
-
-### 5. TypeScript Strictness (Already Mostly There)
-
-| Technology | Version | Purpose | Confidence |
-|------------|---------|---------|------------|
-| typescript | ^5.9.0 | Type checking (already installed, verify latest 5.x) | HIGH |
-
-**Current state:** `tsconfig.base.json` already has `strict: true`, `strictNullChecks: true`, `noImplicitAny: true`. This is good. No changes needed to compiler options.
-
-**Recommended addition to tsconfig.base.json:**
-```json
-{
-  "compilerOptions": {
-    "noUncheckedIndexedAccess": true
+```typescript
+// packages/foundation/src/database/drizzle.module.ts
+@Module({})
+export class DrizzleModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: DrizzleModule,
+      global: true,
+      providers: [
+        {
+          provide: PG_POOL,
+          inject: [ConfigService],
+          useFactory: (config: ConfigService): Pool =>
+            new Pool({ connectionString: config.get<string>('DATABASE_URL') }),
+        },
+        {
+          provide: DRIZZLE,
+          inject: [PG_POOL],
+          useFactory: (pool: Pool): NodePgDatabase => drizzle({ client: pool }),
+        },
+      ],
+      exports: [DRIZZLE],
+    };
   }
 }
 ```
 
-**WHY:** The metadata array access bug (`metadata.get(HEADER.CORRELATION_ID)[0]` returning undefined) documented in CONCERNS.md would have been caught at compile time with `noUncheckedIndexedAccess`. This flag makes TypeScript treat all indexed access as potentially undefined, forcing explicit checks. It is the single most impactful TypeScript strictness flag that the project is missing.
+**Key design:** Pool is a separate provider so it can be injected independently for health checks and graceful shutdown (`pool.end()`).
 
-**WHY NOT `noUncheckedSideEffectImports`:** Too aggressive for NestJS which relies heavily on side-effect imports for decorators and metadata.
+### Migration Workflow
 
----
+```bash
+# Generate SQL from schema changes (per service)
+pnpm --filter auth exec drizzle-kit generate
 
-## Turbo Task Pipeline Additions
+# Apply migrations (at startup or via script)
+pnpm --filter auth exec drizzle-kit migrate
 
-The existing `turbo.json` should be extended with validation tasks:
+# Dev-only: push schema directly (skip SQL files)
+pnpm --filter auth exec drizzle-kit push
 
-```json
-{
-  "tasks": {
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check:deps": {
-      "dependsOn": ["^build"],
-      "cache": true
-    },
-    "check:boundaries": {
-      "dependsOn": ["^build"],
-      "cache": true
-    },
-    "proto:lint": {
-      "cache": true
-    },
-    "proto:breaking": {
-      "cache": false
-    },
-    "validate": {
-      "dependsOn": ["lint", "typecheck", "check:deps", "check:boundaries", "proto:lint"]
-    }
-  }
-}
+# Dev-only: visual database browser
+pnpm --filter auth exec drizzle-kit studio
 ```
 
-This creates a single `pnpm run validate` command that runs all quality checks.
+**drizzle.config.ts** per service:
 
----
+```typescript
+import { defineConfig } from 'drizzle-kit';
+
+export default defineConfig({
+  dialect: 'postgresql',
+  schema: './src/infrastructure/persistence/schema/index.ts',
+  out: './src/infrastructure/persistence/migrations',
+  dbCredentials: {
+    url: process.env.DATABASE_URL!,
+  },
+  schemaFilter: ['auth'],           // Only manage this service's PG schema
+  migrations: {
+    table: '__drizzle_migrations',
+    schema: 'auth',                  // Migration tracking in service's own schema
+  },
+});
+```
+
+## Installation
+
+```bash
+# Core dependencies (in packages/foundation)
+pnpm --filter @email-platform/foundation add drizzle-orm pg
+
+# Type definitions (in packages/foundation)
+pnpm --filter @email-platform/foundation add -D @types/pg
+
+# Migration CLI (root or each app)
+pnpm add -D drizzle-kit
+
+# Each app that uses drizzle needs drizzle-orm as dependency too
+# (for schema definitions in infrastructure/persistence/schema/)
+pnpm --filter auth add drizzle-orm
+pnpm --filter sender add drizzle-orm
+pnpm --filter parser add drizzle-orm
+pnpm --filter audience add drizzle-orm
+```
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| Boundary enforcement | eslint-plugin-boundaries | Nx @nx/eslint-plugin | Requires Nx ecosystem; project uses Turborepo |
-| Boundary enforcement | eslint-plugin-boundaries | bash grep scripts (current) | Misses re-exports, barrel files, dynamic imports; brittle to maintain |
-| Dependency graph | dependency-cruiser | madge | madge is simpler but has no rule engine; dependency-cruiser validates rules, not just visualizes |
-| Proto management | Buf CLI | Manual protoc scripts (current) | No linting, no breaking change detection, already causing dual-directory bugs |
-| Dead code detection | knip | depcheck | depcheck only finds unused deps; knip finds unused exports, files, and types too |
-| Import linting | eslint-plugin-import-x | eslint-plugin-import | Original has stalled flat config support; import-x is faster and maintained |
-| Monorepo hygiene | sherif | syncpack | sherif is faster (Rust), zero-config, covers more rules out of the box |
-| ESLint migration | ESLint 9 flat config | Stay on ESLint 8 | ESLint 8 is EOL since Oct 2024; no security patches; ESLint 10 removes legacy config |
+| ORM | Drizzle ORM | Prisma | Code generation, engine binary, Docker bloat, worse monorepo story |
+| ORM | Drizzle ORM | TypeORM | Decorator schemas conflict with domain-first, poor migration DX, declining ecosystem |
+| ORM | Drizzle ORM | MikroORM | Better than TypeORM but Unit of Work adds complexity, less community adoption |
+| Driver | node-postgres (pg) | postgres.js | pg Pool integrates better with NestJS DI and lifecycle, vast majority of NestJS examples use pg |
+| Driver | node-postgres (pg) | pg + pg-native | pg-native requires native build tools in Docker, marginal speedup not worth complexity |
+| NestJS Integration | Manual provider (~15 LOC) | @knaadh/nestjs-drizzle-pg | Unnecessary abstraction, small maintainer, version coupling risk |
+| Database | PostgreSQL 16-alpine | PostgreSQL 17 | v17 is newer but v16 has longer LTS track record, alpine image well-tested |
 
----
+## Version Confidence
 
-## Installation
+| Package | Version | Confidence | Verified Via |
+|---------|---------|------------|-------------|
+| drizzle-orm | 0.45.2 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
+| drizzle-kit | 0.31.10 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
+| pg | 8.20.0 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
+| @types/pg | 8.20.0 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
+| PostgreSQL Docker | 16-alpine | HIGH | Standard Docker Hub image |
 
-```bash
-# ESLint modernization (replace existing eslint + typescript-eslint)
-pnpm add -Dw eslint@^9.0.0 typescript-eslint@^8.58.0 eslint-plugin-boundaries@^6.0.2 eslint-plugin-import-x eslint-config-prettier@^10.0.0
+**Note on Drizzle v1.0:** A v1.0.0-beta is in active development. The stable 0.45.x line is production-ready and widely used. Upgrading to v1.0 when released should be straightforward (migration guide exists at orm.drizzle.team/docs/upgrade-v1). Do NOT use beta in production.
 
-# Remove old packages
-pnpm remove -w @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-prettier
+## Sources
 
-# Dependency graph validation
-pnpm add -Dw dependency-cruiser@^17.3.10
-
-# Proto management (dev dependency in contracts package)
-pnpm add -D --filter @email-platform/contracts @bufbuild/buf@^1.66.1
-
-# Dead code detection
-pnpm add -Dw knip@^6.0.6
-
-# Sherif runs via pnpm dlx, no install needed
-# Add to CI: pnpm dlx sherif@latest
-```
-
-Note: `eslint-plugin-prettier` is removed because the recommended approach since 2024 is to run Prettier separately (not through ESLint). Keep `prettier` as a standalone formatter and use `eslint-config-prettier` only to disable conflicting ESLint rules.
-
----
-
-## What NOT to Install
-
-| Tool | Why Not |
-|------|---------|
-| **Nx** | Project uses Turborepo. Adding Nx for boundary enforcement alone creates tooling confusion. eslint-plugin-boundaries + dependency-cruiser cover the same ground. |
-| **Husky + lint-staged** | Not needed for this audit milestone. Add when implementing CI/CD pipeline in a future milestone. |
-| **Jest / Vitest** | Tests are explicitly out of scope for this milestone per PROJECT.md. |
-| **commitlint** | Convention enforcement is valuable but out of scope. Focus is on code architecture, not commit messages. |
-| **madge** | dependency-cruiser is strictly more capable. madge only visualizes; dependency-cruiser validates rules. |
-| **depcheck** | Knip supersedes it entirely with broader detection capabilities. |
-| **eslint-plugin-import** (original) | Use eslint-plugin-import-x instead. The original has stalled development and partial flat config support. |
-
----
-
-## Confidence Assessment
-
-| Recommendation | Confidence | Reasoning |
-|----------------|------------|-----------|
-| ESLint 9 + flat config migration | HIGH | ESLint 8 EOL is documented fact. typescript-eslint v8 has full ESLint 9 support. Migration path is well-documented. |
-| eslint-plugin-boundaries | HIGH | v6.0.2 published recently. Active maintenance. ESLint 9 flat config support added in v5+. Widely used in monorepo architectures. |
-| dependency-cruiser | HIGH | v17.3.10, actively maintained, 5k+ GitHub stars. Well-documented monorepo support. Performance improvements in recent releases. |
-| Buf CLI for proto management | HIGH | Industry standard for protobuf. v1.66.1 on npm. Directly addresses the documented dual-directory concern. |
-| knip | HIGH | v6.0.6, very actively maintained. First-class pnpm workspace and NestJS support documented. |
-| sherif | MEDIUM | Newer tool, less ecosystem penetration. But zero-risk to try (runs via `pnpm dlx`, no install). Does one job well. |
-| `noUncheckedIndexedAccess` | HIGH | Standard TypeScript strictness flag. Directly prevents the documented metadata bug class. |
-| eslint-plugin-import-x | HIGH | Active fork with native flat config. Recommended by community for ESLint 9 migration. |
-
----
-
-## Migration Order
-
-The tools should be adopted in this order due to dependencies:
-
-1. **ESLint 9 + typescript-eslint v8** -- Foundation for all other ESLint plugins
-2. **eslint-plugin-boundaries** -- Requires ESLint 9 flat config
-3. **eslint-plugin-import-x** -- Requires ESLint 9 flat config
-4. **dependency-cruiser** -- Independent, can run in parallel with ESLint migration
-5. **Buf CLI** -- Independent, scoped to contracts package
-6. **knip** -- Independent, run after other changes stabilize (to avoid noise from in-progress refactoring)
-7. **sherif** -- Independent, add to CI last
-8. **`noUncheckedIndexedAccess`** -- Last, because it will surface many type errors across the codebase that need fixing
-
-Sources:
-- [ESLint v8 EOL](https://eslint.org/blog/2024/09/eslint-v8-eol-version-support/)
-- [ESLint flat config migration guide](https://eslint.org/docs/latest/use/configure/migration-guide)
-- [eslint-plugin-boundaries](https://github.com/javierbrea/eslint-plugin-boundaries)
-- [eslint-plugin-import-x](https://github.com/un-ts/eslint-plugin-import-x)
-- [dependency-cruiser](https://github.com/sverweij/dependency-cruiser)
-- [Buf CLI](https://buf.build/docs/cli/quickstart/)
-- [Buf breaking change detection](https://buf.build/docs/breaking/)
-- [Knip](https://knip.dev)
-- [Sherif](https://github.com/QuiiBz/sherif)
-
----
-
-*Stack research: 2026-04-02*
+- [Drizzle ORM - PostgreSQL Getting Started](https://orm.drizzle.team/docs/get-started-postgresql)
+- [Drizzle Kit - Migrations Overview](https://orm.drizzle.team/docs/kit-overview)
+- [Drizzle ORM npm](https://www.npmjs.com/package/drizzle-orm) -- version 0.45.2
+- [drizzle-kit npm](https://www.npmjs.com/package/drizzle-kit) -- version 0.31.10
+- [NestJS and DrizzleORM: A Great Match - Trilon](https://trilon.io/blog/nestjs-drizzleorm-a-great-match)
+- [node-postgres documentation](https://node-postgres.com/)
+- [node-postgres vs postgres.js benchmarks](https://dev.to/nigrosimone/benchmarking-postgresql-drivers-in-nodejs-node-postgres-vs-postgresjs-17kl)
+- [NestJS Health Checks with Terminus](https://docs.nestjs.com/recipes/terminus)
+- [Drizzle ORM v1 Upgrade Guide](https://orm.drizzle.team/docs/upgrade-v1)
+- [Drizzle ORM - Latest Releases](https://orm.drizzle.team/docs/latest-releases)

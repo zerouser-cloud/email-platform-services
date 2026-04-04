@@ -1,259 +1,415 @@
-# Domain Pitfalls
+# Domain Pitfalls: PostgreSQL + Drizzle Migration
 
-**Domain:** NestJS Microservices Monorepo Foundation Audit
-**Researched:** 2026-04-02
+**Domain:** Adding PostgreSQL + Drizzle ORM to existing NestJS microservices monorepo with Clean/Hexagonal architecture
+**Researched:** 2026-04-04
+**Confidence:** HIGH (verified against official Drizzle docs, codebase analysis, community patterns)
 
 ## Critical Pitfalls
 
-Mistakes that cause rewrites, broken builds, or cascading failures across the monorepo.
+Mistakes that cause rewrites, data loss, or fundamental architectural violations.
 
-### Pitfall 1: Big-Bang Contract Consolidation Breaks Importers
+### Pitfall 1: Drizzle Schema Types Leaking Into Domain Layer
 
-**What goes wrong:** When consolidating the duplicate generated contracts (`contracts/generated/` vs `contracts/src/generated/`), all imports across all 6 services break simultaneously if the migration is done in one step. The build fails, and because Turbo's `dependsOn: ["^build"]` means contracts must build first, every downstream package and app fails too.
+**What goes wrong:** Drizzle table definitions (`pgTable`) get imported in domain entities or application use cases. Developers use `InferSelectModel<typeof users>` as the domain type, coupling domain to infrastructure.
 
-**Why it happens:** The two directories contain slightly different generated files (1388 vs 1373 lines for sender.ts). Services may import from either location. A naive "delete one directory, update imports" approach doesn't account for subtle type differences or re-export paths in the contracts package's `index.ts`.
+**Why it happens:** Drizzle schemas are TypeScript code (not generated files like Prisma), making it tempting to reuse types directly. The line between "TypeScript type" and "infrastructure concern" blurs because both are `.ts` files in the same project. `InferSelectModel` gives the exact row type for free -- the convenience is seductive.
 
-**Consequences:** Complete build failure across the monorepo. Developers cannot tell which import path is correct. Rollback is messy if partially committed.
-
-**Prevention:**
-1. Before deleting anything, audit every import path with `grep -r "contracts/generated" apps/ packages/`
-2. Verify that `packages/contracts/src/index.ts` re-exports everything consumers need
-3. Regenerate types from proto once into the canonical location
-4. Diff the two generated directories to ensure no hand-edited modifications exist
-5. Update all imports in a single atomic commit
-
-**Detection:** Build failure after contracts change. Imports referencing `@email-platform/contracts/generated/` instead of `@email-platform/contracts` (the package entry point).
-
-**Phase mapping:** Phase 1 - must be resolved first since every other fix depends on stable contracts.
-
----
-
-### Pitfall 2: Config Refactoring Creates Runtime Initialization Order Bugs
-
-**What goes wrong:** Moving `loadGlobalConfig()` from top-level module scope into NestJS dependency injection (DI) changes the initialization order. Config that was previously available synchronously at module declaration time becomes asynchronous, breaking `LoggingModule.forHttp(config.LOG_LEVEL, config.LOG_FORMAT)` and similar static module registration patterns.
-
-**Why it happens:** NestJS `forRoot()`/`forRootAsync()` dynamic modules require async factory functions, but the current code passes config values directly to static `forHttp()` / `forGrpc()` methods. Converting to async means rewriting the LoggingModule, every Module decorator, and every `main.ts` bootstrap. The temptation is to "just move config into DI" without realizing the cascade.
-
-**Consequences:** Services fail to start. Config is `undefined` during module registration. Logging is misconfigured or silent during startup, making the problem harder to debug.
+**Consequences:** Domain layer depends on `drizzle-orm/pg-core` -- violating Dependency Inversion. Changing database schema forces domain changes. Architecture validator flags violations. Domain entities lose behavior (become anemic Drizzle row types).
 
 **Prevention:**
-1. Identify all places `loadGlobalConfig()` result is used at module declaration time (line 7 patterns in all `*.module.ts`)
-2. Convert `LoggingModule.forHttp()` and `LoggingModule.forGrpc()` to `forRootAsync()` pattern first
-3. Create a `ConfigModule.forRoot()` that calls `loadGlobalConfig()` once and provides via DI token
-4. Migrate one service at a time (gateway first since it is the entry point), verify it starts, then proceed
+- Drizzle schema files live ONLY in `apps/*/src/infrastructure/persistence/schema/`
+- Domain entities remain plain TypeScript classes (already the case: `User`, `Campaign`, `Recipient`, `ParserTask`)
+- Repository adapters contain explicit mappers: `toDomain(row)` and `toPersistence(entity)`
+- ESLint `no-restricted-imports` rule: ban `drizzle-orm` imports outside `infrastructure/` directories
+- Repository port interfaces (e.g., `UserRepositoryPort`) reference domain types only -- never Drizzle types
 
-**Detection:** Services crash on startup with `Cannot read property 'LOG_LEVEL' of undefined`. Pino logger silent during boot.
+**Detection:** `grep -r "drizzle-orm" apps/*/src/domain/ apps/*/src/application/` returns results.
 
-**Phase mapping:** Phase 2 - after contracts are stable, before adding any business logic scaffolding.
+**Applies to phase:** Schema definition, repository implementation
 
----
+### Pitfall 2: Shared Database Without Schema Isolation
 
-### Pitfall 3: Over-Engineering Clean/Hexagonal Architecture in Empty Services
+**What goes wrong:** All services with persistence write to the same `public` schema in PostgreSQL. Tables from different services intermingle. Developers start adding cross-service JOINs because "it's the same database."
 
-**What goes wrong:** Applying full Clean Architecture (ports, adapters, use cases, domain entities, repository interfaces) to services that have zero business logic creates a massive boilerplate explosion. Every service gets 15+ files with empty interfaces and pass-through classes. Future developers spend more time navigating the architecture than understanding the (nonexistent) logic.
+**Why it happens:** MongoDB had no schema concept per collection, so developers default to PostgreSQL's `public` schema. A single `DATABASE_URL` env var makes it easy to connect all services to the same namespace. Relational thinking -- "campaigns reference audience groups, so they should share the schema" -- encourages schema coupling.
 
-**Why it happens:** The project constraint says "Clean/Hexagonal Architecture in all apps/". The natural instinct is to scaffold the full layered structure now. But these services have empty controllers -- there is no domain logic to protect with architectural boundaries.
-
-**Consequences:** 60+ files of pure boilerplate across 5 services. Each proto RPC method gets an empty use case, an empty port interface, an empty adapter. Refactoring these later when actual business logic arrives means touching every file again. Architecture becomes cargo cult rather than protective boundary.
-
-**Prevention:**
-1. Only create the directory structure (folders for `domain/`, `application/`, `infrastructure/`) without populating empty files
-2. Implement one service end-to-end as the reference (e.g., auth with a simple health/ping method) to validate the pattern
-3. For stub controllers, implement the gRPC method signatures that return `UNIMPLEMENTED` status -- this is legitimate gRPC practice, not architecture
-4. Defer full Clean Architecture scaffolding to when business logic is actually implemented
-5. Use the `gsd-architecture-validator` agent to verify the reference service, then replicate
-
-**Detection:** Files containing only interface definitions with no implementations. Use cases that are single-line pass-throughs. More than 10 files per service with under 5 lines of actual logic.
-
-**Phase mapping:** Phase 3 - after contracts and config are solid. Create reference implementation in one service, defer others.
-
----
-
-### Pitfall 4: Foundation Package Becomes a God Module
-
-**What goes wrong:** During audit and refactoring, more shared code gets moved into `@email-platform/foundation`. Error handling, logging, resilience, gRPC clients, health checks, and now maybe config utilities, validation helpers, common decorators. Foundation grows unbounded and every service depends on everything in it.
-
-**Why it happens:** "It is shared code, it belongs in packages/" is correct in principle but wrong in execution. The foundation package already contains errors, gRPC, health, logging, and resilience -- five unrelated domains. Adding more creates a package where changing the logging interceptor forces a rebuild of services that only use the health check.
-
-**Consequences:** Slow builds (any foundation change rebuilds all 6 services). Tight coupling -- services import foundation for one utility but get dependency on gRPC, pino, nestjs-cls, terminus, and everything else. Version conflicts when one module needs a newer NestJS version but another does not.
+**Consequences:** Service boundaries erode. One service's migration breaks another service's tables. Cross-service JOINs create hidden coupling that defeats microservices. Eventually impossible to extract a service to its own database. Services can no longer be deployed independently.
 
 **Prevention:**
-1. Before adding anything to foundation, ask: "Does every service need this?" If not, it is not foundation.
-2. Consider splitting foundation into focused packages: `@email-platform/logging`, `@email-platform/grpc-utils`, `@email-platform/health` -- but only if build times become a problem
-3. For now, ensure foundation uses barrel exports (`index.ts`) that allow tree-shaking and keep internal modules loosely coupled
-4. Never add business-domain code to foundation. If auth needs a JWT utility that sender does not, it stays in `apps/auth/`
+- Use `pgSchema` to define per-service PostgreSQL schemas: `auth`, `sender`, `parser`, `audience`
+- Each service's Drizzle config points to its own schema
+- Separate `drizzle.config.ts` per service for independent migration generation
+- No cross-schema foreign keys -- services communicate via gRPC/RabbitMQ only (already enforced)
+- Cross-service references stored as plain text IDs, not foreign keys
+- Gateway: no persistence (REST facade only). Notifier: event-consumer only, no persistence
+- Example:
+  ```typescript
+  import { pgSchema } from 'drizzle-orm/pg-core';
+  export const authSchema = pgSchema('auth');
+  export const users = authSchema.table('users', { ... });
+  ```
 
-**Detection:** Foundation's `package.json` dependencies growing beyond 10 items. Services importing foundation but only using one sub-module. Build times increasing disproportionately.
+**Detection:** Any SQL joining tables owned by different services. Import paths crossing service boundaries in schema files.
 
-**Phase mapping:** Ongoing concern during all phases. Review foundation scope at each phase boundary.
+**Applies to phase:** Database setup, schema definition, Docker Compose configuration
 
----
+### Pitfall 3: Eager Database Connection at Module Load Time
 
-### Pitfall 5: Fixing Security Issues in Wrong Order Breaks Deployment
+**What goes wrong:** Database connection is created when the module file is imported (top-level `const db = drizzle(pool)`), before NestJS has loaded environment variables via ConfigService and validated them with Zod.
 
-**What goes wrong:** Fixing CORS wildcard rejection, error message sanitization, and credential hardcoding all at once in a "security hardening" pass. The CORS fix rejects the development environment's `*` origin. The error sanitization hides useful debugging information. The credential change breaks `docker-compose up`.
+**Why it happens:** Drizzle examples in docs show top-level initialization. The current codebase has a precedent: `loadGlobalConfig()` was previously called at module scope (fixed in Phase 2). Coming from MongoDB stubs (which had no actual connection), developers don't realize PostgreSQL pools connect immediately.
 
-**Why it happens:** Security issues feel urgent and are tempting to batch. But each fix has different blast radius: CORS affects only gateway in production, error sanitization affects all services, credential extraction affects local dev workflow.
-
-**Consequences:** Local development breaks (`docker-compose up` fails with missing env vars). Developers cannot debug issues because error messages are now generic. CORS blocks legitimate development requests.
+**Consequences:** Application crashes with cryptic connection errors or `undefined` DATABASE_URL. Health checks fail because pool connects before config is ready. Breaks the `loadGlobalConfig()` -> Zod validation -> DI flow in `@email-platform/config`.
 
 **Prevention:**
-1. Fix local-dev-safe issues first: use environment variable substitution in docker-compose (`${MINIO_ROOT_USER:-minioadmin}`) which preserves defaults
-2. For CORS: add environment-aware validation (`NODE_ENV === 'production' && CORS_ORIGINS === '*'` throws) but keep `*` working in development
-3. For error sanitization: log original error at DEBUG level, return sanitized message -- implement both sides simultaneously
-4. Test each security fix independently before combining
+- Create Drizzle instance inside NestJS factory provider (`useFactory` with `ConfigService` injection)
+- Pool creation must happen AFTER `AppConfigModule` initializes
+- Expose pool as a separate provider for health checks and shutdown cleanup
+- Pattern:
+  ```typescript
+  {
+    provide: DRIZZLE_TOKEN,
+    useFactory: (config: ConfigService) => {
+      const pool = new Pool({ connectionString: config.get('DATABASE_URL') });
+      return drizzle(pool, { schema });
+    },
+    inject: [ConfigService],
+  }
+  ```
 
-**Detection:** `docker-compose up` fails after security changes. Developers adding `CORS_ORIGINS=*` back to `.env` to "make it work". Error logs showing `[SANITIZED]` but no corresponding debug log with the original message.
+**Detection:** `ECONNREFUSED` or `undefined` URL errors during bootstrap. Any `drizzle()` call outside of a NestJS provider factory.
 
-**Phase mapping:** Spread across phases. Docker credentials in Phase 1 (low risk). CORS environment guard in Phase 2 (with config refactor). Error sanitization in Phase 3 (needs proper logging first).
+**Applies to phase:** Drizzle module integration, config update
+
+### Pitfall 4: No Connection Pool Cleanup on Shutdown
+
+**What goes wrong:** NestJS application shuts down but PostgreSQL connection pool remains open. Connections leak. In Docker Compose with `restart: unless-stopped`, leaked connections accumulate until PostgreSQL hits `max_connections`.
+
+**Why it happens:** Drizzle does NOT manage pool lifecycle -- it delegates to the underlying driver. Unlike Prisma's `$disconnect()`, there's no built-in cleanup. The codebase has `init: true` in Docker Compose (SIGTERM reaches Node), but without explicit `pool.end()` the connections leak.
+
+**Consequences:** Connection exhaustion in PostgreSQL (default 100 connections). With 4 services each holding 10-connection pools = 40 minimum. After a few restarts, PostgreSQL refuses new connections. Silent production degradation.
+
+**Prevention:**
+- Store `Pool` reference separately from Drizzle instance (two injection tokens: `DRIZZLE` and `PG_POOL`)
+- Implement `OnApplicationShutdown` to call `pool.end()`
+- Enable shutdown hooks in every `main.ts`: `app.enableShutdownHooks()`
+- Pattern:
+  ```typescript
+  @Injectable()
+  export class DrizzleLifecycle implements OnApplicationShutdown {
+    constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+    async onApplicationShutdown(): Promise<void> {
+      await this.pool.end();
+    }
+  }
+  ```
+
+**Detection:** Missing `pool.end()` call. Missing `enableShutdownHooks()`. Increasing `pg_stat_activity` connections after restarts.
+
+**Applies to phase:** Drizzle module integration, health checks
+
+### Pitfall 5: Manually Editing Generated Migration Files
+
+**What goes wrong:** Developer modifies a generated migration SQL file or edits the migration journal/snapshot JSON. Subsequent `drizzle-kit generate` produces broken or conflicting migrations because the snapshot no longer matches reality.
+
+**Why it happens:** Drizzle Kit generates SQL files with accompanying JSON snapshots in `meta/`. The temptation to "just fix this one line" is strong. The journal/snapshot mechanism is poorly documented. This is documented as the #1 mistake in community post-mortems.
+
+**Consequences:** Migration state diverges from actual schema. Future `generate` produces incorrect diffs. Production database in inconsistent state. Rollback impossible.
+
+**Prevention:**
+- NEVER edit generated migration files -- create a new migration instead
+- If a migration is wrong: revert the schema change in TypeScript, regenerate
+- Use `drizzle-kit generate` for all migrations, `drizzle-kit push` only for local dev prototyping
+- Commit migration files to git -- they are the source of truth for database state
+- For data migrations (not schema), use `drizzle-kit generate --custom`
+
+**Detection:** Git diff showing manual edits to `drizzle/` migration SQL files. Schema drift between TypeScript definitions and actual database.
+
+**Applies to phase:** Migration strategy, CI/CD setup
+
+### Pitfall 6: Migration Race Condition With Multiple Services
+
+**What goes wrong:** Multiple services in Docker Compose start simultaneously, each running migrations against the same PostgreSQL instance. Even with per-service schemas, concurrent `CREATE SCHEMA` or extension operations can conflict.
+
+**Why it happens:** Putting `migrate()` in `main.ts` bootstrap seems convenient. Docker Compose starts all services roughly in parallel after `postgres` is healthy.
+
+**Consequences:** Service instances crash-loop on startup. Partial migration leaves database in inconsistent state. "relation already exists" errors.
+
+**Prevention:**
+- For local dev (single instance): `migrate()` in `main.ts` is acceptable but each service must only migrate its own schema
+- For production: Run migrations as a separate job/init-container before deploying services
+- Consider a migration service or script that runs per-service migrations sequentially
+- Keep this in mind now even though current deployment is single-instance Docker Compose
+
+**Detection:** Multiple services logging migration errors simultaneously. "relation already exists" errors.
+
+**Applies to phase:** Migration strategy, Docker Compose setup
 
 ## Moderate Pitfalls
 
-### Pitfall 6: Proto Generation Script Not Integrated Into Build Pipeline
+### Pitfall 7: PostgreSQL Schema Not Auto-Created
 
-**What goes wrong:** After consolidating generated contracts to one location, the `generate` script in contracts package runs independently of the Turbo build pipeline. Developers modify `.proto` files but forget to regenerate. The committed generated types drift from the proto definitions.
+**What goes wrong:** Drizzle schemas use `pgSchema('auth')` to namespace tables. The first migration expects the `auth` schema to exist. If it doesn't, migration fails with `schema "auth" does not exist`.
 
-**Prevention:**
-1. Add `generate` as a Turbo task that runs before `build` in the contracts package
-2. Add a CI check that regenerates and diffs -- fails if generated files are stale
-3. Consider adding generated files to `.gitignore` and generating at build time (tradeoff: slower builds, but guaranteed consistency)
-
-**Detection:** TypeScript types do not match proto definitions. Runtime gRPC errors about missing fields that exist in proto but not in generated types.
-
-**Phase mapping:** Phase 1 - part of contracts consolidation.
-
----
-
-### Pitfall 7: Circular Dependencies Between Foundation and Config
-
-**What goes wrong:** Foundation depends on config (`@email-platform/config: "workspace:*"`). If config ever needs a utility from foundation (e.g., a logger during config validation), a circular dependency forms. NestJS circular dependencies are notoriously hard to debug -- the error message is "Nest cannot create the [Module] instance" with no indication of the cycle.
+**Why it happens:** The `CREATE SCHEMA` statement must execute before any `CREATE TABLE`. Drizzle-kit may or may not include it in generated SQL depending on when `pgSchema` was introduced.
 
 **Prevention:**
-1. Config must remain a leaf package with zero internal dependencies
-2. Foundation can depend on config but not vice versa
-3. Draw the dependency graph: `config -> (nothing)`, `foundation -> config, contracts`, `apps/* -> foundation, config, contracts`
-4. Use `madge --circular` in CI to detect cycles early
-5. Never use `forwardRef()` as a fix for circular dependencies between packages -- it masks the real problem
+- Define `pgSchema()` from the very first schema file, before any tables
+- Verify the first generated migration includes `CREATE SCHEMA IF NOT EXISTS "auth"`
+- If missing, add `CREATE SCHEMA IF NOT EXISTS` as a database init script in Docker Compose
+- Alternative: init SQL in `docker-compose.yml` via postgres image's `/docker-entrypoint-initdb.d/`
 
-**Detection:** `Nest cannot create the [X] instance` errors during startup. `madge --circular` output showing cycles. Import chains that form loops.
+**Detection:** Migration failure with `schema "auth" does not exist`. Tables created in `public` schema instead.
 
-**Phase mapping:** Ongoing. Validate at every phase boundary with `madge`.
+**Applies to phase:** Schema definition, Docker Compose
 
----
+### Pitfall 8: JSONB as Escape Hatch from Normalization
 
-### Pitfall 8: Notifier Service Architectural Divergence Goes Unaddressed
+**What goes wrong:** Developers store complex nested objects as JSONB columns to avoid relational schema design. "It worked like MongoDB documents." 45% of failed MongoDB-to-PostgreSQL migrations make this mistake.
 
-**What goes wrong:** Notifier uses HTTP (`LoggingModule.forHttp()`) while all other services use gRPC (`LoggingModule.forGrpc()`). During the audit, notifier gets refactored to match the other services' patterns, but its actual purpose (consuming RabbitMQ events and sending notifications) does not need gRPC at all. Alternatively, it gets ignored entirely and becomes a dead service that nobody maintains.
-
-**Prevention:**
-1. Decide notifier's architectural role explicitly: is it a gRPC service, a RabbitMQ consumer, or both?
-2. If RabbitMQ-only: document why it differs and create a `LoggingModule.forWorker()` pattern
-3. Do not force gRPC onto a service that does not serve RPC methods
-4. Add notifier to the gateway health check if it should be monitored, or explicitly exclude it with documentation
-
-**Detection:** Notifier service not mentioned in health checks. No proto file for notifier. Inconsistent logging module usage.
-
-**Phase mapping:** Phase 2 - decide during config/architecture normalization.
-
----
-
-### Pitfall 9: Turbo Cache Masks Stale Builds During Refactoring
-
-**What goes wrong:** Turbo caches build outputs based on file hashes. During refactoring, if you change a package's exports but a consumer's import statement stays the same string, Turbo may serve a cached build that does not reflect the actual change. The build appears to succeed but the runtime uses stale code.
+**Why it happens:** Coming from MongoDB, the document-model mindset persists. JSONB feels familiar and initially faster.
 
 **Prevention:**
-1. Run `turbo build --force` after any refactoring that changes package exports or barrel files
-2. Ensure `turbo.json` includes relevant config files in task inputs (currently it does not specify `inputs`, relying on defaults)
-3. After completing a refactoring phase, do a clean build (`rm -rf node_modules/.cache && turbo build --force`) to verify
-4. Pin Turbo version with `~2.8.14` instead of `^2.8.14` to prevent behavior changes between versions
+- JSONB is valid ONLY for truly schemaless data: user preferences, metadata blobs, audit context
+- For business entities with known structure (campaigns, recipients, groups), normalize into tables
+- Rule of thumb: if you query/filter by a field, it must be a column, not nested in JSONB
+- The migration rationale states "relational data (campaigns -> groups -> recipients)" -- honor it
 
-**Detection:** Runtime errors that do not reproduce after a clean build. TypeScript compilation succeeds but runtime imports fail. "Module not found" errors that appear intermittently.
+**Applies to phase:** Schema definition
 
-**Phase mapping:** Ongoing. Force clean builds at phase boundaries.
+### Pitfall 9: Missing Foreign Key Indexes
 
----
-
-### Pitfall 10: Metadata Bug Fix Introduces Subtle Behavioral Change
-
-**What goes wrong:** The metadata array access bug (`metadata.get(HEADER.CORRELATION_ID)[0]`) currently returns `undefined` when the header is missing. Some downstream code may already handle this `undefined` case. Fixing it to return a generated UUID changes behavior -- code that checked for `undefined` correlation IDs now gets valid-looking UUIDs for uncorrelated requests.
+**What goes wrong:** Drizzle creates FK constraints but does NOT auto-create indexes on FK columns (unlike some ORMs). JOINs and cascading operations become progressively slower.
 
 **Prevention:**
-1. Before fixing, audit all consumers of correlation IDs to understand how `undefined` propagates
-2. Ensure the fix generates a UUID and logs a warning that a correlation ID was auto-generated (distinguishable from caller-provided IDs)
-3. Consider using a prefix (e.g., `auto-`) for auto-generated IDs so they are distinguishable in logs
+- Always add explicit indexes on foreign key columns:
+  ```typescript
+  export const recipients = audienceSchema.table('recipients', {
+    groupId: text('group_id').references(() => groups.id),
+  }, (table) => [
+    index('idx_recipients_group_id').on(table.groupId),
+  ]);
+  ```
+- Include index review in schema PR checklist
 
-**Detection:** Log analysis showing correlation IDs that do not match any originating request. Traces that appear complete but actually span unrelated requests sharing an auto-generated ID.
+**Applies to phase:** Schema definition
 
-**Phase mapping:** Phase 1 - small fix but validate downstream impact first.
+### Pitfall 10: Transaction Boundaries Without Unit of Work Pattern
+
+**What goes wrong:** Each repository method creates its own transaction. Use cases needing multiple repository operations can't wrap them in a single transaction. Partial writes on failure.
+
+**Why it happens:** Repository pattern in Clean Architecture hides database details. Transaction boundaries span multiple repositories -- an infrastructure concern that doesn't fit neatly into individual ports.
+
+**Prevention:**
+- Define a `UnitOfWork` port interface in the application layer
+- Implement with Drizzle's `db.transaction()` in infrastructure
+- Pass transaction context through the unit of work to repositories
+- Drizzle supports nested transactions via savepoints for complex operations
+- Design repository port interfaces to accept optional transaction context even in stub phase
+
+**Applies to phase:** Repository adapter design (design interface now, implement with business logic later)
+
+### Pitfall 11: Health Indicator DI Mismatch Across Services
+
+**What goes wrong:** `PostgresHealthIndicator` injects `DRIZZLE` or `PG_POOL` token. Services that do NOT use DrizzleModule (gateway, notifier) cannot import it because the provider doesn't exist in their DI container.
+
+**Why it happens:** Current `MongoHealthIndicator` is a stub that doesn't connect to anything. The new PostgreSQL indicator requires a live pool instance.
+
+**Prevention:**
+- Gateway and notifier health modules must NOT include `PostgresHealthIndicator`
+- Only services importing `DrizzleModule.forRoot()` wire the PostgreSQL health indicator
+- Keep health module configuration per-service so each only checks its own dependencies
+
+**Detection:** `Nest cannot resolve dependencies of PostgresHealthIndicator` errors in gateway or notifier.
+
+**Applies to phase:** Health check update
+
+### Pitfall 12: drizzle-kit Config Path Resolution in Monorepo
+
+**What goes wrong:** `drizzle.config.ts` uses relative paths for `schema` and `out`. When run from different working directories in a monorepo, path resolution breaks.
+
+**Why it happens:** drizzle-kit resolves paths relative to execution directory, not config file location. In pnpm workspace, execution context varies.
+
+**Prevention:**
+- Place `drizzle.config.ts` in each service root (`apps/auth/drizzle.config.ts`)
+- Use paths relative to that location
+- pnpm scripts in each service's `package.json`: `"db:generate": "drizzle-kit generate"`
+- Always run from service directory, never from monorepo root
+
+**Detection:** "No schema files found" errors. Migration files in unexpected locations.
+
+**Applies to phase:** Project setup, migration strategy
+
+### Pitfall 13: Driver Confusion (postgres.js vs node-postgres)
+
+**What goes wrong:** Two PostgreSQL drivers exist with different APIs. Copy-pasting from tutorials leads to mixing `postgres` (postgres.js) and `pg` (node-postgres). The Drizzle adapter imports are different and not interchangeable.
+
+**Prevention:**
+- Pick ONE driver and enforce it via foundation module
+- If postgres.js: `import { drizzle } from 'drizzle-orm/postgres-js'` + `import postgres from 'postgres'`
+- If node-postgres: `import { drizzle } from 'drizzle-orm/node-postgres'` + `import { Pool } from 'pg'`
+- Document the choice in CLAUDE.md conventions
+- node-postgres is better for NestJS because: Pool management built-in, wider ecosystem support, easier shutdown (`pool.end()`)
+
+**Detection:** Both `postgres` and `pg` appearing in `pnpm-lock.yaml`.
+
+**Applies to phase:** Initial setup
+
+### Pitfall 14: drizzle-orm and drizzle-kit Version Mismatch
+
+**What goes wrong:** drizzle-kit and drizzle-orm have different internal schema representations across versions. Mismatched versions cause migration generation failures or phantom diffs on unchanged schemas.
+
+**Prevention:**
+- Always update drizzle-orm and drizzle-kit together in the same commit
+- Pin both with tilde versions (`~0.45.2`, `~0.31.10`) -- no caret `^` given Drizzle's beta stability
+- Test migration generation after every version bump
+
+**Detection:** "Unsupported schema version" errors. Migration diffs appearing for unchanged schemas.
+
+**Applies to phase:** Initial setup, ongoing dependency management
+
+### Pitfall 15: push vs generate vs migrate Confusion
+
+**What goes wrong:** Team uses `drizzle-kit push` in production, or mixes workflows, causing schema state to diverge from migration history.
+
+**Prevention:**
+- `drizzle-kit push` -- LOCAL DEVELOPMENT ONLY. Directly syncs schema, no files
+- `drizzle-kit generate` -- Creates SQL migration files. Commit to git
+- `drizzle-kit migrate` -- Runs migration files. Use in CI/CD and production
+- Enforce via pnpm scripts: `db:push` (dev), `db:generate` (creates files), `db:migrate` (runs files)
+- NEVER use `push` against shared or production databases
+
+**Applies to phase:** Migration strategy
 
 ## Minor Pitfalls
 
-### Pitfall 11: Retry Configuration Tuning Without Load Testing
+### Pitfall 16: Using serial Instead of Identity Columns or Application IDs
 
-**What goes wrong:** Reducing `baseDelayMs` from 1000ms to 100ms and `maxRetries` from 10 to 5 seems safe but changes startup behavior in production. Services that previously waited long enough for dependencies to become ready now fail fast and enter a crash loop.
-
-**Prevention:** Change retry defaults but make them configurable per-environment. Production may need longer waits than development.
-
-**Detection:** Kubernetes pod restart counts increasing after retry config change. Services failing with "connection refused" that previously started successfully.
-
-**Phase mapping:** Phase 2 - with config refactoring, make retry params configurable.
-
----
-
-### Pitfall 12: peerDependencies vs Dependencies Confusion in Shared Packages
-
-**What goes wrong:** Foundation declares NestJS packages as both `peerDependencies` and `devDependencies`. During audit, someone "cleans up" by removing the `devDependencies` duplicates, breaking the package's ability to build independently. Or they move `peerDependencies` to `dependencies`, causing version conflicts when apps pin different NestJS versions.
+**What goes wrong:** `serial()` for auto-increment IDs -- deprecated by PostgreSQL community since PG 10+. Integer IDs don't work well across microservices.
 
 **Prevention:**
-1. Keep the current pattern: `peerDependencies` for NestJS framework packages (consumer provides), `devDependencies` for the same packages (needed to build/typecheck the package itself)
-2. Document this pattern in a `CONTRIBUTING.md` or package README
-3. Never move NestJS packages from `peerDependencies` to `dependencies` in shared packages
+- Domain entities already use `string` IDs -- maintain this in Drizzle schema with `text` PKs
+- Use application-generated IDs: NanoID (3.7M ops/sec, URL-safe) or UUIDv7 (time-sortable, better B-tree indexing)
+- If auto-increment needed: `integer().generatedAlwaysAsIdentity()` not `serial()`
 
-**Detection:** `pnpm install` warnings about unmet peer dependencies. Multiple NestJS versions in `pnpm-lock.yaml`. Build failures in packages after dependency cleanup.
+**Applies to phase:** Schema definition
 
-**Phase mapping:** Ongoing. Document the pattern in Phase 1.
+### Pitfall 17: Missing .notNull() on Required Columns
 
----
+**What goes wrong:** Drizzle defaults columns to nullable. Forgetting `.notNull()` allows NULL where domain expects required values.
 
-### Pitfall 13: Ignoring the Build Order Dependency Chain
+**Prevention:** Convention: every column `.notNull()` unless explicitly nullable. Domain entity constructors indicate which fields are required -- schema must match.
 
-**What goes wrong:** Turbo's `dependsOn: ["^build"]` means contracts builds before foundation, which builds before apps. Adding a new shared package without updating `turbo.json` or `package.json` workspace references causes it to build in parallel with its dependencies, producing intermittent build failures.
+**Applies to phase:** Schema definition
+
+### Pitfall 18: Timestamp Mode and Timezone Inconsistency
+
+**What goes wrong:** Default string mode for timestamp columns. String-to-Date conversions everywhere. Different services handle timezones differently.
 
 **Prevention:**
-1. When adding any new package, verify the dependency chain: `contracts -> foundation -> apps`
-2. Ensure `package.json` has explicit `workspace:*` references for internal dependencies
-3. Test with `turbo build --dry-run` to verify build order before committing
+- Use `timestamp('created_at', { mode: 'date', precision: 3, withTimezone: true })` consistently
+- Date mode is 10-15% faster than string mode
+- All timestamps in UTC. Application layer handles display
 
-**Detection:** Intermittent build failures that resolve on retry. Missing type declarations during parallel builds.
+**Applies to phase:** Schema definition
 
-**Phase mapping:** Phase 1 - verify build graph is correct before making changes.
+### Pitfall 19: Connection Pool Size Multiplied Across Services
+
+**What goes wrong:** Default pool size (10) times 4 services = 40 connections. With restarts and health checks, hits PostgreSQL's 100 limit.
+
+**Prevention:**
+- Set explicit `max` pool size per service (start with 5)
+- Configure PostgreSQL `max_connections` in Docker Compose (200+ for dev)
+- Expose as env var: `DATABASE_POOL_MAX`
+- Monitor `pg_stat_activity`
+
+**Applies to phase:** Config, Docker Compose
+
+### Pitfall 20: Docker Compose MongoDB References Left Behind
+
+**What goes wrong:** MongoDB service removed but references remain: `depends_on: mongodb`, volume `mongo_data`, `.env.docker` still has `MONGODB_URI`. Services fail to start.
+
+**Prevention:**
+- Systematic grep for: `mongodb`, `mongo`, `MONGODB_URI`, `MongoHealth`
+- Update: `docker-compose.yml`, `.env.docker`, `env-schema.ts`, `infrastructure.ts`, health imports, all `*.module.ts`
+- Replace `mongo:7` with `postgres:16-alpine`
+- Replace healthcheck: `pg_isready -U postgres`
+- Replace volume: `mongo_data` -> `postgres_data`
+
+**Detection:** Docker Compose waiting for nonexistent `mongodb` service. Zod validation error for missing `DATABASE_URL`.
+
+**Applies to phase:** Docker Compose migration (early phase)
+
+### Pitfall 21: Not Selecting Specific Fields in Queries
+
+**What goes wrong:** `db.select().from(table)` everywhere returns all columns. Over-fetching.
+
+**Prevention:** Repository methods select only needed columns. Maps to Clean Architecture: each use case defines exactly what it needs via its port.
+
+**Applies to phase:** Repository implementation
+
+### Pitfall 22: Forgetting to Export All Schema Files for drizzle-kit
+
+**What goes wrong:** Schema across multiple files but not all exported from entry point. `drizzle-kit generate` silently omits tables.
+
+**Prevention:** Each service's schema directory has barrel `index.ts` re-exporting everything. Verify generated SQL after every `generate`.
+
+**Applies to phase:** Schema definition
 
 ## Phase-Specific Warnings
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Contract consolidation | Big-bang import breakage (Pitfall 1) | Audit imports first, atomic migration, clean build after |
-| Contract consolidation | Proto generation drift (Pitfall 6) | Integrate generate into Turbo pipeline, CI check |
-| Config refactoring | Async initialization order (Pitfall 2) | Convert LoggingModule to forRootAsync first |
-| Config refactoring | Retry defaults changing behavior (Pitfall 11) | Make configurable, not just "better defaults" |
-| Architecture normalization | Over-engineering empty services (Pitfall 3) | One reference implementation, defer rest |
-| Architecture normalization | Notifier divergence (Pitfall 8) | Decide role explicitly before refactoring |
-| Security hardening | Breaking local dev (Pitfall 5) | Environment-aware guards, preserve dev defaults |
-| Foundation changes | God module growth (Pitfall 4) | Gate additions with "does every service need this?" |
-| Any refactoring | Turbo cache staleness (Pitfall 9) | Force clean builds at phase boundaries |
-| Any refactoring | Circular dependencies (Pitfall 7) | Run madge in CI, maintain dependency graph |
+| Phase Topic | Likely Pitfall | Severity | Mitigation |
+|-------------|---------------|----------|------------|
+| Config/env update | Pitfall 20: MongoDB leftovers | Minor | Systematic grep for all MongoDB references |
+| Config/env update | Pitfall 20: .env.docker drift | Minor | Change env-schema + .env.docker atomically |
+| Docker Compose | Pitfall 19: Pool exhaustion | Minor | Set pool sizes, increase max_connections |
+| Docker Compose | Pitfall 4: No pool cleanup | Critical | OnApplicationShutdown with pool.end() |
+| Docker Compose | Pitfall 6: Boot migration race | Critical | Separate migration step from bootstrap |
+| Drizzle module | Pitfall 3: Eager connection | Critical | Async factory with ConfigService DI |
+| Drizzle module | Pitfall 13: Driver confusion | Moderate | Pick one driver, enforce via foundation |
+| Drizzle module | Pitfall 14: Version mismatch | Moderate | Pin drizzle-orm + drizzle-kit together |
+| Schema definition | Pitfall 1: Schema in domain | Critical | Strict placement in infrastructure/, ESLint |
+| Schema definition | Pitfall 2: No schema isolation | Critical | pgSchema per service from day one |
+| Schema definition | Pitfall 7: Schema not created | Moderate | Verify CREATE SCHEMA in first migration |
+| Schema definition | Pitfall 8: JSONB escape hatch | Moderate | Normalize relational business data |
+| Schema definition | Pitfall 9: Missing FK indexes | Moderate | Index checklist for every FK |
+| Migration strategy | Pitfall 5: Editing migrations | Critical | Never edit, always regenerate |
+| Migration strategy | Pitfall 12: Path resolution | Moderate | Per-service drizzle.config.ts |
+| Migration strategy | Pitfall 15: push in production | Moderate | push=dev, generate+migrate=prod |
+| Repository impl | Pitfall 10: No UnitOfWork | Moderate | Design UoW port interface now |
+| Health checks | Pitfall 11: DI mismatch | Moderate | Only wire PG health in services with DrizzleModule |
+
+## Drizzle-Specific Risk: Project Maintenance Pace
+
+**Confidence: LOW (monitoring concern, not a blocker)**
+
+As of late 2025, the Drizzle ORM GitHub repository showed signs of reduced maintainer engagement (1,378 open issues, 250 open PRs, limited commit activity). The core query builder and migration tooling are stable and production-ready, but:
+
+- Pin Drizzle version explicitly (no `^` prefix)
+- Avoid relying on bleeding-edge or undocumented features
+- v1.0.0-beta releases have known edge-case bugs (VARCHAR to CITEXT, snake_case constraints)
+- Contingency awareness: Kysely is the closest alternative SQL-first query builder
+
+This does not affect the migration decision. Drizzle's approach (TypeScript schema as source of truth, SQL-like query builder, lightweight runtime) is the right fit for this project's Clean Architecture constraints.
 
 ## Sources
 
-- [NestJS Circular Dependency Documentation](https://docs.nestjs.com/fundamentals/circular-dependency)
-- [NestJS gRPC Microservices Documentation](https://docs.nestjs.com/microservices/grpc)
-- [NestJS Monorepo Documentation](https://docs.nestjs.com/cli/monorepo)
-- [NestJS Monorepos Without the Meltdown](https://medium.com/@bhagyarana80/nestjs-monorepos-without-the-meltdown-3a155795ea94)
-- [Don't Go All-In Clean Architecture: An Alternative for NestJS](https://dev.to/thiagomini/dont-go-all-in-clean-architecture-an-alternative-for-nestjs-applications-p53)
-- [NestJS Circular Dependency Hell and How to Avoid It](https://dev.to/smolinari/nestjs-circular-dependency-hell-and-how-to-avoid-it-4lfp)
-- [The Schema Language Question: Single Source of Truth](https://www.chiply.dev/post-schema-languages)
-- [How to Structure a NestJS Project for Microservices](https://www.trpkovski.com/2025/10/12/how-to-structure-a-nestjs-project-for-microservices-monorepo-setup/)
+- [Drizzle ORM - Schema Declaration](https://orm.drizzle.team/docs/sql-schema-declaration) -- pgSchema, table definitions
+- [Drizzle ORM - Migrations](https://orm.drizzle.team/docs/migrations) -- generate vs push vs migrate
+- [Drizzle ORM - Transactions](https://orm.drizzle.team/docs/transactions) -- nested transactions, savepoints
+- [NestJS & DrizzleORM: A Great Match - Trilon](https://trilon.io/blog/nestjs-drizzleorm-a-great-match) -- NestJS integration patterns, lifecycle
+- [Drizzle ORM PostgreSQL Best Practices (2025)](https://gist.github.com/productdevbook/7c9ce3bbeb96b3fabc3c7c2aa2abc717) -- identity columns, connection pooling, indexing
+- [3 Biggest Mistakes with Drizzle ORM](https://medium.com/@lior_amsalem/3-biggest-mistakes-with-drizzle-orm-1327e2531aff) -- migration editing, query efficiency
+- [Repository Pattern in NestJS with Drizzle](https://medium.com/@vimulatus/repository-pattern-in-nest-js-with-drizzle-orm-e848aa75ecae) -- Clean Architecture mapping
+- [Drizzle connection cleanup discussion](https://github.com/drizzle-team/drizzle-orm/discussions/228) -- pool.end() lifecycle
+- [PostgreSQL schema-per-microservice](https://dev.to/lbelkind/does-your-microservice-deserve-its-own-database-np2) -- isolation strategies
+- [Infisical: MongoDB to PostgreSQL Migration](https://infisical.com/blog/postgresql-migration-technical) -- document-to-relational pitfalls
+- [Drizzle Kit overview](https://orm.drizzle.team/docs/kit-overview) -- push vs generate vs migrate workflow
+- [Drizzle project health discussion](https://github.com/drizzle-team/drizzle-orm/issues/4391) -- maintenance concerns
+- [NestJS Lifecycle Events](https://docs.nestjs.com/fundamentals/lifecycle-events) -- shutdown hooks
+- [NestJS Dynamic Modules](https://docs.nestjs.com/fundamentals/dynamic-modules) -- provider resolution and DI context
+- Direct codebase inspection of health indicators, config schema, repository stubs, Docker Compose, domain entities
 
 ---
 
-*Pitfalls audit: 2026-04-02*
+*Pitfalls research: 2026-04-04*
