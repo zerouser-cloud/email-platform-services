@@ -26,7 +26,7 @@
 **Milestone Goal:** Replace MongoDB with PostgreSQL + Drizzle ORM across all applicable services while preserving Clean/Hexagonal architecture boundaries.
 
 - [x] **Phase 9: Config & MongoDB Cleanup** - DATABASE_URL in env-schema, purge all MongoDB references from config and code (completed 2026-04-04)
-- [ ] **Phase 10: Foundation DrizzleModule & Health** - Shared DrizzleModule, DatabaseHealthIndicator DI abstraction, pool lifecycle
+- [x] **Phase 10: Foundation DrizzleModule & Health** - Shared DrizzleModule, DatabaseHealthIndicator DI abstraction, pool lifecycle (completed 2026-04-04)
 - [ ] **Phase 11: Docker Infrastructure** - PostgreSQL 16 in docker-compose replacing MongoDB, volumes and healthchecks
 - [ ] **Phase 12: Auth Schema & Repository (Reference)** - Drizzle schema, migrations, repository adapter for auth as reference implementation
 - [ ] **Phase 13: Remaining Services Schema & Repository** - Sender, parser, audience schemas, migrations, and repository adapters following auth pattern
@@ -57,7 +57,7 @@ Plans:
   4. All 6 services start successfully (gateway and notifier do not import DrizzleModule but are unaffected)
 **Plans**: 1 plan
 Plans:
-- [ ] 10-01-PLAN.md — DrizzleModule, PostgresHealthModule, PersistenceModule facade, dependencies, barrel exports
+- [x] 10-01-PLAN.md — DrizzleModule, PostgresHealthModule, PersistenceModule facade, dependencies, barrel exports
 
 ### Phase 11: Docker Infrastructure
 **Goal**: Local development infrastructure runs PostgreSQL instead of MongoDB, with all services able to connect
@@ -127,7 +127,7 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
 | 7. Logging, Security & Operations | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete   | 2026-04-04 |
-| 10. Foundation DrizzleModule & Health | v2.0 | 0/1 | Not started | - |
+| 10. Foundation DrizzleModule & Health | v2.0 | 1/1 | Complete   | 2026-04-04 |
 | 11. Docker Infrastructure | v2.0 | 0/TBD | Not started | - |
 | 12. Auth Schema & Repository (Reference) | v2.0 | 0/TBD | Not started | - |
 | 13. Remaining Services Schema & Repository | v2.0 | 0/TBD | Not started | - |

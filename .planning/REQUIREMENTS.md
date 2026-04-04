@@ -15,9 +15,9 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 
 ### Foundation
 
-- [ ] **FOUND-01**: DrizzleModule в packages/foundation — NestJS dynamic module с DI injection token
-- [ ] **FOUND-02**: DatabaseHealthIndicator абстракция через DI token — конкретная реализация (PostgresHealthIndicator) регистрируется в module, controller не знает о типе базы
-- [ ] **FOUND-03**: Pool lifecycle — graceful shutdown через OnApplicationShutdown
+- [x] **FOUND-01**: DrizzleModule в packages/foundation — NestJS dynamic module с DI injection token
+- [x] **FOUND-02**: DatabaseHealthIndicator абстракция через DI token — конкретная реализация (PostgresHealthIndicator) регистрируется в module, controller не знает о типе базы
+- [x] **FOUND-03**: Pool lifecycle — graceful shutdown через OnApplicationShutdown
 
 ### Schema
 
@@ -70,9 +70,9 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 | INFRA-01 | Phase 9 | Complete |
 | INFRA-02 | Phase 11 | Pending |
 | INFRA-03 | Phase 9 | Complete |
-| FOUND-01 | Phase 10 | Pending |
-| FOUND-02 | Phase 10 | Pending |
-| FOUND-03 | Phase 10 | Pending |
+| FOUND-01 | Phase 10 | Complete |
+| FOUND-02 | Phase 10 | Complete |
+| FOUND-03 | Phase 10 | Complete |
 | SCHM-01 | Phase 12 | Pending |
 | SCHM-02 | Phase 12 | Pending |
 | SCHM-03 | Phase 12 | Pending |
