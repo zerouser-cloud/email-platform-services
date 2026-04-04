@@ -1,0 +1,47 @@
+# Dependencies (installed fresh inside container)
+node_modules
+dist
+
+# Version control
+.git
+.gitignore
+
+# GSD / Agent tooling
+.gsd
+.agent
+.gemini
+.planning
+.agents
+
+# Cursor IDE
+.cursor
+
+# Environment (injected via env_file in compose)
+.env
+.env.local
+.env.production
+.env.docker
+
+# Logs
+*.log
+.local_dev_logs.txt
+.local_start_logs.txt
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Documentation (not needed in runtime image)
+docs
+
+# Turborepo cache
+.turbo
+
+# Infra config (not needed in app image)
+infra
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package audience;
+
+import "common.proto";
+
+service AudienceService {
+  rpc HealthCheck(common.Empty) returns (common.HealthStatus);
+  rpc ListGroups(ListGroupsRequest) returns (GroupList);
+  rpc CreateGroup(CreateGroupRequest) returns (Group);
+  rpc DeleteGroup(GroupIdRequest) returns (common.Empty);
+  rpc ListRecipients(ListRecipientsRequest) returns (RecipientList);
+  rpc GetRecipientsByGroup(GetByGroupRequest) returns (RecipientList);
+  rpc ImportRecipients(ImportRecipientsRequest) returns (ImportResult);
+  rpc MarkAsSent(MarkSentRequest) returns (common.Empty);
+  rpc ResetSendStatus(ResetStatusRequest) returns (common.Empty);
+}
+
+// --- Group ---
+
+message GroupIdRequest {
+  string id = 1;
+}
+
+message ListGroupsRequest {
+  common.PaginationRequest pagination = 1;
+  string user_id = 2;
+}
+
+message CreateGroupRequest {
+  string name = 1;
+  string user_id = 2;
+}
+
+message Group {
+  string id = 1;
+  string name = 2;
+  int32 recipient_count = 3;
+  string user_id = 4;
+  string created_at = 5;
+}
+
+message GroupList {
+  repeated Group groups = 1;
+  common.PaginationMeta pagination = 2;
+}
+
+// --- Recipient ---
+
+message ListRecipientsRequest {
+  common.PaginationRequest pagination = 1;
+  string group_id = 2;
+}
+
+message GetByGroupRequest {
+  string group_id = 1;
+  bool only_unsent = 2;
+}
+
+message ImportRecipientsRequest {
+  string group_id = 1;
+  repeated RecipientInput recipients = 2;
+}
+
+message RecipientInput {
+  string email = 1;
+  string name = 2;
+  string company = 3;
+}
+
+message Recipient {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  string company = 4;
+  string group_id = 5;
+  bool is_sent = 6;
+  string created_at = 7;
+}
+
+message RecipientList {
+  repeated Recipient recipients = 1;
+  common.PaginationMeta pagination = 2;
+}
+
+// --- Operations ---
+
+message MarkSentRequest {
+  repeated string recipient_ids = 1;
+}
+
+message ResetStatusRequest {
+  string group_id = 1;
+}
+
+message ImportResult {
+  int32 imported = 1;
+  int32 duplicates = 2;
+  int32 total = 3;
+}

@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+package sender;
+
+import "common.proto";
+
+service SenderService {
+  rpc HealthCheck(common.Empty) returns (common.HealthStatus);
+  rpc ListCampaigns(ListCampaignsRequest) returns (CampaignList);
+  rpc GetCampaign(CampaignIdRequest) returns (Campaign);
+  rpc CreateCampaign(CreateCampaignRequest) returns (Campaign);
+  rpc PauseCampaign(CampaignIdRequest) returns (Campaign);
+  rpc ResumeCampaign(CampaignIdRequest) returns (Campaign);
+  rpc ListRunners(ListRunnersRequest) returns (RunnerList);
+  rpc CreateRunner(CreateRunnerRequest) returns (Runner);
+  rpc ListMessages(ListMessagesRequest) returns (MessageList);
+  rpc CreateMessage(CreateMessageRequest) returns (Message);
+  rpc ListMacros(ListMacrosRequest) returns (MacrosList);
+}
+
+// --- Common ---
+
+message CampaignIdRequest {
+  string id = 1;
+}
+
+// --- Campaign ---
+
+message ListCampaignsRequest {
+  common.PaginationRequest pagination = 1;
+  string user_id = 2;
+}
+
+message CreateCampaignRequest {
+  string name = 1;
+  string message_id = 2;
+  string runner_id = 3;
+  string group_id = 4;
+  string user_id = 5;
+}
+
+message Campaign {
+  string id = 1;
+  string name = 2;
+  string status = 3;
+  string message_id = 4;
+  string runner_id = 5;
+  string group_id = 6;
+  string user_id = 7;
+  int32 sent_count = 8;
+  int32 failed_count = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message CampaignList {
+  repeated Campaign campaigns = 1;
+  common.PaginationMeta pagination = 2;
+}
+
+// --- Runner ---
+
+message ListRunnersRequest {
+  common.PaginationRequest pagination = 1;
+}
+
+message CreateRunnerRequest {
+  string name = 1;
+  string proxy_url = 2;
+  string sender_email = 3;
+  string sender_name = 4;
+  int32 interval_seconds = 5;
+  int32 cooldown_seconds = 6;
+}
+
+message Runner {
+  string id = 1;
+  string name = 2;
+  string proxy_url = 3;
+  string sender_email = 4;
+  string sender_name = 5;
+  int32 interval_seconds = 6;
+  int32 cooldown_seconds = 7;
+  string created_at = 8;
+}
+
+message RunnerList {
+  repeated Runner runners = 1;
+  common.PaginationMeta pagination = 2;
+}
+
+// --- Message ---
+
+message ListMessagesRequest {
+  common.PaginationRequest pagination = 1;
+}
+
+message CreateMessageRequest {
+  string subject = 1;
+  string body = 2;
+  string user_id = 3;
+}
+
+message Message {
+  string id = 1;
+  string subject = 2;
+  string body = 3;
+  string user_id = 4;
+  string created_at = 5;
+}
+
+message MessageList {
+  repeated Message messages = 1;
+  common.PaginationMeta pagination = 2;
+}
+
+// --- Macros ---
+
+message ListMacrosRequest {
+  common.PaginationRequest pagination = 1;
+}
+
+message Macros {
+  string id = 1;
+  string name = 2;
+  string template = 3;
+  string created_at = 4;
+}
+
+message MacrosList {
+  repeated Macros macros = 1;
+  common.PaginationMeta pagination = 2;
+}

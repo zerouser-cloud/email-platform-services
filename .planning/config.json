@@ -25,12 +25,50 @@
     "text_mode": false,
     "research_before_questions": false,
     "discuss_mode": "discuss",
-    "skip_discuss": false
+    "skip_discuss": false,
+    "_auto_chain_active": false
   },
   "hooks": {
     "context_warnings": true
   },
-  "agent_skills": {},
+  "agent_skills": {
+    "gsd-researcher": [
+      ".agents/skills/clean-ddd-hexagonal",
+      ".agents/skills/branching-patterns",
+      ".agents/skills/twelve-factor",
+      ".agents/skills/infrastructure-guard"
+    ],
+    "gsd-planner": [
+      ".agents/skills/clean-ddd-hexagonal",
+      ".agents/skills/branching-patterns",
+      ".agents/skills/twelve-factor",
+      ".agents/skills/infrastructure-guard"
+    ],
+    "gsd-checker": [
+      ".agents/skills/clean-ddd-hexagonal",
+      ".agents/skills/branching-patterns",
+      ".agents/skills/twelve-factor",
+      ".agents/skills/infrastructure-guard"
+    ],
+    "gsd-executor": [
+      ".agents/skills/clean-ddd-hexagonal",
+      ".agents/skills/branching-patterns",
+      ".agents/skills/twelve-factor",
+      ".agents/skills/infrastructure-guard"
+    ],
+    "gsd-verifier": [
+      ".agents/skills/clean-ddd-hexagonal",
+      ".agents/skills/branching-patterns",
+      ".agents/skills/twelve-factor",
+      ".agents/skills/infrastructure-guard"
+    ],
+    "gsd-architecture-validator": [
+      ".agents/skills/clean-ddd-hexagonal",
+      ".agents/skills/branching-patterns",
+      ".agents/skills/twelve-factor",
+      ".agents/skills/infrastructure-guard"
+    ]
+  },
   "mode": "yolo",
   "granularity": "fine"
 }

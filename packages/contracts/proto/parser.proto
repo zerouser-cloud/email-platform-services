@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package parser;
+
+import "common.proto";
+
+// Service responsible for managing parser tasks and settings.
+service ParserService {
+  rpc HealthCheck(common.Empty) returns (common.HealthStatus);
+  rpc CreateTask(CreateParserTaskRequest) returns (ParserTask);
+  rpc ListTasks(ListParserTasksRequest) returns (ParserTaskList);
+  rpc GetTask(ParserTaskIdRequest) returns (ParserTask);
+  rpc GetSettings(common.Empty) returns (ParserSettings);
+  rpc UpdateSettings(UpdateParserSettingsRequest) returns (ParserSettings);
+}
+
+// --- Requests ---
+
+message ParserTaskIdRequest {
+  string id = 1;
+}
+
+message CreateParserTaskRequest {
+  string category = 1;
+  string date_from = 2;
+  string date_to = 3;
+  string user_id = 4;
+}
+
+message ListParserTasksRequest {
+  common.PaginationRequest pagination = 1;
+  string user_id = 2;
+}
+
+message UpdateParserSettingsRequest {
+  optional int32 max_pages = 1;
+  optional int32 batch_size = 2;
+  optional bool auto_import = 3;
+}
+
+// --- Models ---
+
+message ParserTask {
+  string id = 1;
+  string category = 2;
+  string status = 3;
+  string date_from = 4;
+  string date_to = 5;
+  int32 total_found = 6;
+  int32 total_parsed = 7;
+  string csv_url = 8;
+  string user_id = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message ParserTaskList {
+  repeated ParserTask tasks = 1;
+  common.PaginationMeta pagination = 2;
+}
+
+message ParserSettings {
+  int32 max_pages = 1;
+  int32 batch_size = 2;
+  bool auto_import = 3;
+}

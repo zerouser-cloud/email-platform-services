@@ -31,3 +31,6 @@ npm-debug.log*
 
 # pnpm
 .pnpm-store/
+
+# Turbo cache
+.turbo/

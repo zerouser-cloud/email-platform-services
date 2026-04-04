@@ -131,6 +131,8 @@
 ## Code Style
 - **No switch/case, no if/else chains (3+ branches)** for behavior selection. Use Record dispatch, Map + fallback, canHandle chain, or polymorphic classes. Guard clauses and null checks are fine. See `.agents/skills/branching-patterns/SKILL.md` for decision tree and patterns.
 - **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.agents/skills/twelve-factor/SKILL.md` for 12-Factor rules.
+- **No infrastructure changes without user approval.** Never change ports, docker-compose, .env files, credentials, or connection strings without explicit confirmation. Standard ports must be preserved (5432, 6379, 5672, 9000). See `.agents/skills/infrastructure-guard/SKILL.md` for pre-change checklist.
+- **No defaults or optionals in env schemas.** Zod env schemas must not use `.default()` or `.optional()`. No `z.coerce.boolean()` (use `z.string().transform(v => v === 'true')`). No fallbacks in consumer code (`?? value`, `|| value`). Every env var required, every value from `.env` files. See `.agents/skills/env-schema/SKILL.md` for rules.
 - Prettier configured with:
 - Format and check: `pnpm lint:fix` for workspace
 - Individual app linting: `eslint src/ --ext .ts`

@@ -1,0 +1,1 @@
+- [Full verification after each phase](feedback_verify_after_phase.md) — Run build + docker + curl health after every phase, not just build
