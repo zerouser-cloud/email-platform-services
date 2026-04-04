@@ -6,8 +6,8 @@ import { CreateCampaignUseCase } from './application/use-cases/create-campaign.u
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
 import { HealthController } from './health/health.controller';
 
-export const CAMPAIGN_REPOSITORY_PORT = 'CampaignRepositoryPort';
-export const CREATE_CAMPAIGN_PORT = 'CreateCampaignPort';
+export const CAMPAIGN_REPOSITORY_PORT = Symbol('CampaignRepositoryPort');
+export const CREATE_CAMPAIGN_PORT = Symbol('CreateCampaignPort');
 
 @Module({
   imports: [

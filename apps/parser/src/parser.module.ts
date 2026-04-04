@@ -6,8 +6,8 @@ import { StartParsingUseCase } from './application/use-cases/start-parsing.use-c
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
 import { HealthController } from './health/health.controller';
 
-export const PARSER_TASK_REPOSITORY_PORT = 'ParserTaskRepositoryPort';
-export const START_PARSING_PORT = 'StartParsingPort';
+export const PARSER_TASK_REPOSITORY_PORT = Symbol('ParserTaskRepositoryPort');
+export const START_PARSING_PORT = Symbol('StartParsingPort');
 
 @Module({
   imports: [

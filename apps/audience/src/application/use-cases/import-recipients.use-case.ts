@@ -4,11 +4,12 @@ import {
   ImportRecipientsResult,
 } from '../ports/inbound/import-recipients.port';
 import { RecipientRepositoryPort } from '../ports/outbound/recipient-repository.port';
+import { RECIPIENT_REPOSITORY_PORT } from '../../audience.module';
 
 @Injectable()
 export class ImportRecipientsUseCase implements ImportRecipientsPort {
   constructor(
-    @Inject('RecipientRepositoryPort')
+    @Inject(RECIPIENT_REPOSITORY_PORT)
     private readonly recipientRepository: RecipientRepositoryPort,
   ) {}
 

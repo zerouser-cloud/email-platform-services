@@ -1,12 +1,13 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { SenderProto, CommonProto } from '@email-platform/contracts';
 import { CreateCampaignPort } from '../../application/ports/inbound/create-campaign.port';
+import { CREATE_CAMPAIGN_PORT } from '../../sender.module';
 
 @Controller()
 @SenderProto.SenderServiceControllerMethods()
 export class SenderGrpcServer implements SenderProto.SenderServiceController {
   constructor(
-    @Inject('CreateCampaignPort')
+    @Inject(CREATE_CAMPAIGN_PORT)
     private readonly createCampaignPort: CreateCampaignPort,
   ) {}
 

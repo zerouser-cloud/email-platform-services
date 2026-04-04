@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { StartParsingPort, StartParsingResult } from '../ports/inbound/start-parsing.port';
 import { ParserTaskRepositoryPort } from '../ports/outbound/parser-task-repository.port';
+import { PARSER_TASK_REPOSITORY_PORT } from '../../parser.module';
 
 @Injectable()
 export class StartParsingUseCase implements StartParsingPort {
   constructor(
-    @Inject('ParserTaskRepositoryPort')
+    @Inject(PARSER_TASK_REPOSITORY_PORT)
     private readonly parserTaskRepository: ParserTaskRepositoryPort,
   ) {}
 

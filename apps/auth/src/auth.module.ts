@@ -6,8 +6,8 @@ import { LoginUseCase } from './application/use-cases/login.use-case';
 import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
 import { HealthController } from './health/health.controller';
 
-export const USER_REPOSITORY_PORT = 'UserRepositoryPort';
-export const LOGIN_PORT = 'LoginPort';
+export const USER_REPOSITORY_PORT = Symbol('UserRepositoryPort');
+export const LOGIN_PORT = Symbol('LoginPort');
 
 @Module({
   imports: [AppConfigModule, PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],

@@ -7,8 +7,8 @@ import { TelegramNotificationSender } from './infrastructure/external/telegram-n
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
 import { HealthController } from './health/health.controller';
 
-export const HANDLE_EVENT_PORT = 'HandleEventPort';
-export const NOTIFICATION_SENDER_PORT = 'NotificationSenderPort';
+export const HANDLE_EVENT_PORT = Symbol('HandleEventPort');
+export const NOTIFICATION_SENDER_PORT = Symbol('NotificationSenderPort');
 
 @Module({
   imports: [AppConfigModule, TerminusModule, LoggingModule.forHttpAsync('notifier')],

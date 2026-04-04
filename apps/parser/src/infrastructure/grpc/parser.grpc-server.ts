@@ -1,12 +1,13 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { ParserProto, CommonProto } from '@email-platform/contracts';
 import { StartParsingPort } from '../../application/ports/inbound/start-parsing.port';
+import { START_PARSING_PORT } from '../../parser.module';
 
 @Controller()
 @ParserProto.ParserServiceControllerMethods()
 export class ParserGrpcServer implements ParserProto.ParserServiceController {
   constructor(
-    @Inject('StartParsingPort')
+    @Inject(START_PARSING_PORT)
     private readonly startParsingPort: StartParsingPort,
   ) {}
 

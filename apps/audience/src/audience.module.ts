@@ -6,8 +6,8 @@ import { ImportRecipientsUseCase } from './application/use-cases/import-recipien
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
 import { HealthController } from './health/health.controller';
 
-export const RECIPIENT_REPOSITORY_PORT = 'RecipientRepositoryPort';
-export const IMPORT_RECIPIENTS_PORT = 'ImportRecipientsPort';
+export const RECIPIENT_REPOSITORY_PORT = Symbol('RecipientRepositoryPort');
+export const IMPORT_RECIPIENTS_PORT = Symbol('ImportRecipientsPort');
 
 @Module({
   imports: [

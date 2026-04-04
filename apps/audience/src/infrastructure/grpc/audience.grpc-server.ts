@@ -1,12 +1,13 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { AudienceProto, CommonProto } from '@email-platform/contracts';
 import { ImportRecipientsPort } from '../../application/ports/inbound/import-recipients.port';
+import { IMPORT_RECIPIENTS_PORT } from '../../audience.module';
 
 @Controller()
 @AudienceProto.AudienceServiceControllerMethods()
 export class AudienceGrpcServer implements AudienceProto.AudienceServiceController {
   constructor(
-    @Inject('ImportRecipientsPort')
+    @Inject(IMPORT_RECIPIENTS_PORT)
     private readonly importRecipientsPort: ImportRecipientsPort,
   ) {}
 
