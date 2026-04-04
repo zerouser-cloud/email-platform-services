@@ -1,503 +1,542 @@
-# Architecture: PostgreSQL + Drizzle in Clean/Hexagonal Monorepo
+# Architecture: Infrastructure, CI/CD & Deployment
 
-**Domain:** Database persistence layer migration (MongoDB to PostgreSQL + Drizzle ORM)
+**Domain:** Docker-compose split strategy, CI pipeline, deployment without Kubernetes
 **Researched:** 2026-04-04
 **Overall confidence:** HIGH
 
-## Current State
+## 1. Docker-Compose Split Strategy
 
-The platform has a clean separation already in place:
+### Recommended: Three-File Architecture with `include`
 
-```
-apps/{service}/src/
-  domain/entities/        -- Pure TS classes (User, Campaign, Recipient, ParserTask, Notification)
-  application/ports/
-    inbound/              -- Use case interfaces (LoginPort)
-    outbound/             -- Repository interfaces (UserRepositoryPort, CampaignRepositoryPort, etc.)
-  application/use-cases/  -- Use case implementations
-  infrastructure/
-    persistence/          -- Repository adapters (MongoUserRepository, etc.) -- ALL throw NotImplementedException
-    grpc/                 -- gRPC server controllers
-```
-
-**Key observation:** All repository implementations are stubs that throw `NotImplementedException`. No actual MongoDB driver is installed or wired. This is a greenfield persistence integration -- we are implementing persistence for the first time, not migrating live data.
-
-### Services Needing Database Access
-
-| Service | Repository Port | Domain Entity | Needs PostgreSQL |
-|---------|----------------|---------------|-----------------|
-| auth | UserRepositoryPort | User | YES |
-| sender | CampaignRepositoryPort | Campaign | YES |
-| parser | ParserTaskRepositoryPort | ParserTask | YES |
-| audience | RecipientRepositoryPort | Recipient | YES |
-| notifier | NotificationSenderPort (not a repo) | Notification | NO (event consumer only) |
-| gateway | None (REST facade) | None | NO (proxies to gRPC services) |
-
-**4 services need PostgreSQL. 2 do not.**
-
-### Current Config State
-
-`packages/config/src/infrastructure.ts` currently defines `MONGODB_URI` in the Zod schema. Health indicators in `packages/foundation/src/health/indicators/` include `mongodb.health.ts` (stub returning "no connection configured"). The `HEALTH.INDICATOR.MONGODB` constant is used in health modules.
-
-## Recommended Architecture
-
-### Decision: Shared Database, Separate PostgreSQL Schemas
-
-Use a single PostgreSQL instance with per-service PostgreSQL schemas instead of per-service databases.
-
-**Why this approach:**
-- 4 services in a single monorepo sharing the same deployment infrastructure
-- Simpler connection management (one `DATABASE_URL` env var)
-- PostgreSQL schemas provide logical isolation equivalent to separate databases for query purposes
-- Cross-service queries possible later if needed (but discouraged by architecture constraints)
-- Single backup/restore, single connection pool at infrastructure level
-- Docker Compose already uses a single MongoDB instance for all services -- same pattern
-- Each service's `drizzle-kit` manages only its own schema via `schemaFilter`
-
-**Schema mapping:**
-```
-email_platform (database)
-  auth.*          -- auth service tables (users, refresh_tokens, etc.)
-  sender.*        -- sender service tables (campaigns, email_jobs, etc.)
-  parser.*        -- parser service tables (parser_tasks, etc.)
-  audience.*      -- audience service tables (recipients, groups, etc.)
-```
-
-### Component Placement
+Split the monolithic `docker-compose.yml` into three files using Docker Compose `include` directive (stable since Compose V2.20+, the modern replacement for `-f` merge).
 
 ```
-packages/
-  foundation/
-    src/
-      database/
-        drizzle.module.ts          -- NestJS DynamicModule wrapping Drizzle + pg Pool
-        drizzle.constants.ts       -- DRIZZLE injection token
-      health/
-        indicators/
-          postgresql.health.ts     -- Replaces mongodb.health.ts
-
-apps/{service}/                    -- Only services with persistence (auth, sender, parser, audience)
-  src/
-    infrastructure/
-      persistence/
-        schema/                    -- Drizzle table definitions using pgSchema
-          {entity}.schema.ts       -- e.g., users.schema.ts
-          index.ts                 -- Barrel export of all schemas for that service
-        migrations/                -- Generated SQL migration files (per-service, committed to repo)
-        {entity}.repository.ts     -- Repository adapter using Drizzle (replaces mongo-*.repository.ts)
-  drizzle.config.ts                -- Per-service drizzle-kit config (for CLI only)
+infra/
+  docker-compose.yml              # Full stack: includes infra, adds 6 app services (builds from source)
+  docker-compose.infra.yml        # Infrastructure only: postgres, redis, rabbitmq, minio
+  docker-compose.prod.yml         # Production: includes infra, uses pre-built images from registry
+  docker/
+    app.Dockerfile                # Unchanged -- already correct multi-stage build
 ```
 
-### Layer Placement (Dependency Rule Preserved)
+### File 1: `docker-compose.infra.yml` -- Infrastructure Only
 
-| Component | Layer | Rationale |
-|-----------|-------|-----------|
-| Domain entities (User, Campaign, etc.) | domain/ | Pure TS, zero imports. **UNCHANGED.** |
-| Repository port interfaces | application/ports/outbound/ | Define what persistence looks like. **UNCHANGED.** |
-| Drizzle schema definitions | infrastructure/persistence/schema/ | Framework-specific (`pgTable`, `pgSchema`). Infrastructure layer. |
-| Repository implementations | infrastructure/persistence/ | Adapters implementing ports via Drizzle. Infrastructure layer. |
-| DrizzleModule (shared) | packages/foundation/ | Cross-cutting infrastructure concern, same pattern as LoggingModule. |
-| Migration files | infrastructure/persistence/migrations/ | Framework artifact, lives with the adapter that uses it. |
-| drizzle.config.ts (per-service) | apps/{service}/ root | CLI config for drizzle-kit, used only at dev/CI time for generation. |
+Standalone valid compose file for the 4 backing services. Used in two contexts:
+- **Direct:** `docker compose -f infra/docker-compose.infra.yml up -d` for local dev
+- **Included:** By `docker-compose.yml` and `docker-compose.prod.yml`
 
-**Critical rule: Domain entities MUST NOT import from Drizzle.** The Drizzle schema files in `infrastructure/` map domain entities to database tables. The mapping is one-directional: infrastructure depends on domain, never the reverse.
-
-## New Components
-
-### 1. DrizzleModule (packages/foundation)
-
-Located in `packages/foundation/src/database/`, following the same pattern as `LoggingModule`:
-
-```typescript
-// packages/foundation/src/database/drizzle.constants.ts
-export const DRIZZLE = Symbol('DRIZZLE');
-```
-
-```typescript
-// packages/foundation/src/database/drizzle.module.ts
-import { DynamicModule, Module, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Pool } from 'pg';
-import { drizzle, NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DRIZZLE } from './drizzle.constants';
-
-const PG_POOL = Symbol('PG_POOL');
-
-@Module({})
-export class DrizzleModule {
-  static forRoot(): DynamicModule {
-    return {
-      module: DrizzleModule,
-      global: true,
-      providers: [
-        {
-          provide: PG_POOL,
-          inject: [ConfigService],
-          useFactory: (config: ConfigService): Pool => {
-            return new Pool({
-              connectionString: config.get<string>('DATABASE_URL'),
-            });
-          },
-        },
-        {
-          provide: DRIZZLE,
-          inject: [PG_POOL],
-          useFactory: (pool: Pool): NodePgDatabase => {
-            return drizzle({ client: pool });
-          },
-        },
-      ],
-      exports: [DRIZZLE],
-    };
-  }
-}
-```
-
-**Why custom module instead of `@knaadh/nestjs-drizzle`:**
-- The community package adds abstraction over what is already a 15-line wrapper
-- Custom module gives full control over pool configuration, shutdown hooks, logging
-- Follows existing codebase pattern (`LoggingModule.forGrpc()`, `LoggingModule.forHttp()`)
-- No external dependency risk for trivial code
-
-**Why Pool is a separate provider:**
-- Enables clean shutdown (`pool.end()`) in `OnModuleDestroy`
-- Health indicator can inject the pool directly for `SELECT 1` checks
-- Testable -- mock pool separately from Drizzle instance
-
-### 2. PostgreSQL Health Indicator
-
-```typescript
-// packages/foundation/src/health/indicators/postgresql.health.ts
-import { Inject, Injectable } from '@nestjs/common';
-import { type HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus';
-import { sql } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DRIZZLE } from '../../database/drizzle.constants';
-
-@Injectable()
-export class PostgresHealthIndicator {
-  constructor(
-    private readonly healthIndicatorService: HealthIndicatorService,
-    @Inject(DRIZZLE) private readonly db: NodePgDatabase,
-  ) {}
-
-  async isHealthy(key: string): Promise<HealthIndicatorResult> {
-    const indicator = this.healthIndicatorService.check(key);
-    try {
-      await this.db.execute(sql`SELECT 1`);
-      return indicator.up();
-    } catch {
-      return indicator.down({ message: 'PostgreSQL connection failed' });
-    }
-  }
-}
-```
-
-### 3. Per-Service Drizzle Schema (Example: auth)
-
-```typescript
-// apps/auth/src/infrastructure/persistence/schema/users.schema.ts
-import { pgSchema, text, timestamp } from 'drizzle-orm/pg-core';
-
-export const authSchema = pgSchema('auth');
-
-export const users = authSchema.table('users', {
-  id: text('id').primaryKey(),
-  email: text('email').notNull().unique(),
-  role: text('role').notNull(),
-  organization: text('organization').notNull(),
-  team: text('team').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-```
-
-**Key points:**
-- `pgSchema('auth')` creates a named PostgreSQL schema -- all tables are namespace-isolated
-- Table structure mirrors domain entity properties but adds persistence concerns (timestamps)
-- `text('id').primaryKey()` -- domain generates IDs, not the database (no `generatedAlwaysAsIdentity`)
-- No Drizzle `InferSelectModel` types leak outside `infrastructure/`
-
-### 4. Repository Adapter (Example: auth)
-
-```typescript
-// apps/auth/src/infrastructure/persistence/user.repository.ts
-import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
-import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DRIZZLE } from '@email-platform/foundation';
-import { User } from '../../domain/entities/user.entity';
-import { UserRepositoryPort } from '../../application/ports/outbound/user-repository.port';
-import { users } from './schema/users.schema';
-
-@Injectable()
-export class PgUserRepository implements UserRepositoryPort {
-  constructor(@Inject(DRIZZLE) private readonly db: NodePgDatabase) {}
-
-  async findByEmail(email: string): Promise<User | null> {
-    const rows = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    const row = rows[0];
-    if (!row) return null;
-
-    return new User(row.id, row.email, row.role, row.organization, row.team);
-  }
-
-  async save(user: User): Promise<void> {
-    await this.db
-      .insert(users)
-      .values({
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        organization: user.organization,
-        team: user.team,
-      })
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          email: user.email,
-          role: user.role,
-          organization: user.organization,
-          team: user.team,
-        },
-      });
-  }
-}
-```
-
-**Design points:**
-- Maps between domain entity (pure TS class) and Drizzle row in the repository
-- Domain entity construction happens here (infrastructure layer) -- correct placement
-- `DRIZZLE` token injected via NestJS DI, not the pool directly
-- No Drizzle types leak into domain or application layers
-
-### 5. Per-Service Drizzle Kit Configuration
-
-```typescript
-// apps/auth/drizzle.config.ts
-import { defineConfig } from 'drizzle-kit';
-
-export default defineConfig({
-  dialect: 'postgresql',
-  schema: './src/infrastructure/persistence/schema/index.ts',
-  out: './src/infrastructure/persistence/migrations',
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
-  },
-  schemaFilter: ['auth'],
-  migrations: {
-    table: '__drizzle_migrations',
-    schema: 'auth',
-  },
-});
-```
-
-**Why per-service `drizzle.config.ts`:**
-- Each service owns its schema and migrations independently
-- `schemaFilter` ensures drizzle-kit only touches that service's PostgreSQL schema
-- Migration tracking table lives in the service's own schema (no collision between services)
-- Monorepo script: `pnpm --filter auth exec drizzle-kit generate`
-
-### 6. Module Wiring Change (Example: auth)
-
-```typescript
-// apps/auth/src/auth.module.ts -- AFTER migration
-import { DrizzleModule } from '@email-platform/foundation';
-import { PgUserRepository } from './infrastructure/persistence/user.repository';
-
-@Module({
-  imports: [
-    AppConfigModule,
-    DrizzleModule.forRoot(),           // NEW: provides DRIZZLE token
-    LoggingModule.forGrpcAsync('auth'),
-    HealthModule,
-  ],
-  controllers: [AuthGrpcServer],
-  providers: [
-    { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },  // CHANGED: Mongo -> Pg
-    { provide: LOGIN_PORT, useClass: LoginUseCase },
-  ],
-})
-export class AuthModule implements OnModuleDestroy { ... }
-```
-
-## Modified Components
-
-### Config Package Changes
-
-`packages/config/src/infrastructure.ts`:
-```
-BEFORE: MONGODB_URI: z.string().min(1)
-AFTER:  DATABASE_URL: z.string().min(1)
-```
-
-Format: `postgresql://user:password@host:5432/email_platform`
-
-### Health Constants Changes
-
-`packages/foundation/src/health/health-constants.ts`:
-```
-BEFORE: INDICATOR: { MONGODB: 'mongodb', ... }
-AFTER:  INDICATOR: { POSTGRESQL: 'postgresql', ... }
-```
-
-### Foundation Index Exports
-
-`packages/foundation/src/index.ts`:
-```
-REMOVE: export * from './health/indicators/mongodb.health';
-ADD:    export * from './health/indicators/postgresql.health';
-ADD:    export * from './database/drizzle.module';
-ADD:    export * from './database/drizzle.constants';
-```
-
-### Docker Compose
-
-Replace `mongodb` service block with `postgresql`:
+**Critical fix from current state:** redis, rabbitmq, and minio currently have NO `ports:` mapping, only `networks: [infra]`. This means host-run NestJS services cannot reach them. The infra file must expose ports to host:
 
 ```yaml
-postgresql:
-  image: postgres:16-alpine
-  environment:
-    POSTGRES_DB: email_platform
-    POSTGRES_USER: ${POSTGRES_USER:-emailplatform}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-emailplatform}
-  volumes:
-    - postgres_data:/var/lib/postgresql/data
-  restart: unless-stopped
-  healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-emailplatform}"]
-    interval: 10s
-    timeout: 5s
-    retries: 5
-    start_period: 10s
-  networks: [infra]
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports: ["5432:5432"]               # HARDCODED, not ${POSTGRES_PORT}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-email_platform}
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [infra]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]               # NEW: enables local dev access
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks: [infra]
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports: ["5672:5672", "15672:15672"] # NEW: 5672 for AMQP, 15672 for management UI
+    volumes: [rabbitmq_data:/var/lib/rabbitmq]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks: [infra]
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports: ["9000:9000", "9001:9001"]  # NEW: 9000 for API, 9001 for console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes: [minio_data:/data]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [infra]
+
+volumes:
+  postgres_data:
+  rabbitmq_data:
+  minio_data:
+
+networks:
+  infra:
+    driver: bridge
 ```
 
-All service `depends_on` entries change from `mongodb` to `postgresql`.
+### File 2: `docker-compose.yml` -- Full Stack (Development)
 
-## Removed Components
+For running the entire platform in Docker. Includes infra, adds all 6 app services built from source.
 
-| Component | Reason |
-|-----------|--------|
-| `packages/foundation/src/health/indicators/mongodb.health.ts` | Replaced by `postgresql.health.ts` |
-| `apps/auth/src/infrastructure/persistence/mongo-user.repository.ts` | Replaced by `user.repository.ts` (Pg) |
-| `apps/sender/src/infrastructure/persistence/mongo-campaign.repository.ts` | Replaced by `campaign.repository.ts` (Pg) |
-| `apps/parser/src/infrastructure/persistence/mongo-parser-task.repository.ts` | Replaced by `parser-task.repository.ts` (Pg) |
-| `apps/audience/src/infrastructure/persistence/mongo-recipient.repository.ts` | Replaced by `recipient.repository.ts` (Pg) |
+```yaml
+include:
+  - docker-compose.infra.yml
 
-## Data Flow
+services:
+  gateway:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args: { APP_NAME: gateway }
+    ports: ["4000:3000"]
+    env_file: ../.env.docker
+    depends_on:
+      auth: { condition: service_healthy }
+      sender: { condition: service_healthy }
+      parser: { condition: service_healthy }
+      audience: { condition: service_healthy }
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services]           # Gateway only talks to app services
+
+  auth:
+    build:
+      context: ../
+      dockerfile: infra/docker/app.Dockerfile
+      args: { APP_NAME: auth }
+    expose: ["3001", "50051"]
+    env_file: ../.env.docker
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3001/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services, infra]    # Both networks: talks to gateway + postgres
+
+  # sender, parser, audience, notifier follow the same pattern
+  # with appropriate depends_on for their infra dependencies
+
+networks:
+  services:
+    driver: bridge
+```
+
+**The `include` directive** imports `docker-compose.infra.yml` as a dependency. The infra network and volumes become available to app services. No `-f` flag gymnastics needed -- just `docker compose up`.
+
+### File 3: `docker-compose.prod.yml` -- Production
+
+Same structure but pulls pre-built images from container registry instead of building. Resource limits added.
+
+```yaml
+include:
+  - docker-compose.infra.yml
+
+services:
+  gateway:
+    image: ghcr.io/${GITHUB_REPOSITORY}/gateway:${IMAGE_TAG:-latest}
+    ports: ["4000:3000"]
+    deploy:
+      resources:
+        limits: { memory: 256M, cpus: "0.5" }
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [services]
+  # ... other services with image: instead of build:
+```
+
+### POSTGRES_PORT Variable -- Remove It
+
+The milestone context flags `POSTGRES_PORT` as incorrectly added. **Hardcode `5432:5432`.** Rationale:
+- 5432 is the PostgreSQL standard port. Deviating creates confusion.
+- If a developer has port 5432 occupied, use `docker-compose.override.yml` (already gitignored).
+- Follows 12-Factor: conventions over configuration for local development.
+
+### Two Development Modes
+
+| Mode | Command | Docker runs | Host runs | Primary use |
+|------|---------|------------|-----------|-------------|
+| **Local dev** | `pnpm infra:up` + `pnpm dev` | postgres, redis, rabbitmq, minio | All 6 NestJS services via ts-node-dev | Daily development |
+| **Full Docker** | `pnpm docker:up` | All 10 containers | Nothing | Integration testing, CI |
+
+**Local dev is primary** because:
+- Hot-reload via ts-node-dev is instant (no Docker build cycle)
+- Native Node.js debugging (attach inspector directly)
+- Turbo build caching works on host
+- Only stateful backing services need Docker
+
+### Package.json Scripts
+
+```json
+{
+  "infra:up": "docker compose -f infra/docker-compose.infra.yml up -d",
+  "infra:down": "docker compose -f infra/docker-compose.infra.yml down",
+  "infra:reset": "docker compose -f infra/docker-compose.infra.yml down -v && docker compose -f infra/docker-compose.infra.yml up -d",
+  "docker:up": "docker compose -f infra/docker-compose.yml up --build",
+  "docker:down": "docker compose -f infra/docker-compose.yml down"
+}
+```
+
+## 2. Environment File Strategy
+
+### Current State Problems
+
+1. `.env` and `.env.docker` duplicate ~90% of content with only hostname differences
+2. `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` in `.env.docker` are consumed only by postgres container, not NestJS apps
+3. `.env.docker` sets `NODE_ENV=development` which contradicts Dockerfile's `NODE_ENV=production`
+4. No `PROTO_DIR` in `.env` (local dev)
+
+### Recommended: Three-File Strategy
+
+| File | Purpose | Git tracked |
+|------|---------|-------------|
+| `.env.example` | Variable catalog, documentation, safe defaults | YES |
+| `.env` | Local dev (localhost hostnames, pretty logs) | NO |
+| `.env.docker` | Full-Docker (container hostnames, json logs) | NO |
+
+### What Differs Between `.env` and `.env.docker`
+
+Only hostnames and log format differ. Everything else is identical.
+
+| Variable | `.env` (local dev) | `.env.docker` (full Docker) |
+|----------|--------------------|-----------------------------|
+| `AUTH_GRPC_URL` | `0.0.0.0:50051` | `auth:50051` |
+| `SENDER_GRPC_URL` | `0.0.0.0:50052` | `sender:50052` |
+| `PARSER_GRPC_URL` | `0.0.0.0:50053` | `parser:50053` |
+| `AUDIENCE_GRPC_URL` | `0.0.0.0:50054` | `audience:50054` |
+| `DATABASE_URL` | `...@localhost:5432/...` | `...@postgres:5432/...` |
+| `REDIS_URL` | `redis://localhost:6379` | `redis://redis:6379` |
+| `RABBITMQ_URL` | `amqp://localhost:5672` | `amqp://rabbitmq:5672` |
+| `MINIO_ENDPOINT` | `localhost` | `minio` |
+| `LOG_FORMAT` | `pretty` | `json` |
+
+### Remove NODE_ENV from .env.docker
+
+Dockerfile sets `ENV NODE_ENV=production` for V8/Express optimizations. `.env.docker` overrides it to `development`, defeating the purpose. Remove it.
+
+### Container-Only Variables
+
+`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` are consumed by the postgres container, not NestJS. Keep as defaults in `docker-compose.infra.yml`:
+
+```yaml
+environment:
+  POSTGRES_USER: ${POSTGRES_USER:-postgres}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+  POSTGRES_DB: ${POSTGRES_DB:-email_platform}
+```
+
+### Add PROTO_DIR to .env
 
 ```
-HTTP Request
-  -> Gateway (REST, no DB)
-    -> gRPC call to Service
-      -> gRPC Server (infrastructure/grpc/)
-        -> Use Case (application/use-cases/)
-          -> Repository Port (application/ports/outbound/) <-- INTERFACE (unchanged)
-            -> Repository Adapter (infrastructure/persistence/) <-- DRIZZLE IMPL (new)
-              -> Drizzle query builder
-                -> pg Pool
-                  -> PostgreSQL (schema: {service_name})
+# .env (local dev)
+PROTO_DIR=./packages/contracts/proto
+
+# .env.docker (full Docker)
+PROTO_DIR=/app/proto
 ```
 
-**What changes in the data flow:** Only the bottom 3 layers. Everything from repository port upward is untouched. This is exactly the benefit of hexagonal architecture -- swapping an adapter behind a port.
+## 3. CI/CD Pipeline Architecture
 
-## Migration Strategy
+### Platform: GitHub Actions
 
-### Development: `drizzle-kit push`
-Fast iteration, pushes schema changes directly to database. No migration files generated.
+GitHub Actions because: native to GitHub, monorepo path filtering, excellent Docker/BuildKit integration, GITHUB_TOKEN for GHCR auth, free tier covers needs.
 
-### Production: Generated SQL migrations
-```bash
-# Generate migration SQL
-pnpm --filter auth exec drizzle-kit generate
+### Workflow 1: `ci.yml` -- Validation on PRs
 
-# Migrations applied at app startup
+```yaml
+name: CI
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0               # Turbo needs git history
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint, typecheck, build (affected only)
+        run: pnpm turbo run lint typecheck build --filter='...[origin/main]'
 ```
 
-Migrations run at application startup using `drizzle-orm/node-postgres/migrator`:
-```typescript
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
-await migrate(db, { migrationsFolder: './src/infrastructure/persistence/migrations' });
+**Key decisions:**
+- `fetch-depth: 0` -- Turbo needs full history for `--filter='...[origin/main]'`
+- `concurrency` with `cancel-in-progress` -- new pushes cancel stale runs
+- Single `turbo run` with multiple tasks -- Turbo parallelizes internally
+- `--filter='...[origin/main]'` with `...` includes dependents
+
+### Workflow 2: `deploy.yml` -- Build, Push, Deploy on main
+
+```yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - id: set-matrix
+        run: |
+          AFFECTED=$(pnpm turbo ls --affected --filter='./apps/*' 2>/dev/null \
+            | grep '@email-platform/' \
+            | sed 's/@email-platform\///' \
+            | jq -Rc '[inputs // empty]')
+          echo "matrix=$AFFECTED" >> "$GITHUB_OUTPUT"
+          if [ "$AFFECTED" = "[]" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-push:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/app.Dockerfile
+          build-args: APP_NAME=${{ matrix.app }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/${{ matrix.app }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/${{ matrix.app }}:latest
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+
+  deploy:
+    needs: [detect-changes, build-push]
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /opt/email-platform
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
 ```
 
-**Where to run migrate:** In `main.ts` after creating the NestJS app but before starting microservices. This keeps migration execution in the composition root, not in the module.
+**Key decisions:**
+- **Matrix per app** -- changed services build in parallel
+- **GHCR** -- free, GITHUB_TOKEN auth, no rate limits
+- **Scoped GHA cache** -- `scope=${{ matrix.app }}` prevents 6 services from evicting each other in 10GB cache limit
+- **Two tags** -- `sha` for rollback, `latest` for convenience
+- **SSH deploy** -- simple, no extra infrastructure
 
-### Schema Creation
-PostgreSQL schemas (`auth`, `sender`, `parser`, `audience`) are created automatically by Drizzle migrations when the schema definition references `pgSchema('auth')`. The generated SQL includes `CREATE SCHEMA IF NOT EXISTS "auth"`.
+### Shared Package Change Propagation
+
+When `packages/config` or `packages/foundation` changes, Turbo marks ALL dependent apps as affected. Correct behavior -- shared packages change rarely, but when they do, all services need validation.
+
+## 4. Deployment Architecture Without Kubernetes
+
+### Recommended: Single VPS + Docker Compose + Caddy
+
+For 6 microservices at pre-PMF scale, single VPS is the right choice.
+
+```
+VPS (Hetzner CX32: 4 vCPU, 8GB RAM, ~EUR 7/mo)
++----------------------------------------------------+
+| systemd                                            |
+|   caddy.service (reverse proxy, auto-TLS)          |
+|   docker.service                                   |
+|     docker compose -f docker-compose.prod.yml      |
+|       gateway (port 4000)                          |
+|       auth, sender, parser, audience, notifier     |
+|       postgres, redis, rabbitmq, minio             |
++----------------------------------------------------+
+         |
+     Caddy :443 -> gateway:4000
+```
+
+### Why Caddy over Nginx
+
+- **Automatic HTTPS** via Let's Encrypt -- zero certificate management
+- **Simple config** -- 3 lines vs 30+ for Nginx with TLS
+- **HTTP/2 by default**
+- **Runs outside Docker** as systemd service -- survives compose restarts
+
+```
+# /etc/caddy/Caddyfile
+api.example.com {
+    reverse_proxy localhost:4000
+}
+```
+
+### Resource Limits
+
+| Service | Memory | CPU | Rationale |
+|---------|--------|-----|-----------|
+| gateway | 256M | 0.5 | Stateless proxy |
+| auth | 256M | 0.5 | Simple token ops |
+| sender | 512M | 1.0 | Email sending |
+| parser | 512M | 1.0 | Data processing |
+| audience | 256M | 0.5 | CRUD |
+| notifier | 128M | 0.25 | Event consumer |
+| postgres | 1G | 1.0 | Database |
+| redis | 256M | 0.25 | Cache |
+| rabbitmq | 512M | 0.5 | Message broker |
+| minio | 256M | 0.25 | File storage |
+
+Total: ~4GB, fits on 8GB VPS.
+
+### Graduation Path
+
+| Trigger | Move to | Why |
+|---------|---------|-----|
+| Need 2+ servers | Docker Swarm | Built into Docker, uses compose files, adds multi-host |
+| Need auto-scaling | Managed containers (ECS, Fly.io, Cloud Run) | Offload infra management |
+| Need canary deploys, service mesh | Kubernetes | Only when justified |
+
+**Never skip Docker Swarm.** Same compose format, `docker stack deploy` for multi-host, zero new tooling. Compose to Swarm is 1 hour. Compose to K8s is a week.
+
+## 5. Network Architecture
+
+### Recommended Design
+
+```
+infra network (from docker-compose.infra.yml):
+  postgres, redis, rabbitmq, minio
+  + auth, sender, parser, audience, notifier (need infra access)
+
+services network (from docker-compose.yml):
+  gateway, auth, sender, parser, audience, notifier (inter-service gRPC)
+```
+
+Gateway is ONLY on `services` -- never touches infra directly. All other app services are on both networks.
+
+### include Gotcha
+
+When using `include`, the infra network from the included file becomes available. But verify with `docker compose config` that networks merge correctly. If they don't, use explicit `external: true` networks.
+
+## 6. 12-Factor Compliance
+
+| Factor | Status | Action |
+|--------|--------|--------|
+| I. Codebase | PASS | One repo in Git |
+| II. Dependencies | PASS | pnpm lockfile |
+| III. Config | FIX | Remove `NODE_ENV` from `.env.docker` |
+| IV. Backing Services | PASS | All via URL env vars |
+| V. Build/Release/Run | FIX | Need prod compose with pre-built images |
+| VI. Processes | PASS | Stateless services |
+| VII. Port Binding | PASS | Self-bound via env |
+| VIII. Concurrency | PASS | Separate processes |
+| IX. Disposability | VERIFY | Check SIGTERM handling per service |
+| X. Dev/Prod Parity | FIX | Same image, different env only |
+| XI. Logs | PASS | Pino to stdout |
+| XII. Admin Processes | N/A | Migrations when DB is added |
 
 ## Anti-Patterns to Avoid
 
-### 1. Domain entities importing Drizzle types
-**What:** Using `InferSelectModel<typeof users>` in domain entities or application ports.
-**Why bad:** Couples domain to ORM. Breaks hexagonal architecture dependency rule.
-**Instead:** Map between Drizzle rows and domain entities in the repository adapter.
+### 1. Single env file for everything
+**Instead:** Separate files per environment, differing only in hostnames.
 
-### 2. Shared schema package across services
-**What:** Putting all Drizzle schemas in `packages/contracts/` or a new `packages/database/`.
-**Why bad:** Services must own their data. Shared schemas create coupling and migration conflicts.
-**Instead:** Each service defines schemas in its own `infrastructure/persistence/schema/`.
+### 2. Building images in production compose
+**Instead:** `docker-compose.prod.yml` uses `image:` with pre-built tags.
 
-### 3. Cross-service foreign keys
-**What:** Defining FK from `sender.campaigns.audience_group_id` referencing `audience.groups.id`.
-**Why bad:** Cross-service data ownership violation. Services communicate via gRPC, not shared tables.
-**Instead:** Store IDs as plain text/uuid. Referential integrity enforced at application layer via gRPC calls.
+### 3. Deploying all services on every change
+**Instead:** Turbo `--affected` + matrix build for changed images only.
 
-### 4. Centralized migration runner
-**What:** Running all service migrations from the foundation package or a single script.
-**Why bad:** Migration ordering becomes coupled. One service's migration failure blocks all others.
-**Instead:** Each service runs its own migrations at startup for its own schema only.
+### 4. Jumping to Kubernetes
+**Instead:** Docker Compose on VPS. Graduate to Swarm when needing 2+ hosts.
 
-### 5. Using Drizzle relational query API across schemas
-**What:** Defining `relations()` between tables in different PostgreSQL schemas.
-**Why bad:** Even though PostgreSQL allows cross-schema joins, it violates service boundaries.
-**Instead:** Keep relations within a single service's schema only.
-
-## Transactions (Future Consideration)
-
-The project already uses `nestjs-cls` (v6.2.0) for correlation IDs. When business logic requires transactions, the `@nestjs-cls/transactional` plugin with Drizzle adapter provides request-scoped transaction management without passing `tx` through every method call. This is not needed now (no business logic yet) but the foundation is already in place via CLS.
-
-## Build Order (Dependency-Aware)
-
-The build order respects the dependency chain: `config -> foundation -> apps`.
-
-1. **Config package** -- Replace `MONGODB_URI` with `DATABASE_URL` in env schema
-2. **Foundation package** -- Create `DrizzleModule`, `PostgresHealthIndicator`; remove MongoDB health indicator; update barrel exports
-3. **Docker infrastructure** -- Replace MongoDB with PostgreSQL in `docker-compose.yml`; update `.env.docker`
-4. **Auth service** (reference implementation) -- Create schema, repository, module wiring, drizzle.config.ts, migrations
-5. **Remaining services** (sender, parser, audience) -- Replicate auth pattern
-6. **Verification** -- Full stack startup, all health checks green
-
-**Why auth first:** It is the established reference Clean/Hexagonal implementation in this codebase. Establish and validate the persistence pattern there, then replicate mechanically to other services.
-
-**Why notifier and gateway are excluded:** Neither has a repository port or persistence need. They are unaffected by this migration.
-
-## Scalability Path
-
-| Concern | At MVP (single PG) | At 10K users | At 100K+ users |
-|---------|---------------------|--------------|-----------------|
-| Connection pool | Single shared pool, default size | Pool size tuning per service | PgBouncer external pooler |
-| Schema isolation | PostgreSQL schemas | Same | Separate databases per service |
-| Migrations | Run at app startup | Same | Separate migration job in CI |
-| Read performance | Single instance | Read replicas | Read replica pool in DrizzleModule |
+### 5. Sequential service builds in CI
+**Instead:** Matrix strategy builds all changed services concurrently.
 
 ## Sources
 
-- [Drizzle ORM - pgSchema documentation](https://orm.drizzle.team/docs/schemas) -- HIGH confidence
-- [Drizzle ORM - PostgreSQL setup guide](https://orm.drizzle.team/docs/get-started/postgresql-new) -- HIGH confidence
-- [Drizzle ORM - Config reference](https://orm.drizzle.team/docs/drizzle-config-file) -- HIGH confidence
-- [Drizzle ORM - Migrations](https://orm.drizzle.team/docs/migrations) -- HIGH confidence
-- [Trilon: NestJS and DrizzleORM integration](https://trilon.io/blog/nestjs-drizzleorm-a-great-match) -- MEDIUM confidence
-- [nestjs-cls Drizzle transactional adapter](https://papooch.github.io/nestjs-cls/plugins/available-plugins/transactional/drizzle-orm-adapter) -- MEDIUM confidence (future use)
-- [Wanago: NestJS #149 Drizzle ORM with PostgreSQL](http://wanago.io/2024/05/20/api-nestjs-drizzle-orm-postgresql/) -- MEDIUM confidence
-- [GitHub: drizzle-orm/issues/1365 - Multiple schemas](https://github.com/drizzle-team/drizzle-orm/issues/1365) -- MEDIUM confidence (known limitation awareness)
+- [Docker Compose `include` directive](https://www.docker.com/blog/improve-docker-compose-modularity-with-include/) -- HIGH confidence
+- [Docker: multiple compose files](https://docs.docker.com/compose/how-tos/multiple-compose-files/) -- HIGH confidence
+- [Monorepo CI/CD with GitHub Actions](https://blog.logrocket.com/creating-separate-monorepo-ci-cd-pipelines-github-actions/) -- MEDIUM confidence
+- [GitHub Actions monorepo guide](https://www.warpbuild.com/blog/github-actions-monorepo-guide) -- MEDIUM confidence
+- [Turborepo affected detection](https://github.com/marketplace/actions/turbo-changed) -- MEDIUM confidence
+- [Docker Compose production pitfalls](https://dflow.sh/blog/stop-misusing-docker-compose-in-production-what-most-teams-get-wrong) -- MEDIUM confidence
+- [Microservice deployment patterns](https://semaphore.io/blog/deploy-microservices) -- MEDIUM confidence
 
 ---
 
-*Architecture research: 2026-04-04*
+*Architecture research for v3.0 Infrastructure & CI/CD: 2026-04-04*

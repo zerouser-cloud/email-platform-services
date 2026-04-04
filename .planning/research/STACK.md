@@ -1,268 +1,141 @@
-# Technology Stack: PostgreSQL + Drizzle Migration
+# Technology Stack: CI/CD & Docker Workflows
 
-**Project:** Email Platform v2.0 -- PostgreSQL + Drizzle Migration
+**Project:** Email Platform v3.0 Infrastructure & CI/CD
 **Researched:** 2026-04-04
-**Focus:** Replace MongoDB with PostgreSQL + Drizzle ORM in existing NestJS microservices monorepo
 
-## Recommended Stack Additions
+## Recommended Stack
 
-### Database
-
+### CI/CD Platform
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| PostgreSQL | 16 (Docker image: `postgres:16-alpine`) | Primary relational database | Relational model fits domain (campaigns -> groups -> recipients), ACID transactions, mature ecosystem. v16 for logical replication improvements and performance. Alpine for smaller image. |
+| GitHub Actions | N/A (hosted) | CI/CD pipeline | Already on GitHub, native GHCR integration, free tier sufficient (2000 min/month), first-class pnpm/Turbo support |
+| rharkor/caching-for-turbo | v2.2.1 | Turbo remote cache in CI | Uses GitHub's native cache backend -- no Vercel account, no external dependency, zero-config |
+| pnpm/action-setup | v4 | pnpm installation in CI | Official pnpm action, handles corepack and version pinning |
+| actions/setup-node | v4 | Node.js setup | Cache pnpm store via `cache: 'pnpm'` option |
+| docker/build-push-action | v6 | Docker image builds | BuildKit integration, layer caching, multi-platform support |
+| docker/login-action | v3 | Registry auth | GHCR login in CI |
 
-### ORM and Driver
-
+### Container Registry
 | Technology | Version | Purpose | Why |
 |------------|---------|---------|-----|
-| `drizzle-orm` | 0.45.2 | Type-safe SQL ORM | SQL-like API (no magic), zero runtime overhead, schema-as-code in TypeScript, perfect fit with strict TS config. Not Prisma because: no code generation step, no engine binary, lighter footprint in Docker, better monorepo story. |
-| `drizzle-kit` | 0.31.10 | Migration CLI (generate, migrate, push) | Companion tool for drizzle-orm. Generates SQL migration files from schema diff, applies them. Needed as devDependency only. |
-| `pg` | 8.20.0 | PostgreSQL driver (node-postgres) | Most mature and widely-used PostgreSQL driver for Node.js. Explicit `Pool` class integrates cleanly with NestJS lifecycle (inject pool, call `pool.end()` on destroy). First-class `drizzle-orm/node-postgres` adapter. |
-| `@types/pg` | 8.20.0 | TypeScript type definitions for pg | Required for strict TypeScript configuration. |
+| GitHub Container Registry (ghcr.io) | N/A | Docker image hosting | Unlimited private repos on GitHub plans, native Actions integration, no rate limits from own repos, same auth as code |
 
-### Why node-postgres (pg) over postgres.js
+### Docker Build
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Docker BuildKit | Default in Docker 23+ | Image building | Cache mounts, parallel multi-stage, already used in existing Dockerfile |
+| Node 20-alpine | 20-alpine | Base image | Already used, smallest Node image with musl libc |
 
-| Criterion | node-postgres (pg) | postgres.js |
-|-----------|-------------------|-------------|
-| Maturity | 10+ years, dominant in Node.js ecosystem | Newer, smaller community |
-| NestJS integration | `Pool` class maps naturally to NestJS providers and DI | Custom connection management needed |
-| Graceful shutdown | `pool.end()` is explicit and reliable | `sql.end()` works but less conventional in NestJS |
-| Connection pooling | Separate `Pool` class, injectable as NestJS provider | Built-in but opaque, harder to expose for health checks |
-| TypeScript | Needs `@types/pg` (well-maintained, version-synced) | Native TS but tagged template API is unusual |
-| Docker | Pure JS (pg-native is optional, not needed) | Pure JS |
-| Performance | Slightly slower than postgres.js in benchmarks | Fastest pure-JS driver |
-| Drizzle support | First-class via `drizzle-orm/node-postgres` | First-class via `drizzle-orm/postgres-js` |
-| Community examples | Vast majority of NestJS + Drizzle examples use pg | Fewer NestJS examples |
+### Local Development
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Docker Compose V2 | 2.x (CLI plugin) | Local orchestration | Already in use, health checks, network isolation, volumes |
+| dotenv-cli | 11.x | Env loading for host-mode dev | Already a dependency, loads .env for `turbo run dev` |
 
-**Decision:** Use `pg` (node-postgres) because its `Pool` class integrates naturally with NestJS dependency injection and lifecycle hooks. The explicit pool management enables clean health checks (inject pool, run `SELECT 1`) and graceful shutdown (`pool.end()` in `onModuleDestroy`). Performance difference is negligible for this workload. The existing ARCHITECTURE.md research established this pattern with `drizzle-orm/node-postgres`.
-
-### Supporting Libraries
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| `drizzle-orm` | 0.45.2 | Schema definition, query builder, migrations runtime | Every service that accesses PostgreSQL |
-| `drizzle-kit` | 0.31.10 | CLI for migration generation and application | Dev only. Run from shared package or root scripts. |
-| `pg` | 8.20.0 | PostgreSQL connection pool and driver | Injected into Drizzle initialization |
-| `@types/pg` | 8.20.0 | TypeScript definitions for pg | Dev dependency |
-
-### What NOT to Add
-
-| Library | Why Not |
-|---------|---------|
-| `prisma` / `@prisma/client` | Code generation step, engine binary bloats Docker, worse monorepo DX, overkill for this architecture |
-| `typeorm` | Heavy, decorator-based schema (conflicts with domain-first approach), poor migration story, declining community momentum |
-| `postgres` (postgres.js) | postgres.js Pool is less NestJS-friendly than pg Pool for DI and lifecycle hooks. Considered but pg is better fit for this architecture. |
-| `@knaadh/nestjs-drizzle-pg` | Thin wrapper (v1.2.0) that adds unnecessary abstraction. Manual Drizzle provider in ~15 lines is cleaner, more controllable, and avoids third-party dependency risk. |
-| `mikro-orm` | Good ORM but adds Unit of Work complexity unnecessary for this project's hexagonal architecture where repositories are explicit |
-| `knex` | Query builder without ORM features. Drizzle already covers query building with better type safety. |
-| `@nestjs/typeorm` / `@nestjs/sequelize` | NestJS ORM integrations for ORMs we are not using |
-| `pg-native` | Optional native binding for pg that requires build tools in Docker. Not worth the ~10% speedup vs. added Docker complexity. |
-
-## Integration Points with Existing Monorepo
-
-### Where Drizzle Code Lives
-
-```
-packages/
-  foundation/
-    src/
-      database/
-        drizzle.module.ts      # NestJS DynamicModule: DrizzleModule.forRoot()
-        drizzle.constants.ts   # Injection token: DRIZZLE (Symbol)
-      health/
-        indicators/
-          postgresql.health.ts # Replaces mongodb.health.ts
-
-apps/
-  auth/
-    src/
-      infrastructure/
-        persistence/
-          schema/              # Drizzle schema files (pgSchema + pgTable definitions)
-          migrations/          # Generated SQL migration files
-          repositories/        # Repository implementations using Drizzle
-    drizzle.config.ts          # Per-service drizzle-kit config (at service root)
-```
-
-**Rationale:** Schema and migrations are per-service (data ownership). Drizzle provider is shared (foundation package). This preserves hexagonal architecture -- domain layer never imports drizzle-orm.
-
-### Environment Changes
-
-Current `InfrastructureSchema` (in `packages/config/src/infrastructure.ts`):
-
-```typescript
-// REMOVE
-MONGODB_URI: z.string().min(1),
-
-// ADD
-DATABASE_URL: z.string().min(1),
-```
-
-`DATABASE_URL` format: `postgresql://user:password@host:5432/email_platform`
-
-Single database, per-service PostgreSQL schemas (`auth`, `sender`, `parser`, `audience`) for logical isolation.
-
-### Docker Compose Changes
-
-Replace `mongodb` service with `postgresql`:
-
-```yaml
-# REMOVE
-mongodb:
-  image: mongo:7
-  volumes:
-    - mongo_data:/data/db
-  healthcheck:
-    test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
-
-# ADD
-postgresql:
-  image: postgres:16-alpine
-  environment:
-    POSTGRES_DB: ${POSTGRES_DB:-email_platform}
-    POSTGRES_USER: ${POSTGRES_USER:-emailplatform}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-emailplatform}
-  volumes:
-    - postgres_data:/var/lib/postgresql/data
-  healthcheck:
-    test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-emailplatform}"]
-    interval: 10s
-    timeout: 5s
-    retries: 5
-    start_period: 10s
-  networks: [infra]
-```
-
-Service `depends_on` entries change from `mongodb` to `postgresql`.
-Volume `mongo_data` removed, `postgres_data` added.
-
-### Health Indicator Replacement
-
-Replace `MongoHealthIndicator` with `PostgresHealthIndicator`. The health indicator injects the Drizzle instance and executes `SELECT 1` to verify connectivity. Update `HEALTH.INDICATOR.MONGODB` to `HEALTH.INDICATOR.POSTGRESQL` in health-constants.ts.
-
-### NestJS Provider Pattern
-
-No third-party NestJS module needed. Create a dynamic module in foundation:
-
-```typescript
-// packages/foundation/src/database/drizzle.module.ts
-@Module({})
-export class DrizzleModule {
-  static forRoot(): DynamicModule {
-    return {
-      module: DrizzleModule,
-      global: true,
-      providers: [
-        {
-          provide: PG_POOL,
-          inject: [ConfigService],
-          useFactory: (config: ConfigService): Pool =>
-            new Pool({ connectionString: config.get<string>('DATABASE_URL') }),
-        },
-        {
-          provide: DRIZZLE,
-          inject: [PG_POOL],
-          useFactory: (pool: Pool): NodePgDatabase => drizzle({ client: pool }),
-        },
-      ],
-      exports: [DRIZZLE],
-    };
-  }
-}
-```
-
-**Key design:** Pool is a separate provider so it can be injected independently for health checks and graceful shutdown (`pool.end()`).
-
-### Migration Workflow
-
-```bash
-# Generate SQL from schema changes (per service)
-pnpm --filter auth exec drizzle-kit generate
-
-# Apply migrations (at startup or via script)
-pnpm --filter auth exec drizzle-kit migrate
-
-# Dev-only: push schema directly (skip SQL files)
-pnpm --filter auth exec drizzle-kit push
-
-# Dev-only: visual database browser
-pnpm --filter auth exec drizzle-kit studio
-```
-
-**drizzle.config.ts** per service:
-
-```typescript
-import { defineConfig } from 'drizzle-kit';
-
-export default defineConfig({
-  dialect: 'postgresql',
-  schema: './src/infrastructure/persistence/schema/index.ts',
-  out: './src/infrastructure/persistence/migrations',
-  dbCredentials: {
-    url: process.env.DATABASE_URL!,
-  },
-  schemaFilter: ['auth'],           // Only manage this service's PG schema
-  migrations: {
-    table: '__drizzle_migrations',
-    schema: 'auth',                  // Migration tracking in service's own schema
-  },
-});
-```
-
-## Installation
-
-```bash
-# Core dependencies (in packages/foundation)
-pnpm --filter @email-platform/foundation add drizzle-orm pg
-
-# Type definitions (in packages/foundation)
-pnpm --filter @email-platform/foundation add -D @types/pg
-
-# Migration CLI (root or each app)
-pnpm add -D drizzle-kit
-
-# Each app that uses drizzle needs drizzle-orm as dependency too
-# (for schema definitions in infrastructure/persistence/schema/)
-pnpm --filter auth add drizzle-orm
-pnpm --filter sender add drizzle-orm
-pnpm --filter parser add drizzle-orm
-pnpm --filter audience add drizzle-orm
-```
+### Deployment (VPS target)
+| Technology | Version | Purpose | Why |
+|------------|---------|---------|-----|
+| Docker Compose | 2.x | Production orchestration | Matches current scale (6 services), simple, K8s deferred per project decision |
+| SSH deploy via GH Actions | N/A | Remote deployment | `appleboy/ssh-action` or direct SSH -- minimal, no extra infra |
 
 ## Alternatives Considered
 
 | Category | Recommended | Alternative | Why Not |
 |----------|-------------|-------------|---------|
-| ORM | Drizzle ORM | Prisma | Code generation, engine binary, Docker bloat, worse monorepo story |
-| ORM | Drizzle ORM | TypeORM | Decorator schemas conflict with domain-first, poor migration DX, declining ecosystem |
-| ORM | Drizzle ORM | MikroORM | Better than TypeORM but Unit of Work adds complexity, less community adoption |
-| Driver | node-postgres (pg) | postgres.js | pg Pool integrates better with NestJS DI and lifecycle, vast majority of NestJS examples use pg |
-| Driver | node-postgres (pg) | pg + pg-native | pg-native requires native build tools in Docker, marginal speedup not worth complexity |
-| NestJS Integration | Manual provider (~15 LOC) | @knaadh/nestjs-drizzle-pg | Unnecessary abstraction, small maintainer, version coupling risk |
-| Database | PostgreSQL 16-alpine | PostgreSQL 17 | v17 is newer but v16 has longer LTS track record, alpine image well-tested |
+| CI/CD | GitHub Actions | GitLab CI, CircleCI | Already on GitHub, switching adds complexity with no benefit at this scale |
+| CI/CD | GitHub Actions | Self-hosted runners | Not needed yet -- GitHub-hosted runners are sufficient for 6 services |
+| Remote cache | rharkor/caching-for-turbo | Vercel Remote Cache | Requires Vercel account, external dependency, paid at scale |
+| Remote cache | rharkor/caching-for-turbo | Self-hosted S3 cache | Over-engineering for current team size |
+| Registry | GHCR | Docker Hub | Rate limits on free tier (100 pulls/6h anonymous), 1 private repo on free plan |
+| Registry | GHCR | AWS ECR | Adds AWS dependency, more complex auth, not needed without K8s/ECS |
+| Deployment | Docker Compose on VPS | Kubernetes | Explicitly deferred per KEY DECISIONS in PROJECT.md, 6 services is too small |
+| Deployment | Docker Compose on VPS | Coolify/Dokploy | Self-hosted PaaS adds a layer of abstraction -- useful but not essential |
+| Base image | node:20-alpine | distroless | Distroless is smaller/more secure but lacks shell for health checks (wget in healthcheck) |
 
-## Version Confidence
+## Dockerfile Improvements (over existing)
 
-| Package | Version | Confidence | Verified Via |
-|---------|---------|------------|-------------|
-| drizzle-orm | 0.45.2 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
-| drizzle-kit | 0.31.10 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
-| pg | 8.20.0 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
-| @types/pg | 8.20.0 | HIGH | npm registry (live `npm view` query, 2026-04-04) |
-| PostgreSQL Docker | 16-alpine | HIGH | Standard Docker Hub image |
+The existing Dockerfile is already solid. Recommended minor improvements:
 
-**Note on Drizzle v1.0:** A v1.0.0-beta is in active development. The stable 0.45.x line is production-ready and widely used. Upgrading to v1.0 when released should be straightforward (migration guide exists at orm.drizzle.team/docs/upgrade-v1). Do NOT use beta in production.
+### 1. Use `pnpm fetch` before full install (better CI cache)
+```dockerfile
+# After copying lockfile, before copying package.json manifests:
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --frozen-lockfile
+
+# Then copy manifests and install offline:
+COPY package.json ./
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY packages/config/package.json packages/config/package.json
+COPY packages/foundation/package.json packages/foundation/package.json
+ARG APP_NAME
+COPY apps/${APP_NAME}/package.json apps/${APP_NAME}/package.json
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
+```
+`pnpm fetch` only needs the lockfile, so the layer cache survives even when package.json metadata changes (like version bumps or script changes). This turns `pnpm install` into an offline operation that just links already-fetched packages.
+
+### 2. Add .claude/ to .dockerignore
+Already mostly excluded but verify `.claude/` is listed (contains agent tooling not needed in images).
+
+## GitHub Actions Workflow Structure
+
+```
+.github/
+  workflows/
+    ci.yml          # lint, typecheck, build (on PR + push to main)
+    docker.yml      # build + push images (on push to main, tags)
+    deploy.yml      # deploy to VPS (on workflow_dispatch or tag)
+```
+
+### CI Workflow Key Points
+- Trigger: PR to main, push to main
+- Steps: checkout, pnpm setup, turbo cache setup, `pnpm install --frozen-lockfile`, `turbo run lint typecheck build`
+- Turbo handles task ordering and only runs affected packages
+- Total CI time target: under 5 minutes for typical PR
+
+### Docker Build Workflow Key Points
+- Trigger: push to main (or semantic version tags)
+- Matrix strategy: build 6 service images in parallel
+- Each matrix job: `docker/build-push-action` with `build-args: APP_NAME=${{ matrix.service }}`
+- Push to `ghcr.io/<org>/email-platform-<service>:latest` and `:<sha-short>`
+- Use `type=gha` cache backend for Docker layer caching
+
+### Deploy Workflow Key Points
+- Trigger: manual (workflow_dispatch) or after docker workflow completes
+- SSH into VPS, pull new images, `docker compose up -d`
+- Rolling restart with health check verification
+
+## Image Tagging Strategy
+
+```
+ghcr.io/<org>/email-platform-gateway:latest       # latest from main
+ghcr.io/<org>/email-platform-gateway:main-abc1234  # commit SHA
+ghcr.io/<org>/email-platform-gateway:v1.0.0        # semantic version (on tag)
+```
+
+Use `latest` for dev/staging, commit SHA for traceability, semantic version for production pins.
+
+## Installation
+
+No new dependencies needed for CI/CD -- all tooling is GitHub Actions-based. Local development tools are already in place.
+
+```bash
+# No changes to package.json required
+# GitHub Actions are defined in YAML, not installed locally
+
+# Verify existing setup works:
+pnpm install --frozen-lockfile
+pnpm build
+pnpm lint
+pnpm typecheck
+```
 
 ## Sources
 
-- [Drizzle ORM - PostgreSQL Getting Started](https://orm.drizzle.team/docs/get-started-postgresql)
-- [Drizzle Kit - Migrations Overview](https://orm.drizzle.team/docs/kit-overview)
-- [Drizzle ORM npm](https://www.npmjs.com/package/drizzle-orm) -- version 0.45.2
-- [drizzle-kit npm](https://www.npmjs.com/package/drizzle-kit) -- version 0.31.10
-- [NestJS and DrizzleORM: A Great Match - Trilon](https://trilon.io/blog/nestjs-drizzleorm-a-great-match)
-- [node-postgres documentation](https://node-postgres.com/)
-- [node-postgres vs postgres.js benchmarks](https://dev.to/nigrosimone/benchmarking-postgresql-drivers-in-nodejs-node-postgres-vs-postgresjs-17kl)
-- [NestJS Health Checks with Terminus](https://docs.nestjs.com/recipes/terminus)
-- [Drizzle ORM v1 Upgrade Guide](https://orm.drizzle.team/docs/upgrade-v1)
-- [Drizzle ORM - Latest Releases](https://orm.drizzle.team/docs/latest-releases)
+- [Turborepo GitHub Actions Guide](https://turborepo.dev/docs/guides/ci-vendors/github-actions)
+- [pnpm Docker Documentation](https://pnpm.io/docker)
+- [pnpm deploy CLI](https://pnpm.io/cli/deploy)
+- [rharkor/caching-for-turbo](https://github.com/rharkor/caching-for-turbo)
+- [GHCR vs Docker Hub (cloudonaut)](https://cloudonaut.io/amazon-ecr-vs-docker-hub-vs-github-container-registry/)
+- [GitHub Actions Monorepo Guide (WarpBuild)](https://www.warpbuild.com/blog/github-actions-monorepo-guide)
+- [Docker Compose in Production (Docker Docs)](https://docs.docker.com/compose/how-tos/production/)
+- [Optimized Docker builds with TurboRepo and PNPM](https://fintlabs.medium.com/optimized-multi-stage-docker-builds-with-turborepo-and-pnpm-for-nodejs-microservices-in-a-monorepo-c686fdcf051f)
