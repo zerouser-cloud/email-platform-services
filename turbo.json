@@ -1,6 +1,5 @@
 {
     "$schema": "https://turbo.build/schema.json",
-    "globalEnv": ["NODE_ENV"],
     "tasks": {
         "generate": {
             "inputs": ["proto/**/*.proto", "scripts/generate.sh"],
