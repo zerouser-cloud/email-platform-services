@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
 status: executing
-stopped_at: Completed 17.2-01-PLAN.md
-last_updated: "2026-04-04T18:12:56.837Z"
+stopped_at: Completed 17.2-02-PLAN.md
+last_updated: "2026-04-04T18:17:31.100Z"
 last_activity: 2026-04-04
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
   percent: 0
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 ## Current Position
 
 Phase: 17.2 (no-magic-values-skill-audit) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-04
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 17-docker-image-build-push P01 | 2min | 2 tasks | 1 files |
 | Phase 17.1 P01 | 1min | 2 tasks | 4 files |
 | Phase 17.2 P01 | 2min | 2 tasks | 2 files |
+| Phase 17.2 P02 | 2min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 17]: Docker build workflow uses matrix strategy with per-service scoped GHA cache and branch-aware GHCR tags
 - [Phase 17.1]: HealthModule relies on parent module injector scope for DATABASE_HEALTH -- no re-import of PersistenceModule needed
 - [Phase 17.2]: No-magic-values skill created with decision tree, four extraction patterns (as const, Symbol, shared, extend existing), anti-patterns table
+- [Phase 17.2]: Remove environment field from pino log base entirely for 12-Factor compliance; simplify retry-connect to RETRY_DEFAULTS spread without process.env reads
 
 ### Roadmap Evolution
 
@@ -101,6 +103,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T18:12:56.835Z
-Stopped at: Completed 17.2-01-PLAN.md
+Last session: 2026-04-04T18:17:31.098Z
+Stopped at: Completed 17.2-02-PLAN.md
 Resume file: None
