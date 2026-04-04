@@ -9,10 +9,8 @@ export const GlobalEnvSchema = z
   .object({
     ...TopologySchema.shape,
     ...InfrastructureSchema.shape,
-    NODE_ENV: z
-      .enum(['development', 'production', 'test'])
-      .default('development'),
     PROTO_DIR: z.string().min(1).optional(),
+    CORS_STRICT: z.coerce.boolean().default(false),
     LOG_LEVEL: z.enum([
       LOG_LEVEL.TRACE,
       LOG_LEVEL.DEBUG,
@@ -30,18 +28,18 @@ export const GlobalEnvSchema = z
     RATE_LIMIT_SUSTAINED_LIMIT: z.coerce.number().positive(),
   })
   .refine(
-    (data) => !(data.NODE_ENV === 'production' && data.CORS_ORIGINS === '*'),
+    (data) => !(data.CORS_STRICT && data.CORS_ORIGINS === '*'),
     {
       message:
-        'CORS_ORIGINS cannot be "*" in production. Specify explicit origins (e.g., "https://app.example.com").',
+        'CORS_ORIGINS cannot be "*" when CORS_STRICT is enabled. Specify explicit origins.',
       path: ['CORS_ORIGINS'],
     },
   );
 
 export type GlobalEnv = GlobalTopology &
   InfrastructureConfig & {
-    NODE_ENV: 'development' | 'production' | 'test';
     PROTO_DIR?: string;
+    CORS_STRICT: boolean;
     LOG_LEVEL: LogLevel;
     LOG_FORMAT: LogFormat;
     CORS_ORIGINS: string;
