@@ -1,12 +1,25 @@
-# Email Platform — Foundation Audit
+# Email Platform
 
 ## What This Is
 
-Аудит и укрепление фундамента монорепозиторной email-платформы на базе NestJS микросервисов. Платформа состоит из 6 сервисов (gateway, auth, sender, parser, audience, notifier) и 3 shared-пакетов (config, foundation, contracts). Цель — выявить и исправить архитектурные нарушения, баги, нестыковки и размазанность кода, чтобы получить прочную базу для дальнейшей разработки бизнес-логики.
+Монорепозиторная email-платформа на базе NestJS микросервисов. 6 сервисов (gateway, auth, sender, parser, audience, notifier) и 3 shared-пакета (config, foundation, contracts). Clean/Hexagonal архитектура во всех сервисах с чёткими границами слоёв.
 
 ## Core Value
 
 Каждый сервис должен быть изолированным, с чёткими границами, единым источником истины и правильными контрактами — чтобы бизнес-логика могла строиться на надёжном фундаменте без переделок.
+
+## Current Milestone: v2.0 PostgreSQL + Drizzle Migration
+
+**Goal:** Заменить MongoDB на PostgreSQL с Drizzle ORM — документация, конфигурация, инфраструктура, код.
+
+**Target features:**
+- Обновление tech stack документации (CLAUDE.md, PROJECT.md, constraints)
+- Замена MongoDB на PostgreSQL в Docker Compose инфраструктуре
+- Интеграция Drizzle ORM в infrastructure layer (schema, migrations)
+- Обновление env-schema (MONGO_URL → DATABASE_URL)
+- Замена MongoDB health indicators на PostgreSQL
+- Обновление repository адаптеров под Drizzle
+- Проверка полного флоу запуска всех сервисов после каждой фазы
 
 ## Requirements
 
@@ -73,15 +86,16 @@
 - **Архитектура packages/**: Простая утилитарная структура, без DDD
 - **Без бизнес-логики**: Только структурный каркас (ports, adapters, use cases) — реализация позже
 - **Без тестов**: Тестирование — отдельный следующий этап
-- **Tech stack**: NestJS 11, TypeScript, gRPC, MongoDB, RabbitMQ, Redis — не меняем
+- **Tech stack**: NestJS 11, TypeScript, gRPC, PostgreSQL, Drizzle ORM, RabbitMQ, Redis
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| DDD только в apps/, не в packages/ | Packages — утилитарные библиотеки, DDD в них избыточен | — Pending |
+| DDD только в apps/, не в packages/ | Packages — утилитарные библиотеки, DDD в них избыточен | ✓ Good |
 | Тесты отложены на следующий этап | Сначала прочный фундамент, потом покрытие тестами | — Pending |
 | Бизнес-логику не реализуем | Фокус на архитектурной чистоте, не на фичах | — Pending |
+| MongoDB → PostgreSQL + Drizzle | Реляционные данные (кампании→группы→получатели), типобезопасность, миграции, лучший DDD fit | — Pending |
 
 ## Evolution
 
@@ -101,4 +115,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-02 after Phase 6 completion*
+*Last updated: 2026-04-04 after milestone v2.0 start*
