@@ -129,6 +129,7 @@
 - Type aliases in PascalCase: `LogFormat`, `LogLevel`, `GlobalEnv`
 - Discriminator types use readonly properties for immutability: `readonly port: number`
 ## Code Style
+- **No magic values (unnamed literals).** Extract to named `as const` objects in `*-constants.ts`. DI tokens use `Symbol()` (not strings). Allowed: type literals, import paths, 0/1/-1 idioms, log messages, `process.exit(0|1)`. See `.agents/skills/no-magic-values/SKILL.md` for decision tree and patterns.
 - **No switch/case, no if/else chains (3+ branches)** for behavior selection. Use Record dispatch, Map + fallback, canHandle chain, or polymorphic classes. Guard clauses and null checks are fine. See `.agents/skills/branching-patterns/SKILL.md` for decision tree and patterns.
 - **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.agents/skills/twelve-factor/SKILL.md` for 12-Factor rules.
 - **No infrastructure changes without user approval.** Never change ports, docker-compose, .env files, credentials, or connection strings without explicit confirmation. Standard ports must be preserved (5432, 6379, 5672, 9000). See `.agents/skills/infrastructure-guard/SKILL.md` for pre-change checklist.
