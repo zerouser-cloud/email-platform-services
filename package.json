@@ -12,6 +12,8 @@
     "typecheck": "turbo run typecheck",
     "check-arch": "bash scripts/check-architecture.sh",
     "generate:contracts": "pnpm --filter @email-platform/contracts run generate",
+    "infra:up": "docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml down",
     "docker:up": "docker compose -f infra/docker-compose.yml up --build",
     "docker:down": "docker compose -f infra/docker-compose.yml down",
     "prepare": "husky"
