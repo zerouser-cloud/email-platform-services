@@ -34,7 +34,7 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 ### Verification
 
-- [ ] **VRFY-01**: Both dev modes work: local dev (infra in Docker) + full Docker
+- [x] **VRFY-01**: Both dev modes work: local dev (infra in Docker) + full Docker
 - [ ] **VRFY-02**: CI pipeline passes on clean repo
 
 ## v2.0 Requirements (Validated)
@@ -92,7 +92,7 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 | DPLY-01 | Phase 18 | Pending |
 | DPLY-02 | Phase 18 | Pending |
 | DPLY-03 | Phase 18 | Pending |
-| VRFY-01 | Phase 19 | Pending |
+| VRFY-01 | Phase 19 | Complete |
 | VRFY-02 | Phase 19 | Pending |
 
 **Coverage:**

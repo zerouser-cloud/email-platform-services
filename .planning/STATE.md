@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
 status: verifying
-stopped_at: Completed 17-01-PLAN.md
-last_updated: "2026-04-04T16:38:25.899Z"
+stopped_at: Completed 17.1-01-PLAN.md
+last_updated: "2026-04-04T17:16:13.480Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 6
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 7
+  completed_phases: 5
+  total_plans: 5
+  completed_plans: 5
   percent: 0
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 17 — docker-image-build-push
+**Current focus:** Phase 17.1 — fix-di-double-registration
 
 ## Current Position
 
-Phase: 18
-Plan: Not started
+Phase: 17.1 (fix-di-double-registration) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 16 P01 | 3min | 2 tasks | 6 files |
 | Phase 16.1 P01 | 2min | 2 tasks | 3 files |
 | Phase 17-docker-image-build-push P01 | 2min | 2 tasks | 1 files |
+| Phase 17.1 P01 | 1min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,7 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 16]: Pre-push hook (not pre-commit) for local validation before CI
 - [Phase 16.1]: Docker Compose override pattern for dev ports instead of env-specific compose files
 - [Phase 17]: Docker build workflow uses matrix strategy with per-service scoped GHA cache and branch-aware GHCR tags
+- [Phase 17.1]: HealthModule relies on parent module injector scope for DATABASE_HEALTH -- no re-import of PersistenceModule needed
 
 ### Roadmap Evolution
 
@@ -96,6 +98,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T16:35:14.543Z
-Stopped at: Completed 17-01-PLAN.md
+Last session: 2026-04-04T17:16:13.478Z
+Stopped at: Completed 17.1-01-PLAN.md
 Resume file: None
