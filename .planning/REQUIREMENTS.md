@@ -9,69 +9,69 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 ### Docker Compose & Environment
 
-- [ ] **DOCK-01**: Docker Compose разделён на infra и services через `include` или profiles
-- [ ] **DOCK-02**: Инфраструктурные порты экспонированы для local dev (5432, 6379, 5672, 9000)
-- [ ] **DOCK-03**: POSTGRES_PORT переменная откатана — стандартный 5432 в docker-compose
-- [ ] **DOCK-04**: Env файлы синхронизированы (.env, .env.docker, .env.example) — одинаковый набор ключей
+- [ ] **DOCK-01**: Docker Compose split into infra and services via `include` or profiles
+- [ ] **DOCK-02**: Infrastructure ports exposed for local dev (5432, 6379, 5672, 9000)
+- [ ] **DOCK-03**: POSTGRES_PORT variable reverted -- standard 5432 in docker-compose
+- [ ] **DOCK-04**: Env files synchronized (.env, .env.docker, .env.example) -- same set of keys
 
 ### CI Pipeline
 
-- [ ] **CI-01**: GitHub Actions workflow: lint + typecheck + build на каждый PR
-- [ ] **CI-02**: Turbo affected-only выполнение — CI запускает только изменённые пакеты
-- [ ] **CI-03**: Turbo remote cache через GitHub Actions cache
+- [ ] **CI-01**: GitHub Actions workflow: lint + typecheck + build on every PR
+- [ ] **CI-02**: Turbo affected-only execution -- CI runs only changed packages
+- [ ] **CI-03**: Turbo remote cache via GitHub Actions cache
 
 ### Docker Build
 
-- [ ] **DBLD-01**: Docker image build per service через matrix strategy в GitHub Actions
-- [ ] **DBLD-02**: Образы публикуются в GHCR (GitHub Container Registry)
+- [ ] **DBLD-01**: Docker image build per service via matrix strategy in GitHub Actions
+- [ ] **DBLD-02**: Images published to GHCR (GitHub Container Registry)
 - [ ] **DBLD-03**: Scoped Docker layer cache per service
 
 ### Deployment
 
-- [ ] **DPLY-01**: Deploy workflow: SSH на VPS, docker compose pull + up
-- [ ] **DPLY-02**: Caddy как reverse proxy с auto-TLS
-- [ ] **DPLY-03**: Health check verification после deploy
+- [ ] **DPLY-01**: Deploy workflow: SSH to VPS, docker compose pull + up
+- [ ] **DPLY-02**: Caddy as reverse proxy with auto-TLS
+- [ ] **DPLY-03**: Health check verification after deploy
 
 ### Verification
 
-- [ ] **VRFY-01**: Оба dev режима работают: local dev (infra в Docker) + full Docker
-- [ ] **VRFY-02**: CI pipeline проходит на clean repo
+- [ ] **VRFY-01**: Both dev modes work: local dev (infra in Docker) + full Docker
+- [ ] **VRFY-02**: CI pipeline passes on clean repo
 
 ## v2.0 Requirements (Validated)
 
-- [x] **INFRA-01**: DATABASE_URL в env-schema с Zod-валидацией — Phase 9
-- [x] **INFRA-02**: PostgreSQL 16 в docker-compose — Phase 11
-- [x] **INFRA-03**: Все MongoDB упоминания удалены — Phase 9
-- [x] **FOUND-01**: DrizzleModule в packages/foundation — Phase 10
-- [x] **FOUND-02**: DatabaseHealthIndicator DI абстракция — Phase 10
-- [x] **FOUND-03**: Pool lifecycle graceful shutdown — Phase 10
-- [x] **SCHM-01**: pgSchema per service — Phase 12
-- [x] **SCHM-02**: drizzle-kit config и migrations — Phase 12
-- [x] **SCHM-03**: Drizzle types не в domain layer — Phase 12
-- [x] **REPO-01**: Auth repository adapter — Phase 12
-- [x] **REPO-02**: Sender, Parser, Audience adapters — Phase 13
-- [x] **REPO-03**: Mappers keep types in infrastructure — Phase 13
-- [x] **VRFY-01**: Все сервисы стартуют, health checks — Phase 14
-- [x] **VRFY-02**: Документация обновлена — Phase 14
+- [x] **INFRA-01**: DATABASE_URL in env-schema with Zod validation -- Phase 9
+- [x] **INFRA-02**: PostgreSQL 16 in docker-compose -- Phase 11
+- [x] **INFRA-03**: All MongoDB references removed -- Phase 9
+- [x] **FOUND-01**: DrizzleModule in packages/foundation -- Phase 10
+- [x] **FOUND-02**: DatabaseHealthIndicator DI abstraction -- Phase 10
+- [x] **FOUND-03**: Pool lifecycle graceful shutdown -- Phase 10
+- [x] **SCHM-01**: pgSchema per service -- Phase 12
+- [x] **SCHM-02**: drizzle-kit config and migrations -- Phase 12
+- [x] **SCHM-03**: Drizzle types not in domain layer -- Phase 12
+- [x] **REPO-01**: Auth repository adapter -- Phase 12
+- [x] **REPO-02**: Sender, Parser, Audience adapters -- Phase 13
+- [x] **REPO-03**: Mappers keep types in infrastructure -- Phase 13
+- [x] **VRFY-01**: All services start, health checks -- Phase 14
+- [x] **VRFY-02**: Documentation updated -- Phase 14
 
 ## v1.0 Requirements (Validated)
 
-- [x] **ARCH-01**: Clean/Hexagonal структура — Phase 4-5
-- [x] **ARCH-02**: Нет cross-service imports — Phase 5
-- [x] **CNTR-01**: Единый источник контрактов — Phase 1
-- [x] **CONF-01**: Config через DI — Phase 2
-- [x] **ERR-01**: Error sanitization — Phase 3
-- [x] **HLTH-01**: Parallel health checks — Phase 6
-- [x] **OPS-01**: Structured logging — Phase 7
+- [x] **ARCH-01**: Clean/Hexagonal structure -- Phase 4-5
+- [x] **ARCH-02**: No cross-service imports -- Phase 5
+- [x] **CNTR-01**: Single source of contracts -- Phase 1
+- [x] **CONF-01**: Config via DI -- Phase 2
+- [x] **ERR-01**: Error sanitization -- Phase 3
+- [x] **HLTH-01**: Parallel health checks -- Phase 6
+- [x] **OPS-01**: Structured logging -- Phase 7
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Kubernetes | Docker Compose достаточен для текущего масштаба |
-| Реализация бизнес-логики | Фокус на infrastructure/CI/CD |
-| Тестирование (unit/integration) | Отдельный milestone |
-| neverthrow / Result pattern | Отдельный milestone |
+| Kubernetes | Docker Compose sufficient for current scale |
+| Business logic implementation | Focus on infrastructure/CI/CD |
+| Testing (unit/integration) | Separate milestone |
+| neverthrow / Result pattern | Separate milestone |
 | SSL certs management (beyond Caddy auto) | Caddy handles auto-TLS |
 | Multi-region deployment | Single VPS for now |
 
@@ -79,27 +79,27 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCK-01 | — | Pending |
-| DOCK-02 | — | Pending |
-| DOCK-03 | — | Pending |
-| DOCK-04 | — | Pending |
-| CI-01 | — | Pending |
-| CI-02 | — | Pending |
-| CI-03 | — | Pending |
-| DBLD-01 | — | Pending |
-| DBLD-02 | — | Pending |
-| DBLD-03 | — | Pending |
-| DPLY-01 | — | Pending |
-| DPLY-02 | — | Pending |
-| DPLY-03 | — | Pending |
-| VRFY-01 | — | Pending |
-| VRFY-02 | — | Pending |
+| DOCK-01 | Phase 15 | Pending |
+| DOCK-02 | Phase 15 | Pending |
+| DOCK-03 | Phase 15 | Pending |
+| DOCK-04 | Phase 15 | Pending |
+| CI-01 | Phase 16 | Pending |
+| CI-02 | Phase 16 | Pending |
+| CI-03 | Phase 16 | Pending |
+| DBLD-01 | Phase 17 | Pending |
+| DBLD-02 | Phase 17 | Pending |
+| DBLD-03 | Phase 17 | Pending |
+| DPLY-01 | Phase 18 | Pending |
+| DPLY-02 | Phase 18 | Pending |
+| DPLY-03 | Phase 18 | Pending |
+| VRFY-01 | Phase 19 | Pending |
+| VRFY-02 | Phase 19 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after milestone v3.0 definition*
+*Last updated: 2026-04-04 after v3.0 roadmap creation*
