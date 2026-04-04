@@ -1,8 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  StartParsingPort,
-  StartParsingResult,
-} from '../ports/inbound/start-parsing.port';
+import { StartParsingPort, StartParsingResult } from '../ports/inbound/start-parsing.port';
 import { ParserTaskRepositoryPort } from '../ports/outbound/parser-task-repository.port';
 
 @Injectable()

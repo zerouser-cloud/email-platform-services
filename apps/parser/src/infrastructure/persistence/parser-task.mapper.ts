@@ -6,11 +6,7 @@ type NewParserTaskRow = typeof parserTasks.$inferInsert;
 
 export const ParserTaskMapper = {
   toDomain(row: ParserTaskRow): ParserTask {
-    return new ParserTask(
-      row.id,
-      row.status,
-      row.category,
-    );
+    return new ParserTask(row.id, row.status, row.category);
   },
 
   toPersistence(task: ParserTask): NewParserTaskRow {

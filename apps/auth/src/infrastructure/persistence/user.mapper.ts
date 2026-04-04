@@ -6,13 +6,7 @@ type NewUserRow = typeof users.$inferInsert;
 
 export const UserMapper = {
   toDomain(row: UserRow): User {
-    return new User(
-      row.id,
-      row.email,
-      row.role,
-      row.organization,
-      row.team,
-    );
+    return new User(row.id, row.email, row.role, row.organization, row.team);
   },
 
   toPersistence(user: User, passwordHash: string): NewUserRow {

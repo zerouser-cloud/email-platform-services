@@ -10,11 +10,7 @@ export const HANDLE_EVENT_PORT = 'HandleEventPort';
 export const NOTIFICATION_SENDER_PORT = 'NotificationSenderPort';
 
 @Module({
-  imports: [
-    AppConfigModule,
-    LoggingModule.forHttpAsync('notifier'),
-    HealthModule,
-  ],
+  imports: [AppConfigModule, LoggingModule.forHttpAsync('notifier'), HealthModule],
   providers: [
     { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationSender },
     { provide: HANDLE_EVENT_PORT, useClass: HandleEventUseCase },

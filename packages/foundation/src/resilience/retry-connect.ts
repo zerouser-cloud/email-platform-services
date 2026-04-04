@@ -21,15 +21,15 @@ function sleep(ms: number): Promise<void> {
 
 function getRetryConfig(options?: Partial<RetryOptions>): RetryOptions {
   return {
-    maxRetries: options?.maxRetries
-      ?? (parseInt(process.env.RETRY_MAX_RETRIES ?? '', 10)
-      || RETRY_DEFAULTS.maxRetries),
-    baseDelayMs: options?.baseDelayMs
-      ?? (parseInt(process.env.RETRY_BASE_DELAY_MS ?? '', 10)
-      || RETRY_DEFAULTS.baseDelayMs),
-    maxDelayMs: options?.maxDelayMs
-      ?? (parseInt(process.env.RETRY_MAX_DELAY_MS ?? '', 10)
-      || RETRY_DEFAULTS.maxDelayMs),
+    maxRetries:
+      options?.maxRetries ??
+      (parseInt(process.env.RETRY_MAX_RETRIES ?? '', 10) || RETRY_DEFAULTS.maxRetries),
+    baseDelayMs:
+      options?.baseDelayMs ??
+      (parseInt(process.env.RETRY_BASE_DELAY_MS ?? '', 10) || RETRY_DEFAULTS.baseDelayMs),
+    maxDelayMs:
+      options?.maxDelayMs ??
+      (parseInt(process.env.RETRY_MAX_DELAY_MS ?? '', 10) || RETRY_DEFAULTS.maxDelayMs),
   };
 }
 
@@ -53,7 +53,9 @@ export async function retryConnect<T>(
         throw new Error(`Failed to connect to ${name} after ${maxRetries} attempts: ${message}`);
       }
 
-      const delay = Math.min(baseDelayMs * 2 ** (attempt - 1), maxDelayMs) + Math.floor(Math.random() * baseDelayMs);
+      const delay =
+        Math.min(baseDelayMs * 2 ** (attempt - 1), maxDelayMs) +
+        Math.floor(Math.random() * baseDelayMs);
       logger.warn(
         { dependency: name, attempt, maxRetries, retryInMs: delay },
         `Waiting for ${name}...`,

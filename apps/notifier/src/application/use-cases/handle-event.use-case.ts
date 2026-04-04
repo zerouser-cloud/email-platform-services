@@ -9,10 +9,7 @@ export class HandleEventUseCase implements HandleEventPort {
     private readonly notificationSender: NotificationSenderPort,
   ) {}
 
-  async execute(
-    _eventType: string,
-    _payload: Record<string, unknown>,
-  ): Promise<void> {
+  async execute(_eventType: string, _payload: Record<string, unknown>): Promise<void> {
     throw new Error('HandleEventUseCase not yet implemented');
   }
 }

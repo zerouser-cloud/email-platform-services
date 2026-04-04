@@ -1,8 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  CreateCampaignPort,
-  CreateCampaignResult,
-} from '../ports/inbound/create-campaign.port';
+import { CreateCampaignPort, CreateCampaignResult } from '../ports/inbound/create-campaign.port';
 import { CampaignRepositoryPort } from '../ports/outbound/campaign-repository.port';
 
 @Injectable()

@@ -9,16 +9,10 @@ import { RecipientMapper } from './recipient.mapper';
 
 @Injectable()
 export class PgRecipientRepository implements RecipientRepositoryPort {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: NodePgDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: NodePgDatabase) {}
 
   async findById(id: string): Promise<Recipient | null> {
-    const rows = await this.db
-      .select()
-      .from(recipients)
-      .where(eq(recipients.id, id))
-      .limit(1);
+    const rows = await this.db.select().from(recipients).where(eq(recipients.id, id)).limit(1);
 
     const row = rows[0];
     if (!row) return null;

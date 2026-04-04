@@ -10,15 +10,11 @@ export class ParserGrpcServer implements ParserProto.ParserServiceController {
     private readonly startParsingPort: StartParsingPort,
   ) {}
 
-  async healthCheck(
-    _request: CommonProto.Empty,
-  ): Promise<CommonProto.HealthStatus> {
+  async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {
     throw new NotImplementedException('healthCheck not yet implemented');
   }
 
-  async createTask(
-    _request: ParserProto.CreateParserTaskRequest,
-  ): Promise<ParserProto.ParserTask> {
+  async createTask(_request: ParserProto.CreateParserTaskRequest): Promise<ParserProto.ParserTask> {
     throw new NotImplementedException('createTask not yet implemented');
   }
 
@@ -28,15 +24,11 @@ export class ParserGrpcServer implements ParserProto.ParserServiceController {
     throw new NotImplementedException('listTasks not yet implemented');
   }
 
-  async getTask(
-    _request: ParserProto.ParserTaskIdRequest,
-  ): Promise<ParserProto.ParserTask> {
+  async getTask(_request: ParserProto.ParserTaskIdRequest): Promise<ParserProto.ParserTask> {
     throw new NotImplementedException('getTask not yet implemented');
   }
 
-  async getSettings(
-    _request: CommonProto.Empty,
-  ): Promise<ParserProto.ParserSettings> {
+  async getSettings(_request: CommonProto.Empty): Promise<ParserProto.ParserSettings> {
     throw new NotImplementedException('getSettings not yet implemented');
   }
 

@@ -19,8 +19,6 @@ export class HealthController {
   @Get(HEALTH.READY)
   @HealthCheck()
   readiness() {
-    return this.health.check([
-      () => this.db.isHealthy(HEALTH.INDICATOR.POSTGRESQL),
-    ]);
+    return this.health.check([() => this.db.isHealthy(HEALTH.INDICATOR.POSTGRESQL)]);
   }
 }

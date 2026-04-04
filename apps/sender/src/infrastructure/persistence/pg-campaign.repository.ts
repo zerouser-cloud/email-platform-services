@@ -9,16 +9,10 @@ import { CampaignMapper } from './campaign.mapper';
 
 @Injectable()
 export class PgCampaignRepository implements CampaignRepositoryPort {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: NodePgDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: NodePgDatabase) {}
 
   async findById(id: string): Promise<Campaign | null> {
-    const rows = await this.db
-      .select()
-      .from(campaigns)
-      .where(eq(campaigns.id, id))
-      .limit(1);
+    const rows = await this.db.select().from(campaigns).where(eq(campaigns.id, id)).limit(1);
 
     const row = rows[0];
     if (!row) return null;

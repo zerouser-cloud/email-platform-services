@@ -6,11 +6,7 @@ type NewRecipientRow = typeof recipients.$inferInsert;
 
 export const RecipientMapper = {
   toDomain(row: RecipientRow): Recipient {
-    return new Recipient(
-      row.id,
-      row.email,
-      row.groupId,
-    );
+    return new Recipient(row.id, row.email, row.groupId);
   },
 
   toPersistence(recipient: Recipient): NewRecipientRow {

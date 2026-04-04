@@ -18,8 +18,6 @@ export class HealthController {
   @Get(HEALTH.READY)
   @HealthCheck()
   readiness() {
-    return this.health.check([
-      () => this.rabbitmq.isHealthy(HEALTH.INDICATOR.RABBITMQ),
-    ]);
+    return this.health.check([() => this.rabbitmq.isHealthy(HEALTH.INDICATOR.RABBITMQ)]);
   }
 }

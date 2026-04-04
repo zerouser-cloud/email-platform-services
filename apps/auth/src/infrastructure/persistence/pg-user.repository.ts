@@ -9,16 +9,10 @@ import { UserMapper } from './user.mapper';
 
 @Injectable()
 export class PgUserRepository implements UserRepositoryPort {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: NodePgDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: NodePgDatabase) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    const rows = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const rows = await this.db.select().from(users).where(eq(users.email, email)).limit(1);
 
     const row = rows[0];
     if (!row) return null;

@@ -1,10 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import {
-  HealthCheckService,
-  HealthCheck,
-  GRPCHealthIndicator,
-} from '@nestjs/terminus';
+import { HealthCheckService, HealthCheck, GRPCHealthIndicator } from '@nestjs/terminus';
 import { type GrpcOptions } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { SERVICE } from '@email-platform/config';
@@ -25,10 +21,22 @@ export class HealthController {
     private readonly configService: ConfigService,
   ) {
     this.grpcServices = [
-      { key: SERVICE.auth.id, url: this.configService.get<string>(SERVICE.auth.envKeys.GRPC_URL!) ?? '' },
-      { key: SERVICE.sender.id, url: this.configService.get<string>(SERVICE.sender.envKeys.GRPC_URL!) ?? '' },
-      { key: SERVICE.parser.id, url: this.configService.get<string>(SERVICE.parser.envKeys.GRPC_URL!) ?? '' },
-      { key: SERVICE.audience.id, url: this.configService.get<string>(SERVICE.audience.envKeys.GRPC_URL!) ?? '' },
+      {
+        key: SERVICE.auth.id,
+        url: this.configService.get<string>(SERVICE.auth.envKeys.GRPC_URL!) ?? '',
+      },
+      {
+        key: SERVICE.sender.id,
+        url: this.configService.get<string>(SERVICE.sender.envKeys.GRPC_URL!) ?? '',
+      },
+      {
+        key: SERVICE.parser.id,
+        url: this.configService.get<string>(SERVICE.parser.envKeys.GRPC_URL!) ?? '',
+      },
+      {
+        key: SERVICE.audience.id,
+        url: this.configService.get<string>(SERVICE.audience.envKeys.GRPC_URL!) ?? '',
+      },
     ];
   }
 

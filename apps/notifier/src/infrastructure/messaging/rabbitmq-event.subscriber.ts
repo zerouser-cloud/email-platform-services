@@ -9,12 +9,7 @@ export class RabbitMQEventSubscriber {
   ) {}
 
   // TODO: Add @EventPattern() decorators when RabbitMQ transport is configured
-  async onEvent(
-    eventType: string,
-    payload: Record<string, unknown>,
-  ): Promise<void> {
-    throw new NotImplementedException(
-      'RabbitMQ event handling not yet implemented',
-    );
+  async onEvent(eventType: string, payload: Record<string, unknown>): Promise<void> {
+    throw new NotImplementedException('RabbitMQ event handling not yet implemented');
   }
 }

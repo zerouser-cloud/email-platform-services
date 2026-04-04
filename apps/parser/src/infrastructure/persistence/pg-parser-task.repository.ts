@@ -9,16 +9,10 @@ import { ParserTaskMapper } from './parser-task.mapper';
 
 @Injectable()
 export class PgParserTaskRepository implements ParserTaskRepositoryPort {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: NodePgDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: NodePgDatabase) {}
 
   async findById(id: string): Promise<ParserTask | null> {
-    const rows = await this.db
-      .select()
-      .from(parserTasks)
-      .where(eq(parserTasks.id, id))
-      .limit(1);
+    const rows = await this.db.select().from(parserTasks).where(eq(parserTasks.id, id)).limit(1);
 
     const row = rows[0];
     if (!row) return null;

@@ -6,11 +6,7 @@ type NewCampaignRow = typeof campaigns.$inferInsert;
 
 export const CampaignMapper = {
   toDomain(row: CampaignRow): Campaign {
-    return new Campaign(
-      row.id,
-      row.name,
-      row.status,
-    );
+    return new Campaign(row.id, row.name, row.status);
   },
 
   toPersistence(campaign: Campaign): NewCampaignRow {

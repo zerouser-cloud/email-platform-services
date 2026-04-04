@@ -5,8 +5,6 @@ import { NotificationSenderPort } from '../../application/ports/outbound/notific
 @Injectable()
 export class TelegramNotificationSender implements NotificationSenderPort {
   async send(_notification: Notification): Promise<void> {
-    throw new NotImplementedException(
-      'TelegramNotificationSender not yet implemented',
-    );
+    throw new NotImplementedException('TelegramNotificationSender not yet implemented');
   }
 }
