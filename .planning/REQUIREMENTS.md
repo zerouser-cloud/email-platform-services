@@ -3,90 +3,103 @@
 **Defined:** 2026-04-04
 **Core Value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
 
-## v2.0 Requirements
+## v3.0 Requirements
 
-Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
+Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
-### Infrastructure
+### Docker Compose & Environment
 
-- [x] **INFRA-01**: DATABASE_URL добавлен в env-schema с Zod-валидацией, MONGO_URI удалён
-- [x] **INFRA-02**: PostgreSQL 16 в docker-compose заменяет MongoDB, volume для persistence
-- [x] **INFRA-03**: Все упоминания MongoDB удалены из кодовой базы и конфигурации
+- [ ] **DOCK-01**: Docker Compose разделён на infra и services через `include` или profiles
+- [ ] **DOCK-02**: Инфраструктурные порты экспонированы для local dev (5432, 6379, 5672, 9000)
+- [ ] **DOCK-03**: POSTGRES_PORT переменная откатана — стандартный 5432 в docker-compose
+- [ ] **DOCK-04**: Env файлы синхронизированы (.env, .env.docker, .env.example) — одинаковый набор ключей
 
-### Foundation
+### CI Pipeline
 
-- [x] **FOUND-01**: DrizzleModule в packages/foundation — NestJS dynamic module с DI injection token
-- [x] **FOUND-02**: DatabaseHealthIndicator абстракция через DI token — конкретная реализация (PostgresHealthIndicator) регистрируется в module, controller не знает о типе базы
-- [x] **FOUND-03**: Pool lifecycle — graceful shutdown через OnApplicationShutdown
+- [ ] **CI-01**: GitHub Actions workflow: lint + typecheck + build на каждый PR
+- [ ] **CI-02**: Turbo affected-only выполнение — CI запускает только изменённые пакеты
+- [ ] **CI-03**: Turbo remote cache через GitHub Actions cache
 
-### Schema
+### Docker Build
 
-- [x] **SCHM-01**: Drizzle schema per service (auth, sender, parser, audience) с pgSchema isolation
-- [x] **SCHM-02**: drizzle-kit config и migration workflow настроены для каждого сервиса
-- [x] **SCHM-03**: Drizzle types не проникают в domain layer — маппинг только в infrastructure
+- [ ] **DBLD-01**: Docker image build per service через matrix strategy в GitHub Actions
+- [ ] **DBLD-02**: Образы публикуются в GHCR (GitHub Container Registry)
+- [ ] **DBLD-03**: Scoped Docker layer cache per service
 
-### Repository
+### Deployment
 
-- [x] **REPO-01**: Auth repository adapter реализован с Drizzle (reference implementation)
-- [x] **REPO-02**: Sender, Parser, Audience repository adapters реализованы с Drizzle
-- [x] **REPO-03**: Repository adapters маппят Drizzle rows в domain entities без утечки типов
+- [ ] **DPLY-01**: Deploy workflow: SSH на VPS, docker compose pull + up
+- [ ] **DPLY-02**: Caddy как reverse proxy с auto-TLS
+- [ ] **DPLY-03**: Health check verification после deploy
 
 ### Verification
 
-- [x] **VRFY-01**: Все 6 сервисов стартуют, health checks проходят, docker-compose up работает
-- [x] **VRFY-02**: Документация обновлена (CLAUDE.md, tech stack, README)
+- [ ] **VRFY-01**: Оба dev режима работают: local dev (infra в Docker) + full Docker
+- [ ] **VRFY-02**: CI pipeline проходит на clean repo
+
+## v2.0 Requirements (Validated)
+
+- [x] **INFRA-01**: DATABASE_URL в env-schema с Zod-валидацией — Phase 9
+- [x] **INFRA-02**: PostgreSQL 16 в docker-compose — Phase 11
+- [x] **INFRA-03**: Все MongoDB упоминания удалены — Phase 9
+- [x] **FOUND-01**: DrizzleModule в packages/foundation — Phase 10
+- [x] **FOUND-02**: DatabaseHealthIndicator DI абстракция — Phase 10
+- [x] **FOUND-03**: Pool lifecycle graceful shutdown — Phase 10
+- [x] **SCHM-01**: pgSchema per service — Phase 12
+- [x] **SCHM-02**: drizzle-kit config и migrations — Phase 12
+- [x] **SCHM-03**: Drizzle types не в domain layer — Phase 12
+- [x] **REPO-01**: Auth repository adapter — Phase 12
+- [x] **REPO-02**: Sender, Parser, Audience adapters — Phase 13
+- [x] **REPO-03**: Mappers keep types in infrastructure — Phase 13
+- [x] **VRFY-01**: Все сервисы стартуют, health checks — Phase 14
+- [x] **VRFY-02**: Документация обновлена — Phase 14
 
 ## v1.0 Requirements (Validated)
 
-- [x] **ARCH-01**: Каждый app в apps/ имеет корректную Clean/Hexagonal структуру — Phase 4-5
-- [x] **ARCH-02**: Нет cross-service imports между apps/ — Phase 5
-- [x] **ARCH-03**: Notifier is event-consumer-only (no gRPC) — Phase 5
-- [x] **CNTR-01**: Единый источник сгенерированных контрактов — Phase 1
-- [x] **CNTR-02**: Proto генерация в Turbo pipeline — Phase 1
-- [x] **CONF-01**: Config через DI, loadGlobalConfig только в main.ts — Phase 2
-- [x] **CONF-02**: CORS wildcard запрещён в production — Phase 2
-- [x] **ERR-01**: Error sanitization по gRPC code — Phase 3
-- [x] **ERR-02**: Unified error shape с correlationId, timestamp — Phase 3
-- [x] **HLTH-01**: Parallel gateway health via Promise.allSettled — Phase 6
-- [x] **HLTH-02**: Liveness/readiness separation — Phase 6
-- [x] **RSLN-01**: Retry tuned с jitter и env vars — Phase 6
-- [x] **OPS-01**: Structured logging с correlation IDs — Phase 7
-- [x] **OPS-02**: Graceful shutdown hooks — Phase 7
+- [x] **ARCH-01**: Clean/Hexagonal структура — Phase 4-5
+- [x] **ARCH-02**: Нет cross-service imports — Phase 5
+- [x] **CNTR-01**: Единый источник контрактов — Phase 1
+- [x] **CONF-01**: Config через DI — Phase 2
+- [x] **ERR-01**: Error sanitization — Phase 3
+- [x] **HLTH-01**: Parallel health checks — Phase 6
+- [x] **OPS-01**: Structured logging — Phase 7
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Реализация бизнес-логики | Фокус на persistence infrastructure, бизнес-логика позже |
-| Написание тестов | Тестирование — отдельный этап |
-| neverthrow / Result pattern | Отдельный milestone после завершения документации |
-| OpenTelemetry tracing | Отдельный milestone |
-| Data migration | Нет живых данных — все repository стабы |
+| Kubernetes | Docker Compose достаточен для текущего масштаба |
+| Реализация бизнес-логики | Фокус на infrastructure/CI/CD |
+| Тестирование (unit/integration) | Отдельный milestone |
+| neverthrow / Result pattern | Отдельный milestone |
+| SSL certs management (beyond Caddy auto) | Caddy handles auto-TLS |
+| Multi-region deployment | Single VPS for now |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 9 | Complete |
-| INFRA-02 | Phase 11 | Complete |
-| INFRA-03 | Phase 9 | Complete |
-| FOUND-01 | Phase 10 | Complete |
-| FOUND-02 | Phase 10 | Complete |
-| FOUND-03 | Phase 10 | Complete |
-| SCHM-01 | Phase 12 | Complete |
-| SCHM-02 | Phase 12 | Complete |
-| SCHM-03 | Phase 12 | Complete |
-| REPO-01 | Phase 12 | Complete |
-| REPO-02 | Phase 13 | Complete |
-| REPO-03 | Phase 13 | Complete |
-| VRFY-01 | Phase 14 | Complete |
-| VRFY-02 | Phase 14 | Complete |
+| DOCK-01 | — | Pending |
+| DOCK-02 | — | Pending |
+| DOCK-03 | — | Pending |
+| DOCK-04 | — | Pending |
+| CI-01 | — | Pending |
+| CI-02 | — | Pending |
+| CI-03 | — | Pending |
+| DBLD-01 | — | Pending |
+| DBLD-02 | — | Pending |
+| DBLD-03 | — | Pending |
+| DPLY-01 | — | Pending |
+| DPLY-02 | — | Pending |
+| DPLY-03 | — | Pending |
+| VRFY-01 | — | Pending |
+| VRFY-02 | — | Pending |
 
 **Coverage:**
-- v2.0 requirements: 14 total
-- Mapped to phases: 14
-- Unmapped: 0
+- v3.0 requirements: 15 total
+- Mapped to phases: 0
+- Unmapped: 15
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after roadmap v2.0 creation*
+*Last updated: 2026-04-04 after milestone v3.0 definition*
