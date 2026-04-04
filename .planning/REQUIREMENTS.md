@@ -9,10 +9,10 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 ### Docker Compose & Environment
 
-- [ ] **DOCK-01**: Docker Compose split into infra and services via `include` or profiles
-- [ ] **DOCK-02**: Infrastructure ports exposed for local dev (5432, 6379, 5672, 9000)
-- [ ] **DOCK-03**: POSTGRES_PORT variable reverted -- standard 5432 in docker-compose
-- [ ] **DOCK-04**: Env files synchronized (.env, .env.docker, .env.example) -- same set of keys
+- [x] **DOCK-01**: Docker Compose split into infra and services via `include` or profiles
+- [x] **DOCK-02**: Infrastructure ports exposed for local dev (5432, 6379, 5672, 9000)
+- [x] **DOCK-03**: POSTGRES_PORT variable reverted -- standard 5432 in docker-compose
+- [x] **DOCK-04**: Env files synchronized (.env, .env.docker, .env.example) -- same set of keys
 
 ### CI Pipeline
 
@@ -79,10 +79,10 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DOCK-01 | Phase 15 | Pending |
-| DOCK-02 | Phase 15 | Pending |
-| DOCK-03 | Phase 15 | Pending |
-| DOCK-04 | Phase 15 | Pending |
+| DOCK-01 | Phase 15 | Complete |
+| DOCK-02 | Phase 15 | Complete |
+| DOCK-03 | Phase 15 | Complete |
+| DOCK-04 | Phase 15 | Complete |
 | CI-01 | Phase 16 | Pending |
 | CI-02 | Phase 16 | Pending |
 | CI-03 | Phase 16 | Pending |

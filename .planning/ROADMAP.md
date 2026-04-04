@@ -38,7 +38,7 @@
 
 **Milestone Goal:** Establish proper dev/docker/production workflows with CI/CD pipeline, following 12-Factor principles.
 
-- [ ] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files
+- [x] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files (completed 2026-04-04)
 - [ ] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache
 - [ ] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache
 - [ ] **Phase 18: Deployment** - SSH deploy to VPS with Caddy reverse proxy and health verification
@@ -58,7 +58,7 @@
   5. All 6 services start successfully under both development modes (host-run and full Docker)
 **Plans**: 1 plan
 Plans:
-- [ ] 15-01-PLAN.md -- Compose split, env sync, NODE_ENV removal, CORS fix, verification
+- [x] 15-01-PLAN.md -- Compose split, env sync, NODE_ENV removal, CORS fix, verification
 
 ### Phase 16: CI Pipeline
 **Goal**: Every pull request is automatically validated for lint, typecheck, and build correctness, with fast feedback via Turbo caching
@@ -126,7 +126,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 12. Auth Schema & Repository (Reference) | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 15. Docker Compose Split & Environment | v3.0 | 0/1 | Planning | - |
+| 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 16. CI Pipeline | v3.0 | 0/? | Not started | - |
 | 17. Docker Image Build & Push | v3.0 | 0/? | Not started | - |
 | 18. Deployment | v3.0 | 0/? | Not started | - |

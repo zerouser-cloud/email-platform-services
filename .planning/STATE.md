@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
 status: planning
-stopped_at: Phase 15 context gathered
-last_updated: "2026-04-04T13:30:25.051Z"
+stopped_at: Completed 15-01-PLAN.md
+last_updated: "2026-04-04T13:44:43.773Z"
 last_activity: 2026-04-04 — Roadmap created for v3.0 Infrastructure & CI/CD
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: Stable
 
 *Updated after each plan completion*
+| Phase 15 P01 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,8 @@ Progress: [░░░░░░░░░░] 0%
 - [v3.0]: Docker Compose sufficient for current scale, no Kubernetes
 - [v3.0]: Infrastructure changes require explicit user approval (infrastructure-guard skill)
 - [v3.0]: Must fix unauthorized POSTGRES_PORT change from v2.0 Phase 14
+- [Phase 15]: CORS_STRICT boolean flag replaces NODE_ENV check in Zod CORS refine (12-Factor)
+- [Phase 15]: Docker compose split: infra-only (self-contained) + full-stack (include directive)
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T13:30:25.049Z
-Stopped at: Phase 15 context gathered
-Resume file: .planning/phases/15-docker-compose-split-environment/15-CONTEXT.md
+Last session: 2026-04-04T13:44:43.771Z
+Stopped at: Completed 15-01-PLAN.md
+Resume file: None
