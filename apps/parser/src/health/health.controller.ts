@@ -1,11 +1,13 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { HEALTH } from '@email-platform/foundation';
+import { HEALTH, DATABASE_HEALTH } from '@email-platform/foundation';
+import type { DatabaseHealthIndicator } from '@email-platform/foundation';
 
 @Controller(HEALTH.ROUTE)
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
+    @Inject(DATABASE_HEALTH) private readonly db: DatabaseHealthIndicator,
   ) {}
 
   @Get(HEALTH.LIVE)
@@ -17,6 +19,8 @@ export class HealthController {
   @Get(HEALTH.READY)
   @HealthCheck()
   readiness() {
-    return this.health.check([]);
+    return this.health.check([
+      () => this.db.isHealthy(HEALTH.INDICATOR.POSTGRESQL),
+    ]);
   }
 }
