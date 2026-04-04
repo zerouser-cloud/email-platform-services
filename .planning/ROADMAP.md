@@ -69,7 +69,7 @@ Plans:
   3. All 6 services start and health checks pass with the new Docker infrastructure
 **Plans**: 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
+- [ ] 11-01-PLAN.md — Replace MongoDB with PostgreSQL in docker-compose, update env files
 
 ### Phase 12: Auth Schema & Repository (Reference)
 **Goal**: Auth service has a complete Drizzle persistence layer (schema, migrations, repository adapter) that serves as the validated reference pattern for all other services
@@ -83,7 +83,7 @@ Plans:
   5. All 6 services start and health checks pass after auth schema and repository changes
 **Plans**: 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
+- [ ] 12-01-PLAN.md — Auth Drizzle schema, migrations, repository adapter
 
 ### Phase 13: Remaining Services Schema & Repository
 **Goal**: Sender, parser, and audience services each have their own Drizzle persistence layer following the auth reference pattern
@@ -96,7 +96,7 @@ Plans:
   4. All 6 services start and health checks pass after all repository adapters are wired
 **Plans**: 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
+- [ ] 13-01-PLAN.md — Sender, parser, audience Drizzle schemas, migrations, repository adapters
 
 ### Phase 14: Verification & Documentation
 **Goal**: The entire platform operates correctly with PostgreSQL, and all documentation reflects the new tech stack
@@ -109,7 +109,7 @@ Plans:
   4. Gateway proxies a request to a gRPC service and returns the expected response format
 **Plans**: 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
+- [ ] 14-01-PLAN.md — Full-stack verification, CLAUDE.md update
 
 ## Progress
 
@@ -128,7 +128,7 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
 | 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete   | 2026-04-04 |
 | 10. Foundation DrizzleModule & Health | v2.0 | 1/1 | Complete   | 2026-04-04 |
-| 11. Docker Infrastructure | v2.0 | 0/TBD | Not started | - |
+| 11. Docker Infrastructure | v2.0 | 0/1 | Not started | - |
 | 12. Auth Schema & Repository (Reference) | v2.0 | 0/TBD | Not started | - |
 | 13. Remaining Services Schema & Repository | v2.0 | 0/TBD | Not started | - |
 | 14. Verification & Documentation | v2.0 | 0/TBD | Not started | - |
