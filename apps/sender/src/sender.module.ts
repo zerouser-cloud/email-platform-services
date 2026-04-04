@@ -2,7 +2,6 @@ import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule } from '@email-platform/foundation';
 import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
-import { MongoCampaignRepository } from './infrastructure/persistence/mongo-campaign.repository';
 import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
 import { HealthModule } from './health/health.module';
 
@@ -17,7 +16,6 @@ export const CREATE_CAMPAIGN_PORT = 'CreateCampaignPort';
   ],
   controllers: [SenderGrpcServer],
   providers: [
-    { provide: CAMPAIGN_REPOSITORY_PORT, useClass: MongoCampaignRepository },
     { provide: CREATE_CAMPAIGN_PORT, useClass: CreateCampaignUseCase },
   ],
 })
@@ -27,7 +25,6 @@ export class SenderModule implements OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     this.logger.log('Shutting down sender service...');
     // TODO: drain gRPC server connections
-    // TODO: close MongoDB connection
     // TODO: close Redis connection
   }
 }

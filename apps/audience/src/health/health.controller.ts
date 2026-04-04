@@ -1,12 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { MongoHealthIndicator, HEALTH } from '@email-platform/foundation';
+import { HEALTH } from '@email-platform/foundation';
 
 @Controller(HEALTH.ROUTE)
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
-    private readonly mongo: MongoHealthIndicator,
   ) {}
 
   @Get(HEALTH.LIVE)
@@ -18,8 +17,6 @@ export class HealthController {
   @Get(HEALTH.READY)
   @HealthCheck()
   readiness() {
-    return this.health.check([
-      () => this.mongo.isHealthy(HEALTH.INDICATOR.MONGODB),
-    ]);
+    return this.health.check([]);
   }
 }

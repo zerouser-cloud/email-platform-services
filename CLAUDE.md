@@ -13,7 +13,7 @@
 - **Архитектура packages/**: Простая утилитарная структура, без DDD
 - **Без бизнес-логики**: Только структурный каркас (ports, adapters, use cases) — реализация позже
 - **Без тестов**: Тестирование — отдельный следующий этап
-- **Tech stack**: NestJS 11, TypeScript, gRPC, MongoDB, RabbitMQ, Redis — не меняем
+- **Tech stack**: NestJS 11, TypeScript, gRPC, PostgreSQL, RabbitMQ, Redis — не меняем
 <!-- GSD:project-end -->
 
 <!-- GSD:stack-start source:codebase/STACK.md -->
@@ -61,7 +61,7 @@
 - TypeScript 5.0+ - Strict type checking enabled
 - ts-node 10.0.0 - Runtime TypeScript execution
 - ts-node-dev 2.0.0 - Development watcher
-- MongoDB client: Not yet integrated (health indicator stub only)
+- PostgreSQL client: Not yet integrated (pending Phase 10-12)
 - Redis client: Not yet integrated (health indicator stub only)
 - RabbitMQ client: Not yet integrated (health indicator stub only)
 - MinIO client: Not yet integrated (file storage stub only)
@@ -91,7 +91,7 @@
 - Dockerfile: `infra/docker/app.Dockerfile` (multi-stage build with layer caching)
 - `dist/` directory per app (TypeScript compiled to JavaScript)
 - Proto files bundled: `packages/contracts/proto/` copied to Docker image at `/prod/app/proto`
-- MongoDB 7
+- PostgreSQL 16
 - Redis 7-alpine
 - RabbitMQ 3-management
 - MinIO (latest)
@@ -124,6 +124,8 @@
 - Type aliases in PascalCase: `LogFormat`, `LogLevel`, `GlobalEnv`
 - Discriminator types use readonly properties for immutability: `readonly port: number`
 ## Code Style
+- **No switch/case, no if/else chains (3+ branches)** for behavior selection. Use Record dispatch, Map + fallback, canHandle chain, or polymorphic classes. Guard clauses and null checks are fine. See `.agents/skills/branching-patterns/SKILL.md` for decision tree and patterns.
+- **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.agents/skills/twelve-factor/SKILL.md` for 12-Factor rules.
 - Prettier configured with:
 - Format and check: `pnpm lint:fix` for workspace
 - Individual app linting: `eslint src/ --ext .ts`
@@ -216,7 +218,7 @@
 - Multiple NestJS-based domain services communicating via gRPC
 - Single REST gateway translating HTTP to gRPC (facade pattern)
 - Asynchronous event-driven communication via RabbitMQ
-- MongoDB for persistence across services
+- PostgreSQL for persistence across services
 - Dependency Inversion: infrastructure → application → domain
 - Proto-based contracts enforce service boundaries
 ## System Architecture
@@ -225,7 +227,7 @@
 ## Layers
 - Purpose: Framework integrations and external communication
 - Location: `apps/*/src/infrastructure/`, `packages/foundation/`
-- Contains: gRPC servers/clients, MongoDB repositories, RabbitMQ publishers, REST controllers, external API clients
+- Contains: gRPC servers/clients, PostgreSQL repositories, RabbitMQ publishers, REST controllers, external API clients
 - Depends on: Application, Domain
 - Used by: Nothing depends on this layer (inverted)
 - Purpose: Business logic orchestration and port definitions
@@ -239,7 +241,7 @@
 - Depends on: Nothing
 - Used by: Application layer
 ## Data Flow
-- **Transactional State:** MongoDB (users, campaigns, recipients, parser tasks)
+- **Transactional State:** PostgreSQL (users, campaigns, recipients, parser tasks)
 - **Cache:** Redis for temporary session/performance data (if used)
 - **Async Coordination:** RabbitMQ events ensure loose coupling between services
 - **In-Process:** NestJS providers and modules handle DI
@@ -254,7 +256,7 @@
 - Examples: `packages/contracts/proto/auth.proto`, `packages/contracts/proto/sender.proto`
 - Pattern: `.proto` files compiled to TypeScript via protoc-gen-ts_proto
 - Purpose: Data access abstraction implementing outbound port
-- Examples: MongoRepository for each service (MongoDB collections)
+- Examples: Repository adapter for each service (PostgreSQL via Drizzle ORM, pending Phase 12-13)
 - Pattern: Would implement port interfaces, currently implicit in controllers
 - Purpose: Asynchronous communication between services
 - Examples: `sender.campaign.completed`, `parser.batch.ready`, `recipients.imported`
