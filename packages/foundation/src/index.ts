@@ -17,3 +17,4 @@ export * from './health/indicators/redis.health';
 export * from './health/indicators/rabbitmq.health';
 export * from './resilience/grpc-deadline.interceptor';
 export * from './resilience/retry-connect';
+export * from './persistence';
