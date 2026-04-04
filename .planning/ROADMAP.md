@@ -102,6 +102,22 @@ Plans:
 Plans:
 - [x] 17-01-PLAN.md -- Docker build workflow with matrix strategy, GHCR push, scoped cache
 
+### Phase 17.1: Fix DI Double Registration (INSERTED)
+**Goal**: Убрать дублирование PersistenceModule.forRootAsync() из HealthModule во всех сервисах. HealthModule использует DATABASE_HEALTH из родительского модуля. Один PG connection pool на сервис. Проверка в обоих режимах.
+**Depends on**: Phase 17
+**Requirements**: VRFY-01 (refinement)
+**Success Criteria** (what must be TRUE):
+  1. HealthModule в auth, sender, parser, audience НЕ импортирует PersistenceModule — только TerminusModule
+  2. HealthController инжектит DATABASE_HEALTH из scope родительского модуля
+  3. `pnpm turbo run build` проходит без ошибок
+  4. Local dev mode: `pnpm infra:up` + запуск сервисов на хосте — health endpoints отвечают
+  5. Full Docker mode: `pnpm docker:up` — все 6 сервисов healthy, gateway доступен на порту 4000
+  6. Один PG_POOL на сервис (нет двойного connection pool)
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 17.1 to break down)
+
 ### Phase 18: Deployment via Coolify
 **Goal**: Coolify installed on VPS, email-platform deployed via docker-compose resource with auto-deploy from GitHub on push to dev and main
 **Depends on**: Phase 17
