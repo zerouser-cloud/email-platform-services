@@ -87,7 +87,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 16.1-01-PLAN.md -- Remove infra ports, create dev-ports override, update scripts
+- [x] 16.1-01-PLAN.md -- Remove infra ports, create dev-ports override, update scripts
 
 ### Phase 17: Docker Image Build & Push
 **Goal**: Docker images for each service are automatically built and published to GHCR when changes merge to main
@@ -146,7 +146,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 16. CI Pipeline | v3.0 | 1/1 | Complete    | 2026-04-04 |
-| 16.1. Docker Port Isolation | v3.0 | 0/1 | Planning | - |
+| 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 17. Docker Image Build & Push | v3.0 | 0/? | Not started | - |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |

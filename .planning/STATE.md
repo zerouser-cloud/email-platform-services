@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
 status: verifying
-stopped_at: Completed 16-01-PLAN.md
-last_updated: "2026-04-04T14:39:34.279Z"
+stopped_at: Completed 16.1-01-PLAN.md
+last_updated: "2026-04-04T15:03:14.541Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 2
-  completed_plans: 2
+  total_phases: 6
+  completed_phases: 3
+  total_plans: 3
+  completed_plans: 3
   percent: 0
 ---
 
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 16 — ci-pipeline
+**Current focus:** Phase 16.1 — docker-port-isolation
 
 ## Current Position
 
-Phase: 17
-Plan: Not started
+Phase: 16.1 (docker-port-isolation) — EXECUTING
+Plan: 1 of 1
 Status: Phase complete — ready for verification
 Last activity: 2026-04-04
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 *Updated after each plan completion*
 | Phase 15 P01 | 3min | 2 tasks | 6 files |
 | Phase 16 P01 | 3min | 2 tasks | 6 files |
+| Phase 16.1 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 15]: Docker compose split: infra-only (self-contained) + full-stack (include directive)
 - [Phase 16]: NODE_ENV removed from turbo.json globalEnv for 12-Factor compliance
 - [Phase 16]: Pre-push hook (not pre-commit) for local validation before CI
+- [Phase 16.1]: Docker Compose override pattern for dev ports instead of env-specific compose files
 
 ### Roadmap Evolution
 
@@ -85,6 +87,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T14:36:03.552Z
-Stopped at: Completed 16-01-PLAN.md
+Last session: 2026-04-04T15:03:14.539Z
+Stopped at: Completed 16.1-01-PLAN.md
 Resume file: None
