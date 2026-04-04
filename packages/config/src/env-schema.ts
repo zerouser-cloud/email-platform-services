@@ -9,8 +9,8 @@ export const GlobalEnvSchema = z
   .object({
     ...TopologySchema.shape,
     ...InfrastructureSchema.shape,
-    PROTO_DIR: z.string().min(1).optional(),
-    CORS_STRICT: z.coerce.boolean().default(false),
+    PROTO_DIR: z.string().min(1),
+    CORS_STRICT: z.string().transform((v) => v === 'true'),
     LOG_LEVEL: z.enum([
       LOG_LEVEL.TRACE,
       LOG_LEVEL.DEBUG,
@@ -27,18 +27,14 @@ export const GlobalEnvSchema = z
     RATE_LIMIT_SUSTAINED_TTL: z.coerce.number().positive(),
     RATE_LIMIT_SUSTAINED_LIMIT: z.coerce.number().positive(),
   })
-  .refine(
-    (data) => !(data.CORS_STRICT && data.CORS_ORIGINS === '*'),
-    {
-      message:
-        'CORS_ORIGINS cannot be "*" when CORS_STRICT is enabled. Specify explicit origins.',
-      path: ['CORS_ORIGINS'],
-    },
-  );
+  .refine((data) => !(data.CORS_STRICT && data.CORS_ORIGINS === '*'), {
+    message: 'CORS_ORIGINS cannot be "*" when CORS_STRICT is enabled. Specify explicit origins.',
+    path: ['CORS_ORIGINS'],
+  });
 
 export type GlobalEnv = GlobalTopology &
   InfrastructureConfig & {
-    PROTO_DIR?: string;
+    PROTO_DIR: string;
     CORS_STRICT: boolean;
     LOG_LEVEL: LogLevel;
     LOG_FORMAT: LogFormat;
