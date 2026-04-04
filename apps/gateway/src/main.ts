@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { loadGlobalConfig } from '@email-platform/config';
-import { GrpcToHttpExceptionFilter, SERVER, CORS } from '@email-platform/foundation';
+import { GrpcToHttpExceptionFilter, SERVER, CORS, BOOTSTRAP } from '@email-platform/foundation';
 import { GatewayModule } from './gateway.module';
 
 async function bootstrap() {
@@ -36,6 +36,6 @@ async function bootstrap() {
   await app.listen(config.GATEWAY_PORT, SERVER.DEFAULT_HOST);
 }
 bootstrap().catch((err) => {
-  console.error('Bootstrap failed:', err);
+  console.error(BOOTSTRAP.FAILED_MESSAGE, err);
   process.exit(1);
 });
