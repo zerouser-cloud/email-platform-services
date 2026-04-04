@@ -17,7 +17,7 @@ export class GrpcClientModule {
             inject: [ConfigService],
             useFactory: (configService: ConfigService) => {
               const grpcUrl = configService.get<string>(service.envKeys.GRPC_URL!);
-              const protoDir = configService.get<string>('PROTO_DIR');
+              const protoDir = configService.get<string>('PROTO_DIR')!;
               const deadlineMs = configService.get<number>('GRPC_DEADLINE_MS')!;
               return {
                 transport: Transport.GRPC,
