@@ -69,7 +69,9 @@ Plans:
   2. Turbo executes only affected packages (changed since base branch), not the entire monorepo
   3. Turbo remote cache is configured via GitHub Actions cache backend -- second runs of unchanged packages hit cache and skip execution
   4. CI completes successfully on a clean clone of the repository with no manual setup required
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 16-01-PLAN.md -- CI workflow, turbo.json fix, Husky hooks, branch protection script
 
 ### Phase 17: Docker Image Build & Push
 **Goal**: Docker images for each service are automatically built and published to GHCR when changes merge to main
@@ -127,7 +129,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
-| 16. CI Pipeline | v3.0 | 0/? | Not started | - |
+| 16. CI Pipeline | v3.0 | 0/1 | Planning | - |
 | 17. Docker Image Build & Push | v3.0 | 0/? | Not started | - |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
