@@ -129,7 +129,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
-| 16. CI Pipeline | v3.0 | 1/1 | Complete   | 2026-04-04 |
+| 16. CI Pipeline | v3.0 | 1/1 | Complete    | 2026-04-04 |
 | 17. Docker Image Build & Push | v3.0 | 0/? | Not started | - |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
