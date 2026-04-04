@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
-status: verifying
-stopped_at: Completed 17.1-01-PLAN.md
-last_updated: "2026-04-04T17:16:13.480Z"
+status: executing
+stopped_at: Completed 17.2-01-PLAN.md
+last_updated: "2026-04-04T18:12:56.837Z"
 last_activity: 2026-04-04
 progress:
-  total_phases: 7
+  total_phases: 8
   completed_phases: 5
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 8
+  completed_plans: 6
   percent: 0
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 17.1 — fix-di-double-registration
+**Current focus:** Phase 17.2 — no-magic-values-skill-audit
 
 ## Current Position
 
-Phase: 17.1 (fix-di-double-registration) — EXECUTING
-Plan: 1 of 1
-Status: Phase complete — ready for verification
+Phase: 17.2 (no-magic-values-skill-audit) — EXECUTING
+Plan: 2 of 3
+Status: Ready to execute
 Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0%
@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 16.1 P01 | 2min | 2 tasks | 3 files |
 | Phase 17-docker-image-build-push P01 | 2min | 2 tasks | 1 files |
 | Phase 17.1 P01 | 1min | 2 tasks | 4 files |
+| Phase 17.2 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 16.1]: Docker Compose override pattern for dev ports instead of env-specific compose files
 - [Phase 17]: Docker build workflow uses matrix strategy with per-service scoped GHA cache and branch-aware GHCR tags
 - [Phase 17.1]: HealthModule relies on parent module injector scope for DATABASE_HEALTH -- no re-import of PersistenceModule needed
+- [Phase 17.2]: No-magic-values skill created with decision tree, four extraction patterns (as const, Symbol, shared, extend existing), anti-patterns table
 
 ### Roadmap Evolution
 
@@ -99,6 +101,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T17:16:13.478Z
-Stopped at: Completed 17.1-01-PLAN.md
+Last session: 2026-04-04T18:12:56.835Z
+Stopped at: Completed 17.2-01-PLAN.md
 Resume file: None
