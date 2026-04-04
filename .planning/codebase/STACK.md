@@ -84,7 +84,7 @@
 - ts-node-dev 2.0.0 - Development watcher
 
 **Infrastructure Clients:**
-- MongoDB client: Not yet integrated (health indicator stub only)
+- PostgreSQL: drizzle-orm 0.45.2 + pg 8.20.0 (integrated via DrizzleModule in packages/foundation)
 - Redis client: Not yet integrated (health indicator stub only)
 - RabbitMQ client: Not yet integrated (health indicator stub only)
 - MinIO client: Not yet integrated (file storage stub only)
@@ -116,7 +116,7 @@ PARSER_GRPC_URL=0.0.0.0:50053
 AUDIENCE_GRPC_URL=0.0.0.0:50054
 
 # Infrastructure
-MONGODB_URI=mongodb://localhost:27017/email-platform
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/email_platform
 REDIS_URL=redis://localhost:6379
 RABBITMQ_URL=amqp://localhost:5672
 MINIO_ENDPOINT=localhost
@@ -166,7 +166,7 @@ RATE_LIMIT_SUSTAINED_LIMIT=100
 - Proto files bundled: `packages/contracts/proto/` copied to Docker image at `/prod/app/proto`
 
 **Infrastructure Targets (defined in docker-compose.yml):**
-- MongoDB 7
+- PostgreSQL 16
 - Redis 7-alpine
 - RabbitMQ 3-management
 - MinIO (latest)

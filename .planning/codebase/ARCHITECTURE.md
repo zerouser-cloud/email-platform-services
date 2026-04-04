@@ -10,7 +10,7 @@
 - Multiple NestJS-based domain services communicating via gRPC
 - Single REST gateway translating HTTP to gRPC (facade pattern)
 - Asynchronous event-driven communication via RabbitMQ
-- MongoDB for persistence across services
+- PostgreSQL for persistence across services (via Drizzle ORM with pgSchema per service)
 - Dependency Inversion: infrastructure → application → domain
 - Proto-based contracts enforce service boundaries
 
@@ -55,8 +55,8 @@
 └─────────────────────────────────────────────────────────┘
 
 ┌──────────┐  ┌────────┐  ┌─────────┐  ┌───────────┐
-│ MongoDB  │  │ Redis  │  │RabbitMQ │  │ MinIO/S3  │
-│(persist)│  │(cache) │  │(events) │  │(files)    │
+│PostgreSQL│  │ Redis  │  │RabbitMQ │  │ MinIO/S3  │
+│(persist) │  │(cache) │  │(events) │  │(files)    │
 └──────────┘  └────────┘  └─────────┘  └───────────┘
 ```
 
@@ -65,7 +65,7 @@
 **Infrastructure Layer (Adapters):**
 - Purpose: Framework integrations and external communication
 - Location: `apps/*/src/infrastructure/`, `packages/foundation/`
-- Contains: gRPC servers/clients, MongoDB repositories, RabbitMQ publishers, REST controllers, external API clients
+- Contains: gRPC servers/clients, PostgreSQL repositories (Drizzle), RabbitMQ publishers, REST controllers, external API clients
 - Depends on: Application, Domain
 - Used by: Nothing depends on this layer (inverted)
 
@@ -89,7 +89,7 @@
 
 1. Frontend sends `POST /auth/login {email, password}` to Gateway
 2. Gateway calls `AuthService.Login(gRPC)` via `apps/auth/src/auth.controller.ts`
-3. Auth service verifies credentials against MongoDB and signs JWT
+3. Auth service verifies credentials against PostgreSQL and signs JWT
 4. Gateway returns `TokenPair {accessToken, refreshToken}` to Frontend
 5. For protected endpoints: Gateway calls `AuthService.ValidateToken(gRPC)` to extract UserContext
 6. UserContext passed down to domain service calls
@@ -98,7 +98,7 @@
 
 1. Frontend creates campaign: `POST /sender/campaigns {name, messageId, runnerId, groupId}`
 2. Gateway calls `SenderService.CreateCampaign(gRPC)` from `apps/sender/src/sender.controller.ts`
-3. Sender saves Campaign to MongoDB in collection `sender_tasks`
+3. Sender saves Campaign to PostgreSQL in `sender.campaigns` table
 4. Cron scheduler in Sender service wakes every 3 minutes
 5. Sender calls `AudienceService.GetRecipientsByGroup(gRPC)` to fetch recipients
 6. For each recipient, Sender calls proxy endpoint via HTTP to send email
@@ -113,13 +113,13 @@
 3. Cron in Parser wakes every minute, fetches apps from AppStoreSpy API
 4. Parser uploads CSV results to MinIO/S3
 5. Parser publishes `parser.batch.ready` event with recipients array and CSV URL
-6. Audience service consumes event, deduplicates, saves to MongoDB `recipients` collection
+6. Audience service consumes event, deduplicates, saves to PostgreSQL `audience.recipients` table
 7. Audience publishes `recipients.imported` event with count
 8. Notifier consumes events and sends Telegram notification with file
 
 **State Management:**
 
-- **Transactional State:** MongoDB (users, campaigns, recipients, parser tasks)
+- **Transactional State:** PostgreSQL (users, campaigns, recipients, parser tasks)
 - **Cache:** Redis for temporary session/performance data (if used)
 - **Async Coordination:** RabbitMQ events ensure loose coupling between services
 - **In-Process:** NestJS providers and modules handle DI
@@ -143,7 +143,7 @@
 
 **Repository:**
 - Purpose: Data access abstraction implementing outbound port
-- Examples: MongoRepository for each service (MongoDB collections)
+- Examples: PostgreSQL repository adapter for each service (Drizzle ORM with pgSchema isolation)
 - Pattern: Would implement port interfaces, currently implicit in controllers
 
 **Event:**

@@ -294,7 +294,7 @@ This becomes an orphan service if the platform needs to add gRPC inter-service c
 
 ### Database/Cache Connections Not Pooled in Visible Config
 
-**Current capacity:** Services depend on MongoDB, Redis, RabbitMQ, MinIO but no connection pooling configuration is visible in code.
+**Current capacity:** Services depend on PostgreSQL, Redis, RabbitMQ, MinIO. PostgreSQL connection pooling is configured via pg.Pool (max 10, idle 30s, connect timeout 5s) in DrizzleModule.
 
 **Limit:** Under high load, connection exhaustion may occur if:
 - Services open new connections per request

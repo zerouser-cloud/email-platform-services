@@ -45,14 +45,14 @@
 ## Data Storage
 
 **Databases:**
-- MongoDB 7
-  - Connection: `MONGODB_URI` env var
-  - Example: `mongodb://localhost:27017/email-platform`
+- PostgreSQL 16
+  - Connection: `DATABASE_URL` env var
+  - Example: `postgresql://postgres:postgres@localhost:5432/email_platform`
   - Used by: Auth, Sender, Parser, Audience services
-  - Docker Compose: `infra/docker-compose.yml` (mongo:7 service)
-  - Client: Not yet integrated (health indicator is stub only)
-  - Health check: `packages/foundation/src/health/indicators/mongodb.health.ts` (stub)
-  - Schema/Models: Not found in codebase (to be implemented)
+  - Docker Compose: `infra/docker-compose.yml` (postgres:16-alpine service)
+  - Client: drizzle-orm 0.45.2 + pg 8.20.0 (integrated via DrizzleModule)
+  - Health check: `packages/foundation/src/health/indicators/postgres.health.ts` (PostgresHealthIndicator)
+  - Schema: Drizzle schemas in `apps/*/src/infrastructure/persistence/schema/`, pgSchema per service
 
 **Message Queue:**
 - RabbitMQ 3 (AMQP)
@@ -103,7 +103,7 @@
 - User context: Contains user_id, role, organization, team
 
 **Implementation:**
-- Auth service stores users and tokens in MongoDB
+- Auth service stores users and tokens in PostgreSQL
 - Gateway validates every request via Auth service (TODO: gRPC interceptor)
 - Request context propagated via nestjs-cls
 - See: `packages/foundation/src/logging/grpc-metadata.helper.ts`
@@ -138,8 +138,8 @@ User {
 **Health Checks:**
 - HTTP: GET `/health/live` and `/health/ready` endpoints
 - gRPC: Standard gRPC health check protocol (grpc-health-check package)
-- Indicators implemented as stubs (TODO: real MongoDB, Redis, RabbitMQ checks)
-  - MongoDB: `packages/foundation/src/health/indicators/mongodb.health.ts`
+- Indicators: PostgreSQL health implemented, Redis and RabbitMQ stubs
+  - PostgreSQL: `packages/foundation/src/health/indicators/postgres.health.ts` (implemented)
   - Redis: `packages/foundation/src/health/indicators/redis.health.ts`
   - RabbitMQ: `packages/foundation/src/health/indicators/rabbitmq.health.ts`
 - Docker health checks: Each service defines healthcheck in docker-compose.yml
@@ -152,7 +152,7 @@ User {
 **Hosting:**
 - Docker Compose (local/development)
   - Location: `infra/docker-compose.yml`
-  - Includes: 6 services + MongoDB, Redis, RabbitMQ, MinIO
+  - Includes: 6 services + PostgreSQL, Redis, RabbitMQ, MinIO
   - Networks: 2 (services, infra)
   - Start: `pnpm docker:up`
   - Stop: `pnpm docker:down`
@@ -202,7 +202,7 @@ All defined in `packages/config/src/env-schema.ts` and validated with Zod:
 - AUTH_GRPC_URL, SENDER_GRPC_URL, PARSER_GRPC_URL, AUDIENCE_GRPC_URL
 
 **Infrastructure:**
-- MONGODB_URI
+- DATABASE_URL
 - REDIS_URL
 - RABBITMQ_URL
 - MINIO_ENDPOINT, MINIO_PORT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY

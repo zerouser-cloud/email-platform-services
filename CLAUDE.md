@@ -61,7 +61,12 @@
 - TypeScript 5.0+ - Strict type checking enabled
 - ts-node 10.0.0 - Runtime TypeScript execution
 - ts-node-dev 2.0.0 - Development watcher
-- PostgreSQL client: Not yet integrated (pending Phase 10-12)
+- drizzle-orm 0.45.2 - TypeScript ORM for PostgreSQL (schema-in-code, no codegen)
+- pg 8.20.0 - PostgreSQL client driver (connection pool via `pg.Pool`)
+- DrizzleModule in packages/foundation - NestJS dynamic module providing DRIZZLE and PG_POOL DI tokens
+- PersistenceModule facade - imports DrizzleModule + PostgresHealthModule for service consumption
+- pgSchema per service for namespace isolation (auth, sender, parser, audience)
+- Repository adapters with toDomain/toPersistence mappers in infrastructure/persistence/
 - Redis client: Not yet integrated (health indicator stub only)
 - RabbitMQ client: Not yet integrated (health indicator stub only)
 - MinIO client: Not yet integrated (file storage stub only)
@@ -256,7 +261,7 @@
 - Examples: `packages/contracts/proto/auth.proto`, `packages/contracts/proto/sender.proto`
 - Pattern: `.proto` files compiled to TypeScript via protoc-gen-ts_proto
 - Purpose: Data access abstraction implementing outbound port
-- Examples: Repository adapter for each service (PostgreSQL via Drizzle ORM, pending Phase 12-13)
+- Examples: Repository adapter for each service (PostgreSQL via Drizzle ORM with pgSchema isolation)
 - Pattern: Would implement port interfaces, currently implicit in controllers
 - Purpose: Asynchronous communication between services
 - Examples: `sender.campaign.completed`, `parser.batch.ready`, `recipients.imported`
