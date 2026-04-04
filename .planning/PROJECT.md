@@ -8,18 +8,17 @@
 
 Каждый сервис должен быть изолированным, с чёткими границами, единым источником истины и правильными контрактами — чтобы бизнес-логика могла строиться на надёжном фундаменте без переделок.
 
-## Current Milestone: v2.0 PostgreSQL + Drizzle Migration
+## Current Milestone: v3.0 Infrastructure & CI/CD
 
-**Goal:** Заменить MongoDB на PostgreSQL с Drizzle ORM — документация, конфигурация, инфраструктура, код.
+**Goal:** Настроить правильные dev/docker/production флоу с CI/CD pipeline, соблюдая 12-Factor принципы.
 
 **Target features:**
-- Обновление tech stack документации (CLAUDE.md, PROJECT.md, constraints)
-- Замена MongoDB на PostgreSQL в Docker Compose инфраструктуре
-- Интеграция Drizzle ORM в infrastructure layer (schema, migrations)
-- Обновление env-schema (MONGO_URL → DATABASE_URL)
-- Замена MongoDB health indicators на PostgreSQL
-- Обновление repository адаптеров под Drizzle
-- Проверка полного флоу запуска всех сервисов после каждой фазы
+- Откат неавторизованных изменений порта (POSTGRES_PORT → стандартный 5432)
+- Два режима разработки: local dev (infra в Docker, сервисы на хосте) и full Docker
+- Разделение docker-compose (infra vs services)
+- Синхронизация env файлов (.env, .env.docker, .env.example)
+- CI/CD pipeline (build → test → push image → deploy)
+- 12-Factor compliant deployment (один образ, разные env per environment)
 
 ## Requirements
 
@@ -95,7 +94,9 @@
 | DDD только в apps/, не в packages/ | Packages — утилитарные библиотеки, DDD в них избыточен | ✓ Good |
 | Тесты отложены на следующий этап | Сначала прочный фундамент, потом покрытие тестами | — Pending |
 | Бизнес-логику не реализуем | Фокус на архитектурной чистоте, не на фичах | — Pending |
-| MongoDB → PostgreSQL + Drizzle | Реляционные данные (кампании→группы→получатели), типобезопасность, миграции, лучший DDD fit | — Pending |
+| MongoDB → PostgreSQL + Drizzle | Реляционные данные (кампании→группы→получатели), типобезопасность, миграции, лучший DDD fit | ✓ Good |
+| Kubernetes откладываем | Docker Compose достаточен для текущего масштаба (6 сервисов) | — Pending |
+| Инфра-изменения только с одобрения | Порты, credentials, docker-compose нельзя менять без согласования | ✓ Good |
 
 ## Evolution
 
@@ -115,4 +116,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after milestone v2.0 start*
+*Last updated: 2026-04-04 after milestone v3.0 start*
