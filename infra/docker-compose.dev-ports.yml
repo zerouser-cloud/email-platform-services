@@ -1,0 +1,11 @@
+# Dev override: exposes infra ports to host for local development.
+# Usage: docker compose -f docker-compose.infra.yml -f docker-compose.dev-ports.yml up
+services:
+  postgres:
+    ports: ["5432:5432"]
+  redis:
+    ports: ["6379:6379"]
+  rabbitmq:
+    ports: ["5672:5672", "15672:15672"]
+  minio:
+    ports: ["9000:9000", "9001:9001"]
