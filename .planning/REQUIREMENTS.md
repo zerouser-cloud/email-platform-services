@@ -33,8 +33,8 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 
 ### Verification
 
-- [ ] **VRFY-01**: Все 6 сервисов стартуют, health checks проходят, docker-compose up работает
-- [ ] **VRFY-02**: Документация обновлена (CLAUDE.md, tech stack, README)
+- [x] **VRFY-01**: Все 6 сервисов стартуют, health checks проходят, docker-compose up работает
+- [x] **VRFY-02**: Документация обновлена (CLAUDE.md, tech stack, README)
 
 ## v1.0 Requirements (Validated)
 
@@ -79,8 +79,8 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 | REPO-01 | Phase 12 | Complete |
 | REPO-02 | Phase 13 | Complete |
 | REPO-03 | Phase 13 | Complete |
-| VRFY-01 | Phase 14 | Pending |
-| VRFY-02 | Phase 14 | Pending |
+| VRFY-01 | Phase 14 | Complete |
+| VRFY-02 | Phase 14 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 14 total
