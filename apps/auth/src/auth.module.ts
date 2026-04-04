@@ -10,11 +10,7 @@ export const USER_REPOSITORY_PORT = 'UserRepositoryPort';
 export const LOGIN_PORT = 'LoginPort';
 
 @Module({
-  imports: [
-    AppConfigModule,
-    PersistenceModule.forRootAsync(),
-    LoggingModule.forGrpcAsync('auth'),
-  ],
+  imports: [AppConfigModule, PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],
   controllers: [AuthGrpcServer, HealthController],
   providers: [
     { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
