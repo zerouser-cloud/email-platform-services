@@ -28,8 +28,8 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 ### Repository
 
 - [x] **REPO-01**: Auth repository adapter реализован с Drizzle (reference implementation)
-- [ ] **REPO-02**: Sender, Parser, Audience repository adapters реализованы с Drizzle
-- [ ] **REPO-03**: Repository adapters маппят Drizzle rows в domain entities без утечки типов
+- [x] **REPO-02**: Sender, Parser, Audience repository adapters реализованы с Drizzle
+- [x] **REPO-03**: Repository adapters маппят Drizzle rows в domain entities без утечки типов
 
 ### Verification
 
@@ -77,8 +77,8 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 | SCHM-02 | Phase 12 | Complete |
 | SCHM-03 | Phase 12 | Complete |
 | REPO-01 | Phase 12 | Complete |
-| REPO-02 | Phase 13 | Pending |
-| REPO-03 | Phase 13 | Pending |
+| REPO-02 | Phase 13 | Complete |
+| REPO-03 | Phase 13 | Complete |
 | VRFY-01 | Phase 14 | Pending |
 | VRFY-02 | Phase 14 | Pending |
 

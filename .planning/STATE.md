@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: PostgreSQL + Drizzle Migration
 status: completed
-stopped_at: Phase 13 context gathered
-last_updated: "2026-04-04T10:26:55.999Z"
-last_activity: 2026-04-04 — Phase 12 Plan 01 executed
+stopped_at: Phase 13 Plan 01 executed
+last_updated: "2026-04-04T10:41:50Z"
+last_activity: 2026-04-04 — Phase 13 Plan 01 executed
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
-  percent: 67
+  completed_phases: 5
+  total_plans: 5
+  completed_plans: 5
+  percent: 83
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 12 — Auth Schema & Repository (Reference)
+**Current focus:** Phase 13 — Remaining Services Schema & Repository
 
 ## Current Position
 
-Phase: 12 of 14 (Auth Schema & Repository Reference)
+Phase: 13 of 14 (Remaining Services Schema & Repository)
 Plan: 1/1 complete
 Status: Phase complete
-Last activity: 2026-04-04 — Phase 12 Plan 01 executed
+Last activity: 2026-04-04 — Phase 13 Plan 01 executed
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
@@ -61,6 +61,8 @@ Progress: [███████░░░] 67%
 - [Phase 12]: NodePgDatabase without schema generic -- select().from() API sufficient
 - [Phase 12]: PersistenceModule imported in both AuthModule and HealthModule (NestJS deduplicates)
 - [Phase 12]: UserMapper as plain object with toPersistence accepting passwordHash separately from domain entity
+- [Phase 13]: Exact auth pattern replicated to sender, parser, audience -- pgSchema per service, mapper, repository adapter
+- [Phase 13]: Mapper toPersistence takes only domain entity (no extra args) when all fields map directly
 
 ### Pending Todos
 
@@ -72,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T10:26:55.997Z
-Stopped at: Phase 13 context gathered
-Resume file: .planning/phases/13-remaining-services-schema-repository/13-CONTEXT.md
+Last session: 2026-04-04T10:41:50Z
+Stopped at: Completed 13-01-PLAN.md
+Resume file: .planning/phases/13-remaining-services-schema-repository/13-01-SUMMARY.md
