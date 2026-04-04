@@ -67,26 +67,26 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| FOUND-01 | — | Pending |
-| FOUND-02 | — | Pending |
-| FOUND-03 | — | Pending |
-| SCHM-01 | — | Pending |
-| SCHM-02 | — | Pending |
-| SCHM-03 | — | Pending |
-| REPO-01 | — | Pending |
-| REPO-02 | — | Pending |
-| REPO-03 | — | Pending |
-| VRFY-01 | — | Pending |
-| VRFY-02 | — | Pending |
+| INFRA-01 | Phase 9 | Pending |
+| INFRA-02 | Phase 11 | Pending |
+| INFRA-03 | Phase 9 | Pending |
+| FOUND-01 | Phase 10 | Pending |
+| FOUND-02 | Phase 10 | Pending |
+| FOUND-03 | Phase 10 | Pending |
+| SCHM-01 | Phase 12 | Pending |
+| SCHM-02 | Phase 12 | Pending |
+| SCHM-03 | Phase 12 | Pending |
+| REPO-01 | Phase 12 | Pending |
+| REPO-02 | Phase 13 | Pending |
+| REPO-03 | Phase 13 | Pending |
+| VRFY-01 | Phase 14 | Pending |
+| VRFY-02 | Phase 14 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after milestone v2.0 definition*
+*Last updated: 2026-04-04 after roadmap v2.0 creation*
