@@ -51,13 +51,13 @@ Plans:
 **Depends on**: Phase 9
 **Requirements**: FOUND-01, FOUND-02, FOUND-03
 **Success Criteria** (what must be TRUE):
-  1. `DrizzleModule.forRoot()` is available in packages/foundation, providing `DRIZZLE` and `PG_POOL` injection tokens via NestJS DI
+  1. `DrizzleModule.forRootAsync()` is available in packages/foundation, providing `DRIZZLE` and `PG_POOL` injection tokens via NestJS DI
   2. A `DatabaseHealthIndicator` DI token is provided -- concrete `PostgresHealthIndicator` is registered in the module, consumers inject the abstraction (controller never references PostgreSQL directly)
   3. Pool shuts down cleanly on application shutdown (`OnApplicationShutdown` calls `pool.end()`), verified by observing no connection leak warnings
   4. All 6 services start successfully (gateway and notifier do not import DrizzleModule but are unaffected)
 **Plans**: 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
+- [ ] 10-01-PLAN.md — DrizzleModule, PostgresHealthModule, PersistenceModule facade, dependencies, barrel exports
 
 ### Phase 11: Docker Infrastructure
 **Goal**: Local development infrastructure runs PostgreSQL instead of MongoDB, with all services able to connect
@@ -127,7 +127,7 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
 | 7. Logging, Security & Operations | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete   | 2026-04-04 |
-| 10. Foundation DrizzleModule & Health | v2.0 | 0/TBD | Not started | - |
+| 10. Foundation DrizzleModule & Health | v2.0 | 0/1 | Not started | - |
 | 11. Docker Infrastructure | v2.0 | 0/TBD | Not started | - |
 | 12. Auth Schema & Repository (Reference) | v2.0 | 0/TBD | Not started | - |
 | 13. Remaining Services Schema & Repository | v2.0 | 0/TBD | Not started | - |
