@@ -10,7 +10,7 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 ### Infrastructure
 
 - [x] **INFRA-01**: DATABASE_URL добавлен в env-schema с Zod-валидацией, MONGO_URI удалён
-- [ ] **INFRA-02**: PostgreSQL 16 в docker-compose заменяет MongoDB, volume для persistence
+- [x] **INFRA-02**: PostgreSQL 16 в docker-compose заменяет MongoDB, volume для persistence
 - [x] **INFRA-03**: Все упоминания MongoDB удалены из кодовой базы и конфигурации
 
 ### Foundation
@@ -68,7 +68,7 @@ Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-01 | Phase 9 | Complete |
-| INFRA-02 | Phase 11 | Pending |
+| INFRA-02 | Phase 11 | Complete |
 | INFRA-03 | Phase 9 | Complete |
 | FOUND-01 | Phase 10 | Complete |
 | FOUND-02 | Phase 10 | Complete |
