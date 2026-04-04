@@ -2,6 +2,7 @@ import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nes
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { PinoLogger } from 'nestjs-pino';
+import { LOG_STATUS } from '../constants';
 
 @Injectable()
 export class GrpcLoggingInterceptor implements NestInterceptor {
@@ -16,7 +17,7 @@ export class GrpcLoggingInterceptor implements NestInterceptor {
       tap({
         next: () => {
           const duration = Date.now() - startTime;
-          this.logger.info({ method, duration, status: 'OK' }, 'gRPC call completed');
+          this.logger.info({ method, duration, status: LOG_STATUS.OK }, 'gRPC call completed');
         },
         error: (error: Error) => {
           const duration = Date.now() - startTime;
@@ -24,7 +25,7 @@ export class GrpcLoggingInterceptor implements NestInterceptor {
             {
               method,
               duration,
-              status: 'ERROR',
+              status: LOG_STATUS.ERROR,
               error: error.message,
             },
             'gRPC call failed',

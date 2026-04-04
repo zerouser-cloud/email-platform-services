@@ -19,27 +19,13 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function getRetryConfig(options?: Partial<RetryOptions>): RetryOptions {
-  return {
-    maxRetries:
-      options?.maxRetries ??
-      (parseInt(process.env.RETRY_MAX_RETRIES ?? '', 10) || RETRY_DEFAULTS.maxRetries),
-    baseDelayMs:
-      options?.baseDelayMs ??
-      (parseInt(process.env.RETRY_BASE_DELAY_MS ?? '', 10) || RETRY_DEFAULTS.baseDelayMs),
-    maxDelayMs:
-      options?.maxDelayMs ??
-      (parseInt(process.env.RETRY_MAX_DELAY_MS ?? '', 10) || RETRY_DEFAULTS.maxDelayMs),
-  };
-}
-
 export async function retryConnect<T>(
   name: string,
   connectFn: () => Promise<T>,
   logger: RetryLogger,
   options?: Partial<RetryOptions>,
 ): Promise<T> {
-  const { maxRetries, baseDelayMs, maxDelayMs } = getRetryConfig(options);
+  const { maxRetries, baseDelayMs, maxDelayMs } = { ...RETRY_DEFAULTS, ...options };
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {

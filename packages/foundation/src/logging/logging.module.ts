@@ -37,7 +37,6 @@ export class LoggingModule {
             level: logLevel,
             base: {
               service: serviceName,
-              environment: process.env.NODE_ENV || 'development',
               instanceId,
             },
             genReqId: (req) =>
@@ -89,7 +88,6 @@ export class LoggingModule {
             level: logLevel,
             base: {
               service: serviceName,
-              environment: process.env.NODE_ENV || 'development',
               instanceId,
             },
             autoLogging: false,
@@ -131,7 +129,6 @@ export class LoggingModule {
                 level: logLevel,
                 base: {
                   service: serviceName,
-                  environment: configService.get<string>('NODE_ENV'),
                   instanceId,
                 },
                 genReqId: (req) =>
@@ -190,7 +187,6 @@ export class LoggingModule {
                 level: logLevel,
                 base: {
                   service: serviceName,
-                  environment: configService.get<string>('NODE_ENV'),
                   instanceId,
                 },
                 autoLogging: false,

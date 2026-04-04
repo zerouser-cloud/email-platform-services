@@ -4,6 +4,7 @@ import { PinoLogger } from 'nestjs-pino';
 import { ClsService } from 'nestjs-cls';
 import type { Response } from 'express';
 import { ERROR_MESSAGE } from './error-messages';
+import { HEADER, HTTP_ERROR } from '../constants';
 
 const GRPC_TO_HTTP: Record<number, number> = {
   [GrpcStatus.INVALID_ARGUMENT]: HttpStatus.BAD_REQUEST,
@@ -56,7 +57,7 @@ export class GrpcToHttpExceptionFilter implements ExceptionFilter {
       const response = ctx.getResponse<Response>();
       const status = exception.getStatus();
       const body = exception.getResponse();
-      const correlationId = this.cls.getId() ?? 'no-correlation-id';
+      const correlationId = this.cls.getId() ?? HEADER.FALLBACK_CORRELATION_ID;
       const timestamp = new Date().toISOString();
       const responseBody =
         typeof body === 'object'
@@ -64,7 +65,7 @@ export class GrpcToHttpExceptionFilter implements ExceptionFilter {
           : {
               statusCode: status,
               message: body,
-              error: HttpStatus[status] ?? 'Internal Server Error',
+              error: HttpStatus[status] ?? HTTP_ERROR.FALLBACK_MESSAGE,
               correlationId,
               timestamp,
             };
@@ -85,8 +86,8 @@ export class GrpcToHttpExceptionFilter implements ExceptionFilter {
     response.status(httpStatus).json({
       statusCode: httpStatus,
       message: safeMessage,
-      error: HttpStatus[httpStatus] ?? 'Internal Server Error',
-      correlationId: this.cls.getId() ?? 'no-correlation-id',
+      error: HttpStatus[httpStatus] ?? HTTP_ERROR.FALLBACK_MESSAGE,
+      correlationId: this.cls.getId() ?? HEADER.FALLBACK_CORRELATION_ID,
       timestamp: new Date().toISOString(),
     });
   }

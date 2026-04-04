@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { DRIZZLE, PG_POOL, DATABASE_HEALTH } from './persistence.constants';
+import { DRIZZLE, PG_POOL, DATABASE_HEALTH, PG_POOL_DEFAULTS } from './persistence.constants';
 import { DrizzleShutdownService } from './drizzle-shutdown.service';
 import { PostgresHealthIndicator } from './postgres.health';
 
@@ -13,9 +13,9 @@ const pgPoolProvider: Provider = {
   useFactory: (config: ConfigService): Pool =>
     new Pool({
       connectionString: config.get<string>('DATABASE_URL'),
-      max: 10,
-      idleTimeoutMillis: 30_000,
-      connectionTimeoutMillis: 5_000,
+      max: PG_POOL_DEFAULTS.MAX_CONNECTIONS,
+      idleTimeoutMillis: PG_POOL_DEFAULTS.IDLE_TIMEOUT_MS,
+      connectionTimeoutMillis: PG_POOL_DEFAULTS.CONNECTION_TIMEOUT_MS,
     }),
 };
 
