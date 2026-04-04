@@ -16,9 +16,9 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 ### CI Pipeline
 
-- [ ] **CI-01**: GitHub Actions workflow: lint + typecheck + build on every PR
-- [ ] **CI-02**: Turbo affected-only execution -- CI runs only changed packages
-- [ ] **CI-03**: Turbo remote cache via GitHub Actions cache
+- [x] **CI-01**: GitHub Actions workflow: lint + typecheck + build on every PR
+- [x] **CI-02**: Turbo affected-only execution -- CI runs only changed packages
+- [x] **CI-03**: Turbo remote cache via GitHub Actions cache
 
 ### Docker Build
 
@@ -83,9 +83,9 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 | DOCK-02 | Phase 15 | Complete |
 | DOCK-03 | Phase 15 | Complete |
 | DOCK-04 | Phase 15 | Complete |
-| CI-01 | Phase 16 | Pending |
-| CI-02 | Phase 16 | Pending |
-| CI-03 | Phase 16 | Pending |
+| CI-01 | Phase 16 | Complete |
+| CI-02 | Phase 16 | Complete |
+| CI-03 | Phase 16 | Complete |
 | DBLD-01 | Phase 17 | Pending |
 | DBLD-02 | Phase 17 | Pending |
 | DBLD-03 | Phase 17 | Pending |

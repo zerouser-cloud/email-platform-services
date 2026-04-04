@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
-status: planning
-stopped_at: Phase 16 context gathered
-last_updated: "2026-04-04T14:11:46.222Z"
-last_activity: 2026-04-04 — Roadmap created for v3.0 Infrastructure & CI/CD
+status: verifying
+stopped_at: Completed 16-01-PLAN.md
+last_updated: "2026-04-04T14:36:03.553Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
+  completed_phases: 2
+  total_plans: 2
+  completed_plans: 2
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 15 — Docker Compose Split & Environment
+**Current focus:** Phase 16 — ci-pipeline
 
 ## Current Position
 
-Phase: 15 of 19 (Docker Compose Split & Environment)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-04-04 — Roadmap created for v3.0 Infrastructure & CI/CD
+Phase: 16 (ci-pipeline) — EXECUTING
+Plan: 1 of 1
+Status: Phase complete — ready for verification
+Last activity: 2026-04-04
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 15 P01 | 3min | 2 tasks | 6 files |
+| Phase 16 P01 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,8 @@ Progress: [░░░░░░░░░░] 0%
 - [v3.0]: Must fix unauthorized POSTGRES_PORT change from v2.0 Phase 14
 - [Phase 15]: CORS_STRICT boolean flag replaces NODE_ENV check in Zod CORS refine (12-Factor)
 - [Phase 15]: Docker compose split: infra-only (self-contained) + full-stack (include directive)
+- [Phase 16]: NODE_ENV removed from turbo.json globalEnv for 12-Factor compliance
+- [Phase 16]: Pre-push hook (not pre-commit) for local validation before CI
 
 ### Pending Todos
 
@@ -78,6 +81,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T14:11:46.220Z
-Stopped at: Phase 16 context gathered
-Resume file: .planning/phases/16-ci-pipeline/16-CONTEXT.md
+Last session: 2026-04-04T14:36:03.552Z
+Stopped at: Completed 16-01-PLAN.md
+Resume file: None
