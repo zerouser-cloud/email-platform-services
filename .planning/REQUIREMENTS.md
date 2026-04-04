@@ -26,10 +26,10 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 - [x] **DBLD-02**: Images published to GHCR (GitHub Container Registry)
 - [x] **DBLD-03**: Scoped Docker layer cache per service
 
-### Deployment
+### Deployment (via Coolify)
 
-- [ ] **DPLY-01**: Deploy workflow: SSH to VPS, docker compose pull + up
-- [ ] **DPLY-02**: Caddy as reverse proxy with auto-TLS
+- [ ] **DPLY-01**: Coolify installed on VPS, GitHub repo connected, auto-deploy on push to dev/main
+- [ ] **DPLY-02**: Traefik (via Coolify) as reverse proxy with auto-TLS for gateway domain
 - [ ] **DPLY-03**: Health check verification after deploy
 
 ### Verification
@@ -72,7 +72,7 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 | Business logic implementation | Focus on infrastructure/CI/CD |
 | Testing (unit/integration) | Separate milestone |
 | neverthrow / Result pattern | Separate milestone |
-| SSL certs management (beyond Caddy auto) | Caddy handles auto-TLS |
+| SSL certs management (beyond Traefik auto) | Coolify/Traefik handles auto-TLS |
 | Multi-region deployment | Single VPS for now |
 
 ## Traceability

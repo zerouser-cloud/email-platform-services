@@ -81,11 +81,11 @@ Progress: [░░░░░░░░░░] 0%
 ### Pending Todos
 
 - Revert POSTGRES_PORT variable to standard 5432 in docker-compose (Phase 15, DOCK-03)
-- Phase 18 (Deployment) needs VPS details from user before planning
+- Phase 18 (Deployment via Coolify) needs VPS IP and domain from user before planning
 
 ### Blockers/Concerns
 
-- Phase 18 blocked on user providing VPS connection details (SSH host, user, key) and domain name
+- Phase 18 blocked on user providing VPS IP/domain for Coolify installation
 
 ### Quick Tasks Completed
 

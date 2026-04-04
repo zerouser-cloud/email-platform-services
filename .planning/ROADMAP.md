@@ -102,17 +102,18 @@ Plans:
 Plans:
 - [x] 17-01-PLAN.md -- Docker build workflow with matrix strategy, GHCR push, scoped cache
 
-### Phase 18: Deployment
-**Goal**: Merged changes are deployed to a VPS with HTTPS access and verified health
+### Phase 18: Deployment via Coolify
+**Goal**: Coolify installed on VPS, email-platform deployed via docker-compose resource with auto-deploy from GitHub on push to dev and main
 **Depends on**: Phase 17
 **Requirements**: DPLY-01, DPLY-02, DPLY-03
 **Success Criteria** (what must be TRUE):
-  1. A deploy workflow SSHs into the VPS, pulls updated images from GHCR, and runs `docker compose up -d` with the production compose file
-  2. Caddy reverse proxy is configured with automatic TLS, routing HTTPS traffic to the gateway service
-  3. After deployment completes, health check endpoints return healthy status for all running services
-  4. The deploy workflow fails visibly (non-zero exit) if health checks do not pass within a timeout
+  1. Coolify installed on VPS, accessible via HTTPS, connected to GitHub repository `zerouser-cloud/email-platform-services`
+  2. Docker-compose resource configured in Coolify — pulls images from GHCR and runs all services. Traefik (via Coolify) handles reverse proxy with auto-TLS for the gateway domain
+  3. Auto-deploy triggers on push to dev and main branches (separate environments in Coolify)
+  4. After deployment, health check endpoints return healthy status for all running services
+  5. Production compose file uses `image:` (GHCR images) instead of `build:` — no builds on server
 **Plans**: TBD
-**NOTE**: This phase requires VPS connection details (SSH host, user, key) and domain name as user input before planning.
+**NOTE**: This phase requires VPS IP/domain and Coolify admin access as user input before planning.
 
 ### Phase 19: Verification
 **Goal**: Both development workflows and the CI pipeline are validated end-to-end on a clean state
