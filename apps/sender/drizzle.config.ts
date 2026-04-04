@@ -8,8 +8,4 @@ export default defineConfig({
     url: process.env.DATABASE_URL!,
   },
   schemaFilter: ['sender'],
-  migrations: {
-    table: '__drizzle_migrations',
-    schema: 'sender',
-  },
 });
