@@ -84,10 +84,10 @@ Plans:
   4. Local dev mode works: `docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml up` exposes infra ports
   5. Full Docker mode works: `docker compose -f infra/docker-compose.yml up` exposes only gateway:4000
   6. App code unchanged — no env branching, same DATABASE_URL/REDIS_URL consumed from config
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 16.1 to break down)
+- [ ] 16.1-01-PLAN.md -- Remove infra ports, create dev-ports override, update scripts
 
 ### Phase 17: Docker Image Build & Push
 **Goal**: Docker images for each service are automatically built and published to GHCR when changes merge to main
@@ -146,6 +146,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 16. CI Pipeline | v3.0 | 1/1 | Complete    | 2026-04-04 |
+| 16.1. Docker Port Isolation | v3.0 | 0/1 | Planning | - |
 | 17. Docker Image Build & Push | v3.0 | 0/? | Not started | - |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
