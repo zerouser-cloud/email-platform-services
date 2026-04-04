@@ -1,130 +1,92 @@
-# Requirements: Email Platform Foundation Audit
+# Requirements: Email Platform
 
-**Defined:** 2026-04-02
-**Core Value:** Каждый сервис изолирован, с чёткими границами и надёжными контрактами
+**Defined:** 2026-04-04
+**Core Value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
 
-## v1 Requirements
+## v2.0 Requirements
 
-### Contract Hygiene
+Requirements for PostgreSQL + Drizzle Migration. Each maps to roadmap phases.
 
-- [x] **CONT-01**: Единственный источник сгенерированных типов — `contracts/src/generated/`, дубликат `contracts/generated/` удалён
-- [x] **CONT-02**: Proto генерация встроена в Turbo pipeline и запускается автоматически при сборке
-- [x] **CONT-03**: Команда `pnpm generate:contracts` доступна на верхнем уровне монорепо
-- [x] **CONT-04**: Controller stubs в auth, sender, parser, audience содержат `@GrpcMethod` декораторы, соответствующие proto RPC методам (без бизнес-логики)
+### Infrastructure
 
-### Configuration Management
+- [ ] **INFRA-01**: DATABASE_URL добавлен в env-schema с Zod-валидацией, MONGO_URI удалён
+- [ ] **INFRA-02**: PostgreSQL 16 в docker-compose заменяет MongoDB, volume для persistence
+- [ ] **INFRA-03**: Все упоминания MongoDB удалены из кодовой базы и конфигурации
 
-- [x] **CONF-01**: `loadGlobalConfig()` вызывается один раз, конфигурация доступна через injectable `ConfigService` во всех сервисах
-- [x] **CONF-02**: Zod-схема конфигурации отклоняет `CORS_ORIGINS=*` при `NODE_ENV=production`
-- [x] **CONF-03**: MinIO credentials в docker-compose используют env var substitution `${VAR:-default}` вместо хардкода
+### Foundation
 
-### Error Handling & Safety
+- [ ] **FOUND-01**: DrizzleModule в packages/foundation — NestJS dynamic module с DI injection token
+- [ ] **FOUND-02**: DatabaseHealthIndicator абстракция через DI token — конкретная реализация (PostgresHealthIndicator) регистрируется в module, controller не знает о типе базы
+- [ ] **FOUND-03**: Pool lifecycle — graceful shutdown через OnApplicationShutdown
 
-- [x] **ERR-01**: Metadata array access в logging module использует optional chaining с fallback на `crypto.randomUUID()`
-- [x] **ERR-02**: gRPC error messages маппятся на безопасные клиентские сообщения, оригиналы логируются server-side
-- [x] **ERR-03**: Все сервисы возвращают ошибки в едином формате `{ statusCode, message, error, correlationId }` через global exception filter
+### Schema
 
-### Architectural Boundaries
+- [ ] **SCHM-01**: Drizzle schema per service (auth, sender, parser, audience) с pgSchema isolation
+- [ ] **SCHM-02**: drizzle-kit config и migration workflow настроены для каждого сервиса
+- [ ] **SCHM-03**: Drizzle types не проникают в domain layer — маппинг только в infrastructure
 
-- [x] **ARCH-01**: Каждый app в apps/ имеет корректную Clean/Hexagonal структуру (domain/application/infrastructure) — валидация через architecture-validator агент
-- [x] **ARCH-02**: Shared код живёт в packages/, service-specific в apps/. Нет cross-service импортов между apps/
-- [x] **ARCH-03**: Notifier оформлен как event-consumer-only сервис с RabbitMQ health check (без gRPC)
+### Repository
 
-### Health & Resilience
-
-- [x] **HLTH-01**: Gateway проверяет health gRPC сервисов параллельно через `Promise.all()`
-- [x] **HLTH-02**: Retry configuration уменьшена до разумных значений и конфигурируема через env vars
-- [x] **HLTH-03**: Раздельные liveness (процесс жив) и readiness (зависимости готовы) probe endpoints
-
-### Logging & Observability
-
-- [x] **LOG-01**: Pino логи содержат structured fields: service name, environment, instanceId
-- [x] **LOG-02**: NestJS interceptor логирует request/response timing: `{ method, path, statusCode, durationMs }`
-
-### Security
-
-- [x] **SEC-01**: CORS wildcard запрещён в production, `.env.example` содержит безопасные defaults с комментариями
-
-### Operational
-
-- [x] **OPS-01**: Graceful shutdown: in-flight requests завершаются, gRPC connections drainятся, DB/RabbitMQ pools закрываются через `enableShutdownHooks()` и `onModuleDestroy`
+- [ ] **REPO-01**: Auth repository adapter реализован с Drizzle (reference implementation)
+- [ ] **REPO-02**: Sender, Parser, Audience repository adapters реализованы с Drizzle
+- [ ] **REPO-03**: Repository adapters маппят Drizzle rows в domain entities без утечки типов
 
 ### Verification
 
-- [ ] **VER-01**: Инфраструктура (MongoDB, Redis, RabbitMQ, MinIO) поднята через docker compose (команда из package.json)
-- [ ] **VER-02**: Все сервисы запускаются без ошибок через команду из package.json
-- [ ] **VER-03**: Health endpoints всех сервисов отвечают корректно через curl
-- [ ] **VER-04**: Gateway проксирует запросы к gRPC сервисам, ошибки возвращаются в едином формате
+- [ ] **VRFY-01**: Все 6 сервисов стартуют, health checks проходят, docker-compose up работает
+- [ ] **VRFY-02**: Документация обновлена (CLAUDE.md, tech stack, README)
 
-## v2 Requirements
+## v1.0 Requirements (Validated)
 
-### Observability
-
-- **OBS-01**: OpenTelemetry distributed tracing с gRPC и HTTP auto-instrumentation
-- **OBS-02**: OpenAPI/Swagger спецификация для gateway
-
-### Resilience
-
-- **RES-01**: Circuit breaker для inter-service gRPC вызовов
-- **RES-02**: Connection pool configuration для MongoDB, Redis, RabbitMQ
-
-### Security
-
-- **SEC-02**: Pre-commit hook для детекции secrets
-
-### Testing
-
-- **TEST-01**: Unit-тесты для foundation modules (errors, retry, interceptors)
-- **TEST-02**: Integration-тесты для startup и health checks сервисов
+- [x] **ARCH-01**: Каждый app в apps/ имеет корректную Clean/Hexagonal структуру — Phase 4-5
+- [x] **ARCH-02**: Нет cross-service imports между apps/ — Phase 5
+- [x] **ARCH-03**: Notifier is event-consumer-only (no gRPC) — Phase 5
+- [x] **CNTR-01**: Единый источник сгенерированных контрактов — Phase 1
+- [x] **CNTR-02**: Proto генерация в Turbo pipeline — Phase 1
+- [x] **CONF-01**: Config через DI, loadGlobalConfig только в main.ts — Phase 2
+- [x] **CONF-02**: CORS wildcard запрещён в production — Phase 2
+- [x] **ERR-01**: Error sanitization по gRPC code — Phase 3
+- [x] **ERR-02**: Unified error shape с correlationId, timestamp — Phase 3
+- [x] **HLTH-01**: Parallel gateway health via Promise.allSettled — Phase 6
+- [x] **HLTH-02**: Liveness/readiness separation — Phase 6
+- [x] **RSLN-01**: Retry tuned с jitter и env vars — Phase 6
+- [x] **OPS-01**: Structured logging с correlation IDs — Phase 7
+- [x] **OPS-02**: Graceful shutdown hooks — Phase 7
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Бизнес-логика в сервисах | Сначала фундамент, потом бизнес-логика |
-| Тесты | Следующий этап после аудита |
-| Новые сервисы | Работаем с существующими 6 сервисами |
-| DDD в packages/ | Утилитарные библиотеки, DDD излишний |
-| Миграция с Turbo на Nx | Turbo работает, менять нет причин |
-| CI/CD pipeline | Инфраструктурная задача, не часть code audit |
-| API versioning | Нет consumers, версионирование пустых stubs бесполезно |
-| Database migrations | Нет бизнес-моделей, миграции преждевременны |
-| Buf CLI | Текущий generate.sh скрипт работает, замена ради моды не нужна |
+| Реализация бизнес-логики | Фокус на persistence infrastructure, бизнес-логика позже |
+| Написание тестов | Тестирование — отдельный этап |
+| neverthrow / Result pattern | Отдельный milestone после завершения документации |
+| OpenTelemetry tracing | Отдельный milestone |
+| Data migration | Нет живых данных — все repository стабы |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONT-01 | Phase 1 | Complete |
-| CONT-02 | Phase 1 | Complete |
-| CONT-03 | Phase 1 | Complete |
-| CONT-04 | Phase 5 | Complete |
-| CONF-01 | Phase 2 | Complete |
-| CONF-02 | Phase 2 | Complete |
-| CONF-03 | Phase 2 | Complete |
-| ERR-01 | Phase 3 | Complete |
-| ERR-02 | Phase 3 | Complete |
-| ERR-03 | Phase 3 | Complete |
-| ARCH-01 | Phase 4 | Complete |
-| ARCH-02 | Phase 5 | Complete |
-| ARCH-03 | Phase 5 | Complete |
-| HLTH-01 | Phase 6 | Complete |
-| HLTH-02 | Phase 6 | Complete |
-| HLTH-03 | Phase 6 | Complete |
-| LOG-01 | Phase 7 | Complete |
-| LOG-02 | Phase 7 | Complete |
-| SEC-01 | Phase 7 | Complete |
-| OPS-01 | Phase 7 | Complete |
-| VER-01 | Phase 8 | Pending |
-| VER-02 | Phase 8 | Pending |
-| VER-03 | Phase 8 | Pending |
-| VER-04 | Phase 8 | Pending |
+| INFRA-01 | — | Pending |
+| INFRA-02 | — | Pending |
+| INFRA-03 | — | Pending |
+| FOUND-01 | — | Pending |
+| FOUND-02 | — | Pending |
+| FOUND-03 | — | Pending |
+| SCHM-01 | — | Pending |
+| SCHM-02 | — | Pending |
+| SCHM-03 | — | Pending |
+| REPO-01 | — | Pending |
+| REPO-02 | — | Pending |
+| REPO-03 | — | Pending |
+| VRFY-01 | — | Pending |
+| VRFY-02 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 24 total
-- Mapped to phases: 24
-- Unmapped: 0
+- v2.0 requirements: 14 total
+- Mapped to phases: 0
+- Unmapped: 14
 
 ---
-*Requirements defined: 2026-04-02*
-*Last updated: 2026-04-02 after roadmap creation*
+*Requirements defined: 2026-04-04*
+*Last updated: 2026-04-04 after milestone v2.0 definition*
