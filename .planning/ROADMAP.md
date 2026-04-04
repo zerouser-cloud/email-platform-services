@@ -25,7 +25,7 @@
 
 **Milestone Goal:** Replace MongoDB with PostgreSQL + Drizzle ORM across all applicable services while preserving Clean/Hexagonal architecture boundaries.
 
-- [ ] **Phase 9: Config & MongoDB Cleanup** - DATABASE_URL in env-schema, purge all MongoDB references from config and code
+- [x] **Phase 9: Config & MongoDB Cleanup** - DATABASE_URL in env-schema, purge all MongoDB references from config and code (completed 2026-04-04)
 - [ ] **Phase 10: Foundation DrizzleModule & Health** - Shared DrizzleModule, DatabaseHealthIndicator DI abstraction, pool lifecycle
 - [ ] **Phase 11: Docker Infrastructure** - PostgreSQL 16 in docker-compose replacing MongoDB, volumes and healthchecks
 - [ ] **Phase 12: Auth Schema & Repository (Reference)** - Drizzle schema, migrations, repository adapter for auth as reference implementation
@@ -44,7 +44,7 @@
   3. All 6 services start successfully after config changes (no runtime errors from removed env vars)
 **Plans**: 1 plan
 Plans:
-- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
+- [x] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ### Phase 10: Foundation DrizzleModule & Health
 **Goal**: Any service can import a shared DrizzleModule to get a configured Drizzle instance and database health checking via DI, with proper connection pool lifecycle
@@ -126,7 +126,7 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
 | 6. Health & Resilience | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 7. Logging, Security & Operations | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 9. Config & MongoDB Cleanup | v2.0 | 0/1 | Not started | - |
+| 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete   | 2026-04-04 |
 | 10. Foundation DrizzleModule & Health | v2.0 | 0/TBD | Not started | - |
 | 11. Docker Infrastructure | v2.0 | 0/TBD | Not started | - |
 | 12. Auth Schema & Repository (Reference) | v2.0 | 0/TBD | Not started | - |

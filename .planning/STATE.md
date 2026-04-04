@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: PostgreSQL + Drizzle Migration
 status: planning
-stopped_at: Phase 9 context gathered
-last_updated: "2026-04-04T08:34:25.998Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-04T08:50:38.152Z"
 last_activity: 2026-04-04 — Roadmap created for v2.0 milestone
 progress:
   total_phases: 6
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -51,6 +51,8 @@ Progress: [░░░░░░░░░░] 0%
 - [v2.0]: Single PostgreSQL instance with pgSchema per service for logical isolation
 - [v2.0]: DatabaseHealthIndicator through DI abstraction token, not concrete class
 - [v2.0]: Each phase must verify full service startup flow (docker-compose up, all services healthy)
+- [Phase 09-config-mongodb-cleanup]: DATABASE_URL replaces MONGODB_URI with z.string().url() Zod validation
+- [Phase 09-config-mongodb-cleanup]: Repository port tokens kept without providers for Phase 12-13 Drizzle wiring
 
 ### Pending Todos
 
@@ -62,6 +64,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-04T08:34:25.996Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-config-mongodb-cleanup/09-CONTEXT.md
+Last session: 2026-04-04T08:50:38.151Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: None
