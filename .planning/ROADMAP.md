@@ -56,7 +56,9 @@
   3. POSTGRES_PORT variable is removed -- PostgreSQL uses standard port 5432 hardcoded in docker-compose, matching DATABASE_URL
   4. `.env`, `.env.docker`, and `.env.example` contain the same set of keys (values may differ), and `.env.example` is the tracked source of truth
   5. All 6 services start successfully under both development modes (host-run and full Docker)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 15-01-PLAN.md -- Compose split, env sync, NODE_ENV removal, CORS fix, verification
 
 ### Phase 16: CI Pipeline
 **Goal**: Every pull request is automatically validated for lint, typecheck, and build correctness, with fast feedback via Turbo caching
@@ -124,7 +126,7 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 12. Auth Schema & Repository (Reference) | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 15. Docker Compose Split & Environment | v3.0 | 0/? | Not started | - |
+| 15. Docker Compose Split & Environment | v3.0 | 0/1 | Planning | - |
 | 16. CI Pipeline | v3.0 | 0/? | Not started | - |
 | 17. Docker Image Build & Push | v3.0 | 0/? | Not started | - |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
