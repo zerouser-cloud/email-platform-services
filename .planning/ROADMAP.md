@@ -133,7 +133,7 @@ Plans:
 Plans:
 - [x] 17.2-01-PLAN.md -- Create no-magic-values skill and add to CLAUDE.md
 - [x] 17.2-02-PLAN.md -- Fix magic values in packages/foundation
-- [ ] 17.2-03-PLAN.md -- Fix magic values in apps/ (DI tokens, varchar lengths, bootstrap)
+- [x] 17.2-03-PLAN.md -- Fix magic values in apps/ (DI tokens, varchar lengths, bootstrap)
 
 ### Phase 18: Deployment via Coolify
 **Goal**: Coolify installed on VPS, email-platform deployed via docker-compose resource with auto-deploy from GitHub on push to dev and main
@@ -185,6 +185,6 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete    | 2026-04-04 |
 | 17. Docker Image Build & Push | v3.0 | 1/1 | Complete    | 2026-04-04 |
 | 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete   | 2026-04-04 |
-| 17.2. No Magic Values Skill & Audit | v3.0 | 2/3 | In Progress|  |
+| 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete   | 2026-04-04 |
 | 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
