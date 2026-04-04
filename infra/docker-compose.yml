@@ -36,7 +36,7 @@ services:
     expose: [ "3001", "50051" ]
     env_file: ../.env.docker
     depends_on:
-      mongodb:
+      postgres:
         condition: service_healthy
     restart: unless-stopped
     init: true
@@ -57,7 +57,7 @@ services:
     expose: [ "3002", "50052" ]
     env_file: ../.env.docker
     depends_on:
-      mongodb:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -82,7 +82,7 @@ services:
     expose: [ "3003", "50053" ]
     env_file: ../.env.docker
     depends_on:
-      mongodb:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -107,7 +107,7 @@ services:
     expose: [ "3004", "50054" ]
     env_file: ../.env.docker
     depends_on:
-      mongodb:
+      postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
@@ -146,13 +146,17 @@ services:
 
   # === Infrastructure ===
 
-  mongodb:
-    image: mongo:7
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-email_platform}
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.runCommand('ping').ok" ]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -201,7 +205,7 @@ services:
     networks: [infra]
 
 volumes:
-  mongo_data:
+  postgres_data:
   rabbitmq_data:
   minio_data:
 
