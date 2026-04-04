@@ -70,6 +70,10 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 16]: NODE_ENV removed from turbo.json globalEnv for 12-Factor compliance
 - [Phase 16]: Pre-push hook (not pre-commit) for local validation before CI
 
+### Roadmap Evolution
+
+- Phase 16.1 inserted after Phase 16: Docker Port Isolation (URGENT) — infra ports open in full Docker mode, only gateway should be exposed
+
 ### Pending Todos
 
 - Revert POSTGRES_PORT variable to standard 5432 in docker-compose (Phase 15, DOCK-03)

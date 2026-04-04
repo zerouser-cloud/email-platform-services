@@ -73,6 +73,22 @@ Plans:
 Plans:
 - [x] 16-01-PLAN.md -- CI workflow, turbo.json fix, Husky hooks, branch protection script
 
+### Phase 16.1: Docker Port Isolation (INSERTED)
+**Goal**: В full Docker режиме наружу доступен только gateway (порт 4000). Инфраструктурные порты убраны из docker-compose.infra.yml в отдельный dev-ports override. Три файла: infra (без портов), dev-ports (override с портами для local dev), docker-compose.yml (full stack, только gateway наружу).
+**Depends on**: Phase 16
+**Requirements**: DOCK-01 (refinement)
+**Success Criteria** (what must be TRUE):
+  1. `docker-compose.infra.yml` defines infra services WITHOUT `ports:` — only internal networking
+  2. `docker-compose.dev-ports.yml` override file adds host port exposure for local dev (5432, 6379, 5672, 15672, 9000, 9001)
+  3. `docker-compose.yml` (full stack) includes infra without ports — only gateway exposes port 4000 to host
+  4. Local dev mode works: `docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml up` exposes infra ports
+  5. Full Docker mode works: `docker compose -f infra/docker-compose.yml up` exposes only gateway:4000
+  6. App code unchanged — no env branching, same DATABASE_URL/REDIS_URL consumed from config
+**Plans**: TBD
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 16.1 to break down)
+
 ### Phase 17: Docker Image Build & Push
 **Goal**: Docker images for each service are automatically built and published to GHCR when changes merge to main
 **Depends on**: Phase 16
