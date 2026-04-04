@@ -1,3 +1,6 @@
+include:
+  - docker-compose.infra.yml
+
 services:
 
   gateway:
@@ -6,7 +9,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: gateway
-    ports: [ "4000:3000" ]
+    ports: ["4000:3000"]
     env_file: ../.env.docker
     depends_on:
       auth:
@@ -33,7 +36,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: auth
-    expose: [ "3001", "50051" ]
+    expose: ["3001", "50051"]
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -54,7 +57,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: sender
-    expose: [ "3002", "50052" ]
+    expose: ["3002", "50052"]
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -79,7 +82,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: parser
-    expose: [ "3003", "50053" ]
+    expose: ["3003", "50053"]
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -104,7 +107,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: audience
-    expose: [ "3004", "50054" ]
+    expose: ["3004", "50054"]
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -127,7 +130,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: notifier
-    expose: [ "3005" ]
+    expose: ["3005"]
     env_file: ../.env.docker
     depends_on:
       rabbitmq:
@@ -144,74 +147,6 @@ services:
       start_period: 10s
     networks: [services, infra]
 
-  # === Infrastructure ===
-
-  postgres:
-    image: postgres:16-alpine
-    ports: [ "${POSTGRES_PORT:-5432}:5432" ]
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-email_platform}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks: [infra]
-
-  redis:
-    image: redis:7-alpine
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
-    networks: [infra]
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_running" ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    networks: [infra]
-
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9001"
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - minio_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: [ "CMD", "mc", "ready", "local" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks: [infra]
-
-volumes:
-  postgres_data:
-  rabbitmq_data:
-  minio_data:
-
 networks:
   services:
-    driver: bridge
-  infra:
     driver: bridge
