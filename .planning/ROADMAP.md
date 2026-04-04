@@ -42,7 +42,9 @@
   1. `DATABASE_URL` exists in env-schema.ts with Zod validation (connection string format), and `MONGO_URI`/`MONGODB_URI` is removed
   2. `grep -ri mongo` across the entire codebase returns zero matches (excluding git history and node_modules)
   3. All 6 services start successfully after config changes (no runtime errors from removed env vars)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ### Phase 10: Foundation DrizzleModule & Health
 **Goal**: Any service can import a shared DrizzleModule to get a configured Drizzle instance and database health checking via DI, with proper connection pool lifecycle
@@ -53,7 +55,9 @@
   2. A `DatabaseHealthIndicator` DI token is provided -- concrete `PostgresHealthIndicator` is registered in the module, consumers inject the abstraction (controller never references PostgreSQL directly)
   3. Pool shuts down cleanly on application shutdown (`OnApplicationShutdown` calls `pool.end()`), verified by observing no connection leak warnings
   4. All 6 services start successfully (gateway and notifier do not import DrizzleModule but are unaffected)
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ### Phase 11: Docker Infrastructure
 **Goal**: Local development infrastructure runs PostgreSQL instead of MongoDB, with all services able to connect
@@ -63,7 +67,9 @@
   1. `docker-compose up` starts PostgreSQL 16 with a healthcheck, persistent volume, and correct credentials matching `DATABASE_URL`
   2. MongoDB service is fully removed from docker-compose (no mongo container, no mongo volume)
   3. All 6 services start and health checks pass with the new Docker infrastructure
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ### Phase 12: Auth Schema & Repository (Reference)
 **Goal**: Auth service has a complete Drizzle persistence layer (schema, migrations, repository adapter) that serves as the validated reference pattern for all other services
@@ -75,7 +81,9 @@
   3. `PgUserRepository` implements the existing `UserRepositoryPort` interface using Drizzle queries, with explicit `toDomain()`/`toPersistence()` mappers
   4. No Drizzle types (`InferSelectModel`, `pgTable`, etc.) appear outside `infrastructure/` -- domain and application layers remain pure
   5. All 6 services start and health checks pass after auth schema and repository changes
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ### Phase 13: Remaining Services Schema & Repository
 **Goal**: Sender, parser, and audience services each have their own Drizzle persistence layer following the auth reference pattern
@@ -86,7 +94,9 @@
   2. Each service has a `drizzle.config.ts` scoped to its own schema, and `drizzle-kit generate`/`migrate` works independently per service
   3. Repository adapters implement existing port interfaces using Drizzle queries, with `toDomain()`/`toPersistence()` mappers that keep Drizzle types in infrastructure
   4. All 6 services start and health checks pass after all repository adapters are wired
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ### Phase 14: Verification & Documentation
 **Goal**: The entire platform operates correctly with PostgreSQL, and all documentation reflects the new tech stack
@@ -97,7 +107,9 @@
   2. CLAUDE.md tech stack section references PostgreSQL + Drizzle ORM (not MongoDB), with correct versions and patterns
   3. All drizzle-kit migrations apply cleanly on a fresh database (drop and recreate scenario)
   4. Gateway proxies a request to a gRPC service and returns the expected response format
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 09-01-PLAN.md — Purge MongoDB references, replace MONGODB_URI with DATABASE_URL
 
 ## Progress
 
@@ -114,7 +126,7 @@ Phases execute in numeric order: 9 -> 10 -> 11 -> 12 -> 13 -> 14
 | 6. Health & Resilience | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 7. Logging, Security & Operations | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 9. Config & MongoDB Cleanup | v2.0 | 0/TBD | Not started | - |
+| 9. Config & MongoDB Cleanup | v2.0 | 0/1 | Not started | - |
 | 10. Foundation DrizzleModule & Health | v2.0 | 0/TBD | Not started | - |
 | 11. Docker Infrastructure | v2.0 | 0/TBD | Not started | - |
 | 12. Auth Schema & Repository (Reference) | v2.0 | 0/TBD | Not started | - |
