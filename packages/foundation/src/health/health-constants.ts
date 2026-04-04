@@ -11,5 +11,6 @@ export const HEALTH = {
     MEMORY_HEAP: 'memory_heap',
     REDIS: 'redis',
     RABBITMQ: 'rabbitmq',
+    POSTGRESQL: 'postgresql',
   },
 } as const;
