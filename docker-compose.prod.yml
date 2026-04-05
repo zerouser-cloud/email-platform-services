@@ -3,7 +3,7 @@ services:
   gateway:
     image: ghcr.io/zerouser-cloud/email-platform-gateway:${IMAGE_TAG:-latest}
     pull_policy: always
-    ports: ["3000:3000"]
+    expose: ["3000"]
     restart: unless-stopped
     init: true
     healthcheck:
