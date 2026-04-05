@@ -41,7 +41,7 @@
 - [x] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files (completed 2026-04-04)
 - [x] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache (completed 2026-04-04)
 - [x] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache (completed 2026-04-04)
-- [ ] **Phase 18: Deployment via Coolify** - Deploy to VPS via Coolify with auto-deploy, HTTPS, and Coolify-managed infrastructure
+- [ ] **Phase 18: Deployment** - SSH deploy to VPS with Caddy reverse proxy and health verification
 - [ ] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo
 
 ## Phase Details
@@ -138,15 +138,15 @@ Plans:
 ### Phase 18: Deployment via Coolify
 **Goal**: Email platform deployed on VPS via Coolify with all infrastructure as Coolify-managed resources, auto-deploy from GitHub, and HTTPS access
 **Depends on**: Phase 17.2
-**Requirements**: DPLY-01, DPLY-02, DPLY-03, DPLY-04
+**Requirements**: DPLY-01, DPLY-02, DPLY-03
 **Success Criteria** (what must be TRUE):
   1. Coolify project has two environments (dev, production) with all infrastructure: PostgreSQL (native DB), Redis (native DB), RabbitMQ (one-click Service), Garage (one-click Service for S3-compatible storage)
-  2. GitHub repository `zerouser-cloud/email-platform-services` connected to Coolify, auto-deploy configured for dev branch -> dev environment, main branch -> production environment
-  3. Application services deployed from GHCR images with env vars pointing to Coolify-managed infrastructure (DATABASE_URL, REDIS_URL, RABBITMQ_URL, STORAGE_ENDPOINT)
-  4. Traefik (via Coolify) routes `api.dev.email-platform.pp.ua` -> dev gateway, `api.email-platform.pp.ua` -> prod gateway, with auto-TLS
-  5. Health check endpoints respond: `https://api.email-platform.pp.ua/health/ready` returns all services SERVING
-  6. Env vars renamed: MINIO_* -> STORAGE_* (storage-agnostic) in env schema, .env files, and Coolify env config
-**Plans**: 3 plans
+  2. GitHub repository `zerouser-cloud/email-platform-services` connected to Coolify, auto-deploy configured for dev branch → dev environment, main branch → production environment
+  3. Application services deployed from GHCR images with env vars pointing to Coolify-managed infrastructure (DATABASE_URL, REDIS_URL, RABBITMQ_URL, S3_ENDPOINT)
+  4. Traefik (via Coolify) routes `dev.email-platform.pp.ua` → dev gateway, `email-platform.pp.ua` → prod gateway, with auto-TLS
+  5. Health check endpoints respond: `https://dev.email-platform.pp.ua/health/ready` returns all services SERVING
+  6. Env vars renamed: MINIO_* → S3_* (storage-agnostic) in env schema, .env files, and Coolify env config
+**Plans**: 3 planned, 1 complete
 **Canonical refs**: `infra/docker/app.Dockerfile`, `packages/config/src/infrastructure.ts`, `.github/workflows/docker-build.yml`
 **Inputs provided**:
   - VPS IP: `135.181.41.169`
@@ -155,11 +155,6 @@ Plans:
   - Coolify: v4.0.0-beta.442 (already installed)
   - GitHub: `zerouser-cloud/email-platform-services` (public)
   - GHCR: `ghcr.io/zerouser-cloud/email-platform-<service>`
-
-Plans:
-- [ ] 18-01-PLAN.md -- MINIO->STORAGE env rename, docker-compose.prod.yml, GHA deploy step
-- [ ] 18-02-PLAN.md -- Coolify project, environments, infrastructure resources, GitHub App
-- [ ] 18-03-PLAN.md -- Coolify application deployment, domains, env vars, health verification
 
 ### Phase 19: Verification
 **Goal**: Both development workflows and the CI pipeline are validated end-to-end on a clean state
@@ -199,5 +194,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 17. Docker Image Build & Push | v3.0 | 1/1 | Complete    | 2026-04-04 |
 | 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete    | 2026-04-04 |
-| 18. Deployment via Coolify | v3.0 | 0/3 | In Progress | - |
+| 18. Deployment | v3.0 | 0/? | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
