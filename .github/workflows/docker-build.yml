@@ -54,10 +54,14 @@ jobs:
     name: Trigger Coolify Redeploy
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Trigger Coolify webhook
+      - name: Trigger Coolify deploy
         run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            WEBHOOK="${{ secrets.COOLIFY_PROD_WEBHOOK }}"
+          else
+            WEBHOOK="${{ secrets.COOLIFY_DEV_WEBHOOK }}"
+          fi
           curl --silent --fail --request GET \
-            '${{ secrets.COOLIFY_WEBHOOK }}' \
-            --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
+            "${WEBHOOK}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
