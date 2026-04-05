@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
-status: verifying
-stopped_at: Completed 17.2-03-PLAN.md
-last_updated: "2026-04-04T18:27:43.027Z"
-last_activity: 2026-04-04
+status: completed
+stopped_at: Completed 18-01-PLAN.md
+last_updated: "2026-04-05T08:14:17.075Z"
+last_activity: 2026-04-05 -- Plan 01 complete (env rename + prod compose + deploy step)
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 8
-  completed_plans: 8
-  percent: 0
+  completed_plans: 9
+  percent: 33
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-04)
 
 ## Current Position
 
-Phase: 18
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-04
+Phase: 18 (deployment-via-coolify) — EXECUTING
+Plan: 2 of 3
+Status: Plan 01 complete, continuing to Plan 02
+Last activity: 2026-04-05 -- Plan 01 complete (env rename + prod compose + deploy step)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 17.2 P01 | 2min | 2 tasks | 2 files |
 | Phase 17.2 P02 | 2min | 2 tasks | 9 files |
 | Phase 17.2 P03 | 3min | 2 tasks | 25 files |
+| Phase 18 P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 17.2]: No-magic-values skill created with decision tree, four extraction patterns (as const, Symbol, shared, extend existing), anti-patterns table
 - [Phase 17.2]: Remove environment field from pino log base entirely for 12-Factor compliance; simplify retry-connect to RETRY_DEFAULTS spread without process.env reads
 - [Phase 17.2]: All @Inject() call sites updated to use named Symbol constants -- string-based injection would silently fail at runtime with Symbol tokens
+- [Phase 18]: STORAGE_* prefix for storage-agnostic naming (MinIO/Garage/S3 compatible)
+- [Phase 18]: Coolify compose: no networks/env_file/build directives; deploy job only on main branch
 
 ### Roadmap Evolution
 
@@ -105,6 +108,6 @@ Progress: [░░░░░░░░░░] 0%
 
 ## Session Continuity
 
-Last session: 2026-04-04T18:23:00.503Z
-Stopped at: Completed 17.2-03-PLAN.md
+Last session: 2026-04-05T08:14:17.073Z
+Stopped at: Completed 18-01-PLAN.md
 Resume file: None

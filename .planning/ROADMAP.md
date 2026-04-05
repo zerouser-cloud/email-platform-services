@@ -146,7 +146,7 @@ Plans:
   4. Traefik (via Coolify) routes `dev.email-platform.pp.ua` → dev gateway, `email-platform.pp.ua` → prod gateway, with auto-TLS
   5. Health check endpoints respond: `https://dev.email-platform.pp.ua/health/ready` returns all services SERVING
   6. Env vars renamed: MINIO_* → S3_* (storage-agnostic) in env schema, .env files, and Coolify env config
-**Plans**: TBD
+**Plans**: 3 planned, 1 complete
 **Canonical refs**: `infra/docker/app.Dockerfile`, `packages/config/src/infrastructure.ts`, `.github/workflows/docker-build.yml`
 **Inputs provided**:
   - VPS IP: `135.181.41.169`
