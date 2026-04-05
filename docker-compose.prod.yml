@@ -1,43 +1,11 @@
-x-shared-env: &shared-env
-  GATEWAY_PORT: ${GATEWAY_PORT}
-  AUTH_PORT: ${AUTH_PORT}
-  SENDER_PORT: ${SENDER_PORT}
-  PARSER_PORT: ${PARSER_PORT}
-  AUDIENCE_PORT: ${AUDIENCE_PORT}
-  NOTIFIER_PORT: ${NOTIFIER_PORT}
-  AUTH_GRPC_URL: ${AUTH_GRPC_URL}
-  SENDER_GRPC_URL: ${SENDER_GRPC_URL}
-  PARSER_GRPC_URL: ${PARSER_GRPC_URL}
-  AUDIENCE_GRPC_URL: ${AUDIENCE_GRPC_URL}
-  DATABASE_URL: ${DATABASE_URL}
-  REDIS_URL: ${REDIS_URL}
-  RABBITMQ_URL: ${RABBITMQ_URL}
-  STORAGE_ENDPOINT: ${STORAGE_ENDPOINT}
-  STORAGE_PORT: ${STORAGE_PORT}
-  STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY}
-  STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY}
-  STORAGE_BUCKET: ${STORAGE_BUCKET}
-  STORAGE_REGION: ${STORAGE_REGION}
-  LOG_LEVEL: ${LOG_LEVEL}
-  LOG_FORMAT: ${LOG_FORMAT}
-  CORS_ORIGINS: ${CORS_ORIGINS}
-  CORS_STRICT: ${CORS_STRICT}
-  PROTO_DIR: ${PROTO_DIR:-/app/proto}
-  GRPC_DEADLINE_MS: ${GRPC_DEADLINE_MS}
-  RATE_LIMIT_BURST_TTL: ${RATE_LIMIT_BURST_TTL}
-  RATE_LIMIT_BURST_LIMIT: ${RATE_LIMIT_BURST_LIMIT}
-  RATE_LIMIT_SUSTAINED_TTL: ${RATE_LIMIT_SUSTAINED_TTL}
-  RATE_LIMIT_SUSTAINED_LIMIT: ${RATE_LIMIT_SUSTAINED_LIMIT}
-
 services:
 
   gateway:
     image: ghcr.io/zerouser-cloud/email-platform-gateway:${IMAGE_TAG:-latest}
+    pull_policy: always
     ports: ["3000:3000"]
     restart: unless-stopped
     init: true
-    environment:
-      <<: *shared-env
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
       interval: 10s
@@ -47,11 +15,10 @@ services:
 
   auth:
     image: ghcr.io/zerouser-cloud/email-platform-auth:${IMAGE_TAG:-latest}
+    pull_policy: always
     expose: ["3001", "50051"]
     restart: unless-stopped
     init: true
-    environment:
-      <<: *shared-env
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3001/health/live"]
       interval: 10s
@@ -61,11 +28,10 @@ services:
 
   sender:
     image: ghcr.io/zerouser-cloud/email-platform-sender:${IMAGE_TAG:-latest}
+    pull_policy: always
     expose: ["3002", "50052"]
     restart: unless-stopped
     init: true
-    environment:
-      <<: *shared-env
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3002/health/live"]
       interval: 10s
@@ -75,11 +41,10 @@ services:
 
   parser:
     image: ghcr.io/zerouser-cloud/email-platform-parser:${IMAGE_TAG:-latest}
+    pull_policy: always
     expose: ["3003", "50053"]
     restart: unless-stopped
     init: true
-    environment:
-      <<: *shared-env
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3003/health/live"]
       interval: 10s
@@ -89,11 +54,10 @@ services:
 
   audience:
     image: ghcr.io/zerouser-cloud/email-platform-audience:${IMAGE_TAG:-latest}
+    pull_policy: always
     expose: ["3004", "50054"]
     restart: unless-stopped
     init: true
-    environment:
-      <<: *shared-env
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3004/health/live"]
       interval: 10s
@@ -103,11 +67,10 @@ services:
 
   notifier:
     image: ghcr.io/zerouser-cloud/email-platform-notifier:${IMAGE_TAG:-latest}
+    pull_policy: always
     expose: ["3005"]
     restart: unless-stopped
     init: true
-    environment:
-      <<: *shared-env
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3005/health/live"]
       interval: 10s
