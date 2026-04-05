@@ -138,7 +138,7 @@ Plans:
 ### Phase 18: Deployment via Coolify
 **Goal**: Email platform deployed on VPS via Coolify with all infrastructure as Coolify-managed resources, auto-deploy from GitHub, and HTTPS access
 **Depends on**: Phase 17.2
-**Requirements**: DPLY-01, DPLY-02, DPLY-03
+**Requirements**: DPLY-01, DPLY-02, DPLY-03, DPLY-04
 **Success Criteria** (what must be TRUE):
   1. Coolify project has two environments (dev, production) with all infrastructure: PostgreSQL (native DB), Redis (native DB), RabbitMQ (one-click Service), Garage (one-click Service for S3-compatible storage)
   2. GitHub repository `zerouser-cloud/email-platform-services` connected to Coolify, auto-deploy configured for dev branch -> dev environment, main branch -> production environment
