@@ -5,9 +5,7 @@ import { AudienceGrpcServer } from './infrastructure/grpc/audience.grpc-server';
 import { ImportRecipientsUseCase } from './application/use-cases/import-recipients.use-case';
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
 import { HealthController } from './health/health.controller';
-
-export const RECIPIENT_REPOSITORY_PORT = Symbol('RecipientRepositoryPort');
-export const IMPORT_RECIPIENTS_PORT = Symbol('ImportRecipientsPort');
+import { RECIPIENT_REPOSITORY_PORT, IMPORT_RECIPIENTS_PORT } from './audience.constants';
 
 @Module({
   imports: [

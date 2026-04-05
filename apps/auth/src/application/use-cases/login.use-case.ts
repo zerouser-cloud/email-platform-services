@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { LoginPort, LoginResult } from '../ports/inbound/login.port';
 import { UserRepositoryPort } from '../ports/outbound/user-repository.port';
-import { USER_REPOSITORY_PORT } from '../../auth.module';
+import { USER_REPOSITORY_PORT } from '../../auth.constants';
 
 @Injectable()
 export class LoginUseCase implements LoginPort {

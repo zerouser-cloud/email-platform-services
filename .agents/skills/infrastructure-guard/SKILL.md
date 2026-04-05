@@ -114,14 +114,29 @@ Modifying docker-compose?
 
 ## Conflict Resolution
 
-When a standard port is occupied on the developer's machine:
+**ABSOLUTE RULE: Never change port numbers to resolve conflicts. Kill the conflicting process instead.**
+
+When a standard port is occupied:
 
 ```
 Port 5432 busy?
-├─ Option A: Stop local PostgreSQL    → sudo systemctl stop postgresql
-├─ Option B: Use different host port  → Change in .env only, NOT in compose
-├─ Option C: Use Docker network only  → No host port, access via docker exec
-└─ NEVER: Change compose default      → This affects ALL developers
+│
+├─ Step 1: Identify what's using it
+│   └─ docker ps --format '{{.Names}} {{.Ports}}' | grep 5432
+│   └─ ss -tlnp | grep 5432
+│
+├─ Step 2: Ask the user
+│   └─ "Port 5432 is occupied by <container/process>. Can I stop it?"
+│
+├─ Step 3: Only after user approves
+│   └─ docker stop <container>
+│   └─ OR: sudo systemctl stop postgresql
+│
+└─ NEVER:
+    ├─ Change port in docker-compose     → Affects ALL developers
+    ├─ Change port in .env               → Creates config drift
+    ├─ Change port in dev-ports override  → Same problem
+    └─ Use a different port "temporarily" → Nothing is more permanent
 ```
 
-**The compose file defines the STANDARD. Local overrides go in .env.**
+**The port is standard. The conflict is temporary. Fix the conflict, not the port.**

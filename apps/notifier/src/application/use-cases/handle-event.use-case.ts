@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { HandleEventPort } from '../ports/inbound/handle-event.port';
 import { NotificationSenderPort } from '../ports/outbound/notification-sender.port';
-import { NOTIFICATION_SENDER_PORT } from '../../notifier.module';
+import { NOTIFICATION_SENDER_PORT } from '../../notifier.constants';
 
 @Injectable()
 export class HandleEventUseCase implements HandleEventPort {

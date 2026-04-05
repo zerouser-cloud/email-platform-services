@@ -5,9 +5,7 @@ import { AuthGrpcServer } from './infrastructure/grpc/auth.grpc-server';
 import { LoginUseCase } from './application/use-cases/login.use-case';
 import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
 import { HealthController } from './health/health.controller';
-
-export const USER_REPOSITORY_PORT = Symbol('UserRepositoryPort');
-export const LOGIN_PORT = Symbol('LoginPort');
+import { USER_REPOSITORY_PORT, LOGIN_PORT } from './auth.constants';
 
 @Module({
   imports: [AppConfigModule, PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],

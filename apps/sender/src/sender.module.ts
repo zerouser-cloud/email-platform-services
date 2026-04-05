@@ -5,9 +5,7 @@ import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
 import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
 import { HealthController } from './health/health.controller';
-
-export const CAMPAIGN_REPOSITORY_PORT = Symbol('CampaignRepositoryPort');
-export const CREATE_CAMPAIGN_PORT = Symbol('CreateCampaignPort');
+import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constants';
 
 @Module({
   imports: [

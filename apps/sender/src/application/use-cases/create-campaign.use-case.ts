@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateCampaignPort, CreateCampaignResult } from '../ports/inbound/create-campaign.port';
 import { CampaignRepositoryPort } from '../ports/outbound/campaign-repository.port';
-import { CAMPAIGN_REPOSITORY_PORT } from '../../sender.module';
+import { CAMPAIGN_REPOSITORY_PORT } from '../../sender.constants';
 
 @Injectable()
 export class CreateCampaignUseCase implements CreateCampaignPort {

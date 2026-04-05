@@ -1,7 +1,7 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { AuthProto, CommonProto } from '@email-platform/contracts';
 import { LoginPort } from '../../application/ports/inbound/login.port';
-import { LOGIN_PORT } from '../../auth.module';
+import { LOGIN_PORT } from '../../auth.constants';
 
 @Controller()
 @AuthProto.AuthServiceControllerMethods()

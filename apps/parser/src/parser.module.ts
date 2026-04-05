@@ -5,9 +5,7 @@ import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
 import { StartParsingUseCase } from './application/use-cases/start-parsing.use-case';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
 import { HealthController } from './health/health.controller';
-
-export const PARSER_TASK_REPOSITORY_PORT = Symbol('ParserTaskRepositoryPort');
-export const START_PARSING_PORT = Symbol('StartParsingPort');
+import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.constants';
 
 @Module({
   imports: [

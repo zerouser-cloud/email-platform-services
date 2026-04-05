@@ -1,7 +1,7 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { AudienceProto, CommonProto } from '@email-platform/contracts';
 import { ImportRecipientsPort } from '../../application/ports/inbound/import-recipients.port';
-import { IMPORT_RECIPIENTS_PORT } from '../../audience.module';
+import { IMPORT_RECIPIENTS_PORT } from '../../audience.constants';
 
 @Controller()
 @AudienceProto.AudienceServiceControllerMethods()

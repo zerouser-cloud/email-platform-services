@@ -1,7 +1,7 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { SenderProto, CommonProto } from '@email-platform/contracts';
 import { CreateCampaignPort } from '../../application/ports/inbound/create-campaign.port';
-import { CREATE_CAMPAIGN_PORT } from '../../sender.module';
+import { CREATE_CAMPAIGN_PORT } from '../../sender.constants';
 
 @Controller()
 @SenderProto.SenderServiceControllerMethods()

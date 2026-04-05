@@ -4,7 +4,7 @@ import {
   ImportRecipientsResult,
 } from '../ports/inbound/import-recipients.port';
 import { RecipientRepositoryPort } from '../ports/outbound/recipient-repository.port';
-import { RECIPIENT_REPOSITORY_PORT } from '../../audience.module';
+import { RECIPIENT_REPOSITORY_PORT } from '../../audience.constants';
 
 @Injectable()
 export class ImportRecipientsUseCase implements ImportRecipientsPort {

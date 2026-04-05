@@ -1,7 +1,7 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { ParserProto, CommonProto } from '@email-platform/contracts';
 import { StartParsingPort } from '../../application/ports/inbound/start-parsing.port';
-import { START_PARSING_PORT } from '../../parser.module';
+import { START_PARSING_PORT } from '../../parser.constants';
 
 @Controller()
 @ParserProto.ParserServiceControllerMethods()

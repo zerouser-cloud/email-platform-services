@@ -6,9 +6,7 @@ import { HandleEventUseCase } from './application/use-cases/handle-event.use-cas
 import { TelegramNotificationSender } from './infrastructure/external/telegram-notification.sender';
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
 import { HealthController } from './health/health.controller';
-
-export const HANDLE_EVENT_PORT = Symbol('HandleEventPort');
-export const NOTIFICATION_SENDER_PORT = Symbol('NotificationSenderPort');
+import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
 @Module({
   imports: [AppConfigModule, TerminusModule, LoggingModule.forHttpAsync('notifier')],

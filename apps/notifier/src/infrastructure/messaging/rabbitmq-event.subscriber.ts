@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { HandleEventPort } from '../../application/ports/inbound/handle-event.port';
-import { HANDLE_EVENT_PORT } from '../../notifier.module';
+import { HANDLE_EVENT_PORT } from '../../notifier.constants';
 
 @Injectable()
 export class RabbitMQEventSubscriber {
