@@ -136,17 +136,25 @@ Plans:
 - [x] 17.2-03-PLAN.md -- Fix magic values in apps/ (DI tokens, varchar lengths, bootstrap)
 
 ### Phase 18: Deployment via Coolify
-**Goal**: Coolify installed on VPS, email-platform deployed via docker-compose resource with auto-deploy from GitHub on push to dev and main
-**Depends on**: Phase 17
+**Goal**: Email platform deployed on VPS via Coolify with all infrastructure as Coolify-managed resources, auto-deploy from GitHub, and HTTPS access
+**Depends on**: Phase 17.2
 **Requirements**: DPLY-01, DPLY-02, DPLY-03
 **Success Criteria** (what must be TRUE):
-  1. Coolify installed on VPS, accessible via HTTPS, connected to GitHub repository `zerouser-cloud/email-platform-services`
-  2. Docker-compose resource configured in Coolify — pulls images from GHCR and runs all services. Traefik (via Coolify) handles reverse proxy with auto-TLS for the gateway domain
-  3. Auto-deploy triggers on push to dev and main branches (separate environments in Coolify)
-  4. After deployment, health check endpoints return healthy status for all running services
-  5. Production compose file uses `image:` (GHCR images) instead of `build:` — no builds on server
+  1. Coolify project has two environments (dev, production) with all infrastructure: PostgreSQL (native DB), Redis (native DB), RabbitMQ (one-click Service), Garage (one-click Service for S3-compatible storage)
+  2. GitHub repository `zerouser-cloud/email-platform-services` connected to Coolify, auto-deploy configured for dev branch → dev environment, main branch → production environment
+  3. Application services deployed from GHCR images with env vars pointing to Coolify-managed infrastructure (DATABASE_URL, REDIS_URL, RABBITMQ_URL, S3_ENDPOINT)
+  4. Traefik (via Coolify) routes `dev.email-platform.pp.ua` → dev gateway, `email-platform.pp.ua` → prod gateway, with auto-TLS
+  5. Health check endpoints respond: `https://dev.email-platform.pp.ua/health/ready` returns all services SERVING
+  6. Env vars renamed: MINIO_* → S3_* (storage-agnostic) in env schema, .env files, and Coolify env config
 **Plans**: TBD
-**NOTE**: This phase requires VPS IP/domain and Coolify admin access as user input before planning.
+**Canonical refs**: `infra/docker/app.Dockerfile`, `packages/config/src/infrastructure.ts`, `.github/workflows/docker-build.yml`
+**Inputs provided**:
+  - VPS IP: `135.181.41.169`
+  - Domain: `email-platform.pp.ua`
+  - Dev subdomain: `dev.email-platform.pp.ua`
+  - Coolify: v4.0.0-beta.442 (already installed)
+  - GitHub: `zerouser-cloud/email-platform-services` (public)
+  - GHCR: `ghcr.io/zerouser-cloud/email-platform-<service>`
 
 ### Phase 19: Verification
 **Goal**: Both development workflows and the CI pipeline are validated end-to-end on a clean state

@@ -28,9 +28,10 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 
 ### Deployment (via Coolify)
 
-- [ ] **DPLY-01**: Coolify installed on VPS, GitHub repo connected, auto-deploy on push to dev/main
-- [ ] **DPLY-02**: Traefik (via Coolify) as reverse proxy with auto-TLS for gateway domain
-- [ ] **DPLY-03**: Health check verification after deploy
+- [ ] **DPLY-01**: Coolify environments (dev + prod) with infrastructure: PostgreSQL, Redis (native DBs), RabbitMQ, Garage (one-click Services). GitHub repo connected, auto-deploy on push to dev/main
+- [ ] **DPLY-02**: Traefik (via Coolify) routes dev.email-platform.pp.ua and email-platform.pp.ua to respective gateway services with auto-TLS
+- [ ] **DPLY-03**: Health check verification after deploy — /health/ready returns all services SERVING
+- [ ] **DPLY-04**: MINIO_* env vars renamed to S3_* (storage-agnostic) in schema, .env files, and Coolify config
 
 ### Verification
 
