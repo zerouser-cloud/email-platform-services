@@ -34,3 +34,6 @@ npm-debug.log*
 
 # Turbo cache
 .turbo/
+
+# Private credentials (Claude workspace)
+.planning/.secrets/

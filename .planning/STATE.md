@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
-status: completed
-stopped_at: Completed 18-01-PLAN.md
-last_updated: "2026-04-05T08:14:17.075Z"
-last_activity: 2026-04-05 -- Plan 01 complete (env rename + prod compose + deploy step)
+status: executing
+stopped_at: Phase 18 context gathered
+last_updated: "2026-04-05T08:09:48.761Z"
+last_activity: 2026-04-05 -- Phase 18 execution started
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 8
-  completed_plans: 9
-  percent: 33
+  total_plans: 11
+  completed_plans: 8
+  percent: 0
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 17.2 — no-magic-values-skill-audit
+**Current focus:** Phase 18 — deployment-via-coolify
 
 ## Current Position
 
 Phase: 18 (deployment-via-coolify) — EXECUTING
-Plan: 2 of 3
-Status: Plan 01 complete, continuing to Plan 02
-Last activity: 2026-04-05 -- Plan 01 complete (env rename + prod compose + deploy step)
+Plan: 1 of 3
+Status: Executing Phase 18
+Last activity: 2026-04-05 -- Phase 18 execution started
 
-Progress: [███░░░░░░░] 33%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -61,7 +61,6 @@ Progress: [███░░░░░░░] 33%
 | Phase 17.2 P01 | 2min | 2 tasks | 2 files |
 | Phase 17.2 P02 | 2min | 2 tasks | 9 files |
 | Phase 17.2 P03 | 3min | 2 tasks | 25 files |
-| Phase 18 P01 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -82,8 +81,6 @@ Progress: [███░░░░░░░] 33%
 - [Phase 17.2]: No-magic-values skill created with decision tree, four extraction patterns (as const, Symbol, shared, extend existing), anti-patterns table
 - [Phase 17.2]: Remove environment field from pino log base entirely for 12-Factor compliance; simplify retry-connect to RETRY_DEFAULTS spread without process.env reads
 - [Phase 17.2]: All @Inject() call sites updated to use named Symbol constants -- string-based injection would silently fail at runtime with Symbol tokens
-- [Phase 18]: STORAGE_* prefix for storage-agnostic naming (MinIO/Garage/S3 compatible)
-- [Phase 18]: Coolify compose: no networks/env_file/build directives; deploy job only on main branch
 
 ### Roadmap Evolution
 
@@ -108,6 +105,6 @@ Progress: [███░░░░░░░] 33%
 
 ## Session Continuity
 
-Last session: 2026-04-05T08:14:17.073Z
-Stopped at: Completed 18-01-PLAN.md
-Resume file: None
+Last session: 2026-04-05T07:52:58.466Z
+Stopped at: Phase 18 context gathered
+Resume file: .planning/phases/18-deployment-via-coolify/18-CONTEXT.md
