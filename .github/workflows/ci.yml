@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  TURBO_SCM_BASE: ${{ github.base_ref }}
+  TURBO_SCM_BASE: origin/${{ github.base_ref }}
 
 jobs:
   lint:
