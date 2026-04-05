@@ -1,0 +1,73 @@
+services:
+
+  gateway:
+    image: ghcr.io/zerouser-cloud/email-platform-gateway:${IMAGE_TAG:-latest}
+    ports: ["3000:3000"]
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  auth:
+    image: ghcr.io/zerouser-cloud/email-platform-auth:${IMAGE_TAG:-latest}
+    expose: ["3001", "50051"]
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3001/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  sender:
+    image: ghcr.io/zerouser-cloud/email-platform-sender:${IMAGE_TAG:-latest}
+    expose: ["3002", "50052"]
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3002/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  parser:
+    image: ghcr.io/zerouser-cloud/email-platform-parser:${IMAGE_TAG:-latest}
+    expose: ["3003", "50053"]
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3003/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  audience:
+    image: ghcr.io/zerouser-cloud/email-platform-audience:${IMAGE_TAG:-latest}
+    expose: ["3004", "50054"]
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3004/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  notifier:
+    image: ghcr.io/zerouser-cloud/email-platform-notifier:${IMAGE_TAG:-latest}
+    expose: ["3005"]
+    restart: unless-stopped
+    init: true
+    healthcheck:
+      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3005/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
