@@ -29,8 +29,9 @@ COPY tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/${APP_NAME} ./apps/${APP_NAME}
 
-# Step 4: Build packages in dependency order, then target app
-RUN pnpm --filter @email-platform/contracts run build \
+# Step 4: Generate proto TypeScript, then build packages in dependency order
+RUN pnpm --filter @email-platform/contracts run generate \
+    && pnpm --filter @email-platform/contracts run build \
     && pnpm --filter @email-platform/config run build \
     && pnpm --filter @email-platform/foundation run build \
     && pnpm --filter @email-platform/${APP_NAME} run build
