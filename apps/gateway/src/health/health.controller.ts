@@ -43,7 +43,9 @@ export class HealthController {
   @Get(HEALTH.LIVE)
   @HealthCheck()
   liveness() {
-    return this.health.check([]);
+    return this.health
+      .check([])
+      .then((result) => ({ ...result, code_env: process.env.COOLIFY_BRANCH ?? 'local' }));
   }
 
   @Get(HEALTH.READY)
