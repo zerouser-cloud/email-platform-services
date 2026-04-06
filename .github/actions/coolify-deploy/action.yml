@@ -1,0 +1,22 @@
+name: Coolify Deploy
+description: Trigger Coolify redeployment via API
+
+inputs:
+  token:
+    description: Coolify API token
+    required: true
+  host:
+    description: Coolify host URL
+    required: true
+  uuid:
+    description: Coolify application UUID
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Trigger deploy
+      shell: bash
+      run: |
+        curl -fsSL -H "Authorization: Bearer ${{ inputs.token }}" \
+          "${{ inputs.host }}/api/v1/deploy?uuid=${{ inputs.uuid }}&force=false"
