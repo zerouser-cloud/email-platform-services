@@ -18,5 +18,7 @@ runs:
     - name: Trigger deploy
       shell: bash
       run: |
-        curl -fsSL -H "Authorization: Bearer ${{ inputs.token }}" \
-          "${{ inputs.host }}/api/v1/deploy?uuid=${{ inputs.uuid }}&force=false"
+        response=$(curl -fsS -H "Authorization: Bearer ${{ inputs.token }}" \
+          "${{ inputs.host }}/api/v1/deploy?uuid=${{ inputs.uuid }}&force=false")
+        echo "$response"
+        echo "$response" | grep -q '"deployments"' || { echo "::error::Deploy failed — unexpected response"; exit 1; }
