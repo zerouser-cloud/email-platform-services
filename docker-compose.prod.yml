@@ -8,7 +8,6 @@ services:
     init: true
     labels:
       diun.enable: "true"
-      diun.watch_repo: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
       interval: 10s
@@ -22,8 +21,6 @@ services:
     expose: ["3001", "50051"]
     restart: unless-stopped
     init: true
-    labels:
-      diun.enable: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3001/health/live"]
       interval: 10s
@@ -37,8 +34,6 @@ services:
     expose: ["3002", "50052"]
     restart: unless-stopped
     init: true
-    labels:
-      diun.enable: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3002/health/live"]
       interval: 10s
@@ -52,8 +47,6 @@ services:
     expose: ["3003", "50053"]
     restart: unless-stopped
     init: true
-    labels:
-      diun.enable: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3003/health/live"]
       interval: 10s
@@ -67,8 +60,6 @@ services:
     expose: ["3004", "50054"]
     restart: unless-stopped
     init: true
-    labels:
-      diun.enable: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3004/health/live"]
       interval: 10s
@@ -82,8 +73,6 @@ services:
     expose: ["3005"]
     restart: unless-stopped
     init: true
-    labels:
-      diun.enable: "true"
     healthcheck:
       test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3005/health/live"]
       interval: 10s
