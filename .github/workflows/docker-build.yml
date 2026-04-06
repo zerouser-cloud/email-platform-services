@@ -49,3 +49,17 @@ jobs:
           build-args: APP_NAME=${{ matrix.service }}
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  deploy:
+    name: Deploy to Coolify
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/coolify-deploy
+        with:
+          token: ${{ secrets.COOLIFY_TOKEN }}
+          host: ${{ secrets.COOLIFY_HOST }}
+          uuid: ${{ github.ref == 'refs/heads/dev' && secrets.COOLIFY_UUID_DEV || secrets.COOLIFY_UUID_PROD }}
