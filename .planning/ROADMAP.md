@@ -41,7 +41,8 @@
 - [x] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files (completed 2026-04-04)
 - [x] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache (completed 2026-04-04)
 - [x] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache (completed 2026-04-04)
-- [ ] **Phase 18: Deployment** - SSH deploy to VPS with Caddy reverse proxy and health verification
+- [x] **Phase 18: Deployment** - Coolify deployment with Diun auto-deploy, Cloudflare HTTPS (completed 2026-04-06)
+- [ ] **Phase 18.1: Deployment Polish** - Diun deduplication, prod auto-deploy, GitHub webhook cleanup, S3 setup (INSERTED)
 - [ ] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo
 
 ## Phase Details
@@ -138,7 +139,7 @@ Plans:
 ### Phase 18: Deployment via Coolify
 **Goal**: Email platform deployed on VPS via Coolify with all infrastructure as Coolify-managed resources, auto-deploy from GitHub, and HTTPS access
 **Depends on**: Phase 17.2
-**Requirements**: DPLY-01, DPLY-02, DPLY-03
+**Requirements**: DPLY-01, DPLY-02, DPLY-03, DPLY-04
 **Success Criteria** (what must be TRUE):
   1. Coolify project has two environments (dev, production) with all infrastructure: PostgreSQL (native DB), Redis (native DB), RabbitMQ (one-click Service), Garage (one-click Service for S3-compatible storage)
   2. GitHub repository `zerouser-cloud/email-platform-services` connected to Coolify, auto-deploy configured for dev branch → dev environment, main branch → production environment
@@ -146,7 +147,7 @@ Plans:
   4. Traefik (via Coolify) routes `dev.email-platform.pp.ua` → dev gateway, `email-platform.pp.ua` → prod gateway, with auto-TLS
   5. Health check endpoints respond: `https://dev.email-platform.pp.ua/health/ready` returns all services SERVING
   6. Env vars renamed: MINIO_* → S3_* (storage-agnostic) in env schema, .env files, and Coolify env config
-**Plans**: 3 planned, 1 complete
+**Plans**: 3 plans
 **Canonical refs**: `infra/docker/app.Dockerfile`, `packages/config/src/infrastructure.ts`, `.github/workflows/docker-build.yml`
 **Inputs provided**:
   - VPS IP: `135.181.41.169`
@@ -155,6 +156,28 @@ Plans:
   - Coolify: v4.0.0-beta.442 (already installed)
   - GitHub: `zerouser-cloud/email-platform-services` (public)
   - GHCR: `ghcr.io/zerouser-cloud/email-platform-<service>`
+
+Plans:
+- [x] 18-01-PLAN.md -- Env var rename, Dockerfile fix, docker-compose.prod.yml
+- [x] 18-02-PLAN.md -- Coolify project setup, infrastructure resources
+- [x] 18-03-PLAN.md -- Service deployment and auto-deploy pipeline
+
+### Phase 18.1: Deployment Polish (INSERTED)
+**Goal**: Довести автодеплой до production-ready состояния: Diun мониторит только наши образы, один webhook на цикл, prod автодеплой, убрать GitHub webhook, настроить S3
+**Depends on**: Phase 18
+**Requirements**: DPLY-01 (refinement), DPLY-02 (refinement)
+**Success Criteria** (what must be TRUE):
+  1. Diun monitors only 6 email-platform images (WATCHBYDEFAULT=false + diun.enable labels)
+  2. Image update triggers exactly one Coolify deploy call (not six)
+  3. Both dev and prod environments auto-deploy on new GHCR images
+  4. GitHub manual webhook removed (no double deploys)
+  5. Health liveness endpoint has no test version artifact
+  6. Garage S3 bucket and keys created (or explicitly deferred)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 18.1-01-PLAN.md -- Remove test v2 version, add Diun labels to docker-compose.prod.yml
+- [ ] 18.1-02-PLAN.md -- Coolify Diun config, GitHub webhook cleanup, Garage S3 setup
 
 ### Phase 19: Verification
 **Goal**: Both development workflows and the CI pipeline are validated end-to-end on a clean state
@@ -194,5 +217,6 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 17. Docker Image Build & Push | v3.0 | 1/1 | Complete    | 2026-04-04 |
 | 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete    | 2026-04-04 |
-| 18. Deployment | v3.0 | 0/? | Not started | - |
+| 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
+| 18.1. Deployment Polish | v3.0 | 0/2 | Not started | - |
 | 19. Verification | v3.0 | 0/? | Not started | - |
