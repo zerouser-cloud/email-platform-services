@@ -43,7 +43,7 @@ export class HealthController {
   @Get(HEALTH.LIVE)
   @HealthCheck()
   liveness() {
-    return this.health.check([]).then((result) => ({ ...result, version: 'v2' }));
+    return this.health.check([]);
   }
 
   @Get(HEALTH.READY)
