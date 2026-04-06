@@ -104,9 +104,10 @@ Progress: [░░░░░░░░░░] 0%
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260404-pja | Fix env schema: strict validation, no defaults | 2026-04-04 | fa29e64 | [260404-pja-fix-env-schema](./quick/260404-pja-fix-env-schema-strict-validation-no-defa/) |
+| 260406-oes | Replace Diun with CI push-based Coolify deploy | 2026-04-06 | b099435 | [260406-oes-pivot-deploy](./quick/260406-oes-pivot-deploy-replace-diun-with-ci-push-b/) |
 
 ## Session Continuity
 
-Last session: 2026-04-06T11:51:07.799Z
-Stopped at: Completed 18.1-01-PLAN.md
+Last session: 2026-04-06T14:39:00Z
+Stopped at: Completed 260406-oes quick task
 Resume file: None
