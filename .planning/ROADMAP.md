@@ -176,7 +176,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 18.1-01-PLAN.md -- Remove test v2 version, add Diun labels to docker-compose.prod.yml
+- [x] 18.1-01-PLAN.md -- Remove test v2 version, add Diun labels to docker-compose.prod.yml
 - [ ] 18.1-02-PLAN.md -- Coolify Diun config, GitHub webhook cleanup, Garage S3 setup
 
 ### Phase 19: Verification
@@ -218,5 +218,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete    | 2026-04-04 |
 | 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
-| 18.1. Deployment Polish | v3.0 | 0/2 | Not started | - |
+| 18.1. Deployment Polish | v3.0 | 1/2 | In Progress|  |
 | 19. Verification | v3.0 | 0/? | Not started | - |
