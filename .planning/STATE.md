@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Infrastructure & CI/CD
 status: executing
-stopped_at: Phase 18 context gathered
-last_updated: "2026-04-05T08:09:48.761Z"
-last_activity: 2026-04-05 -- Phase 18 execution started
+stopped_at: Completed 18.1-01-PLAN.md
+last_updated: "2026-04-06T11:51:07.801Z"
+last_activity: 2026-04-06
 progress:
-  total_phases: 8
-  completed_phases: 6
-  total_plans: 11
-  completed_plans: 8
+  total_phases: 9
+  completed_phases: 7
+  total_plans: 13
+  completed_plans: 12
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 18 — deployment-via-coolify
+**Current focus:** Phase 18.1 — deployment-polish
 
 ## Current Position
 
-Phase: 18 (deployment-via-coolify) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 18
-Last activity: 2026-04-05 -- Phase 18 execution started
+Phase: 18.1 (deployment-polish) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-06
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -61,6 +61,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 17.2 P01 | 2min | 2 tasks | 2 files |
 | Phase 17.2 P02 | 2min | 2 tasks | 9 files |
 | Phase 17.2 P03 | 3min | 2 tasks | 25 files |
+| Phase 18.1-deployment-polish P01 | 1min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,7 @@ Progress: [░░░░░░░░░░] 0%
 - [Phase 17.2]: No-magic-values skill created with decision tree, four extraction patterns (as const, Symbol, shared, extend existing), anti-patterns table
 - [Phase 17.2]: Remove environment field from pino log base entirely for 12-Factor compliance; simplify retry-connect to RETRY_DEFAULTS spread without process.env reads
 - [Phase 17.2]: All @Inject() call sites updated to use named Symbol constants -- string-based injection would silently fail at runtime with Symbol tokens
+- [Phase 18.1]: diun.watch_repo only on gateway for single webhook trigger per update cycle
 
 ### Roadmap Evolution
 
@@ -102,9 +104,10 @@ Progress: [░░░░░░░░░░] 0%
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260404-pja | Fix env schema: strict validation, no defaults | 2026-04-04 | fa29e64 | [260404-pja-fix-env-schema](./quick/260404-pja-fix-env-schema-strict-validation-no-defa/) |
+| 260406-oes | Replace Diun with CI push-based Coolify deploy | 2026-04-06 | a219c0d | [260406-oes-pivot-deploy](./quick/260406-oes-pivot-deploy-replace-diun-with-ci-push-b/) |
 
 ## Session Continuity
 
-Last session: 2026-04-05T07:52:58.466Z
-Stopped at: Phase 18 context gathered
-Resume file: .planning/phases/18-deployment-via-coolify/18-CONTEXT.md
+Last session: 2026-04-06T14:39:00Z
+Stopped at: Completed 260406-oes quick task
+Resume file: None

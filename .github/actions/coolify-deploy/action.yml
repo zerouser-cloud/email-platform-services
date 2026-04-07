@@ -1,0 +1,24 @@
+name: Coolify Deploy
+description: Trigger Coolify redeployment via API
+
+inputs:
+  token:
+    description: Coolify API token
+    required: true
+  host:
+    description: Coolify host URL
+    required: true
+  uuid:
+    description: Coolify application UUID
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Trigger deploy
+      shell: bash
+      run: |
+        response=$(curl -fsS -H "Authorization: Bearer ${{ inputs.token }}" \
+          "${{ inputs.host }}/api/v1/deploy?uuid=${{ inputs.uuid }}&force=false")
+        echo "$response"
+        echo "$response" | grep -q '"deployments"' || { echo "::error::Deploy failed — unexpected response"; exit 1; }
