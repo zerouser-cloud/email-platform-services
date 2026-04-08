@@ -90,8 +90,8 @@ Plans:
   4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
 **Plans**: 2 plans
 Plans:
-- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [ ] 21-01-PLAN.md — Create CacheModule in foundation (ioredis, DI tokens, health, shutdown, namespace)
+- [ ] 21-02-PLAN.md — Integrate CacheModule into sender service
 
 ### Phase 22: S3 StorageModule
 **Goal**: Services can store and retrieve files through a DI-injected S3 client that works identically with MinIO (local) and Garage (production) without code changes
