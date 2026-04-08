@@ -29,14 +29,14 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 ### Deployment (via Coolify)
 
 - [x] **DPLY-01**: Coolify environments (dev + prod) with infrastructure: PostgreSQL, Redis (native DBs), RabbitMQ, Garage (one-click Services). GitHub repo connected, auto-deploy on push to dev/main
-- [ ] **DPLY-02**: Traefik (via Coolify) routes dev.email-platform.pp.ua and email-platform.pp.ua to respective gateway services with auto-TLS
+- [x] **DPLY-02**: Traefik (via Coolify) routes dev.email-platform.pp.ua and email-platform.pp.ua to respective gateway services with auto-TLS
 - [x] **DPLY-03**: Health check verification after deploy — /health/ready returns all services SERVING
 - [x] **DPLY-04**: MINIO_* env vars renamed to S3_* (storage-agnostic) in schema, .env files, and Coolify config
 
 ### Verification
 
 - [x] **VRFY-01**: Both dev modes work: local dev (infra in Docker) + full Docker
-- [ ] **VRFY-02**: CI pipeline passes on clean repo
+- [x] **VRFY-02**: CI pipeline passes on clean repo
 
 ## v2.0 Requirements (Validated)
 
@@ -91,10 +91,10 @@ Requirements for Infrastructure & CI/CD. Each maps to roadmap phases.
 | DBLD-02 | Phase 17 | Complete |
 | DBLD-03 | Phase 17 | Complete |
 | DPLY-01 | Phase 18 | Complete |
-| DPLY-02 | Phase 18 | Pending |
+| DPLY-02 | Phase 18 | Complete |
 | DPLY-03 | Phase 18 | Complete |
 | VRFY-01 | Phase 19 | Complete |
-| VRFY-02 | Phase 19 | Pending |
+| VRFY-02 | Phase 19 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 15 total
