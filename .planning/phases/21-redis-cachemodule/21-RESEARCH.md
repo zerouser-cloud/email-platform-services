@@ -395,17 +395,11 @@ export class HealthController {
 
 All assumptions are standard ioredis API behaviors with very low risk of being incorrect.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **RedisHealthIndicator DI for HealthIndicatorService**
-   - What we know: PostgresHealthIndicator injects HealthIndicatorService via constructor (provided by TerminusModule)
-   - What's unclear: When using useFactory in providers, HealthIndicatorService injection needs to be handled differently since we're constructing the instance manually
-   - Recommendation: Make RedisHealthIndicator a regular @Injectable class (like PostgresHealthIndicator) and use `useExisting` alias for REDIS_HEALTH token. The Redis client can be injected via the internal REDIS_CLIENT token
+1. **RedisHealthIndicator DI for HealthIndicatorService** — RESOLVED: Make RedisHealthIndicator a regular @Injectable class (like PostgresHealthIndicator) and use `useExisting` alias for REDIS_HEALTH token. The Redis client injected via internal REDIS_CLIENT token.
 
-2. **Audience service -- does it need Redis?**
-   - What we know: Audience env schema does NOT include RedisSchema currently. Sender does.
-   - What's unclear: Whether audience should add CacheModule in this phase
-   - Recommendation: Only add CacheModule to sender in this phase (it already has RedisSchema). Other services add when they have cache use cases
+2. **Audience service -- does it need Redis?** — RESOLVED: Only add CacheModule to sender in this phase (it already has RedisSchema). Other services add when they have cache use cases.
 
 ## Environment Availability
 
