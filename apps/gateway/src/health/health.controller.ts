@@ -4,7 +4,7 @@ import { HealthCheckService, HealthCheck, GRPCHealthIndicator } from '@nestjs/te
 import { type GrpcOptions } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { SERVICE } from '@email-platform/config';
-import { HEALTH } from '@email-platform/foundation';
+import { HEALTH, getBuildInfo } from '@email-platform/foundation';
 
 const checkOverallHealth = (healthService: {
   check: (data: { service: string }) => { toPromise: () => Promise<unknown> };
@@ -43,9 +43,7 @@ export class HealthController {
   @Get(HEALTH.LIVE)
   @HealthCheck()
   liveness() {
-    return this.health
-      .check([])
-      .then((result) => ({ ...result, code_env: process.env.COOLIFY_BRANCH ?? 'local' }));
+    return this.health.check([]).then((result) => ({ ...result, build: getBuildInfo() }));
   }
 
   @Get(HEALTH.READY)
