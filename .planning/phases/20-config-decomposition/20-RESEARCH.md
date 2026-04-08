@@ -359,17 +359,11 @@ Based on current module imports and config usage:
 | A2 | Cache by shape-key-join is sufficient for `loadConfig()` deduplication | Pitfalls | LOW -- microservices run one schema per process, cache mostly for idempotency |
 | A3 | Notifier needs RabbitMQ + Storage schemas based on planned usage | Service-to-Schema Mapping | LOW -- worst case is validating an extra var that exists in .env anyway |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **CorsSchema refine placement**
-   - What we know: Current CORS_STRICT/CORS_ORIGINS refine is on GlobalEnvSchema. Refines are lost on `.shape` spread.
-   - What's unclear: Should the refine live in CorsSchema (requiring custom compose logic) or in gateway's composed schema?
-   - Recommendation: Apply refine in gateway's composed schema only. CorsSchema exports base fields. This is simpler and aligns with the principle that cross-field validation belongs to the consumer.
+1. **CorsSchema refine placement** — RESOLVED: Apply refine in gateway's composed schema only. CorsSchema exports base fields without refine. Cross-field validation belongs to the consumer (gateway), not the sub-schema.
 
-2. **loadGlobalConfig() backward compat during migration**
-   - What we know: All 6 main.ts files call `loadGlobalConfig()`. Migration needs to be atomic or have a transition.
-   - What's unclear: Keep `loadGlobalConfig()` as a convenience wrapper or remove it?
-   - Recommendation: Keep `loadGlobalConfig()` as `loadConfig(GlobalEnvSchema)` wrapper during migration, deprecate after all services migrated. Alternatively, migrate all 6 at once (they're each a 3-line change).
+2. **loadGlobalConfig() backward compat during migration** — RESOLVED: Migrate all 6 services atomically (each is a 3-line change). loadGlobalConfig() becomes loadConfig(GlobalEnvSchema) wrapper, kept for backward compat but all services use loadConfig() directly with their own schemas.
 
 ## Sources
 
