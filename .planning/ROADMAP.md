@@ -240,3 +240,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.3: PersistenceModule — убрать PG_POOL export наружу (BACKLOG)
+
+**Goal:** PG_POOL экспортируется из PersistenceModule и доступен сервисам через DI, но это протечка инфраструктуры — сервисы должны работать через DRIZZLE (ORM абстракция), а не через raw pool. Проверить используется ли PG_POOL в apps/, если нет — убрать из exports. Если да — заменить на ORM операции. Аналогичный принцип применить ко всем infrastructure modules: экспортировать абстракцию, не raw client.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
