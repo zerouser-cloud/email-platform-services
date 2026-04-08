@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 20 context gathered
-last_updated: "2026-04-08T14:09:33.787Z"
-last_activity: 2026-04-08 -- Phase 20 planning complete
+stopped_at: Completed 20-01-PLAN.md
+last_updated: "2026-04-08T14:45:45.100Z"
+last_activity: 2026-04-08 -- Plan 01 complete (schema decomposition)
 progress:
   total_phases: 8
   completed_phases: 0
   total_plans: 2
-  completed_plans: 0
-  percent: 0
+  completed_plans: 1
+  percent: 50
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 20 of 27 (Config Decomposition) -- first phase of v4.0
-Plan: --
-Status: Ready to execute
-Last activity: 2026-04-08 -- Phase 20 planning complete
+Plan: 1 of 2 complete
+Status: Executing
+Last activity: 2026-04-08 -- Plan 01 complete (schema decomposition)
 
-Progress: [========================░░░░░░] 76% (v1-v3 complete, v4.0 starting)
+Progress: [█████░░░░░] 50% phase, [========================░░░░░░] 76% overall
 
 ## Performance Metrics
 
@@ -53,6 +53,8 @@ Progress: [========================░░░░░░] 76% (v1-v3 complete, v4.0
 - Last 5 plans: 1-3min each
 - Trend: Stable
 
+| Phase 20 P01 | 4min | 2 tasks | 15 files |
+
 ## Accumulated Context
 
 ### Decisions
@@ -62,6 +64,8 @@ Progress: [========================░░░░░░] 76% (v1-v3 complete, v4.0
 - [v3.0]: 12-Factor compliance -- no env branching, no NODE_ENV reads
 - [v4.0]: Config decomposition first -- modular sub-schemas unblock all infrastructure modules
 - [v4.0]: Build order: Config -> CacheModule -> StorageModule -> gRPC -> HTTP+CB -> EventModule -> Shutdown -> Tracing
+- [Phase 20]: Kept loadGlobalConfig() and default AppConfigModule for backward compat -- apps migrate in Plan 02
+- [Phase 20]: Manual GlobalEnv type due to TopologySchema dynamic shape -- z.infer cannot resolve
 
 ### Pending Todos
 
@@ -73,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T13:48:06.185Z
-Stopped at: Phase 20 context gathered
-Resume file: .planning/phases/20-config-decomposition/20-CONTEXT.md
+Last session: 2026-04-08T14:45:45.098Z
+Stopped at: Completed 20-01-PLAN.md
+Resume file: None
