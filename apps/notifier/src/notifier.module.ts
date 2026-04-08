@@ -10,7 +10,11 @@ import { HealthController } from './health/health.controller';
 import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
 @Module({
-  imports: [AppConfigModule.forRoot(NotifierEnvSchema), TerminusModule, LoggingModule.forHttpAsync('notifier')],
+  imports: [
+    AppConfigModule.forRoot(NotifierEnvSchema),
+    TerminusModule,
+    LoggingModule.forHttpAsync('notifier'),
+  ],
   controllers: [HealthController],
   providers: [
     { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationSender },
