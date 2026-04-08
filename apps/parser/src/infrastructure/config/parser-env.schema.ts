@@ -20,4 +20,8 @@ export const ParserEnvSchema = composeSchemas(
   GrpcSchema,
 );
 
-export type ParserEnv = GlobalTopology & DatabaseConfig & StorageConfig & LoggingConfig & GrpcConfig;
+export type ParserEnv = GlobalTopology &
+  DatabaseConfig &
+  StorageConfig &
+  LoggingConfig &
+  GrpcConfig;

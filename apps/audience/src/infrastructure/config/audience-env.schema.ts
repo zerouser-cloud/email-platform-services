@@ -20,4 +20,8 @@ export const AudienceEnvSchema = composeSchemas(
   GrpcSchema,
 );
 
-export type AudienceEnv = GlobalTopology & DatabaseConfig & RabbitConfig & LoggingConfig & GrpcConfig;
+export type AudienceEnv = GlobalTopology &
+  DatabaseConfig &
+  RabbitConfig &
+  LoggingConfig &
+  GrpcConfig;

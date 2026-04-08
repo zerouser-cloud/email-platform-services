@@ -9,7 +9,11 @@ import { HealthController } from './health/health.controller';
 import { USER_REPOSITORY_PORT, LOGIN_PORT } from './auth.constants';
 
 @Module({
-  imports: [AppConfigModule.forRoot(AuthEnvSchema), PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],
+  imports: [
+    AppConfigModule.forRoot(AuthEnvSchema),
+    PersistenceModule.forRootAsync(),
+    LoggingModule.forGrpcAsync('auth'),
+  ],
   controllers: [AuthGrpcServer, HealthController],
   providers: [
     { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
