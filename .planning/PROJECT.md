@@ -8,13 +8,20 @@
 
 Каждый сервис должен быть изолированным, с чёткими границами, единым источником истины и правильными контрактами — чтобы бизнес-логика могла строиться на надёжном фундаменте без переделок.
 
-## Current State
+## Current Milestone: v4.0 Infrastructure Abstractions & Cross-Cutting
 
-**Shipped:** v3.0 Infrastructure & CI/CD (2026-04-08)
+**Goal:** Унифицированные абстракции для всей инфраструктуры — каркасы в foundation, per-service адаптеры — с изоляцией сервисов от знаний об инфраструктуре, в стиле Clean/Hexagonal.
 
-Полный CI/CD pipeline: GitHub Actions → GHCR → Coolify auto-deploy. Два режима локальной разработки (`start:native`, `start:isolated`). Dev и prod окружения на Coolify с Cloudflare DNS. Garage S3 с WebUI для файлового хранилища. Build-info в каждом образе (commit hash, branch, timestamp).
-
-**Next:** v4.0 — S3 storage client с абстракцией, Docsify документация
+**Target features:**
+- gRPC client каркас в foundation + per-service адаптеры в infrastructure/clients/
+- RabbitMQ publisher/consumer абстракция + per-service конфигурация
+- HTTP client каркас для внешних API + per-service адаптеры
+- S3 client через AWS SDK (unified MinIO/Garage, env rename MINIO_* → S3_*)
+- Redis client в едином стиле
+- Distributed tracing (propagation через gRPC metadata, RabbitMQ headers)
+- Graceful shutdown (корректное завершение connections, in-flight запросов)
+- Circuit breaker для внешних HTTP вызовов
+- Config decomposition (модульная env-schema)
 
 ## Requirements
 
@@ -63,11 +70,15 @@
 - ✓ Both dev modes verified: start:native + start:isolated — Phase 19
 
 ### Active
-- [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
-- [ ] Правильные контракты между сервисами (proto как единый источник истины)
-- [ ] Устранение размазанности кода — общий код в packages/, специфичный в apps/
-- [ ] Безопасность: CORS wildcard в production, unsanitized error messages, hardcoded credentials
-- [ ] Корректная структура внутри каждого сервиса (ports, adapters, use cases) — без бизнес-логики, только каркас
+- [ ] gRPC client каркас в foundation + per-service адаптеры
+- [ ] RabbitMQ publisher/consumer абстракция + per-service конфигурация
+- [ ] HTTP client каркас для внешних API + per-service адаптеры
+- [ ] S3 client через AWS SDK (unified MinIO/Garage, env rename MINIO_* → S3_*)
+- [ ] Redis client в едином стиле с остальными infrastructure modules
+- [ ] Distributed tracing (propagation через gRPC metadata, RabbitMQ headers)
+- [ ] Graceful shutdown (корректное завершение connections, in-flight запросов)
+- [ ] Circuit breaker для внешних HTTP вызовов
+- [ ] Config decomposition (модульная env-schema вместо монолитной)
 
 ### Out of Scope
 
@@ -87,6 +98,8 @@
 - Prod: api.email-platform.pp.ua, Dev: api.dev.email-platform.pp.ua
 - Garage WebUI: garage.email-platform.pp.ua (prod), garage.dev.email-platform.pp.ua (dev)
 - Контроллеры — заглушки, бизнес-логика не реализована
+- PersistenceModule — reference implementation для infrastructure module pattern
+- Foundation даёт каркасы, каждый сервис автономно собирает нужные адаптеры
 
 ## Constraints
 
@@ -146,4 +159,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after v3.0 milestone complete*
+*Last updated: 2026-04-08 after v4.0 milestone start*

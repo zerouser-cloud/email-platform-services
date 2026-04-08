@@ -1,36 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: Infrastructure & CI/CD
-status: executing
-stopped_at: Completed 260406-oes quick task
-last_updated: "2026-04-08T11:33:36.177Z"
+milestone: v4.0
+milestone_name: Infrastructure Abstractions & Cross-Cutting
+status: defining
+stopped_at: null
+last_updated: "2026-04-08T00:00:00.000Z"
 last_activity: 2026-04-08
 progress:
-  total_phases: 9
-  completed_phases: 8
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-04)
+See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 18.1 — deployment-polish
+**Current focus:** Defining requirements for v4.0
 
 ## Current Position
 
-Phase: 19
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-08
-
-Progress: [░░░░░░░░░░] 0%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-08 — Milestone v4.0 started
 
 ## Performance Metrics
 
