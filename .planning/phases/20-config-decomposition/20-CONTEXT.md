@@ -102,7 +102,7 @@ Split monolithic env-schema into modular Zod sub-schemas per concern. Each servi
 <deferred>
 ## Deferred Ideas
 
-None — discussion stayed within phase scope
+- **CORS refine и wildcard handling** — пересмотреть подход к `.refine()` для CORS_STRICT/CORS_ORIGINS и логику `config.CORS_ORIGINS.split(',')` в gateway main.ts. Возможно упростить или убрать. Поднять при обсуждении Phase 23 (gRPC Client) или Phase 24 (HTTP Client), когда будем детально разбирать gateway.
 
 </deferred>
 
