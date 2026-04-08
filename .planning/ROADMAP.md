@@ -216,3 +216,14 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
 | 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
+
+## Backlog
+
+### Phase 999.1: TopologySchema Static Refactor — Single Source of Truth (BACKLOG)
+
+**Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
