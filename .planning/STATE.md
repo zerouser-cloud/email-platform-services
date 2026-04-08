@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 21 context gathered
-last_updated: "2026-04-08T17:03:50.011Z"
-last_activity: 2026-04-08 -- Phase 21 planning complete
+stopped_at: Completed 21-01-PLAN.md
+last_updated: "2026-04-08T17:09:57.923Z"
+last_activity: 2026-04-08
 progress:
   total_phases: 11
   completed_phases: 1
   total_plans: 4
-  completed_plans: 2
-  percent: 50
+  completed_plans: 3
+  percent: 75
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 20 - Config Decomposition
+**Current focus:** Phase 21 — Redis CacheModule
 
 ## Current Position
 
-Phase: 21 of 27 (redis cachemodule)
-Plan: Not started
+Phase: 21 (Redis CacheModule) — EXECUTING
+Plan: 2 of 2
 Status: Ready to execute
-Last activity: 2026-04-08 -- Phase 21 planning complete
+Last activity: 2026-04-08
 
 Progress: [█████░░░░░] 50% phase, [========================░░░░░░] 76% overall
 
@@ -56,6 +56,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 
 | Phase 20 P01 | 4min | 2 tasks | 15 files |
 | Phase 20 P02 | 10min | 2 tasks | 32 files |
+| Phase 21 P01 | 2min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 - [Phase 20]: Manual GlobalEnv type due to TopologySchema dynamic shape -- z.infer cannot resolve
 - [Phase 20]: Added zod as direct dep to all 6 apps -- fixes TS2742 cross-package type resolution for per-service schemas
 - [Phase 20]: Manual XxxEnv types with type assertions on loadConfig() -- same pattern as GlobalEnv for dynamic TopologySchema
+- [Phase 21]: Export RedisHealthIndicator from cache barrel for downstream backward compatibility
 
 ### Pending Todos
 
@@ -81,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T16:37:01.137Z
-Stopped at: Phase 21 context gathered
-Resume file: .planning/phases/21-redis-cachemodule/21-CONTEXT.md
+Last session: 2026-04-08T17:09:57.921Z
+Stopped at: Completed 21-01-PLAN.md
+Resume file: None

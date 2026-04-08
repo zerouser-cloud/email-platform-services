@@ -16,10 +16,10 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 
 ### Redis (CacheModule)
 
-- [ ] **CACHE-01**: CacheModule в foundation с `forRootAsync()`, Symbol DI tokens, health indicator, shutdown service
-- [ ] **CACHE-02**: Сервис может инжектить Redis client через DI token и выполнять get/set/del операции
-- [ ] **CACHE-03**: Health indicator отражает реальное состояние Redis connection (замена stub)
-- [ ] **CACHE-04**: Per-service namespace isolation (ключи не пересекаются между сервисами)
+- [x] **CACHE-01**: CacheModule в foundation с `forRootAsync()`, Symbol DI tokens, health indicator, shutdown service
+- [x] **CACHE-02**: Сервис может инжектить Redis client через DI token и выполнять get/set/del операции
+- [x] **CACHE-03**: Health indicator отражает реальное состояние Redis connection (замена stub)
+- [x] **CACHE-04**: Per-service namespace isolation (ключи не пересекаются между сервисами)
 
 ### S3 (StorageModule)
 
@@ -145,10 +145,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CFG-02 | Phase 20 | Complete |
 | CFG-03 | Phase 20 | Complete |
 | CFG-04 | Phase 20 | Complete |
-| CACHE-01 | Phase 21 | Pending |
-| CACHE-02 | Phase 21 | Pending |
-| CACHE-03 | Phase 21 | Pending |
-| CACHE-04 | Phase 21 | Pending |
+| CACHE-01 | Phase 21 | Complete |
+| CACHE-02 | Phase 21 | Complete |
+| CACHE-03 | Phase 21 | Complete |
+| CACHE-04 | Phase 21 | Complete |
 | S3-01 | Phase 22 | Pending |
 | S3-02 | Phase 22 | Pending |
 | S3-03 | Phase 22 | Pending |

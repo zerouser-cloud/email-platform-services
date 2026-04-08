@@ -90,7 +90,7 @@ Plans:
   4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
 **Plans**: 2 plans
 Plans:
-- [ ] 21-01-PLAN.md — Create CacheModule in foundation (ioredis, DI tokens, health, shutdown, namespace)
+- [x] 21-01-PLAN.md — Create CacheModule in foundation (ioredis, DI tokens, health, shutdown, namespace)
 - [ ] 21-02-PLAN.md — Integrate CacheModule into sender service
 
 ### Phase 22: S3 StorageModule
@@ -209,7 +209,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 18.1. Deployment Polish | v3.0 | 2/2 | Complete | 2026-04-08 |
 | 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
 | 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
-| 21. Redis CacheModule | v4.0 | 0/0 | Not started | - |
+| 21. Redis CacheModule | v4.0 | 1/2 | In Progress|  |
 | 22. S3 StorageModule | v4.0 | 0/0 | Not started | - |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
@@ -223,7 +223,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 0 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
