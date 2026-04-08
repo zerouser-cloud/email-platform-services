@@ -8,17 +8,13 @@
 
 Каждый сервис должен быть изолированным, с чёткими границами, единым источником истины и правильными контрактами — чтобы бизнес-логика могла строиться на надёжном фундаменте без переделок.
 
-## Current Milestone: v3.0 Infrastructure & CI/CD
+## Current State
 
-**Goal:** Настроить правильные dev/docker/production флоу с CI/CD pipeline, соблюдая 12-Factor принципы.
+**Shipped:** v3.0 Infrastructure & CI/CD (2026-04-08)
 
-**Target features:**
-- Откат неавторизованных изменений порта (POSTGRES_PORT → стандартный 5432)
-- Два режима разработки: local dev (infra в Docker, сервисы на хосте) и full Docker
-- Разделение docker-compose (infra vs services)
-- Синхронизация env файлов (.env, .env.docker, .env.example)
-- CI/CD pipeline (build → test → push image → deploy)
-- 12-Factor compliant deployment (один образ, разные env per environment)
+Полный CI/CD pipeline: GitHub Actions → GHCR → Coolify auto-deploy. Два режима локальной разработки (`start:native`, `start:isolated`). Dev и prod окружения на Coolify с Cloudflare DNS. Garage S3 с WebUI для файлового хранилища. Build-info в каждом образе (commit hash, branch, timestamp).
+
+**Next:** v4.0 — S3 storage client с абстракцией, Docsify документация
 
 ## Requirements
 
@@ -56,6 +52,15 @@
 
 - ✓ Docker Compose split (infra + full-stack), env sync, NODE_ENV removal — Phase 15
 - ✓ GitHub Actions CI: lint + typecheck + build on every PR, Turbo affected-only + cache — Phase 16
+- ✓ Docker port isolation: infra ports only in dev-ports override, gateway-only in full Docker — Phase 16.1
+- ✓ Docker images built per service via matrix, pushed to GHCR with branch-aware tags — Phase 17
+- ✓ DI double registration fix: single PG pool per service — Phase 17.1
+- ✓ No-magic-values skill + full codebase audit — Phase 17.2
+- ✓ Coolify deployment: dev + prod environments, PostgreSQL, Redis, RabbitMQ, Garage S3 — Phase 18
+- ✓ CI push-based deploy: GitHub Actions → Coolify API, 1 deploy per merge — Phase 18.1
+- ✓ Garage S3 with WebUI, buckets and keys for dev + prod — Phase 18.1
+- ✓ Build-info.json baked into Docker images (commit, branch, timestamp) — Phase 19
+- ✓ Both dev modes verified: start:native + start:isolated — Phase 19
 
 ### Active
 - [ ] Изоляция сервисов — нет cross-service утечек, каждый сервис владеет своими данными
@@ -74,13 +79,14 @@
 
 ## Context
 
-- Проект на раннем этапе: инфраструктура поднята, сервисы стартуют, но контроллеры пустые (заглушки)
-- Архитектура заявлена как Clean/Hexagonal, но не везде реализована
-- Proto-контракты определены, TypeScript типы сгенерированы, но дублируются в двух местах
-- Foundation package содержит shared-модули (logging, errors, resilience, gRPC clients) — это правильно
-- Конфигурация через Zod валидацию, но загружается множественно вместо одного раза
-- Docker Compose для локальной разработки, Helm для deployment
-- Есть встроенный агент `gsd-architecture-validator` для проверки Clean/DDD/Hexagonal в apps/
+- Shipped v3.0: полный CI/CD pipeline, Coolify deployment, 2 dev режима
+- 6 NestJS микросервисов + 3 shared packages, Clean/Hexagonal архитектура
+- PostgreSQL (Drizzle ORM), Redis, RabbitMQ, Garage S3 — вся инфра в Coolify
+- CI: GitHub Actions (lint, typecheck, build, Docker Build & Push, Coolify deploy)
+- Dev: `start:native` (infra Docker + сервисы на хосте) и `start:isolated` (всё в Docker)
+- Prod: api.email-platform.pp.ua, Dev: api.dev.email-platform.pp.ua
+- Garage WebUI: garage.email-platform.pp.ua (prod), garage.dev.email-platform.pp.ua (dev)
+- Контроллеры — заглушки, бизнес-логика не реализована
 
 ## Constraints
 
@@ -101,7 +107,10 @@
 | Kubernetes откладываем | Docker Compose достаточен для текущего масштаба (6 сервисов) | — Pending |
 | Инфра-изменения только с одобрения | Порты, credentials, docker-compose нельзя менять без согласования | ✓ Good |
 | PersistenceModule — единый фасад для PostgreSQL+Redis | Один модуль, один pool, один scope. Нет отдельных DrizzleModule/HealthModule | ✓ Good |
-| Deployment через Coolify | Self-hosted PaaS для всех проектов, auto-deploy из GitHub, Traefik + auto-TLS | — Pending |
+| Deployment через Coolify | Self-hosted PaaS для всех проектов, auto-deploy из GitHub, Traefik + auto-TLS | ✓ Good |
+| CI push-based deploy вместо Diun | Diun слал 6 webhooks per cycle, CI вызывает Coolify API 1 раз после сборки | ✓ Good |
+| Garage вместо MinIO на prod | Coolify one-click, S3-compatible, легковесный | ✓ Good |
+| Build-info.json вместо env vars | Зашито в образ при сборке, не зависит от runtime env | ✓ Good |
 
 ## Infrastructure Module Architecture
 
@@ -137,4 +146,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after Phase 16 CI Pipeline complete*
+*Last updated: 2026-04-08 after v3.0 milestone complete*
