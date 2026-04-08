@@ -1,5 +1,6 @@
 export * from './topology';
-export * from './infrastructure';
+export * from './schemas';
+export * from './compose';
 export * from './env-constants';
 export * from './env-schema';
 export * from './app-config.module';
