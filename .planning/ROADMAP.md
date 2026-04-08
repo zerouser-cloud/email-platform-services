@@ -74,7 +74,10 @@
   2. GlobalEnvSchema composes sub-schemas via spread -- adding a new sub-schema requires only one import line
   3. Each service's config module validates only the env vars relevant to its imported infrastructure modules, not the full set
   4. A developer can add a new env var group (e.g., for a new backing service) by creating one sub-schema file without modifying existing schemas
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 21: Redis CacheModule
 **Goal**: Services can use Redis for caching through a DI-injected client with health monitoring and namespace isolation, following the PersistenceModule pattern
@@ -85,7 +88,10 @@
   2. A service importing CacheModule can inject the Redis client via DI token and perform get/set/del operations against a running Redis instance
   3. Health endpoint reports real Redis connection status (not a stub returning "up")
   4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 22: S3 StorageModule
 **Goal**: Services can store and retrieve files through a DI-injected S3 client that works identically with MinIO (local) and Garage (production) without code changes
@@ -96,7 +102,10 @@
   2. The same client code works against MinIO (local dev) and Garage (production) -- switching requires only env var changes, zero code changes
   3. All env vars use S3_* prefix (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET) -- no MINIO_* references remain in codebase
   4. A service importing StorageModule can upload, download, and delete files through the injected client
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 23: gRPC Client Typed Wrappers
 **Goal**: Services communicate via gRPC using type-safe client wrappers that enforce proto contracts at compile time and handle deadlines automatically
@@ -107,7 +116,10 @@
   2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
   3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
   4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 24: HTTP Client & Circuit Breaker
 **Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection
@@ -118,7 +130,10 @@
   2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
   3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
   4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 25: RabbitMQ EventModule
 **Goal**: Services can publish and consume domain events through typed interfaces with guaranteed delivery semantics, dead letter handling, and health monitoring
@@ -130,7 +145,10 @@
   3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
   4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
   5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 26: Graceful Shutdown
 **Goal**: When a service receives SIGTERM, all in-flight work completes and all connections close in the correct order before the process exits
@@ -140,7 +158,10 @@
   1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
   2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
   3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 27: Distributed Tracing
 **Goal**: A single correlation ID follows a request from gateway entry through all downstream gRPC calls and RabbitMQ event chains, visible in every log line
@@ -150,7 +171,10 @@
   1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
   2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
   3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ## Progress
 
