@@ -68,6 +68,7 @@
 - ✓ Garage S3 with WebUI, buckets and keys for dev + prod — Phase 18.1
 - ✓ Build-info.json baked into Docker images (commit, branch, timestamp) — Phase 19
 - ✓ Both dev modes verified: start:native + start:isolated — Phase 19
+- ✓ Config decomposition: modular Zod sub-schemas, per-service env validation — Phase 20
 
 ### Active
 - [ ] gRPC client каркас в foundation + per-service адаптеры
@@ -159,4 +160,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after v4.0 milestone start*
+*Last updated: 2026-04-08 after Phase 20 complete*
