@@ -4,7 +4,8 @@
 
 - v1.0 Foundation Audit - Phases 1-8 (shipped 2026-04-04)
 - v2.0 PostgreSQL + Drizzle Migration - Phases 9-14 (shipped 2026-04-04)
-- v3.0 Infrastructure & CI/CD - Phases 15-19 (in progress)
+- v3.0 Infrastructure & CI/CD - Phases 15-19 (shipped 2026-04-08)
+- v4.0 Infrastructure Abstractions & Cross-Cutting - Phases 20-27 (in progress)
 
 ## Phases
 
@@ -34,166 +35,153 @@
 
 </details>
 
-### v3.0 Infrastructure & CI/CD (In Progress)
+<details>
+<summary>v3.0 Infrastructure & CI/CD (Phases 15-19) - SHIPPED 2026-04-08</summary>
 
-**Milestone Goal:** Establish proper dev/docker/production workflows with CI/CD pipeline, following 12-Factor principles.
+- [x] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files
+- [x] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache
+- [x] **Phase 16.1: Docker Port Isolation** - Infra ports only in dev-ports override, gateway-only in full Docker (INSERTED)
+- [x] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache
+- [x] **Phase 17.1: Fix DI Double Registration** - Single PG pool per service (INSERTED)
+- [x] **Phase 17.2: No Magic Values Skill & Audit** - Skill creation + full codebase audit (INSERTED)
+- [x] **Phase 18: Deployment via Coolify** - Coolify deployment with CI push-based deploy, Cloudflare HTTPS
+- [x] **Phase 18.1: Deployment Polish** - CI deploy dedup, Garage S3 setup (INSERTED)
+- [x] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo
 
-- [x] **Phase 15: Docker Compose Split & Environment** - Separate infra/services compose files, fix ports, sync env files (completed 2026-04-04)
-- [x] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache (completed 2026-04-04)
-- [x] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache (completed 2026-04-04)
-- [x] **Phase 18: Deployment** - Coolify deployment with Diun auto-deploy, Cloudflare HTTPS (completed 2026-04-06)
-- [x] **Phase 18.1: Deployment Polish** - Diun deduplication, prod auto-deploy, GitHub webhook cleanup, S3 setup (INSERTED) (completed 2026-04-08)
-- [x] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo (completed 2026-04-08)
+</details>
+
+### v4.0 Infrastructure Abstractions & Cross-Cutting (In Progress)
+
+**Milestone Goal:** Unified infrastructure abstractions -- framework modules in foundation, per-service adapters in infrastructure/ -- isolating services from infrastructure knowledge, Clean/Hexagonal style.
+
+- [x] **Phase 20: Config Decomposition** - Modular Zod sub-schemas per concern replacing monolithic env-schema (completed 2026-04-08)
+- [ ] **Phase 21: Redis CacheModule** - CacheModule in foundation with DI tokens, health indicator, per-service namespace isolation
+- [ ] **Phase 22: S3 StorageModule** - StorageModule in foundation with AWS SDK v3, unified MinIO/Garage, env rename MINIO->S3
+- [ ] **Phase 23: gRPC Client Typed Wrappers** - Type-safe gRPC client framework in foundation with deadline propagation
+- [ ] **Phase 24: HTTP Client & Circuit Breaker** - HTTP client framework with retry, timeout, circuit breaker for external APIs
+- [ ] **Phase 25: RabbitMQ EventModule** - Publisher/consumer abstraction with manual ack, DLQ, typed event interfaces
+- [ ] **Phase 26: Graceful Shutdown** - Centralized ShutdownOrchestrator managing ordered teardown of all modules
+- [ ] **Phase 27: Distributed Tracing** - Correlation ID propagation through gRPC metadata and RabbitMQ headers
 
 ## Phase Details
 
-### Phase 15: Docker Compose Split & Environment
-**Goal**: Developers have two working development modes -- local dev (infra in Docker, services on host) and full Docker -- with correct environment configuration and no unauthorized port overrides
-**Depends on**: Phase 14 (v2.0 complete)
-**Requirements**: DOCK-01, DOCK-02, DOCK-03, DOCK-04
+### Phase 20: Config Decomposition
+**Goal**: Services validate only the environment variables they actually need, and adding new infrastructure concerns does not require touching a monolithic schema
+**Depends on**: Phase 19 (v3.0 complete)
+**Requirements**: CFG-01, CFG-02, CFG-03, CFG-04
 **Success Criteria** (what must be TRUE):
-  1. Docker Compose is split into at least two files (infra-only and full-stack) using `include` or profiles, and `docker compose config` validates each without errors
-  2. Running `docker compose -f docker-compose.infra.yml up` exposes PostgreSQL (5432), Redis (6379), RabbitMQ (5672/15672), and MinIO (9000/9001) on the host for local dev
-  3. POSTGRES_PORT variable is removed -- PostgreSQL uses standard port 5432 hardcoded in docker-compose, matching DATABASE_URL
-  4. `.env`, `.env.docker`, and `.env.example` contain the same set of keys (values may differ), and `.env.example` is the tracked source of truth
-  5. All 6 services start successfully under both development modes (host-run and full Docker)
-**Plans**: 1 plan
-Plans:
-- [x] 15-01-PLAN.md -- Compose split, env sync, NODE_ENV removal, CORS fix, verification
-
-### Phase 16: CI Pipeline
-**Goal**: Every pull request is automatically validated for lint, typecheck, and build correctness, with fast feedback via Turbo caching
-**Depends on**: Phase 15
-**Requirements**: CI-01, CI-02, CI-03
-**Success Criteria** (what must be TRUE):
-  1. A GitHub Actions workflow triggers on every PR to main, running lint + typecheck + build steps
-  2. Turbo executes only affected packages (changed since base branch), not the entire monorepo
-  3. Turbo remote cache is configured via GitHub Actions cache backend -- second runs of unchanged packages hit cache and skip execution
-  4. CI completes successfully on a clean clone of the repository with no manual setup required
-**Plans**: 1 plan
-Plans:
-- [x] 16-01-PLAN.md -- CI workflow, turbo.json fix, Husky hooks, branch protection script
-
-### Phase 16.1: Docker Port Isolation (INSERTED)
-**Goal**: В full Docker режиме наружу доступен только gateway (порт 4000). Инфраструктурные порты убраны из docker-compose.infra.yml в отдельный dev-ports override. Три файла: infra (без портов), dev-ports (override с портами для local dev), docker-compose.yml (full stack, только gateway наружу).
-**Depends on**: Phase 16
-**Requirements**: DOCK-01 (refinement)
-**Success Criteria** (what must be TRUE):
-  1. `docker-compose.infra.yml` defines infra services WITHOUT `ports:` — only internal networking
-  2. `docker-compose.dev-ports.yml` override file adds host port exposure for local dev (5432, 6379, 5672, 15672, 9000, 9001)
-  3. `docker-compose.yml` (full stack) includes infra without ports — only gateway exposes port 4000 to host
-  4. Local dev mode works: `docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml up` exposes infra ports
-  5. Full Docker mode works: `docker compose -f infra/docker-compose.yml up` exposes only gateway:4000
-  6. App code unchanged — no env branching, same DATABASE_URL/REDIS_URL consumed from config
-**Plans**: 1 plan
-
-Plans:
-- [x] 16.1-01-PLAN.md -- Remove infra ports, create dev-ports override, update scripts
-
-### Phase 17: Docker Image Build & Push
-**Goal**: Docker images for each service are automatically built and published to GHCR when changes merge to main
-**Depends on**: Phase 16
-**Requirements**: DBLD-01, DBLD-02, DBLD-03
-**Success Criteria** (what must be TRUE):
-  1. A GitHub Actions workflow builds Docker images for each service in parallel using matrix strategy
-  2. Built images are pushed to GHCR (`ghcr.io/<org>/email-platform-<service>`) with SHA and latest tags
-  3. Docker layer cache is scoped per service (no cross-service cache eviction), and rebuilds of unchanged layers are cache hits
-  4. `docker pull` of a published image and `docker run` starts the service without errors
-**Plans**: 1 plan
-Plans:
-- [x] 17-01-PLAN.md -- Docker build workflow with matrix strategy, GHCR push, scoped cache
-
-### Phase 17.1: Fix DI Double Registration (INSERTED)
-**Goal**: Убрать дублирование PersistenceModule.forRootAsync() из HealthModule во всех сервисах. HealthModule использует DATABASE_HEALTH из родительского модуля. Один PG connection pool на сервис. Проверка в обоих режимах.
-**Depends on**: Phase 17
-**Requirements**: VRFY-01 (refinement)
-**Success Criteria** (what must be TRUE):
-  1. HealthModule в auth, sender, parser, audience НЕ импортирует PersistenceModule — только TerminusModule
-  2. HealthController инжектит DATABASE_HEALTH из scope родительского модуля
-  3. `pnpm turbo run build` проходит без ошибок
-  4. Local dev mode: `pnpm infra:up` + запуск сервисов на хосте — health endpoints отвечают
-  5. Full Docker mode: `pnpm docker:up` — все 6 сервисов healthy, gateway доступен на порту 4000
-  6. Один PG_POOL на сервис (нет двойного connection pool)
-**Plans**: 1 plan
-
-Plans:
-- [x] 17.1-01-PLAN.md -- Remove PersistenceModule from HealthModules, verify build and health
-
-### Phase 17.2: No Magic Values Skill & Audit (INSERTED)
-**Goal**: Создать скилл no-magic-values с классификацией нарушений и предписанными структурами данных для каждого случая. Провести аудит кодовой базы на magic numbers/strings, исправить найденные нарушения по правилам скилла.
-**Depends on**: Phase 17.1
-**Requirements**: ARCH-01 (refinement)
-**Success Criteria** (what must be TRUE):
-  1. Скилл `.agents/skills/no-magic-values/SKILL.md` создан с классификацией и decision tree
-  2. Аудит кодовой базы завершён — все magic values найдены и классифицированы
-  3. Все нарушения исправлены по правилам скилла (enum, const, Record, array)
-  4. `pnpm turbo run build` + `pnpm turbo run lint typecheck` проходят
-  5. Скилл добавлен в CLAUDE.md Code Style
-**Plans**: 3 plans
-
-Plans:
-- [x] 17.2-01-PLAN.md -- Create no-magic-values skill and add to CLAUDE.md
-- [x] 17.2-02-PLAN.md -- Fix magic values in packages/foundation
-- [x] 17.2-03-PLAN.md -- Fix magic values in apps/ (DI tokens, varchar lengths, bootstrap)
-
-### Phase 18: Deployment via Coolify
-**Goal**: Email platform deployed on VPS via Coolify with all infrastructure as Coolify-managed resources, auto-deploy from GitHub, and HTTPS access
-**Depends on**: Phase 17.2
-**Requirements**: DPLY-01, DPLY-02, DPLY-03, DPLY-04
-**Success Criteria** (what must be TRUE):
-  1. Coolify project has two environments (dev, production) with all infrastructure: PostgreSQL (native DB), Redis (native DB), RabbitMQ (one-click Service), Garage (one-click Service for S3-compatible storage)
-  2. GitHub repository `zerouser-cloud/email-platform-services` connected to Coolify, auto-deploy configured for dev branch → dev environment, main branch → production environment
-  3. Application services deployed from GHCR images with env vars pointing to Coolify-managed infrastructure (DATABASE_URL, REDIS_URL, RABBITMQ_URL, S3_ENDPOINT)
-  4. Traefik (via Coolify) routes `dev.email-platform.pp.ua` → dev gateway, `email-platform.pp.ua` → prod gateway, with auto-TLS
-  5. Health check endpoints respond: `https://dev.email-platform.pp.ua/health/ready` returns all services SERVING
-  6. Env vars renamed: MINIO_* → S3_* (storage-agnostic) in env schema, .env files, and Coolify env config
-**Plans**: 3 plans
-**Canonical refs**: `infra/docker/app.Dockerfile`, `packages/config/src/infrastructure.ts`, `.github/workflows/docker-build.yml`
-**Inputs provided**:
-  - VPS IP: `135.181.41.169`
-  - Domain: `email-platform.pp.ua`
-  - Dev subdomain: `dev.email-platform.pp.ua`
-  - Coolify: v4.0.0-beta.442 (already installed)
-  - GitHub: `zerouser-cloud/email-platform-services` (public)
-  - GHCR: `ghcr.io/zerouser-cloud/email-platform-<service>`
-
-Plans:
-- [x] 18-01-PLAN.md -- Env var rename, Dockerfile fix, docker-compose.prod.yml
-- [x] 18-02-PLAN.md -- Coolify project setup, infrastructure resources
-- [x] 18-03-PLAN.md -- Service deployment and auto-deploy pipeline
-
-### Phase 18.1: Deployment Polish (INSERTED)
-**Goal**: Довести автодеплой до production-ready состояния: Diun мониторит только наши образы, один webhook на цикл, prod автодеплой, убрать GitHub webhook, настроить S3
-**Depends on**: Phase 18
-**Requirements**: DPLY-01 (refinement), DPLY-02 (refinement)
-**Success Criteria** (what must be TRUE):
-  1. Diun monitors only 6 email-platform images (WATCHBYDEFAULT=false + diun.enable labels)
-  2. Image update triggers exactly one Coolify deploy call (not six)
-  3. Both dev and prod environments auto-deploy on new GHCR images
-  4. GitHub manual webhook removed (no double deploys)
-  5. Health liveness endpoint has no test version artifact
-  6. Garage S3 bucket and keys created (or explicitly deferred)
+  1. Env schema is split into independent Zod sub-schemas per concern (redis, s3, rabbitmq, http, tracing) that can be imported individually
+  2. GlobalEnvSchema composes sub-schemas via spread -- adding a new sub-schema requires only one import line
+  3. Each service's config module validates only the env vars relevant to its imported infrastructure modules, not the full set
+  4. A developer can add a new env var group (e.g., for a new backing service) by creating one sub-schema file without modifying existing schemas
 **Plans**: 2 plans
-
 Plans:
-- [x] 18.1-01-PLAN.md -- Remove test v2 version, add Diun labels to docker-compose.prod.yml
-- [x] 18.1-02-PLAN.md -- Coolify Diun config, GitHub webhook cleanup, Garage S3 setup
+- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
-### Phase 19: Verification
-**Goal**: Both development workflows and the CI pipeline are validated end-to-end on a clean state
-**Depends on**: Phase 18
-**Requirements**: VRFY-01, VRFY-02
+### Phase 21: Redis CacheModule
+**Goal**: Services can use Redis for caching through a DI-injected client with health monitoring and namespace isolation, following the PersistenceModule pattern
+**Depends on**: Phase 20
+**Requirements**: CACHE-01, CACHE-02, CACHE-03, CACHE-04
 **Success Criteria** (what must be TRUE):
-  1. Local dev mode works: `docker compose -f docker-compose.infra.yml up` starts infrastructure, then services run on the host and connect successfully
-  2. Full Docker mode works: `docker compose up` starts both infrastructure and all services, with inter-service gRPC communication functioning
-  3. Pushing a PR to GitHub triggers CI, which passes lint + typecheck + build without manual intervention
-  4. No regressions from v1.0/v2.0 -- all 6 services start, health checks pass, gateway proxies requests correctly
-**Plans**: TBD
+  1. CacheModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook -- structurally matching PersistenceModule
+  2. A service importing CacheModule can inject the Redis client via DI token and perform get/set/del operations against a running Redis instance
+  3. Health endpoint reports real Redis connection status (not a stub returning "up")
+  4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
+**Plans**: 2 plans
+Plans:
+- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+
+### Phase 22: S3 StorageModule
+**Goal**: Services can store and retrieve files through a DI-injected S3 client that works identically with MinIO (local) and Garage (production) without code changes
+**Depends on**: Phase 20
+**Requirements**: S3-01, S3-02, S3-03, S3-04
+**Success Criteria** (what must be TRUE):
+  1. StorageModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook
+  2. The same client code works against MinIO (local dev) and Garage (production) -- switching requires only env var changes, zero code changes
+  3. All env vars use S3_* prefix (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET) -- no MINIO_* references remain in codebase
+  4. A service importing StorageModule can upload, download, and delete files through the injected client
+**Plans**: 2 plans
+Plans:
+- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+
+### Phase 23: gRPC Client Typed Wrappers
+**Goal**: Services communicate via gRPC using type-safe client wrappers that enforce proto contracts at compile time and handle deadlines automatically
+**Depends on**: Phase 20
+**Requirements**: GRPC-01, GRPC-02, GRPC-03, GRPC-04
+**Success Criteria** (what must be TRUE):
+  1. Foundation provides a gRPC client framework that binds to proto-generated TypeScript types -- calling a non-existent method or passing wrong types is a compile error
+  2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
+  3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
+  4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+
+### Phase 24: HTTP Client & Circuit Breaker
+**Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection
+**Depends on**: Phase 20
+**Requirements**: HTTP-01, HTTP-02, HTTP-03, HTTP-04
+**Success Criteria** (what must be TRUE):
+  1. Foundation provides an HTTP client framework with configurable retry, timeout, and structured request/response logging
+  2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
+  3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
+  4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+
+### Phase 25: RabbitMQ EventModule
+**Goal**: Services can publish and consume domain events through typed interfaces with guaranteed delivery semantics, dead letter handling, and health monitoring
+**Depends on**: Phase 20
+**Requirements**: EVENT-01, EVENT-02, EVENT-03, EVENT-04, EVENT-05
+**Success Criteria** (what must be TRUE):
+  1. EventModule exists in foundation with publisher/consumer abstraction, Symbol DI tokens, health indicator, and shutdown hook
+  2. Consumed messages use manual acknowledgment by default -- a message is not removed from the queue until the handler explicitly acks it
+  3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
+  4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
+  5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+
+### Phase 26: Graceful Shutdown
+**Goal**: When a service receives SIGTERM, all in-flight work completes and all connections close in the correct order before the process exits
+**Depends on**: Phase 21, Phase 22, Phase 23, Phase 24, Phase 25
+**Requirements**: SHUT-01, SHUT-02, SHUT-03
+**Success Criteria** (what must be TRUE):
+  1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
+  2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
+  3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+
+### Phase 27: Distributed Tracing
+**Goal**: A single correlation ID follows a request from gateway entry through all downstream gRPC calls and RabbitMQ event chains, visible in every log line
+**Depends on**: Phase 23, Phase 25
+**Requirements**: TRACE-01, TRACE-02, TRACE-03
+**Success Criteria** (what must be TRUE):
+  1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
+  2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
+  3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
+**Plans**: 2 plans
+Plans:
+- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
+Phases execute in numeric order: 20 -> 21 -> 22 -> 23 -> 24 -> 25 -> 26 -> 27
+
+Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any order, but sequential execution is recommended for pattern refinement (simplest module first).
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -211,12 +199,20 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 12. Auth Schema & Repository (Reference) | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
 | 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete   | 2026-04-04 |
-| 16. CI Pipeline | v3.0 | 1/1 | Complete    | 2026-04-04 |
-| 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete    | 2026-04-04 |
-| 17. Docker Image Build & Push | v3.0 | 1/1 | Complete    | 2026-04-04 |
-| 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete   | 2026-04-04 |
-| 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete    | 2026-04-04 |
+| 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 16. CI Pipeline | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 17. Docker Image Build & Push | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete | 2026-04-04 |
+| 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete | 2026-04-04 |
 | 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
-| 18.1. Deployment Polish | v3.0 | 2/2 | Complete    | 2026-04-08 |
-| 19. Verification | v3.0 | 0/0 | Complete    | 2026-04-08 |
+| 18.1. Deployment Polish | v3.0 | 2/2 | Complete | 2026-04-08 |
+| 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
+| 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
+| 21. Redis CacheModule | v4.0 | 0/0 | Not started | - |
+| 22. S3 StorageModule | v4.0 | 0/0 | Not started | - |
+| 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
+| 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
+| 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
+| 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
+| 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |

@@ -1,22 +1,20 @@
-import { GlobalEnvSchema, GlobalEnv } from './env-schema';
+import { z } from 'zod';
 
-let cachedConfig: GlobalEnv | null = null;
+const cache = new Map<z.ZodType, unknown>();
 
 /**
- * Pure validator for process.env against Zod GlobalEnvSchema.
+ * Validates process.env against the provided Zod schema.
+ * Results are cached by schema reference for idempotency.
+ * Works because each service passes the same module-level const schema reference.
  *
- * Environment variables must be injected by the platform:
- * - Local dev: `node --env-file=.env` (Node.js 20+ native)
- * - Docker: `env_file` in docker-compose.yml
- * - CI/Prod: platform-level env injection
- *
- * This function NEVER loads files — it only validates what's already in process.env.
- *
- * @returns Safely validated GlobalEnv (topology + infrastructure), cached after first execution.
+ * @param schema - A ZodObject or ZodEffects (refined ZodObject) to validate against
+ * @returns Parsed and validated config object
  */
-export function loadGlobalConfig(): GlobalEnv {
-  if (cachedConfig) return cachedConfig;
+export function loadConfig<T extends z.ZodType>(schema: T): z.infer<T> {
+  const cached = cache.get(schema);
+  if (cached) return cached as z.infer<T>;
 
-  cachedConfig = GlobalEnvSchema.parse(process.env) as unknown as GlobalEnv;
-  return cachedConfig;
+  const result = schema.parse(process.env);
+  cache.set(schema, result);
+  return result as z.infer<T>;
 }

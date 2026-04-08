@@ -3,12 +3,13 @@ import helmet from 'helmet';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
-import { loadGlobalConfig } from '@email-platform/config';
+import { loadConfig } from '@email-platform/config';
+import { GatewayEnvSchema, type GatewayEnv } from './infrastructure/config';
 import { GrpcToHttpExceptionFilter, SERVER, CORS, BOOTSTRAP } from '@email-platform/foundation';
 import { GatewayModule } from './gateway.module';
 
 async function bootstrap() {
-  const config = loadGlobalConfig();
+  const config = loadConfig(GatewayEnvSchema) as GatewayEnv;
   const app = await NestFactory.create(GatewayModule, { bufferLogs: true });
 
   app.useLogger(app.get(Logger));

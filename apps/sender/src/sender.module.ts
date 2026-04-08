@@ -1,5 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
+import { SenderEnvSchema } from './infrastructure/config';
 import { LoggingModule, PersistenceModule, RedisHealthIndicator } from '@email-platform/foundation';
 import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
 import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
@@ -9,7 +10,7 @@ import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constan
 
 @Module({
   imports: [
-    AppConfigModule,
+    AppConfigModule.forRoot(SenderEnvSchema),
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('sender'),
   ],
