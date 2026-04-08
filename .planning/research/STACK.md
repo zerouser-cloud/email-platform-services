@@ -1,141 +1,238 @@
-# Technology Stack: CI/CD & Docker Workflows
+# Stack Research: Infrastructure Abstractions & Cross-Cutting Concerns
 
-**Project:** Email Platform v3.0 Infrastructure & CI/CD
-**Researched:** 2026-04-04
+**Domain:** NestJS microservices infrastructure layer (v4.0)
+**Researched:** 2026-04-08
+**Confidence:** HIGH
 
-## Recommended Stack
+## Existing Stack (DO NOT change)
 
-### CI/CD Platform
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| GitHub Actions | N/A (hosted) | CI/CD pipeline | Already on GitHub, native GHCR integration, free tier sufficient (2000 min/month), first-class pnpm/Turbo support |
-| rharkor/caching-for-turbo | v2.2.1 | Turbo remote cache in CI | Uses GitHub's native cache backend -- no Vercel account, no external dependency, zero-config |
-| pnpm/action-setup | v4 | pnpm installation in CI | Official pnpm action, handles corepack and version pinning |
-| actions/setup-node | v4 | Node.js setup | Cache pnpm store via `cache: 'pnpm'` option |
-| docker/build-push-action | v6 | Docker image builds | BuildKit integration, layer caching, multi-platform support |
-| docker/login-action | v3 | Registry auth | GHCR login in CI |
+Already validated and in use -- listed here to prevent duplication:
 
-### Container Registry
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| GitHub Container Registry (ghcr.io) | N/A | Docker image hosting | Unlimited private repos on GitHub plans, native Actions integration, no rate limits from own repos, same auth as code |
+| Technology | Version | Role |
+|------------|---------|------|
+| NestJS | 11.0.1 | Framework, microservices |
+| @nestjs/microservices | 11.0.1 | gRPC transport |
+| @grpc/grpc-js | 1.14.3 | gRPC runtime |
+| drizzle-orm + pg | 0.45.2 / 8.20.0 | PostgreSQL ORM |
+| nestjs-pino + pino | 4.6.0 / 10.3.1 | Structured logging |
+| nestjs-cls | 6.2.0 | Correlation ID propagation |
+| @nestjs/terminus | 11.1.1 | Health checks |
+| Zod | 4.3.6 | Env schema validation |
+| class-validator + class-transformer | 0.15.1 / 0.5.1 | DTO validation |
 
-### Docker Build
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Docker BuildKit | Default in Docker 23+ | Image building | Cache mounts, parallel multi-stage, already used in existing Dockerfile |
-| Node 20-alpine | 20-alpine | Base image | Already used, smallest Node image with musl libc |
+## Recommended Stack Additions
 
-### Local Development
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Docker Compose V2 | 2.x (CLI plugin) | Local orchestration | Already in use, health checks, network isolation, volumes |
-| dotenv-cli | 11.x | Env loading for host-mode dev | Already a dependency, loads .env for `turbo run dev` |
+### RabbitMQ Client
 
-### Deployment (VPS target)
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Docker Compose | 2.x | Production orchestration | Matches current scale (6 services), simple, K8s deferred per project decision |
-| SSH deploy via GH Actions | N/A | Remote deployment | `appleboy/ssh-action` or direct SSH -- minimal, no extra infra |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @golevelup/nestjs-rabbitmq | 9.0.0 | Publisher/consumer abstraction | Decorator-based handlers (`@RabbitSubscribe`), automatic exchange/queue setup, connection resiliency via amqp-connection-manager, topic exchange support. Far richer RabbitMQ API than `@nestjs/microservices` which treats all transports generically and loses RabbitMQ-specific features (exchanges, routing keys, dead letter queues). Peer dep `@nestjs/common: ^11.1.17` -- satisfied by `^11.0.1` range resolving to 11.1.18. |
 
-## Alternatives Considered
+**Why NOT `@nestjs/microservices` RabbitMQ transport:** The built-in transport abstracts away RabbitMQ specifics (no exchange types, no routing keys, no DLQ config, no consumer prefetch). The project needs topic exchanges with routing keys (`sender.campaign.completed`, `parser.batch.ready`) which `@nestjs/microservices` doesn't natively support.
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| CI/CD | GitHub Actions | GitLab CI, CircleCI | Already on GitHub, switching adds complexity with no benefit at this scale |
-| CI/CD | GitHub Actions | Self-hosted runners | Not needed yet -- GitHub-hosted runners are sufficient for 6 services |
-| Remote cache | rharkor/caching-for-turbo | Vercel Remote Cache | Requires Vercel account, external dependency, paid at scale |
-| Remote cache | rharkor/caching-for-turbo | Self-hosted S3 cache | Over-engineering for current team size |
-| Registry | GHCR | Docker Hub | Rate limits on free tier (100 pulls/6h anonymous), 1 private repo on free plan |
-| Registry | GHCR | AWS ECR | Adds AWS dependency, more complex auth, not needed without K8s/ECS |
-| Deployment | Docker Compose on VPS | Kubernetes | Explicitly deferred per KEY DECISIONS in PROJECT.md, 6 services is too small |
-| Deployment | Docker Compose on VPS | Coolify/Dokploy | Self-hosted PaaS adds a layer of abstraction -- useful but not essential |
-| Base image | node:20-alpine | distroless | Distroless is smaller/more secure but lacks shell for health checks (wget in healthcheck) |
+**Why NOT raw amqplib:** Requires manual connection management, reconnection logic, channel pooling. `@golevelup` wraps `amqp-connection-manager` (which wraps amqplib) and adds NestJS DI integration, decorator discovery, and health hooks.
 
-## Dockerfile Improvements (over existing)
+### HTTP Client (External APIs)
 
-The existing Dockerfile is already solid. Recommended minor improvements:
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @nestjs/axios | 4.0.1 | HTTP client DI module | NestJS-native DI wrapper around axios. Provides `HttpModule.registerAsync()` pattern matching PersistenceModule style. Services inject `HttpService` and get Observable-based API with interceptors. Peer deps: `@nestjs/common ^10.0.0 || ^11.0.0`, `axios ^1.3.1`. |
+| axios | 1.9.x | HTTP client engine | Mature, widely used, interceptor chain for auth headers/retry/logging. Already has OTel auto-instrumentation support. |
 
-### 1. Use `pnpm fetch` before full install (better CI cache)
-```dockerfile
-# After copying lockfile, before copying package.json manifests:
-COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm fetch --frozen-lockfile
+**Why NOT native `fetch`:** No interceptor chain, no request/response transformation, no timeout configuration, no automatic retries. Would need to build all of that manually.
 
-# Then copy manifests and install offline:
-COPY package.json ./
-COPY packages/contracts/package.json packages/contracts/package.json
-COPY packages/config/package.json packages/config/package.json
-COPY packages/foundation/package.json packages/foundation/package.json
-ARG APP_NAME
-COPY apps/${APP_NAME}/package.json apps/${APP_NAME}/package.json
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile --offline
-```
-`pnpm fetch` only needs the lockfile, so the layer cache survives even when package.json metadata changes (like version bumps or script changes). This turns `pnpm install` into an offline operation that just links already-fetched packages.
+**Why NOT `undici`:** Latest (8.x) requires Node.js >= 22.19.0. Project uses Node.js 20. Not compatible.
 
-### 2. Add .claude/ to .dockerignore
-Already mostly excluded but verify `.claude/` is listed (contains agent tooling not needed in images).
+**Why NOT `got`:** ESM-only since v12, complicates TypeScript CJS build. Less NestJS ecosystem integration than axios.
 
-## GitHub Actions Workflow Structure
+### S3 Client (MinIO / Garage)
 
-```
-.github/
-  workflows/
-    ci.yml          # lint, typecheck, build (on PR + push to main)
-    docker.yml      # build + push images (on push to main, tags)
-    deploy.yml      # deploy to VPS (on workflow_dispatch or tag)
-```
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @aws-sdk/client-s3 | 3.x (latest ~3.1026) | S3 operations (get, put, delete, list) | Official AWS SDK v3, modular (tree-shakeable), works with any S3-compatible backend (MinIO, Garage) via `endpoint` + `forcePathStyle: true`. Industry standard. |
+| @aws-sdk/lib-storage | 3.x (latest ~3.1026) | Multipart uploads | Managed multipart upload for large files (CSV exports from parser, email attachments). Same SDK family. |
 
-### CI Workflow Key Points
-- Trigger: PR to main, push to main
-- Steps: checkout, pnpm setup, turbo cache setup, `pnpm install --frozen-lockfile`, `turbo run lint typecheck build`
-- Turbo handles task ordering and only runs affected packages
-- Total CI time target: under 5 minutes for typical PR
+**Why NOT minio-js (minio npm):** Proprietary API that only works with MinIO. AWS SDK works with MinIO, Garage, and real S3 -- one client for any backend. The project already uses Garage in prod; using AWS SDK means zero vendor lock-in.
 
-### Docker Build Workflow Key Points
-- Trigger: push to main (or semantic version tags)
-- Matrix strategy: build 6 service images in parallel
-- Each matrix job: `docker/build-push-action` with `build-args: APP_NAME=${{ matrix.service }}`
-- Push to `ghcr.io/<org>/email-platform-<service>:latest` and `:<sha-short>`
-- Use `type=gha` cache backend for Docker layer caching
+**Config:** Existing env vars (`STORAGE_ENDPOINT`, `STORAGE_PORT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET`, `STORAGE_REGION`) map directly to AWS SDK `S3Client` config. No env rename needed -- the v3.0 migration already renamed from MINIO_* to STORAGE_*.
 
-### Deploy Workflow Key Points
-- Trigger: manual (workflow_dispatch) or after docker workflow completes
-- SSH into VPS, pull new images, `docker compose up -d`
-- Rolling restart with health check verification
+### Redis Client
 
-## Image Tagging Strategy
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| ioredis | 5.10.1 | Redis client | De facto standard for Node.js Redis. Supports clusters, sentinels, pipelining, Lua scripting. Node.js >= 12. High performance, battle-tested. |
 
-```
-ghcr.io/<org>/email-platform-gateway:latest       # latest from main
-ghcr.io/<org>/email-platform-gateway:main-abc1234  # commit SHA
-ghcr.io/<org>/email-platform-gateway:v1.0.0        # semantic version (on tag)
-```
+**Integration pattern:** Custom `RedisModule.forRootAsync()` in foundation following PersistenceModule pattern -- DI token (`REDIS_CLIENT`), health indicator, shutdown service. No need for community wrappers (`@nestjs-modules/ioredis`, `liaoliaots/nestjs-redis`) -- they add indirection without value when you already have a clean module pattern.
 
-Use `latest` for dev/staging, commit SHA for traceability, semantic version for production pins.
+**Why NOT `redis` (node-redis):** ioredis has better TypeScript support, more features (cluster mode, sentinel), and higher community adoption in NestJS ecosystem. The `redis` package is catching up but ioredis remains the safer choice.
+
+**Existing env:** `REDIS_URL` already in `InfrastructureSchema`. Maps directly to `new Redis(config.get('REDIS_URL'))`.
+
+### Resilience (Circuit Breaker + Retry + Timeout)
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| cockatiel | 3.2.1 | Circuit breaker, retry, timeout, bulkhead, fallback | Unified resilience library inspired by .NET Polly. Composable policies (`circuitBreaker.wrap(retry.wrap(timeout))`). Pure TypeScript, zero dependencies. Node.js >= 16 (v3.x). **DO NOT use v4.0.0** -- requires Node.js >= 22, incompatible with project's Node.js 20 runtime. |
+
+**Why NOT opossum:** Circuit breaker only -- no retry, timeout, bulkhead. Would need separate libraries for each concern. Cockatiel provides all resilience patterns in one composable API.
+
+**Why NOT custom implementation:** The existing `retryConnect` in foundation handles connection retry only. Cockatiel provides a battle-tested circuit breaker state machine (closed/open/half-open) with proper event emission. Writing this correctly is non-trivial.
+
+**Integration:** Wrap external HTTP calls (AppStoreSpy API, Google Cloud Proxy, Telegram Bot API) with cockatiel policies. Per-service adapter creates its own policy instance with service-specific thresholds.
+
+### Distributed Tracing
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @opentelemetry/sdk-node | 0.214.0 | OTel SDK entry point | Official Node.js SDK. Engines: `^18.19.0 || >=20.6.0` -- compatible with Node.js 20. Peer dep: `@opentelemetry/api >=1.3.0 <1.10.0`. |
+| @opentelemetry/api | 1.9.x | OTel API (spans, context) | Stable API surface. Required peer dep for all OTel packages. |
+| @opentelemetry/exporter-trace-otlp-http | 0.214.0 | Trace export via OTLP/HTTP | Sends traces to Jaeger, Grafana Tempo, or any OTLP collector. HTTP transport simpler than gRPC for the exporter itself. |
+| @opentelemetry/instrumentation-nestjs-core | 0.60.0 | NestJS auto-instrumentation | Auto-creates spans for controllers, guards, interceptors, pipes. Peer dep: `@opentelemetry/api ^1.3.0`. |
+| @opentelemetry/instrumentation-http | 0.214.0 | HTTP request tracing | Auto-instruments incoming/outgoing HTTP. Captures axios calls automatically. |
+| @opentelemetry/instrumentation-grpc | 0.214.0 | gRPC call tracing | Auto-instruments @grpc/grpc-js. Trace propagation through gRPC metadata happens automatically. |
+
+**Why NOT nestjs-otel or Nestjs-OpenTelemetry:** These are thin wrappers around OTel SDK that add NestJS decorators (`@OtelCounter`, `@Span`). Not needed -- the auto-instrumentation packages already create spans for NestJS controllers, HTTP, and gRPC without decorators. Adding wrappers creates version coupling risk with both NestJS and OTel. Use official OTel packages directly.
+
+**Architecture:** OTel SDK initializes in `main.ts` BEFORE NestJS bootstrap (required for auto-instrumentation). A `tracing.ts` file in each service (or shared in foundation) configures the SDK. No NestJS module needed -- OTel hooks into Node.js runtime directly.
+
+**Trace propagation:** gRPC metadata propagation is automatic via `@opentelemetry/instrumentation-grpc`. RabbitMQ header propagation needs manual W3C Trace Context injection/extraction in the EventModule publisher/consumer -- OTel does not auto-instrument amqplib by default without `@opentelemetry/instrumentation-amqplib`.
+
+| @opentelemetry/instrumentation-amqplib | 0.46.0 | RabbitMQ trace propagation | Auto-instruments amqplib (used by @golevelup internally). Propagates trace context through message headers. |
+
+### Graceful Shutdown
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| (built-in NestJS) | -- | Lifecycle hooks | `enableShutdownHooks()` + `OnApplicationShutdown` interface. Already used in `DrizzleShutdownService`. Extend pattern to Redis, RabbitMQ, S3 clients. |
+| nestjs-graceful-shutdown | 2.0.0 | HTTP connection draining | Uses `http-terminator` to properly close keep-alive connections. Prevents gateway hanging on deploy. Peer dep: `@nestjs/common *`, `http-terminator ^3.2.0`. Only needed for gateway (HTTP service). gRPC services use `server.tryShutdown()` natively. |
+| http-terminator | 3.2.0 | HTTP server termination | Tracks in-flight requests, closes idle keep-alive sockets. Required by nestjs-graceful-shutdown. |
+
+**Pattern:** Each foundation module (PersistenceModule, EventModule, StorageModule, RedisModule) includes its own shutdown service implementing `OnApplicationShutdown`. Order is managed by NestJS module dependency graph. `beforeApplicationShutdown` for stopping new work acceptance, `onApplicationShutdown` for closing connections.
+
+## Supporting Libraries
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| amqp-connection-manager | 5.x | RabbitMQ connection resilience | Transitive dep of @golevelup/nestjs-rabbitmq. Auto-reconnect, channel management. |
+| amqplib | 0.10.x | AMQP 0-9-1 protocol | Transitive dep. Low-level RabbitMQ protocol implementation. |
+| http-terminator | 3.2.0 | HTTP graceful shutdown | Gateway only. Close keep-alive connections on shutdown. |
 
 ## Installation
 
-No new dependencies needed for CI/CD -- all tooling is GitHub Actions-based. Local development tools are already in place.
-
 ```bash
-# No changes to package.json required
-# GitHub Actions are defined in YAML, not installed locally
+# RabbitMQ
+pnpm --filter @email-platform/foundation add @golevelup/nestjs-rabbitmq
 
-# Verify existing setup works:
-pnpm install --frozen-lockfile
-pnpm build
-pnpm lint
-pnpm typecheck
+# HTTP Client
+pnpm --filter @email-platform/foundation add @nestjs/axios axios
+
+# S3
+pnpm --filter @email-platform/foundation add @aws-sdk/client-s3 @aws-sdk/lib-storage
+
+# Redis
+pnpm --filter @email-platform/foundation add ioredis
+
+# Resilience
+pnpm --filter @email-platform/foundation add cockatiel@^3.2.1
+
+# Distributed Tracing
+pnpm --filter @email-platform/foundation add @opentelemetry/sdk-node @opentelemetry/api @opentelemetry/exporter-trace-otlp-http @opentelemetry/instrumentation-nestjs-core @opentelemetry/instrumentation-http @opentelemetry/instrumentation-grpc @opentelemetry/instrumentation-amqplib
+
+# Graceful Shutdown (gateway only)
+pnpm --filter @email-platform/gateway add nestjs-graceful-shutdown http-terminator
+
+# Types
+pnpm --filter @email-platform/foundation add -D @types/amqplib
 ```
+
+## Alternatives Considered
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| @golevelup/nestjs-rabbitmq | @nestjs/microservices RabbitMQ | Only if you need transport-agnostic code (swap RabbitMQ for Kafka without code changes). Not the case here -- RabbitMQ is a committed choice. |
+| @nestjs/axios + axios | Native fetch | Simple one-off requests without interceptors, retries, or logging. Not applicable for this project's external API calls. |
+| @aws-sdk/client-s3 | minio (npm) | If ONLY using MinIO and never plan to switch backends. Not recommended -- Garage is already used in prod. |
+| ioredis | redis (node-redis) | If using Redis modules (JSON, Graph, TimeSeries) -- node-redis has better module support. Not needed here. |
+| cockatiel 3.2.1 | opossum | If you only need circuit breaker without retry/timeout/bulkhead composition. Not sufficient for this project. |
+| cockatiel 3.2.1 | cockatiel 4.0.0 | When project upgrades to Node.js 22+. Pin to 3.2.1 until then. |
+| OTel SDK direct | nestjs-otel wrapper | If you want decorator-based span creation (`@Span()`). Auto-instrumentation covers 90% of needs without decorators. |
+
+## What NOT to Use
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| cockatiel 4.0.0 | Requires Node.js >= 22. Project uses Node.js 20. | cockatiel 3.2.1 (Node.js >= 16) |
+| undici 8.x | Requires Node.js >= 22.19.0. Incompatible. | axios via @nestjs/axios |
+| minio (npm package) | Vendor-specific API. Won't work if backend changes from MinIO to Garage/S3. | @aws-sdk/client-s3 with `forcePathStyle: true` |
+| nestjs-s3 (npm) | Thin wrapper around AWS SDK v3 that adds no value over direct usage. Unmaintained (1 contributor). | @aws-sdk/client-s3 directly in StorageModule |
+| @nestjs-modules/ioredis | Unnecessary abstraction when you already have PersistenceModule pattern to follow. Adds version coupling. | ioredis directly in RedisModule |
+| Jaeger client (jaeger-client npm) | Deprecated. Jaeger now uses OpenTelemetry SDK natively. | @opentelemetry/sdk-node + OTLP exporter |
+
+## Integration with Existing Foundation Pattern
+
+Each new module follows the PersistenceModule blueprint:
+
+```
+foundation/src/{module}/
+  {module}.module.ts       -- DynamicModule with forRootAsync()
+  {module}.constants.ts    -- Symbol DI tokens, defaults
+  {module}.interfaces.ts   -- Health indicator interface
+  {module}.providers.ts    -- Provider factories (inject ConfigService)
+  {module}-shutdown.service.ts  -- OnApplicationShutdown
+  {module}.health.ts       -- HealthIndicatorService-based check
+  index.ts                 -- Barrel exports
+```
+
+| New Module | DI Tokens | Health Indicator | Shutdown Service |
+|------------|-----------|------------------|------------------|
+| EventModule | `RABBITMQ_CONNECTION`, `EVENT_HEALTH` | AmqpConnection.isConnected() check | Close AMQP connection |
+| StorageModule | `S3_CLIENT`, `STORAGE_HEALTH` | HeadBucket call on configured bucket | Destroy S3Client |
+| RedisModule | `REDIS_CLIENT`, `REDIS_HEALTH` | Redis PING command | client.quit() |
+| HttpClientModule | `HTTP_SERVICE`, (no health) | N/A (external APIs) | N/A |
+| ResilienceModule | N/A (factory functions) | N/A | N/A |
+
+## Config Decomposition
+
+Current `GlobalEnvSchema` is monolithic. New modules need env vars:
+
+| Module | New Env Vars | Schema Location |
+|--------|-------------|-----------------|
+| EventModule | `RABBITMQ_URL` (already exists), `RABBITMQ_PREFETCH` | `packages/config/src/messaging.ts` |
+| StorageModule | `STORAGE_*` (already exist) | Already in `infrastructure.ts` |
+| RedisModule | `REDIS_URL` (already exists) | Already in `infrastructure.ts` |
+| Tracing | `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME` | `packages/config/src/tracing.ts` |
+| Resilience | `CIRCUIT_BREAKER_THRESHOLD`, `CIRCUIT_BREAKER_DURATION_MS` | `packages/config/src/resilience.ts` |
+| Graceful Shutdown | `SHUTDOWN_TIMEOUT_MS` | `packages/config/src/resilience.ts` |
+
+Pattern: Split monolithic `GlobalEnvSchema` into domain-specific schemas (`TopologySchema`, `InfrastructureSchema`, `MessagingSchema`, `TracingSchema`, `ResilienceSchema`) composed via spread: `z.object({ ...TopologySchema.shape, ...InfrastructureSchema.shape, ... })`. This already works -- `TopologySchema` and `InfrastructureSchema` are composed this way today.
+
+## Version Compatibility Matrix
+
+| Package | Requires Node.js | Requires NestJS | Compatible |
+|---------|-------------------|-----------------|------------|
+| @golevelup/nestjs-rabbitmq 9.0.0 | (not specified) | ^11.1.17 | YES (pnpm resolves ^11.0.1 to 11.1.18) |
+| cockatiel 3.2.1 | >= 16 | N/A | YES |
+| cockatiel 4.0.0 | >= 22 | N/A | NO -- Node 20 |
+| ioredis 5.10.1 | >= 12 | N/A | YES |
+| @aws-sdk/client-s3 3.x | >= 16 | N/A | YES |
+| @nestjs/axios 4.0.1 | (via NestJS) | ^10 or ^11 | YES |
+| @opentelemetry/sdk-node 0.214.0 | ^18.19.0 or >= 20.6.0 | N/A | YES |
+| nestjs-graceful-shutdown 2.0.0 | (not specified) | * (any) | YES |
+| undici 8.x | >= 22.19.0 | N/A | NO -- Node 20 |
 
 ## Sources
 
-- [Turborepo GitHub Actions Guide](https://turborepo.dev/docs/guides/ci-vendors/github-actions)
-- [pnpm Docker Documentation](https://pnpm.io/docker)
-- [pnpm deploy CLI](https://pnpm.io/cli/deploy)
-- [rharkor/caching-for-turbo](https://github.com/rharkor/caching-for-turbo)
-- [GHCR vs Docker Hub (cloudonaut)](https://cloudonaut.io/amazon-ecr-vs-docker-hub-vs-github-container-registry/)
-- [GitHub Actions Monorepo Guide (WarpBuild)](https://www.warpbuild.com/blog/github-actions-monorepo-guide)
-- [Docker Compose in Production (Docker Docs)](https://docs.docker.com/compose/how-tos/production/)
-- [Optimized Docker builds with TurboRepo and PNPM](https://fintlabs.medium.com/optimized-multi-stage-docker-builds-with-turborepo-and-pnpm-for-nodejs-microservices-in-a-monorepo-c686fdcf051f)
+- [npm registry](https://www.npmjs.com/) -- version, peerDependencies, engines verified via `npm view` (HIGH confidence)
+- [@golevelup/nestjs-rabbitmq npm](https://www.npmjs.com/package/@golevelup/nestjs-rabbitmq) -- v9.0.0 peer deps confirmed
+- [cockatiel GitHub](https://github.com/connor4312/cockatiel) -- v3.x Node >= 16, v4.x Node >= 22
+- [NestJS RabbitMQ docs](https://docs.nestjs.com/microservices/rabbitmq) -- built-in transport limitations
+- [Golevelup RabbitMQ docs](https://golevelup.github.io/nestjs/modules/rabbitmq.html) -- exchange/routing key support
+- [OpenTelemetry NestJS guide (SigNoz)](https://signoz.io/blog/opentelemetry-nestjs/) -- production setup patterns
+- [@opentelemetry/instrumentation-nestjs-core npm](https://www.npmjs.com/package/@opentelemetry/instrumentation-nestjs-core) -- auto-instrumentation scope
+- [NestJS lifecycle events docs](https://docs.nestjs.com/fundamentals/lifecycle-events) -- shutdown hook sequence
+- [nestjs-graceful-shutdown npm](https://www.npmjs.com/package/nestjs-graceful-shutdown) -- HTTP termination
+- [AWS SDK S3 + MinIO guide](https://northflank.com/guides/connect-nodejs-to-minio-with-tls-using-aws-s3) -- forcePathStyle config
+
+---
+*Stack research for: Email Platform v4.0 Infrastructure Abstractions*
+*Researched: 2026-04-08*
