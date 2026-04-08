@@ -54,7 +54,7 @@
 
 **Milestone Goal:** Unified infrastructure abstractions -- framework modules in foundation, per-service adapters in infrastructure/ -- isolating services from infrastructure knowledge, Clean/Hexagonal style.
 
-- [ ] **Phase 20: Config Decomposition** - Modular Zod sub-schemas per concern replacing monolithic env-schema
+- [x] **Phase 20: Config Decomposition** - Modular Zod sub-schemas per concern replacing monolithic env-schema (completed 2026-04-08)
 - [ ] **Phase 21: Redis CacheModule** - CacheModule in foundation with DI tokens, health indicator, per-service namespace isolation
 - [ ] **Phase 22: S3 StorageModule** - StorageModule in foundation with AWS SDK v3, unified MinIO/Garage, env rename MINIO->S3
 - [ ] **Phase 23: gRPC Client Typed Wrappers** - Type-safe gRPC client framework in foundation with deadline propagation
@@ -77,7 +77,7 @@
 **Plans**: 2 plans
 Plans:
 - [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 21: Redis CacheModule
 **Goal**: Services can use Redis for caching through a DI-injected client with health monitoring and namespace isolation, following the PersistenceModule pattern
@@ -90,7 +90,7 @@ Plans:
   4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
 **Plans**: 2 plans
 Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
 - [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 22: S3 StorageModule
@@ -208,7 +208,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
 | 18.1. Deployment Polish | v3.0 | 2/2 | Complete | 2026-04-08 |
 | 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
-| 20. Config Decomposition | v4.0 | 1/2 | In Progress|  |
+| 20. Config Decomposition | v4.0 | 2/2 | Complete   | 2026-04-08 |
 | 21. Redis CacheModule | v4.0 | 0/0 | Not started | - |
 | 22. S3 StorageModule | v4.0 | 0/0 | Not started | - |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |

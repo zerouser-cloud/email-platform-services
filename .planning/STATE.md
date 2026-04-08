@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 20-01-PLAN.md
-last_updated: "2026-04-08T14:45:45.100Z"
-last_activity: 2026-04-08 -- Plan 01 complete (schema decomposition)
+stopped_at: Completed 20-02-PLAN.md
+last_updated: "2026-04-08T14:58:36.900Z"
+last_activity: 2026-04-08
 progress:
   total_phases: 8
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
-  percent: 50
+  completed_plans: 2
+  percent: 100
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 20 of 27 (Config Decomposition) -- first phase of v4.0
-Plan: 1 of 2 complete
-Status: Executing
-Last activity: 2026-04-08 -- Plan 01 complete (schema decomposition)
+Plan: 2 of 2 complete
+Status: Ready to execute
+Last activity: 2026-04-08
 
 Progress: [█████░░░░░] 50% phase, [========================░░░░░░] 76% overall
 
@@ -54,6 +54,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 - Trend: Stable
 
 | Phase 20 P01 | 4min | 2 tasks | 15 files |
+| Phase 20 P02 | 10min | 2 tasks | 32 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,8 @@ Progress: [█████░░░░░] 50% phase, [========================�
 - [v4.0]: Build order: Config -> CacheModule -> StorageModule -> gRPC -> HTTP+CB -> EventModule -> Shutdown -> Tracing
 - [Phase 20]: Kept loadGlobalConfig() and default AppConfigModule for backward compat -- apps migrate in Plan 02
 - [Phase 20]: Manual GlobalEnv type due to TopologySchema dynamic shape -- z.infer cannot resolve
+- [Phase 20]: Added zod as direct dep to all 6 apps -- fixes TS2742 cross-package type resolution for per-service schemas
+- [Phase 20]: Manual XxxEnv types with type assertions on loadConfig() -- same pattern as GlobalEnv for dynamic TopologySchema
 
 ### Pending Todos
 
@@ -77,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T14:45:45.098Z
-Stopped at: Completed 20-01-PLAN.md
+Last session: 2026-04-08T14:58:36.898Z
+Stopped at: Completed 20-02-PLAN.md
 Resume file: None

@@ -11,7 +11,7 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 
 - [x] **CFG-01**: Env schema разбита на модульные Zod sub-schemas per concern (redis, s3, rabbitmq, http, tracing)
 - [x] **CFG-02**: Sub-schemas compose в GlobalEnvSchema через spread
-- [ ] **CFG-03**: Каждый сервис валидирует только свои env vars, не все
+- [x] **CFG-03**: Каждый сервис валидирует только свои env vars, не все
 - [x] **CFG-04**: Добавление нового env var не требует изменения монолитной схемы
 
 ### Redis (CacheModule)
@@ -143,7 +143,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | CFG-01 | Phase 20 | Complete |
 | CFG-02 | Phase 20 | Complete |
-| CFG-03 | Phase 20 | Pending |
+| CFG-03 | Phase 20 | Complete |
 | CFG-04 | Phase 20 | Complete |
 | CACHE-01 | Phase 21 | Pending |
 | CACHE-02 | Phase 21 | Pending |
