@@ -141,43 +141,43 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | — | Pending |
-| CFG-02 | — | Pending |
-| CFG-03 | — | Pending |
-| CFG-04 | — | Pending |
-| CACHE-01 | — | Pending |
-| CACHE-02 | — | Pending |
-| CACHE-03 | — | Pending |
-| CACHE-04 | — | Pending |
-| S3-01 | — | Pending |
-| S3-02 | — | Pending |
-| S3-03 | — | Pending |
-| S3-04 | — | Pending |
-| GRPC-01 | — | Pending |
-| GRPC-02 | — | Pending |
-| GRPC-03 | — | Pending |
-| GRPC-04 | — | Pending |
-| HTTP-01 | — | Pending |
-| HTTP-02 | — | Pending |
-| HTTP-03 | — | Pending |
-| HTTP-04 | — | Pending |
-| EVENT-01 | — | Pending |
-| EVENT-02 | — | Pending |
-| EVENT-03 | — | Pending |
-| EVENT-04 | — | Pending |
-| EVENT-05 | — | Pending |
-| SHUT-01 | — | Pending |
-| SHUT-02 | — | Pending |
-| SHUT-03 | — | Pending |
-| TRACE-01 | — | Pending |
-| TRACE-02 | — | Pending |
-| TRACE-03 | — | Pending |
+| CFG-01 | Phase 20 | Pending |
+| CFG-02 | Phase 20 | Pending |
+| CFG-03 | Phase 20 | Pending |
+| CFG-04 | Phase 20 | Pending |
+| CACHE-01 | Phase 21 | Pending |
+| CACHE-02 | Phase 21 | Pending |
+| CACHE-03 | Phase 21 | Pending |
+| CACHE-04 | Phase 21 | Pending |
+| S3-01 | Phase 22 | Pending |
+| S3-02 | Phase 22 | Pending |
+| S3-03 | Phase 22 | Pending |
+| S3-04 | Phase 22 | Pending |
+| GRPC-01 | Phase 23 | Pending |
+| GRPC-02 | Phase 23 | Pending |
+| GRPC-03 | Phase 23 | Pending |
+| GRPC-04 | Phase 23 | Pending |
+| HTTP-01 | Phase 24 | Pending |
+| HTTP-02 | Phase 24 | Pending |
+| HTTP-03 | Phase 24 | Pending |
+| HTTP-04 | Phase 24 | Pending |
+| EVENT-01 | Phase 25 | Pending |
+| EVENT-02 | Phase 25 | Pending |
+| EVENT-03 | Phase 25 | Pending |
+| EVENT-04 | Phase 25 | Pending |
+| EVENT-05 | Phase 25 | Pending |
+| SHUT-01 | Phase 26 | Pending |
+| SHUT-02 | Phase 26 | Pending |
+| SHUT-03 | Phase 26 | Pending |
+| TRACE-01 | Phase 27 | Pending |
+| TRACE-02 | Phase 27 | Pending |
+| TRACE-03 | Phase 27 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 31 total
-- Mapped to phases: 0
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after initial definition*
+*Last updated: 2026-04-08 after roadmap creation*
