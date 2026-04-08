@@ -13,7 +13,7 @@ export * from './errors/grpc-exceptions';
 export * from './errors/rpc-exception.filter';
 export * from './errors/grpc-to-http.filter';
 export * from './health/health-constants';
-export * from './health/indicators/redis.health';
+export * from './cache';
 export * from './health/indicators/rabbitmq.health';
 export * from './resilience/grpc-deadline.interceptor';
 export * from './resilience/retry-connect';

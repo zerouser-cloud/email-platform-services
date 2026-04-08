@@ -6,3 +6,4 @@ export {
   REDIS_HEALTH_CHECK,
 } from './cache.constants';
 export type { CachePort, CacheHealthIndicator, CacheModuleOptions } from './cache.interfaces';
+export { RedisHealthIndicator } from './redis.health';
