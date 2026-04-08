@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE, loadGlobalConfig } from '@email-platform/config';
+import { SERVICE, loadConfig } from '@email-platform/config';
+import { SenderEnvSchema, type SenderEnv } from './infrastructure/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { SenderModule } from './sender.module';
 
 async function bootstrap() {
-  const config = loadGlobalConfig();
+  const config = loadConfig(SenderEnvSchema) as SenderEnv;
   const app = await NestFactory.create(SenderModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));

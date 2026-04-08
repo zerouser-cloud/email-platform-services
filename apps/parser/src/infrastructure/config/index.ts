@@ -1,1 +1,1 @@
-export { ParserEnvSchema } from './parser-env.schema';
+export { ParserEnvSchema, type ParserEnv } from './parser-env.schema';

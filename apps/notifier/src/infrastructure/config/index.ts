@@ -1,1 +1,1 @@
-export { NotifierEnvSchema } from './notifier-env.schema';
+export { NotifierEnvSchema, type NotifierEnv } from './notifier-env.schema';

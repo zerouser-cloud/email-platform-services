@@ -1,9 +1,23 @@
-import { z, composeSchemas, TopologySchema, DatabaseSchema, RabbitSchema, LoggingSchema, GrpcSchema } from '@email-platform/config';
+import {
+  composeSchemas,
+  TopologySchema,
+  DatabaseSchema,
+  RabbitSchema,
+  LoggingSchema,
+  GrpcSchema,
+  type GlobalTopology,
+  type DatabaseConfig,
+  type RabbitConfig,
+  type LoggingConfig,
+  type GrpcConfig,
+} from '@email-platform/config';
 
-export const AudienceEnvSchema: z.ZodObject<z.ZodRawShape> = composeSchemas(
+export const AudienceEnvSchema = composeSchemas(
   TopologySchema,
   DatabaseSchema,
   RabbitSchema,
   LoggingSchema,
   GrpcSchema,
 );
+
+export type AudienceEnv = GlobalTopology & DatabaseConfig & RabbitConfig & LoggingConfig & GrpcConfig;

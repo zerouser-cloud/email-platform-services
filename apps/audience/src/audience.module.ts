@@ -1,5 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
+import { AudienceEnvSchema } from './infrastructure/config';
 import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
 import { AudienceGrpcServer } from './infrastructure/grpc/audience.grpc-server';
 import { ImportRecipientsUseCase } from './application/use-cases/import-recipients.use-case';
@@ -9,7 +10,7 @@ import { RECIPIENT_REPOSITORY_PORT, IMPORT_RECIPIENTS_PORT } from './audience.co
 
 @Module({
   imports: [
-    AppConfigModule,
+    AppConfigModule.forRoot(AudienceEnvSchema),
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('audience'),
   ],

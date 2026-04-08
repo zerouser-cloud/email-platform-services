@@ -1,1 +1,1 @@
-export { AudienceEnvSchema } from './audience-env.schema';
+export { AudienceEnvSchema, type AudienceEnv } from './audience-env.schema';

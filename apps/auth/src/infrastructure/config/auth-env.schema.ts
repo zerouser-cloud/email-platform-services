@@ -1,8 +1,20 @@
-import { z, composeSchemas, TopologySchema, DatabaseSchema, LoggingSchema, GrpcSchema } from '@email-platform/config';
+import {
+  composeSchemas,
+  TopologySchema,
+  DatabaseSchema,
+  LoggingSchema,
+  GrpcSchema,
+  type GlobalTopology,
+  type DatabaseConfig,
+  type LoggingConfig,
+  type GrpcConfig,
+} from '@email-platform/config';
 
-export const AuthEnvSchema: z.ZodObject<z.ZodRawShape> = composeSchemas(
+export const AuthEnvSchema = composeSchemas(
   TopologySchema,
   DatabaseSchema,
   LoggingSchema,
   GrpcSchema,
 );
+
+export type AuthEnv = GlobalTopology & DatabaseConfig & LoggingConfig & GrpcConfig;

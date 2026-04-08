@@ -1,1 +1,1 @@
-export { AuthEnvSchema } from './auth-env.schema';
+export { AuthEnvSchema, type AuthEnv } from './auth-env.schema';

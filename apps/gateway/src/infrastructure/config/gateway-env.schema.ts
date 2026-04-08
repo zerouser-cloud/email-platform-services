@@ -1,6 +1,18 @@
-import { z, composeSchemas, TopologySchema, LoggingSchema, GrpcSchema, CorsSchema, RateLimitSchema } from '@email-platform/config';
+import {
+  composeSchemas,
+  TopologySchema,
+  LoggingSchema,
+  GrpcSchema,
+  CorsSchema,
+  RateLimitSchema,
+  type GlobalTopology,
+  type LoggingConfig,
+  type GrpcConfig,
+  type CorsConfig,
+  type RateLimitConfig,
+} from '@email-platform/config';
 
-const BaseGatewayEnvSchema: z.ZodObject<z.ZodRawShape> = composeSchemas(
+const BaseGatewayEnvSchema = composeSchemas(
   TopologySchema,
   LoggingSchema,
   GrpcSchema,
@@ -15,3 +27,5 @@ export const GatewayEnvSchema = BaseGatewayEnvSchema.refine(
     path: ['CORS_ORIGINS'],
   },
 );
+
+export type GatewayEnv = GlobalTopology & LoggingConfig & GrpcConfig & CorsConfig & RateLimitConfig;
