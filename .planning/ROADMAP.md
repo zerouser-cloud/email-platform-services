@@ -230,7 +230,11 @@ Plans:
 
 ### Phase 999.2: Type-safe config access — eliminate ConfigService type loss (BACKLOG)
 
-**Goal:** ConfigService.get<string>() теряет Zod-гарантии — возвращает `string | undefined` хотя Zod уже валидировал. Это вынуждает использовать `!` и `?? ''` повсюду (health controller, gRPC clients). Нужен типизированный доступ к конфигу, чтобы TypeScript видел гарантии Zod. Возможные подходы: typed ConfigService wrapper, inject parsed config напрямую, или custom provider. Связано с Phase 23 (gRPC Client) — health controller gRPC service list использует `SERVICE.auth.envKeys.GRPC_URL!` и `?? ''`.
+**Goal:** ConfigService.get<string>() теряет Zod-гарантии — возвращает `string | undefined` хотя Zod уже валидировал. Это вынуждает использовать `!` и `?? ''` повсюду. Нужен типизированный доступ к конфигу, чтобы TypeScript видел гарантии Zod. Возможные подходы: typed ConfigService wrapper, inject parsed config напрямую, или custom provider.
+**Known occurrences:**
+- `gateway/health/health.controller.ts` — `SERVICE.auth.envKeys.GRPC_URL!` и `?? ''` для gRPC service list
+- `gateway/throttle/throttle.module.ts` — `configService.get<number>('RATE_LIMIT_BURST_TTL')!` и другие магические строки (нарушает no-magic-values skill)
+- Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты (связано с 999.1)
 **Requirements:** TBD
 **Plans:** 0 plans
 
