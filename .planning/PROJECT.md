@@ -69,6 +69,7 @@
 - ✓ Build-info.json baked into Docker images (commit, branch, timestamp) — Phase 19
 - ✓ Both dev modes verified: start:native + start:isolated — Phase 19
 - ✓ Config decomposition: modular Zod sub-schemas, per-service env validation — Phase 20
+- ✓ Redis CacheModule: DI-injected client, CachePort абстракция, auto-prefix namespace, real health check — Phase 21
 
 ### Active
 - [ ] gRPC client каркас в foundation + per-service адаптеры
