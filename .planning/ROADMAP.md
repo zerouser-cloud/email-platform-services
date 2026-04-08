@@ -227,3 +227,12 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.2: Type-safe config access — eliminate ConfigService type loss (BACKLOG)
+
+**Goal:** ConfigService.get<string>() теряет Zod-гарантии — возвращает `string | undefined` хотя Zod уже валидировал. Это вынуждает использовать `!` и `?? ''` повсюду (health controller, gRPC clients). Нужен типизированный доступ к конфигу, чтобы TypeScript видел гарантии Zod. Возможные подходы: typed ConfigService wrapper, inject parsed config напрямую, или custom provider. Связано с Phase 23 (gRPC Client) — health controller gRPC service list использует `SERVICE.auth.envKeys.GRPC_URL!` и `?? ''`.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
