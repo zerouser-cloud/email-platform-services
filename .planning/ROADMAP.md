@@ -91,7 +91,7 @@ Plans:
 **Plans**: 2 plans
 Plans:
 - [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 22: S3 StorageModule
 **Goal**: Services can store and retrieve files through a DI-injected S3 client that works identically with MinIO (local) and Garage (production) without code changes
@@ -104,7 +104,7 @@ Plans:
   4. A service importing StorageModule can upload, download, and delete files through the injected client
 **Plans**: 2 plans
 Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
+- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
 - [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 23: gRPC Client Typed Wrappers
@@ -208,7 +208,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
 | 18.1. Deployment Polish | v3.0 | 2/2 | Complete | 2026-04-08 |
 | 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
-| 20. Config Decomposition | v4.0 | 2/2 | Complete   | 2026-04-08 |
+| 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 21. Redis CacheModule | v4.0 | 0/0 | Not started | - |
 | 22. S3 StorageModule | v4.0 | 0/0 | Not started | - |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
