@@ -1,6 +1,7 @@
 export * from './topology';
 export * from './schemas';
 export * from './compose';
+export { z } from 'zod';
 export * from './env-constants';
 export * from './env-schema';
 export * from './app-config.module';
