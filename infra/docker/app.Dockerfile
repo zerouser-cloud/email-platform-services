@@ -51,6 +51,10 @@ WORKDIR /app
 
 COPY --from=builder /prod/app ./
 
+ARG BUILD_COMMIT=local
+ARG BUILD_BRANCH=local
+RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
+
 USER appuser
 
 # Ecosystem-level: V8/Express runtime optimizations (NOT read by app config)
