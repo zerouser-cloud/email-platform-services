@@ -42,8 +42,8 @@
 - [x] **Phase 16: CI Pipeline** - GitHub Actions PR validation with Turbo affected-only execution and remote cache (completed 2026-04-04)
 - [x] **Phase 17: Docker Image Build & Push** - Per-service Docker builds via matrix strategy, published to GHCR with scoped cache (completed 2026-04-04)
 - [x] **Phase 18: Deployment** - Coolify deployment with Diun auto-deploy, Cloudflare HTTPS (completed 2026-04-06)
-- [ ] **Phase 18.1: Deployment Polish** - Diun deduplication, prod auto-deploy, GitHub webhook cleanup, S3 setup (INSERTED)
-- [ ] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo
+- [x] **Phase 18.1: Deployment Polish** - Diun deduplication, prod auto-deploy, GitHub webhook cleanup, S3 setup (INSERTED) (completed 2026-04-08)
+- [x] **Phase 19: Verification** - Both dev modes work, CI pipeline passes on clean repo (completed 2026-04-08)
 
 ## Phase Details
 
@@ -177,7 +177,7 @@ Plans:
 
 Plans:
 - [x] 18.1-01-PLAN.md -- Remove test v2 version, add Diun labels to docker-compose.prod.yml
-- [ ] 18.1-02-PLAN.md -- Coolify Diun config, GitHub webhook cleanup, Garage S3 setup
+- [x] 18.1-02-PLAN.md -- Coolify Diun config, GitHub webhook cleanup, Garage S3 setup
 
 ### Phase 19: Verification
 **Goal**: Both development workflows and the CI pipeline are validated end-to-end on a clean state
@@ -218,5 +218,5 @@ Phases execute in numeric order: 15 -> 16 -> 17 -> 18 -> 19
 | 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete   | 2026-04-04 |
 | 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete    | 2026-04-04 |
 | 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
-| 18.1. Deployment Polish | v3.0 | 1/2 | In Progress|  |
-| 19. Verification | v3.0 | 0/? | Not started | - |
+| 18.1. Deployment Polish | v3.0 | 2/2 | Complete    | 2026-04-08 |
+| 19. Verification | v3.0 | 0/0 | Complete    | 2026-04-08 |

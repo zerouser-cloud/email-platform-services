@@ -18,3 +18,4 @@ export * from './health/indicators/rabbitmq.health';
 export * from './resilience/grpc-deadline.interceptor';
 export * from './resilience/retry-connect';
 export * from './persistence';
+export * from './build-info';
