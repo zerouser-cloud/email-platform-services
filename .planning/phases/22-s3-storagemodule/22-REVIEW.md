@@ -30,7 +30,13 @@ findings:
   warning: 4
   info: 3
   total: 9
-status: issues_found
+status: resolved
+resolution:
+  resolved_at: 2026-04-09
+  resolved_by: "Plan 22-03 (code review fixes)"
+  findings_closed: [CR-01, CR-02, WR-01, WR-02, WR-03, WR-04]
+  findings_out_of_scope: [IN-02, IN-03]
+  findings_side_effect_closed: [IN-01]
 ---
 
 # Phase 22: Code Review Report
@@ -38,7 +44,23 @@ status: issues_found
 **Reviewed:** 2026-04-09T10:20:00Z
 **Depth:** standard
 **Files Reviewed:** 21
-**Status:** issues_found
+**Status:** resolved (via Plan 22-03)
+
+## Resolution Status — 2026-04-09
+
+**Plan 22-03 closes CR-01, CR-02, WR-01, WR-02, WR-03, WR-04.**
+
+Architecture changes (see `22-CODE-REVIEW-NOTES.md` for full design):
+- Storage module split into `infrastructure/` (primitives) and `reports/` (concrete shared bucket)
+- `S3CoreModule` @Global singleton — one `S3Client` + one `S3ShutdownService` per process (WR-04)
+- `BucketStorageModule.forBucket()` factory with per-bucket `token` and `healthToken` (CR-01)
+- `ReportsStorageModule` is now a real `@Module` class (CR-02)
+- `STORAGE_PROTOCOL` env var (http|https enum) replaces hardcoded `http://` (WR-01)
+- `S3StorageService.download()` throws on empty body (WR-02)
+- Bucket names `REPORTS_BUCKET`, `PARSER_STORAGE_BUCKET` as named constants (WR-03)
+
+IN-01 closed as side-effect (orphan `STORAGE_BUCKET` env var removed).
+IN-02, IN-03 remain out-of-scope (cosmetic / convention notes).
 
 ## Summary
 

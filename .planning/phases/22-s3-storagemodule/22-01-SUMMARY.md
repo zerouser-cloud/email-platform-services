@@ -202,6 +202,19 @@ None -- no external service configuration required. MinIO/Garage are already run
 **Acceptance criteria (Task 2):** 4/4 PASS
 **Plan verification block:** 5/5 PASS
 
+## Post-Review Fix Reference — Plan 22-03
+
+Code review (22-REVIEW.md, 2026-04-09) identified 6 critical/warning findings in the storage module created by this plan. These are addressed architecturally by Plan 22-03 (code review fixes):
+
+- **CR-01** (shared STORAGE_HEALTH Symbol collision) → 22-03 introduces per-bucket `healthToken` in `BucketStorageOptions`
+- **CR-02** (ReportsStorageModule class not in Nest graph) → 22-03 makes `ReportsStorageModule` a real `@Module` class
+- **WR-01** (hardcoded `http://`) → 22-03 adds `STORAGE_PROTOCOL` env var
+- **WR-02** (silent empty buffer in `download()`) → 22-03 throws on undefined `response.Body`
+- **WR-03** (inline `'reports'`/`'parser'` literals) → 22-03 extracts to `REPORTS_BUCKET`/`PARSER_STORAGE_BUCKET` constants
+- **WR-04** (multiple S3Client instances) → 22-03 introduces `@Global() S3CoreModule` singleton
+
+File layout after 22-03: `packages/foundation/src/storage/` is restructured into `infrastructure/` (primitives) + `reports/` (concrete shared bucket). Old flat files listed in this summary's "Files Created" section are DELETED by 22-03 and replaced with subfolder-organized equivalents. See `22-CODE-REVIEW-NOTES.md` for the target architecture.
+
 ---
 
 *Phase: 22-s3-storagemodule*

@@ -190,6 +190,21 @@ None. Wave 1 already installed AWS SDK dependencies, `STORAGE_*` env vars alread
 
 **No threat flags.** No new security surface was introduced outside the plan's `<threat_model>` — parser and notifier gain S3 access exactly as the threat model anticipated, with bucket isolation via separate DI tokens (T-22-05 mitigation).
 
+## Post-Review Fix Reference — Plan 22-03
+
+Code review (22-REVIEW.md, 2026-04-09) identified that `ParserStorageModule` and `NotifierStorageModule` wrappers created by this plan had two critical DI-correctness issues:
+
+- **CR-01** — Parser imported two `StorageModule` instances that both exported `STORAGE_HEALTH`, causing the health check to silently bind to whichever provider Nest encountered last (likely the wrong bucket)
+- **CR-02** — Both wrappers listed `ReportsStorageModule` in `exports:`, but that class was never in the imports graph (the old foundation pattern returned a `DynamicModule` with `module: StorageModule`, not `ReportsStorageModule`), making the export either silently ignored or runtime error
+
+Plan 22-03 resolves both:
+- Parser wrapper is split into `ParserStorageModule` (per-bucket only, real `@Module`) + `StorageModule` composition (parser + reports) in `apps/parser/src/infrastructure/storage/`
+- Parser health controller injects two separate tokens: `PARSER_STORAGE_HEALTH` and `REPORTS_STORAGE_HEALTH`
+- Notifier wrapper is collapsed to a composition-only `StorageModule` (reports bucket only); `notifier-storage.module.ts` is deleted
+- Notifier health controller injects `REPORTS_STORAGE_HEALTH` and uses `REPORTS_HEALTH_KEY` constant
+
+Files listed in this summary are substantially reorganized by 22-03 — see `22-CODE-REVIEW-NOTES.md` and the 22-03-PLAN.md task list for full details.
+
 ---
 
 *Phase: 22-s3-storagemodule*
