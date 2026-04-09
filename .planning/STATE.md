@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 22.1-01-PLAN.md
-last_updated: "2026-04-09T12:37:42.686Z"
+stopped_at: Completed 22.1-02-PLAN.md
+last_updated: "2026-04-09T12:53:04.215Z"
 last_activity: 2026-04-09
 progress:
   total_phases: 16
   completed_phases: 3
   total_plans: 12
-  completed_plans: 8
-  percent: 67
+  completed_plans: 9
+  percent: 75
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 22.1 (s3-core-encapsulation) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-04-09
 
@@ -61,6 +61,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 | Phase 21 P01 | 2min | 2 tasks | 11 files |
 | Phase 21 P02 | 1min | 2 tasks | 2 files |
 | Phase 22.1 P01 | 6min | 2 tasks | 13 files |
+| Phase 22.1 P02 | 6min | 2 tasks | 47 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 - [Phase 20]: Manual XxxEnv types with type assertions on loadConfig() -- same pattern as GlobalEnv for dynamic TopologySchema
 - [Phase 21]: Export RedisHealthIndicator from cache barrel for downstream backward compatibility
 - [Phase 22.1]: [Phase 22.1-01]: Foundation internal/external partition established; S3 storage primitives relocated to packages/foundation/src/internal/storage/; @Global() removed from S3CoreModule atomically with ReportsStorageModule explicit S3CoreModule import; temporary compat shim in storage/index.ts re-exports both new internal path and reports facade until Plan 02 barrel flip
+- [Phase 22.1]: [Phase 22.1-02]: Foundation src/ reduced to {external/, internal/, index.ts}; top-level barrel is one line 'export * from ./external'; 22-line external aggregator mirrors original public surface 1:1; parser and notifier root modules no longer import S3CoreModule; Plan 04 BucketStorageModule compat shim and type-only StorageHealthIndicator re-export documented in external/storage/index.ts (Rule 3 auto-fix for StorageHealthIndicator type surfacing)
 
 ### Pending Todos
 
@@ -94,6 +96,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T12:37:42.684Z
-Stopped at: Completed 22.1-01-PLAN.md
+Last session: 2026-04-09T12:53:04.213Z
+Stopped at: Completed 22.1-02-PLAN.md
 Resume file: None
