@@ -6,6 +6,7 @@ import { LoggingModule, RabbitMqHealthIndicator } from '@email-platform/foundati
 import { HandleEventUseCase } from './application/use-cases/handle-event.use-case';
 import { TelegramNotificationSender } from './infrastructure/external/telegram-notification.sender';
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
+import { NotifierStorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
 import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
@@ -13,6 +14,7 @@ import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constant
   imports: [
     AppConfigModule.forRoot(NotifierEnvSchema),
     TerminusModule,
+    NotifierStorageModule.forRootAsync(),
     LoggingModule.forHttpAsync('notifier'),
   ],
   controllers: [HealthController],
