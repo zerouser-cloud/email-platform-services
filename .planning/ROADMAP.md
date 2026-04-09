@@ -104,8 +104,8 @@ Plans:
   4. A service importing StorageModule can upload, download, and delete files through the injected client
 **Plans**: 2 plans
 Plans:
-- [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [ ] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
+- [ ] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
 ### Phase 23: gRPC Client Typed Wrappers
 **Goal**: Services communicate via gRPC using type-safe client wrappers that enforce proto contracts at compile time and handle deadlines automatically
@@ -210,7 +210,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
 | 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
-| 22. S3 StorageModule | v4.0 | 0/0 | Not started | - |
+| 22. S3 StorageModule | v4.0 | 0/2 | Planned     | - |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
