@@ -135,7 +135,7 @@ Plans:
   6. Ноль изменений в `apps/`, `packages/`, `infra/` — только в `docs/` и `.planning/`
 **Plans**: 2 plans
 Plans:
-- [ ] 22.2-01-PLAN.md — Переписать REQUIREMENTS.md/ROADMAP.md/PROJECT.md под новый docs-only scope
+- [x] 22.2-01-PLAN.md — Переписать REQUIREMENTS.md/ROADMAP.md/PROJECT.md под новый docs-only scope
 - [ ] 22.2-02-PLAN.md — Создать docs/runbooks/bucket-provisioning.md с 4 env разделами + rationale + known gap
 
 ### Phase 22.1: s3-core-encapsulation (INSERTED)
@@ -271,7 +271,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 5/5 plans complete
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
