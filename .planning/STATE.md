@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 22.1 context gathered
-last_updated: "2026-04-09T12:19:20.764Z"
-last_activity: 2026-04-09 -- Phase 22.1 planning complete
+stopped_at: Completed 22.1-01-PLAN.md
+last_updated: "2026-04-09T12:37:42.686Z"
+last_activity: 2026-04-09
 progress:
   total_phases: 16
   completed_phases: 3
   total_plans: 12
-  completed_plans: 7
-  percent: 58
+  completed_plans: 8
+  percent: 67
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 21 — Redis CacheModule
+**Current focus:** Phase 22.1 — s3-core-encapsulation
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 22.1 (s3-core-encapsulation) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-04-09 -- Phase 22.1 planning complete
+Last activity: 2026-04-09
 
 Progress: [█████░░░░░] 50% phase, [========================░░░░░░] 76% overall
 
@@ -60,6 +60,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 | Phase 20 P02 | 10min | 2 tasks | 32 files |
 | Phase 21 P01 | 2min | 2 tasks | 11 files |
 | Phase 21 P02 | 1min | 2 tasks | 2 files |
+| Phase 22.1 P01 | 6min | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 - [Phase 20]: Added zod as direct dep to all 6 apps -- fixes TS2742 cross-package type resolution for per-service schemas
 - [Phase 20]: Manual XxxEnv types with type assertions on loadConfig() -- same pattern as GlobalEnv for dynamic TopologySchema
 - [Phase 21]: Export RedisHealthIndicator from cache barrel for downstream backward compatibility
+- [Phase 22.1]: [Phase 22.1-01]: Foundation internal/external partition established; S3 storage primitives relocated to packages/foundation/src/internal/storage/; @Global() removed from S3CoreModule atomically with ReportsStorageModule explicit S3CoreModule import; temporary compat shim in storage/index.ts re-exports both new internal path and reports facade until Plan 02 barrel flip
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T11:09:18.721Z
-Stopped at: Phase 22.1 context gathered
-Resume file: .planning/phases/22.1-s3-core-encapsulation/22.1-CONTEXT.md
+Last session: 2026-04-09T12:37:42.684Z
+Stopped at: Completed 22.1-01-PLAN.md
+Resume file: None
