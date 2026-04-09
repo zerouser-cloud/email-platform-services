@@ -31,7 +31,7 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 ### S3 Encapsulation (per-service composition)
 
 - [x] **SENC-01**: Root module каждого storage-using сервиса импортирует ровно один storage-related модуль (per-service composition StorageModule)
-- [ ] **SENC-02**: S3CoreModule импортируется только из per-service composition StorageModule, не из root service module
+- [x] **SENC-02**: S3CoreModule импортируется только из per-service composition StorageModule, не из root service module
 - [ ] **SENC-03**: Добавление нового bucket type требует только нового per-bucket модуля + composition update -- никаких изменений в root module сервиса
 - [ ] **SENC-04**: pnpm build остаётся зелёным; все существующие storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) продолжают резолвиться через DI после рефакторинга
 
@@ -177,7 +177,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | S3-03 | Phase 22 | Pending |
 | S3-04 | Phase 22 | Pending |
 | SENC-01 | Phase 22.1 | Complete |
-| SENC-02 | Phase 22.1 | Pending |
+| SENC-02 | Phase 22.1 | Complete |
 | SENC-03 | Phase 22.1 | Pending |
 | SENC-04 | Phase 22.1 | Pending |
 | SPRV-01 | Phase 22.2 | Pending |
