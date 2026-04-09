@@ -235,6 +235,8 @@ Plans:
 - `gateway/health/health.controller.ts` — `SERVICE.auth.envKeys.GRPC_URL!` и `?? ''` для gRPC service list
 - `gateway/throttle/throttle.module.ts` — `configService.get<number>('RATE_LIMIT_BURST_TTL')!` и другие магические строки (нарушает no-magic-values skill)
 - Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты (связано с 999.1)
+- `foundation/cache/cache.providers.ts` — `config.get<string>('REDIS_URL')!` магическая строка + assertion
+- `foundation/persistence/persistence.providers.ts` — `config.get<string>('DATABASE_URL')` тот же паттерн
 **Requirements:** TBD
 **Plans:** 0 plans
 
