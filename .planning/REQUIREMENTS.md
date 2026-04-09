@@ -37,11 +37,13 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 
 ### S3 Bucket Provisioning
 
-- [ ] **SPRV-01**: Новый per-bucket модуль декларирует своё имя bucket'а; механизм провизии читает эти декларации как single source of truth
-- [ ] **SPRV-02**: Существующие bucket'ы НЕ пересоздаются и не модифицируются -- провизия полностью идемпотентна (HeadBucket → optional CreateBucket)
-- [ ] **SPRV-03**: Один и тот же код пути провизии работает против MinIO (local/docker) и Garage (dev/prod) -- различия провайдеров прозрачны
-- [ ] **SPRV-04**: Ошибки провизии блокируют readiness: health endpoint репортит DOWN со структурированной причиной; сервис не бутается молча с отсутствующими bucket'ами
-- [ ] **SPRV-05**: Провизия opt-in через required env flag (config value, не env identity) -- deployment'ы где bucket'ы управляются externally (Coolify/IaC) могут отключить
+Scope changed during `/gsd:discuss-phase` (2026-04-09): phase became docs-only runbook, no code-based provisioning. Rationale: 12-factor separation, Garage key bindings incompatibility with S3 API CreateBucket, minimal prod permissions, safety against silent misconfig, unified manual approach across all 4 environments. См. `.planning/phases/22.2-bucket-provisioning-automation/22.2-CONTEXT.md` decisions D-01..D-03.
+
+- [ ] **SPRV-01**: Runbook `docs/runbooks/bucket-provisioning.md` покрывает ровно 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage) отдельными self-contained разделами
+- [ ] **SPRV-02**: Каждый раздел включает 6 стандартных шагов (Prerequisites, Open UI, Create buckets, Configure access, Set env vars, Verify)
+- [ ] **SPRV-03**: Garage разделы (dev, prod) отдельно покрывают создание key binding с подчёркнутым warning — без него bucket недоступен приложению
+- [ ] **SPRV-04**: Verification step с `curl` против `/health/ready` для каждого окружения, с примерами OK и DOWN ответов
+- [ ] **SPRV-05**: Runbook включает "Rationale" секцию объясняющую почему решено не автоматизировать (12-factor, Garage key bindings, minimal permissions, safety, unified approach)
 
 ### S3 Smoke Test Endpoints
 
