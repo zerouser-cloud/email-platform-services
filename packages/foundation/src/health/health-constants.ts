@@ -12,6 +12,5 @@ export const HEALTH = {
     REDIS: 'redis',
     RABBITMQ: 'rabbitmq',
     POSTGRESQL: 'postgresql',
-    S3: 's3',
   },
 } as const;
