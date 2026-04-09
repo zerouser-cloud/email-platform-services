@@ -383,22 +383,13 @@ export class S3ShutdownService implements OnApplicationShutdown {
 | A4 | HeadBucket is the best health check command | Code Examples | Could use ListBuckets but HeadBucket is more targeted |
 | A5 | Multiple S3Client instances (one per forRootAsync call) have minimal overhead | Pitfalls | If many buckets per service, consider client sharing |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **S3Client sharing across multiple StorageModule instances**
-   - What we know: A service importing both ParserStorageModule and ReportsStorageModule creates 2 S3Client instances
-   - What's unclear: Whether to share one client or accept duplication (at most 2 per service)
-   - Recommendation: Accept duplication -- simpler, matches CacheModule pattern (one Redis per CacheModule), at most 2 clients per service is negligible overhead
+1. **S3Client sharing across multiple StorageModule instances** — RESOLVED: Accept duplication. Max 2 clients per service is negligible overhead. Matches CacheModule pattern.
 
-2. **STORAGE_BUCKET env var vs per-service bucket names**
-   - What we know: STORAGE_BUCKET='email-platform' exists in .env. Per-service buckets are 'parser', 'sender', 'reports'
-   - What's unclear: Whether STORAGE_BUCKET is the "default" bucket or a prefix, or unused
-   - Recommendation: Ignore STORAGE_BUCKET for now -- per-service bucket names are hardcoded in service modules per D-07. STORAGE_BUCKET may be used for legacy or default cases
+2. **STORAGE_BUCKET env var vs per-service bucket names** — RESOLVED: Ignore STORAGE_BUCKET env var for now. Per-service bucket names are hardcoded in service infrastructure/storage/ modules per D-07.
 
-3. **Health indicator: which bucket to check?**
-   - What we know: A service may have 2 buckets (own + reports). Health check uses HeadBucket.
-   - What's unclear: Check one bucket or both?
-   - Recommendation: Health indicator checks a configurable bucket (the main service bucket). Reports health is optional.
+3. **Health indicator: which bucket to check?** — RESOLVED: Health indicator checks the bucket passed in forRootAsync({ bucket }). Each StorageModule instance has its own health check for its bucket.
 
 ## Environment Availability
 
