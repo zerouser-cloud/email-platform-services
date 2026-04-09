@@ -144,9 +144,13 @@ Plans:
   2. S3CoreModule is imported only from within per-service composition StorageModule, never from a root service module
   3. Adding a new bucket type to an existing service requires only a new per-bucket module plus a composition update -- no changes to the root service module
   4. pnpm build remains green; all existing storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) still resolve correctly after refactor
-**Plans**: 0 plans
+**Plans**: 5 plans
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.1 to break down)
+- [ ] 22.1-01-PLAN.md — Create external/internal skeletons, relocate storage primitives to internal/storage/, remove @Global(), rewrite ReportsStorageModule with explicit S3CoreModule import
+- [ ] 22.1-02-PLAN.md — Relocate non-storage subsystems to external/, flip top-level barrel to one-line re-export, drop S3CoreModule from parser.module.ts and notifier.module.ts
+- [ ] 22.1-03-PLAN.md — Add exports field to foundation package.json, upgrade tsconfig.base.json to node16/node16, force rebuild
+- [ ] 22.1-04-PLAN.md — Rewrite parser-storage.module.ts with @email-platform/foundation/internal subpath imports, delete Plan 02 BucketStorageModule compat shim
+- [ ] 22.1-05-PLAN.md — Add single static ESLint rule (apps/*/src override + apps/*/src/infrastructure override), automated probe verification, human-verified boot smoke tests
 
 ### Phase 23: gRPC Client Typed Wrappers
 **Goal**: Services communicate via gRPC using type-safe client wrappers that enforce proto contracts at compile time and handle deadlines automatically
