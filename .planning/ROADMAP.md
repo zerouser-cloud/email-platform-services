@@ -243,6 +243,15 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
+### Phase 999.4: CacheService quality — improve get() type safety and error handling (BACKLOG)
+
+**Goal:** `CacheService.get<T>()` имеет две проблемы: (1) `JSON.parse(raw) as T` — unchecked type assertion, caller получает typed result без runtime проверки; (2) `catch { return null }` — молча проглатывает ошибку парсинга повреждённых данных, вызывающий код думает что ключа нет. Нужно: либо принимать optional validator/schema, либо логировать ошибку парсинга, либо возвращать raw string при ошибке. Зафиксировано в code review Phase 21 как WR-02.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
 ### Phase 999.3: PersistenceModule — убрать PG_POOL export наружу (BACKLOG)
 
 **Goal:** PG_POOL экспортируется из PersistenceModule и доступен сервисам через DI, но это протечка инфраструктуры — сервисы должны работать через DRIZZLE (ORM абстракция), а не через raw pool. Проверить используется ли PG_POOL в apps/, если нет — убрать из exports. Если да — заменить на ORM операции. Аналогичный принцип применить ко всем infrastructure modules: экспортировать абстракцию, не raw client.
