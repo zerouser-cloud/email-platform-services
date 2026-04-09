@@ -1,25 +1,20 @@
 // External storage barrel.
 // Re-exports the public ReportsStorageModule facade.
+// NOTE: storage-related runtime primitives are INTENTIONALLY not re-exported here —
+// they live under packages/foundation/src/internal/storage/ and are reached via
+// @email-platform/foundation/internal (guarded by the exports field in
+// packages/foundation/package.json and the ESLint rule added in Plan 05).
 export * from './reports';
 
-// === Type-only re-export: StorageHealthIndicator (Rule 3 auto-fix) ===
+// Type-only re-export: StorageHealthIndicator (carried forward from Plan 02 Rule 3 auto-fix).
 // `apps/parser/src/health/health.controller.ts` and
-// `apps/notifier/src/health/health.controller.ts` import `StorageHealthIndicator`
-// as a type to annotate the injected `*_STORAGE_HEALTH` providers. The interface
-// lives under `internal/storage/storage.interfaces.ts` but is public-facing
-// (consumer-facing contract for the REPORTS_STORAGE_HEALTH token), equivalent to
-// DatabaseHealthIndicator which is exposed via external/persistence.
+// `apps/notifier/src/health/health.controller.ts` import this interface as a type
+// to annotate the injected `*_STORAGE_HEALTH` providers. The interface lives under
+// `internal/storage/storage.interfaces.ts` but is public-facing (consumer-facing
+// contract for the REPORTS_STORAGE_HEALTH token), equivalent to DatabaseHealthIndicator
+// which is exposed via external/persistence.
 // Re-exported here as type-only so the public barrel continues to expose only the
-// contract, not the primitive implementation (S3HealthIndicator stays internal).
-// A later plan may relocate this interface to external/storage/ proper.
+// contract, not the primitive implementation class (which stays internal).
+// This is a TYPE-ONLY export — it carries no runtime JS and cannot leak any runtime
+// storage primitive values into the public barrel.
 export type { StorageHealthIndicator } from '../../internal/storage';
-
-// === TEMPORARY Plan 04 compat shim — DELETE in Plan 04 Task 1 ===
-// `apps/parser/src/infrastructure/storage/parser-storage.module.ts` currently imports
-// `BucketStorageModule` from the top-level `@email-platform/foundation` barrel.
-// Plan 04 switches that import to `@email-platform/foundation/internal` (which requires
-// the package.json `exports` field + tsconfig upgrade landing in Plan 03 first).
-// Until Plan 04 runs, this re-export keeps parser-storage.module.ts building.
-// REMOVE this block in Plan 04 Task 1 in the same commit that rewrites parser-storage.module.ts.
-export { BucketStorageModule } from '../../internal/storage';
-// === END Plan 04 compat shim ===
