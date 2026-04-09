@@ -108,32 +108,43 @@ Plans:
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
-
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 22
-**Plans:** 0 plans
-
+**Goal**: Each storage-using service exposes safe, env-gated HTTP endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
+**Depends on**: Phase 22, Phase 22.1, Phase 22.2
+**Requirements**: SSMK-01, SSMK-02, SSMK-03, SSMK-04, SSMK-05
+**Success Criteria** (what must be TRUE):
+  1. Parser exposes smoke endpoints for both PARSER_STORAGE and REPORTS_STORAGE covering upload, download, delete, exists, getSignedUrl
+  2. Notifier exposes smoke endpoints for REPORTS_STORAGE covering the same StoragePort surface
+  3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
+  4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
+  5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
+**Plans**: 0 plans
 Plans:
 - [ ] TBD (run /gsd-plan-phase 22.3 to break down)
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
-
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 22
-**Plans:** 0 plans
-
+**Goal**: Every bucket declared by a per-bucket module is automatically checked and created on service boot, idempotently and identically across MinIO and Garage, with failures surfaced through health checks
+**Depends on**: Phase 22, Phase 22.1
+**Requirements**: SPRV-01, SPRV-02, SPRV-03, SPRV-04, SPRV-05
+**Success Criteria** (what must be TRUE):
+  1. A new per-bucket module declaration auto-provisions its bucket on boot without manual intervention or external scripts
+  2. Buckets that already exist are NOT recreated or modified -- provisioning is fully idempotent (HeadBucket detects existence, CreateBucket only on missing)
+  3. The same provisioning code path runs against MinIO (local/docker) and Garage (dev/prod) -- provider differences are transparent
+  4. Provisioning errors block readiness: health endpoint reports DOWN with structured reason; service does not silently boot with missing buckets
+  5. Provisioning is opt-in via a required env flag (config value, not env identity) so deployments where buckets are managed externally (Coolify/IaC) can disable it
+**Plans**: 0 plans
 Plans:
 - [ ] TBD (run /gsd-plan-phase 22.2 to break down)
 
 ### Phase 22.1: s3-core-encapsulation (INSERTED)
-
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 22
-**Plans:** 0 plans
-
+**Goal**: Per-service composition StorageModule fully owns the S3 client lifecycle — root modules import a single storage module and have no knowledge of underlying S3 infrastructure
+**Depends on**: Phase 22
+**Requirements**: SENC-01, SENC-02, SENC-03, SENC-04
+**Success Criteria** (what must be TRUE):
+  1. parser.module.ts and notifier.module.ts each import exactly one storage-related module (the per-service composition StorageModule)
+  2. S3CoreModule is imported only from within per-service composition StorageModule, never from a root service module
+  3. Adding a new bucket type to an existing service requires only a new per-bucket module plus a composition update -- no changes to the root service module
+  4. pnpm build remains green; all existing storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) still resolve correctly after refactor
+**Plans**: 0 plans
 Plans:
 - [ ] TBD (run /gsd-plan-phase 22.1 to break down)
 

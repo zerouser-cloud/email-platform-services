@@ -28,6 +28,29 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 - [ ] **S3-03**: Env vars переименованы MINIO_* → S3_* (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET)
 - [ ] **S3-04**: Сервис может загружать, скачивать и удалять файлы через DI token
 
+### S3 Encapsulation (per-service composition)
+
+- [ ] **SENC-01**: Root module каждого storage-using сервиса импортирует ровно один storage-related модуль (per-service composition StorageModule)
+- [ ] **SENC-02**: S3CoreModule импортируется только из per-service composition StorageModule, не из root service module
+- [ ] **SENC-03**: Добавление нового bucket type требует только нового per-bucket модуля + composition update -- никаких изменений в root module сервиса
+- [ ] **SENC-04**: pnpm build остаётся зелёным; все существующие storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) продолжают резолвиться через DI после рефакторинга
+
+### S3 Bucket Provisioning
+
+- [ ] **SPRV-01**: Новый per-bucket модуль декларирует своё имя bucket'а; механизм провизии читает эти декларации как single source of truth
+- [ ] **SPRV-02**: Существующие bucket'ы НЕ пересоздаются и не модифицируются -- провизия полностью идемпотентна (HeadBucket → optional CreateBucket)
+- [ ] **SPRV-03**: Один и тот же код пути провизии работает против MinIO (local/docker) и Garage (dev/prod) -- различия провайдеров прозрачны
+- [ ] **SPRV-04**: Ошибки провизии блокируют readiness: health endpoint репортит DOWN со структурированной причиной; сервис не бутается молча с отсутствующими bucket'ами
+- [ ] **SPRV-05**: Провизия opt-in через required env flag (config value, не env identity) -- deployment'ы где bucket'ы управляются externally (Coolify/IaC) могут отключить
+
+### S3 Smoke Test Endpoints
+
+- [ ] **SSMK-01**: Parser экспонирует smoke endpoints для PARSER_STORAGE и REPORTS_STORAGE покрывающие upload/download/delete/exists/getSignedUrl
+- [ ] **SSMK-02**: Notifier экспонирует smoke endpoints для REPORTS_STORAGE покрывающие тот же surface StoragePort
+- [ ] **SSMK-03**: Cross-service shared bucket flow демонстрируемо рабочий: parser загружает в reports bucket, notifier скачивает тот же ключ из reports bucket -- доказывает что shared storage работает end-to-end
+- [ ] **SSMK-04**: Endpoints gated через required env flag (config value, без NODE_ENV/isDev/isProd reads) -- по умолчанию disabled в shipped artifacts
+- [ ] **SSMK-05**: Те же endpoint контракты доступны во всех четырёх deployment окружениях (local-native, local-docker, dev-Coolify, prod-Coolify) -- единый тест-план валидирует всю матрицу
+
 ### gRPC Client
 
 - [ ] **GRPC-01**: Type-safe gRPC client каркас в foundation с автоматической привязкой к proto контрактам
@@ -153,6 +176,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | S3-02 | Phase 22 | Pending |
 | S3-03 | Phase 22 | Pending |
 | S3-04 | Phase 22 | Pending |
+| SENC-01 | Phase 22.1 | Pending |
+| SENC-02 | Phase 22.1 | Pending |
+| SENC-03 | Phase 22.1 | Pending |
+| SENC-04 | Phase 22.1 | Pending |
+| SPRV-01 | Phase 22.2 | Pending |
+| SPRV-02 | Phase 22.2 | Pending |
+| SPRV-03 | Phase 22.2 | Pending |
+| SPRV-04 | Phase 22.2 | Pending |
+| SPRV-05 | Phase 22.2 | Pending |
+| SSMK-01 | Phase 22.3 | Pending |
+| SSMK-02 | Phase 22.3 | Pending |
+| SSMK-03 | Phase 22.3 | Pending |
+| SSMK-04 | Phase 22.3 | Pending |
+| SSMK-05 | Phase 22.3 | Pending |
 | GRPC-01 | Phase 23 | Pending |
 | GRPC-02 | Phase 23 | Pending |
 | GRPC-03 | Phase 23 | Pending |
@@ -174,10 +211,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRACE-03 | Phase 27 | Pending |
 
 **Coverage:**
-- v4.0 requirements: 31 total
-- Mapped to phases: 31
+- v4.0 requirements: 45 total (31 original + 14 from inserted phases 22.1-22.3)
+- Mapped to phases: 45
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after roadmap creation*
+*Last updated: 2026-04-09 after inserting phases 22.1, 22.2, 22.3*
