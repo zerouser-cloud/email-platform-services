@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Completed 22.1-04-PLAN.md
-last_updated: "2026-04-09T13:10:41.347Z"
+status: verifying
+stopped_at: Phase 22.1 Plan 05 complete, awaiting phase gates
+last_updated: "2026-04-09T14:54:20.345Z"
 last_activity: 2026-04-09
 progress:
   total_phases: 16
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 11
-  percent: 92
+  completed_plans: 12
+  percent: 100
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 22.1 (s3-core-encapsulation) — EXECUTING
 Plan: 5 of 5
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-09
 
-Progress: [█████░░░░░] 50% phase, [========================░░░░░░] 76% overall
+Progress: [██████████] 100% phase, [==============================] 100% overall
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 | Phase 22.1 P02 | 6min | 2 tasks | 47 files |
 | Phase 22.1 P03 | 2min | 2 tasks | 2 files |
 | Phase 22.1 P04 | 4min | 1 tasks | 2 files |
+| Phase 22.1 P05 | 70min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,7 @@ Progress: [█████░░░░░] 50% phase, [========================�
 - [Phase 22.1]: [Phase 22.1-02]: Foundation src/ reduced to {external/, internal/, index.ts}; top-level barrel is one line 'export * from ./external'; 22-line external aggregator mirrors original public surface 1:1; parser and notifier root modules no longer import S3CoreModule; Plan 04 BucketStorageModule compat shim and type-only StorageHealthIndicator re-export documented in external/storage/index.ts (Rule 3 auto-fix for StorageHealthIndicator type surfacing)
 - [Phase 22.1]: [Phase 22.1-03]: Foundation package-boundary sealed at TypeScript resolution level; packages/foundation/package.json declares exports field with two subpaths (. and ./internal, types+default conditions, no wildcards, no import/require conditions); tsconfig.base.json upgraded from module:commonjs/moduleResolution:node to module:node16/moduleResolution:node16 workspace-wide; Turbo cache force-refreshed to invalidate stale dist/; CJS emission preserved (zero type:module in workspace); @email-platform/foundation/internal is now a resolvable subpath for Plan 04 consumers
 - [Phase 22.1]: [Phase 22.1-04]: ParserStorageModule now imports { BucketStorageModule, S3CoreModule } from @email-platform/foundation/internal (first real consumer of Plan 03 subpath); S3CoreModule listed as first entry in imports array before BucketStorageModule.forBucket(); Plan 02 BucketStorageModule compat shim removed from packages/foundation/src/external/storage/index.ts atomically in the same commit; type-only StorageHealthIndicator re-export preserved (Rule 3 carry-forward — removing it would break parser+notifier health controllers that import it as a type annotation); grep S3CoreModule under apps/ source now returns exactly one file (parser-storage.module.ts); workspace build 10/10 and lint 7/7 green
+- [Phase 22.1]: [Phase 22.1]: BucketStorageModule is self-contained (forBucket() imports S3CoreModule) — per-service storage wrappers re-export by class to propagate dynamic-scope Symbol tokens transitively; avoids Nest 11 dynamic-module export reflect quirk without reintroducing @Global()
 
 ### Pending Todos
 
@@ -100,6 +102,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T13:10:41.345Z
-Stopped at: Completed 22.1-04-PLAN.md
+Last session: 2026-04-09T14:54:20.343Z
+Stopped at: Phase 22.1 Plan 05 complete, awaiting phase gates
 Resume file: None
