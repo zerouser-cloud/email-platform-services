@@ -131,9 +131,10 @@ Plans:
   3. The same provisioning code path runs against MinIO (local/docker) and Garage (dev/prod) -- provider differences are transparent
   4. Provisioning errors block readiness: health endpoint reports DOWN with structured reason; service does not silently boot with missing buckets
   5. Provisioning is opt-in via a required env flag (config value, not env identity) so deployments where buckets are managed externally (Coolify/IaC) can disable it
-**Plans**: 0 plans
+**Plans**: 2 plans
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.2 to break down)
+- [ ] 22.2-01-PLAN.md — Переписать REQUIREMENTS.md/ROADMAP.md/PROJECT.md под новый docs-only scope
+- [ ] 22.2-02-PLAN.md — Создать docs/runbooks/bucket-provisioning.md с 4 env разделами + rationale + known gap
 
 ### Phase 22.1: s3-core-encapsulation (INSERTED)
 **Goal**: Per-service composition StorageModule fully owns the S3 client lifecycle — root modules import a single storage module and have no knowledge of underlying S3 infrastructure
