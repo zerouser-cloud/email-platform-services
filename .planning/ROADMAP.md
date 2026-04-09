@@ -122,15 +122,17 @@ Plans:
 - [ ] TBD (run /gsd-plan-phase 22.3 to break down)
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
-**Goal**: Every bucket declared by a per-bucket module is automatically checked and created on service boot, idempotently and identically across MinIO and Garage, with failures surfaced through health checks
+**Goal**: Полная процедура создания S3 bucket'ов документирована как операционный runbook, покрывающий все 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage). Любой оператор может следовать runbook без предварительных знаний и получить рабочие buckets. Нулевые изменения в коде, docker-compose, env-схемах — единственный deliverable `docs/runbooks/bucket-provisioning.md`.
 **Depends on**: Phase 22, Phase 22.1
 **Requirements**: SPRV-01, SPRV-02, SPRV-03, SPRV-04, SPRV-05
+**Scope change**: Оригинальный scope (code-based auto-provisioning с env flag) был отклонён в `/gsd:discuss-phase` 2026-04-09. Причины зафиксированы в `.planning/phases/22.2-bucket-provisioning-automation/22.2-CONTEXT.md` decisions D-01..D-03 и в Rationale секции самого runbook. Phase 22.3 prerequisite изменён: "выполнить runbook и создать buckets" вместо "auto-provisioning работает".
 **Success Criteria** (what must be TRUE):
-  1. A new per-bucket module declaration auto-provisions its bucket on boot without manual intervention or external scripts
-  2. Buckets that already exist are NOT recreated or modified -- provisioning is fully idempotent (HeadBucket detects existence, CreateBucket only on missing)
-  3. The same provisioning code path runs against MinIO (local/docker) and Garage (dev/prod) -- provider differences are transparent
-  4. Provisioning errors block readiness: health endpoint reports DOWN with structured reason; service does not silently boot with missing buckets
-  5. Provisioning is opt-in via a required env flag (config value, not env identity) so deployments where buckets are managed externally (Coolify/IaC) can disable it
+  1. `docs/runbooks/bucket-provisioning.md` существует и покрывает все 4 окружения отдельными self-contained разделами в порядке local-native → local-isolated → dev Coolify/Garage → prod Coolify/Garage
+  2. Новый разработчик с нуля может следовать runbook и получить рабочие buckets в любом из 4 окружений без внешней помощи
+  3. Garage секции (dev, prod) включают шаги создания key binding с подчёркнутым warning блоком — без key binding bucket недоступен приложению
+  4. Каждый раздел включает `curl` verification step против `/health/ready` с примерами OK и DOWN ответов
+  5. Rationale секция объясняет решение не автоматизировать (12-factor separation, Garage key bindings incompatibility, minimal prod permissions, safety против silent misconfig, unified approach)
+  6. Ноль изменений в `apps/`, `packages/`, `infra/` — только в `docs/` и `.planning/`
 **Plans**: 2 plans
 Plans:
 - [ ] 22.2-01-PLAN.md — Переписать REQUIREMENTS.md/ROADMAP.md/PROJECT.md под новый docs-only scope
