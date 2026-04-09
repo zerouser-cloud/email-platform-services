@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BucketStorageModule } from '../infrastructure/bucket-storage.module';
+import { BucketStorageModule, S3CoreModule } from '../../internal/storage';
 import {
   REPORTS_STORAGE,
   REPORTS_STORAGE_HEALTH,
@@ -9,6 +9,7 @@ import {
 
 @Module({
   imports: [
+    S3CoreModule,
     BucketStorageModule.forBucket({
       bucket: REPORTS_BUCKET,
       token: REPORTS_STORAGE,

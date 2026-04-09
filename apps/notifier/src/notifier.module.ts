@@ -2,11 +2,7 @@ import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { AppConfigModule } from '@email-platform/config';
 import { NotifierEnvSchema } from './infrastructure/config';
-import {
-  LoggingModule,
-  RabbitMqHealthIndicator,
-  S3CoreModule,
-} from '@email-platform/foundation';
+import { LoggingModule, RabbitMqHealthIndicator, S3CoreModule } from '@email-platform/foundation';
 import { HandleEventUseCase } from './application/use-cases/handle-event.use-case';
 import { TelegramNotificationSender } from './infrastructure/external/telegram-notification.sender';
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';

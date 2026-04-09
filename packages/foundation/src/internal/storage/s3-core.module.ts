@@ -1,14 +1,9 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { S3Client } from '@aws-sdk/client-s3';
-import {
-  S3_CLIENT,
-  S3_DEFAULTS,
-  STORAGE_ENDPOINT_SEPARATOR,
-} from './storage.constants';
+import { S3_CLIENT, S3_DEFAULTS, STORAGE_ENDPOINT_SEPARATOR } from './storage.constants';
 import { S3ShutdownService } from './s3-shutdown.service';
 
-@Global()
 @Module({
   imports: [ConfigModule],
   providers: [

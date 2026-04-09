@@ -6,14 +6,8 @@ import {
   REPORTS_STORAGE_HEALTH,
   REPORTS_HEALTH_KEY,
 } from '@email-platform/foundation';
-import type {
-  DatabaseHealthIndicator,
-  StorageHealthIndicator,
-} from '@email-platform/foundation';
-import {
-  PARSER_STORAGE_HEALTH,
-  PARSER_STORAGE_HEALTH_KEY,
-} from '../parser.constants';
+import type { DatabaseHealthIndicator, StorageHealthIndicator } from '@email-platform/foundation';
+import { PARSER_STORAGE_HEALTH, PARSER_STORAGE_HEALTH_KEY } from '../parser.constants';
 
 @Controller(HEALTH.ROUTE)
 export class HealthController {
