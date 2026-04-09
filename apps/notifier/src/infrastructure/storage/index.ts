@@ -1,1 +1,1 @@
-export { NotifierStorageModule } from './notifier-storage.module';
+export { StorageModule } from './storage.module';
