@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BucketStorageModule, S3CoreModule } from '../../internal/storage';
+import { BucketStorageModule, S3CoreModule } from '../../../internal/storage';
 import {
   REPORTS_STORAGE,
   REPORTS_STORAGE_HEALTH,
