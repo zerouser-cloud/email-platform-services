@@ -1,11 +1,11 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { ParserEnvSchema } from './infrastructure/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
+import { LoggingModule, PersistenceModule, S3CoreModule } from '@email-platform/foundation';
 import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
 import { StartParsingUseCase } from './application/use-cases/start-parsing.use-case';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
-import { ParserStorageModule } from './infrastructure/storage';
+import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
 import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.constants';
 
@@ -13,7 +13,8 @@ import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.consta
   imports: [
     AppConfigModule.forRoot(ParserEnvSchema),
     PersistenceModule.forRootAsync(),
-    ParserStorageModule.forRootAsync(),
+    S3CoreModule,
+    StorageModule,
     LoggingModule.forGrpcAsync('parser'),
   ],
   controllers: [ParserGrpcServer, HealthController],
