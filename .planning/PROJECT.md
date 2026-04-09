@@ -70,7 +70,8 @@
 - ✓ Both dev modes verified: start:native + start:isolated — Phase 19
 - ✓ Config decomposition: modular Zod sub-schemas, per-service env validation — Phase 20
 - ✓ Redis CacheModule: DI-injected client, CachePort абстракция, auto-prefix namespace, real health check — Phase 21
-- ✓ S3 StorageModule: DI-injected @Global S3CoreModule singleton + BucketStorageModule factory, per-bucket health tokens, ReportsStorageModule as shared real Nest module, STORAGE_PROTOCOL env var (works identically MinIO/Garage) — Phase 22
+- ✓ S3 StorageModule: DI-injected S3CoreModule singleton (non-global, self-contained inside BucketStorageModule.forBucket) + per-bucket health tokens, ReportsStorageModule as shared Nest module in foundation, STORAGE_PROTOCOL env var (works identically MinIO/Garage) — Phase 22, Phase 22.1
+- ✓ Foundation package encapsulation: `external/` vs `internal/` partition with package.json `exports` field + tsconfig `moduleResolution: node16` + ESLint two-override rule — three independent gates seal public/internal API, S3CoreModule reachable only via `@email-platform/foundation/internal` subpath — Phase 22.1
 
 ### Active
 - [ ] gRPC client каркас в foundation + per-service адаптеры
@@ -135,7 +136,7 @@ Backing services абстрагированы через модули-фасад
 |--------|-----------------|--------|
 | **PersistenceModule** | PostgreSQL (pool, Drizzle ORM, health) | Ready — Phase 10 |
 | **CacheModule** | Redis (DI client, CachePort, namespaced keys, health) | Ready — Phase 21 |
-| **S3CoreModule + BucketStorageModule + ReportsStorageModule** | MinIO / Garage (@Global singleton S3Client, per-bucket factory, shared reports module, per-bucket health tokens) | Ready — Phase 22 |
+| **S3CoreModule + BucketStorageModule + ReportsStorageModule** | MinIO / Garage (non-global S3Client singleton via class-identity dedup, self-contained BucketStorageModule.forBucket factory, shared reports module in foundation, per-bucket health tokens, reachable only via `@email-platform/foundation/internal` subpath) | Ready — Phase 22 + 22.1 |
 | **EventModule** | RabbitMQ (connection, publisher, consumer, health) | Planned — Phase 25 |
 | **gRPC Client Wrappers** | gRPC (typed client wrappers, deadline handling) | Planned — Phase 23 |
 | **HTTP Client + Circuit Breaker** | External HTTP APIs (resilient client, retry, timeout) | Planned — Phase 24 |
@@ -164,4 +165,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after Phase 22 complete*
+*Last updated: 2026-04-09 after Phase 22.1 complete*
