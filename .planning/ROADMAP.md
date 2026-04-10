@@ -108,7 +108,7 @@ Plans:
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
-**Goal**: Each storage-using service exposes safe, env-gated HTTP endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
+**Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
 **Depends on**: Phase 22, Phase 22.1, Phase 22.2
 **Requirements**: SSMK-01, SSMK-02, SSMK-03, SSMK-04, SSMK-05
 **Success Criteria** (what must be TRUE):
@@ -117,9 +117,11 @@ Plans:
   3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
   4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
   5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
-**Plans**: 0 plans
+**Plans**: 3 plans
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.3 to break down)
+- [ ] 22.3-01-PLAN.md — Proto definitions (parser.proto smoke rpc + new notifier.proto) + notifier gRPC infrastructure
+- [ ] 22.3-02-PLAN.md — Storage smoke gRPC controllers in parser and notifier test/ directories
+- [ ] 22.3-03-PLAN.md — Gateway REST proxy controller under /test/ with gRPC clients to parser and notifier
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
 **Goal**: Полная процедура создания S3 bucket'ов документирована как операционный runbook, покрывающий все 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage). Любой оператор может следовать runbook без предварительных знаний и получить рабочие buckets. Нулевые изменения в коде, docker-compose, env-схемах — единственный deliverable `docs/runbooks/bucket-provisioning.md`.
@@ -259,6 +261,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
+| 22.3. Storage Smoke Test Endpoints | v4.0 | 0/3 | Planning | - |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
