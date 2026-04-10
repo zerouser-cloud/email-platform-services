@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package notifier;
+
+import "common.proto";
+
+// Service responsible for notifications and event-driven file delivery.
+// Storage smoke test rpc methods (temporary -- delete after verification).
+service NotifierService {
+  rpc HealthCheck(common.Empty) returns (common.HealthStatus);
+  rpc RunStorageSmoke(common.Empty) returns (StorageSmokeResponse);
+  rpc CleanupStorageSmoke(CleanupSmokeRequest) returns (CleanupSmokeResponse);
+}
+
+// --- Storage Smoke Test (temporary -- delete after verification) ---
+
+message StorageSmokeStepResult {
+  string step = 1;
+  bool success = 2;
+  string detail = 3;
+}
+
+message StorageSmokeBucketResult {
+  string bucket = 1;
+  string test_key = 2;
+  repeated StorageSmokeStepResult steps = 3;
+  bool all_passed = 4;
+}
+
+message StorageSmokeResponse {
+  repeated StorageSmokeBucketResult buckets = 1;
+}
+
+message CleanupSmokeRequest {
+  string bucket = 1;
+  string key = 2;
+}
+
+message CleanupSmokeResponse {
+  bool success = 1;
+  string detail = 2;
+}
