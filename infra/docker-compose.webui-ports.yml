@@ -1,0 +1,8 @@
+# WebUI override: exposes infra management UI ports to host.
+# Used by BOTH start:native and start:isolated modes.
+# Add new WebUI ports here (e.g., Drizzle Studio) — they become available in all dev modes.
+services:
+  rabbitmq:
+    ports: ["15672:15672"]    # RabbitMQ Management UI
+  minio:
+    ports: ["9001:9001"]      # MinIO Console

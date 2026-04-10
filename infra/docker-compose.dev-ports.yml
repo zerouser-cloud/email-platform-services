@@ -1,11 +1,12 @@
-# Dev override: exposes infra ports to host for local development.
-# Usage: docker compose -f docker-compose.infra.yml -f docker-compose.dev-ports.yml up
+# Dev override: exposes infra SERVICE ports to host for local development (start:native).
+# WebUI ports are in docker-compose.webui-ports.yml (shared by native and isolated modes).
+# Usage: docker compose -f docker-compose.infra.yml -f docker-compose.dev-ports.yml -f docker-compose.webui-ports.yml up
 services:
   postgres:
     ports: ["5432:5432"]
   redis:
     ports: ["6379:6379"]
   rabbitmq:
-    ports: ["5672:5672", "15672:15672"]
+    ports: ["5672:5672"]
   minio:
-    ports: ["9000:9000", "9001:9001"]
+    ports: ["9000:9000"]
