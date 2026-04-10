@@ -16,10 +16,10 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 
 ### Redis (CacheModule)
 
-- [ ] **CACHE-01**: CacheModule в foundation с `forRootAsync()`, Symbol DI tokens, health indicator, shutdown service
-- [ ] **CACHE-02**: Сервис может инжектить Redis client через DI token и выполнять get/set/del операции
-- [ ] **CACHE-03**: Health indicator отражает реальное состояние Redis connection (замена stub)
-- [ ] **CACHE-04**: Per-service namespace isolation (ключи не пересекаются между сервисами)
+- [x] **CACHE-01**: CacheModule в foundation с `forRootAsync()`, Symbol DI tokens, health indicator, shutdown service
+- [x] **CACHE-02**: Сервис может инжектить Redis client через DI token и выполнять get/set/del операции
+- [x] **CACHE-03**: Health indicator отражает реальное состояние Redis connection (замена stub)
+- [x] **CACHE-04**: Per-service namespace isolation (ключи не пересекаются между сервисами)
 
 ### S3 (StorageModule)
 
@@ -27,6 +27,31 @@ Requirements for Infrastructure Abstractions & Cross-Cutting milestone.
 - [ ] **S3-02**: Unified client через AWS SDK v3 работает с MinIO (local) и Garage (prod) без изменения кода
 - [ ] **S3-03**: Env vars переименованы MINIO_* → S3_* (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET)
 - [ ] **S3-04**: Сервис может загружать, скачивать и удалять файлы через DI token
+
+### S3 Encapsulation (per-service composition)
+
+- [x] **SENC-01**: Root module каждого storage-using сервиса импортирует ровно один storage-related модуль (per-service composition StorageModule)
+- [x] **SENC-02**: S3CoreModule импортируется только из per-service composition StorageModule, не из root service module
+- [x] **SENC-03**: Добавление нового bucket type требует только нового per-bucket модуля + composition update -- никаких изменений в root module сервиса
+- [x] **SENC-04**: pnpm build остаётся зелёным; все существующие storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) продолжают резолвиться через DI после рефакторинга
+
+### S3 Bucket Provisioning
+
+Scope changed during `/gsd:discuss-phase` (2026-04-09): phase became docs-only runbook, no code-based provisioning. Rationale: 12-factor separation, Garage key bindings incompatibility with S3 API CreateBucket, minimal prod permissions, safety against silent misconfig, unified manual approach across all 4 environments. См. `.planning/phases/22.2-bucket-provisioning-automation/22.2-CONTEXT.md` decisions D-01..D-03.
+
+- [ ] **SPRV-01**: Runbook `docs/runbooks/bucket-provisioning.md` покрывает ровно 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage) отдельными self-contained разделами
+- [ ] **SPRV-02**: Каждый раздел включает 6 стандартных шагов (Prerequisites, Open UI, Create buckets, Configure access, Set env vars, Verify)
+- [ ] **SPRV-03**: Garage разделы (dev, prod) отдельно покрывают создание key binding с подчёркнутым warning — без него bucket недоступен приложению
+- [ ] **SPRV-04**: Verification step с `curl` против `/health/ready` для каждого окружения, с примерами OK и DOWN ответов
+- [ ] **SPRV-05**: Runbook включает "Rationale" секцию объясняющую почему решено не автоматизировать (12-factor, Garage key bindings, minimal permissions, safety, unified approach)
+
+### S3 Smoke Test Endpoints
+
+- [ ] **SSMK-01**: Parser экспонирует smoke endpoints для PARSER_STORAGE и REPORTS_STORAGE покрывающие upload/download/delete/exists/getSignedUrl
+- [ ] **SSMK-02**: Notifier экспонирует smoke endpoints для REPORTS_STORAGE покрывающие тот же surface StoragePort
+- [ ] **SSMK-03**: Cross-service shared bucket flow демонстрируемо рабочий: parser загружает в reports bucket, notifier скачивает тот же ключ из reports bucket -- доказывает что shared storage работает end-to-end
+- [ ] **SSMK-04**: Endpoints gated через required env flag (config value, без NODE_ENV/isDev/isProd reads) -- по умолчанию disabled в shipped artifacts
+- [ ] **SSMK-05**: Те же endpoint контракты доступны во всех четырёх deployment окружениях (local-native, local-docker, dev-Coolify, prod-Coolify) -- единый тест-план валидирует всю матрицу
 
 ### gRPC Client
 
@@ -145,14 +170,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CFG-02 | Phase 20 | Complete |
 | CFG-03 | Phase 20 | Complete |
 | CFG-04 | Phase 20 | Complete |
-| CACHE-01 | Phase 21 | Pending |
-| CACHE-02 | Phase 21 | Pending |
-| CACHE-03 | Phase 21 | Pending |
-| CACHE-04 | Phase 21 | Pending |
+| CACHE-01 | Phase 21 | Complete |
+| CACHE-02 | Phase 21 | Complete |
+| CACHE-03 | Phase 21 | Complete |
+| CACHE-04 | Phase 21 | Complete |
 | S3-01 | Phase 22 | Pending |
 | S3-02 | Phase 22 | Pending |
 | S3-03 | Phase 22 | Pending |
 | S3-04 | Phase 22 | Pending |
+| SENC-01 | Phase 22.1 | Complete |
+| SENC-02 | Phase 22.1 | Complete |
+| SENC-03 | Phase 22.1 | Complete |
+| SENC-04 | Phase 22.1 | Complete |
+| SPRV-01 | Phase 22.2 | Pending |
+| SPRV-02 | Phase 22.2 | Pending |
+| SPRV-03 | Phase 22.2 | Pending |
+| SPRV-04 | Phase 22.2 | Pending |
+| SPRV-05 | Phase 22.2 | Pending |
+| SSMK-01 | Phase 22.3 | Pending |
+| SSMK-02 | Phase 22.3 | Pending |
+| SSMK-03 | Phase 22.3 | Pending |
+| SSMK-04 | Phase 22.3 | Pending |
+| SSMK-05 | Phase 22.3 | Pending |
 | GRPC-01 | Phase 23 | Pending |
 | GRPC-02 | Phase 23 | Pending |
 | GRPC-03 | Phase 23 | Pending |
@@ -174,10 +213,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TRACE-03 | Phase 27 | Pending |
 
 **Coverage:**
-- v4.0 requirements: 31 total
-- Mapped to phases: 31
+- v4.0 requirements: 45 total (31 original + 14 from inserted phases 22.1-22.3)
+- Mapped to phases: 45
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after roadmap creation*
+*Last updated: 2026-04-09 after inserting phases 22.1, 22.2, 22.3*

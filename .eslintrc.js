@@ -90,8 +90,28 @@ module.exports = {
                             '@email-platform/parser', '@email-platform/parser/*',
                             '@email-platform/audience', '@email-platform/audience/*',
                             '@email-platform/notifier', '@email-platform/notifier/*',
+                            '@email-platform/foundation/internal',
+                            '@email-platform/foundation/internal/*',
                         ],
-                        message: 'Apps cannot import from other apps. Use contracts for shared types.',
+                        message: 'Apps cannot import from other apps or from foundation internal. Use contracts for shared types; wrap internal primitives in infrastructure/.',
+                    }],
+                }],
+            },
+        },
+        {
+            files: ['apps/*/src/infrastructure/**/*.ts'],
+            rules: {
+                'no-restricted-imports': ['error', {
+                    patterns: [{
+                        group: [
+                            '@email-platform/gateway', '@email-platform/gateway/*',
+                            '@email-platform/auth', '@email-platform/auth/*',
+                            '@email-platform/sender', '@email-platform/sender/*',
+                            '@email-platform/parser', '@email-platform/parser/*',
+                            '@email-platform/audience', '@email-platform/audience/*',
+                            '@email-platform/notifier', '@email-platform/notifier/*',
+                        ],
+                        message: 'Apps cannot import from other apps. Use contracts for shared types. (Foundation internal is allowed in infrastructure/ per Phase 22.1.)',
                     }],
                 }],
             },
