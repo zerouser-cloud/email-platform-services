@@ -8,6 +8,7 @@ import { TelegramNotificationSender } from './infrastructure/external/telegram-n
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
 import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
+import { StorageSmokeController } from './test/storage-smoke.controller';
 import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
 @Module({
@@ -17,7 +18,7 @@ import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constant
     StorageModule,
     LoggingModule.forHttpAsync('notifier'),
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, StorageSmokeController],
   providers: [
     { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationSender },
     { provide: HANDLE_EVENT_PORT, useClass: HandleEventUseCase },
