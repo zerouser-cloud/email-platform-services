@@ -317,3 +317,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.6: Настроить HTTPS для Garage WebUI на Coolify (BACKLOG)
+
+**Goal:** Garage WebUI (garage.dev.email-platform.pp.ua и garage.email-platform.pp.ua) сейчас доступен только по HTTP. Настроить HTTPS — через Traefik auto-TLS или Cloudflare proxy для этих доменов. После исправления — обновить docs/runbooks/bucket-provisioning.md обратно на https:// и S3 endpoint порты с 80 на 443.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
