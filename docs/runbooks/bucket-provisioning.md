@@ -456,16 +456,19 @@ STORAGE_REGION=us-east-1
 
 ```bash
 # Это вернёт status: ok даже если S3 упал — НЕ использовать как единственную проверку
-curl -s http://api.dev.email-platform.pp.ua/health/ready | jq
+curl -s http://api.dev.email-platform.pp.ua/health/ready
 ```
 
-Для реальной проверки S3 нужен **прямой HTTP endpoint parser'а**. HTTP порт parser'а (3003) **не exposed** наружу через Traefik (Coolify конфигурация по умолчанию exposes только gateway HTTP port). Поэтому:
+Для реальной проверки S3 нужен **прямой HTTP endpoint parser'а**. HTTP порт parser'а (по умолчанию `PARSER_PORT=3003`) **не exposed** наружу через Traefik (Coolify конфигурация по умолчанию exposes только gateway HTTP port). Поэтому:
 
-**Вариант А: SSH/Terminal через Coolify dashboard.**
+> **Важно:** убедись что ты exec'нулся именно в **parser** контейнер, не в gateway или другой сервис. Порт зависит от `PARSER_PORT` env var в Coolify — проверь значение в Coolify → project → parser → Environment Variables. По умолчанию `3003`.
+> В контейнерах `node:20-alpine` нет `jq` — используй `wget -qO-` без `| jq`.
+
+**Вариант А: Terminal через Coolify dashboard.**
 
 ```bash
-# Coolify → project → parser service → Terminal
-wget -qO- http://localhost:3003/health/ready | jq
+# Coolify → project → dev environment → parser service → Terminal
+wget -qO- http://localhost:3003/health/ready
 ```
 
 Здесь `localhost` — внутри контейнера parser, это сам parser process.
@@ -623,14 +626,16 @@ Gateway health через Traefik — **не показывает S3 state** (kn
 
 ```bash
 # status: ok не означает что S3 работает — использовать только как liveness check, не как S3 verification
-curl -s http://api.email-platform.pp.ua/health/ready | jq
+curl -s http://api.email-platform.pp.ua/health/ready
 ```
 
-Для реальной S3 проверки — SSH/Terminal в **prod** parser container:
+Для реальной S3 проверки — Terminal в **prod** parser container:
+
+> **Важно:** те же правила что в dev — exec в **parser** контейнер (не gateway), порт из `PARSER_PORT` env var (по умолчанию `3003`), `jq` недоступен в alpine образах.
 
 ```bash
-# Coolify → project → parser service (prod environment) → Terminal
-wget -qO- http://localhost:3003/health/ready | jq
+# Coolify → project → prod environment → parser service → Terminal
+wget -qO- http://localhost:3003/health/ready
 ```
 
 Или через `docker exec` на prod Coolify host:
