@@ -262,11 +262,11 @@ docker compose -f infra/docker-compose.yml ps
 
 ### Шаг 2: Открыть UI
 
-MinIO WebUI: **http://localhost:9001** (тот же URL что и в local-native — dev-ports override exposes 9001 на хост).
+MinIO WebUI: **http://localhost:9001** (тот же URL что и в local-native — `webui-ports.yml` overlay экспонирует WebUI порты в обоих режимах).
 
 Логин: `minioadmin` / `minioadmin` (те же defaults).
 
-> **Важно:** WebUI доступен **только** благодаря `dev-ports.yml` override. Если запустить isolated без этого override (`docker compose -f infra/docker-compose.yml up -d`), порт `9001` не будет exposed и WebUI окажется недоступен с хоста — придётся заходить через `docker exec` в minio container. Для простоты onboarding всегда запускай через `pnpm start:isolated` — команда включает override.
+> **Как это работает:** `pnpm start:isolated` запускает `docker compose -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml up --build`. Overlay `webui-ports.yml` проброшивает WebUI порты (MinIO Console 9001, RabbitMQ Management 15672) на хост, а технические порты (5432, 6379, 5672, 9000) остаются внутри Docker network — apps общаются с инфрой по docker DNS, не через хост.
 
 ### Шаг 3: Создать bucket'ы
 

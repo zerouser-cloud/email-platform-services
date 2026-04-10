@@ -16,10 +16,10 @@
     "start:isolated": "pnpm docker:up",
     "stop:native": "pnpm infra:down",
     "stop:isolated": "pnpm docker:down",
-    "infra:up": "docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml up -d",
-    "infra:down": "docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml down",
-    "docker:up": "docker compose -f infra/docker-compose.yml up --build",
-    "docker:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:up": "docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml -f infra/docker-compose.webui-ports.yml up -d",
+    "infra:down": "docker compose -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml -f infra/docker-compose.webui-ports.yml down",
+    "docker:up": "docker compose -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml up --build",
+    "docker:down": "docker compose -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml down",
     "prepare": "husky"
   },
   "devDependencies": {
