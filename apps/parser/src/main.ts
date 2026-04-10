@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE, loadGlobalConfig } from '@email-platform/config';
+import { SERVICE, loadConfig } from '@email-platform/config';
+import { ParserEnvSchema, type ParserEnv } from './infrastructure/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { ParserModule } from './parser.module';
 
 async function bootstrap() {
-  const config = loadGlobalConfig();
+  const config = loadConfig(ParserEnvSchema) as ParserEnv;
   const app = await NestFactory.create(ParserModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));

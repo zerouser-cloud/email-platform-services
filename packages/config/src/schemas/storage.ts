@@ -1,9 +1,6 @@
 import { z } from 'zod';
 
-export const InfrastructureSchema = z.object({
-  DATABASE_URL: z.string().url(),
-  REDIS_URL: z.string().min(1),
-  RABBITMQ_URL: z.string().min(1),
+export const StorageSchema = z.object({
   STORAGE_ENDPOINT: z.string().min(1),
   STORAGE_PORT: z.coerce.number(),
   STORAGE_ACCESS_KEY: z.string().min(1),
@@ -12,4 +9,4 @@ export const InfrastructureSchema = z.object({
   STORAGE_REGION: z.string().min(1),
 });
 
-export type InfrastructureConfig = z.infer<typeof InfrastructureSchema>;
+export type StorageConfig = z.infer<typeof StorageSchema>;

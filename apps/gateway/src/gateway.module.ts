@@ -1,5 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
+import { GatewayEnvSchema } from './infrastructure/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { LoggingModule, GrpcToHttpExceptionFilter } from '@email-platform/foundation';
 import { ThrottleModule } from './throttle/throttle.module';
@@ -8,7 +9,7 @@ import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
-    AppConfigModule,
+    AppConfigModule.forRoot(GatewayEnvSchema),
     TerminusModule,
     LoggingModule.forHttpAsync('gateway'),
     ThrottleModule,

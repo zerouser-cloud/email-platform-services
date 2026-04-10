@@ -1,12 +1,13 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE, loadGlobalConfig } from '@email-platform/config';
+import { SERVICE, loadConfig } from '@email-platform/config';
+import { AuthEnvSchema, type AuthEnv } from './infrastructure/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { AuthModule } from './auth.module';
 
 async function bootstrap() {
-  const config = loadGlobalConfig();
+  const config = loadConfig(AuthEnvSchema) as AuthEnv;
   const app = await NestFactory.create(AuthModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));
