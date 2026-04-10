@@ -38,4 +38,18 @@ export class ParserGrpcServer implements ParserProto.ParserServiceController {
   ): Promise<ParserProto.ParserSettings> {
     throw new NotImplementedException('updateSettings not yet implemented');
   }
+
+  // --- Storage Smoke Test stubs (temporary -- implemented in Plan 02) ---
+
+  async runStorageSmoke(
+    _request: CommonProto.Empty,
+  ): Promise<ParserProto.StorageSmokeResponse> {
+    throw new NotImplementedException('runStorageSmoke not yet implemented');
+  }
+
+  async cleanupStorageSmoke(
+    _request: ParserProto.CleanupSmokeRequest,
+  ): Promise<ParserProto.CleanupSmokeResponse> {
+    throw new NotImplementedException('cleanupStorageSmoke not yet implemented');
+  }
 }
