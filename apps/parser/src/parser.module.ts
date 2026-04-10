@@ -7,6 +7,7 @@ import { StartParsingUseCase } from './application/use-cases/start-parsing.use-c
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
 import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
+import { StorageSmokeController } from './test/storage-smoke.controller';
 import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.constants';
 
 @Module({
@@ -16,7 +17,7 @@ import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.consta
     StorageModule,
     LoggingModule.forGrpcAsync('parser'),
   ],
-  controllers: [ParserGrpcServer, HealthController],
+  controllers: [ParserGrpcServer, HealthController, StorageSmokeController],
   providers: [
     { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },
     { provide: START_PARSING_PORT, useClass: StartParsingUseCase },
