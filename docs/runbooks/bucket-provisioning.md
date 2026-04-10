@@ -456,7 +456,7 @@ STORAGE_REGION=us-east-1
 
 ```bash
 # Это вернёт status: ok даже если S3 упал — НЕ использовать как единственную проверку
-curl -s https://api.dev.email-platform.pp.ua/health/ready | jq
+curl -s http://api.dev.email-platform.pp.ua/health/ready | jq
 ```
 
 Для реальной проверки S3 нужен **прямой HTTP endpoint parser'а**. HTTP порт parser'а (3003) **не exposed** наружу через Traefik (Coolify конфигурация по умолчанию exposes только gateway HTTP port). Поэтому:
@@ -623,7 +623,7 @@ Gateway health через Traefik — **не показывает S3 state** (kn
 
 ```bash
 # status: ok не означает что S3 работает — использовать только как liveness check, не как S3 verification
-curl -s https://api.email-platform.pp.ua/health/ready | jq
+curl -s http://api.email-platform.pp.ua/health/ready | jq
 ```
 
 Для реальной S3 проверки — SSH/Terminal в **prod** parser container:
