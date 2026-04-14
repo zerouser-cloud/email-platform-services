@@ -56,7 +56,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
-    networks: [infra]
+    networks:
+      infra:
+        # Network aliases so containers in the same network can resolve
+        # `public.localhost` (and other bucket subdomains) to this Garage
+        # instance — required for [s3_web] virtual-host routing in isolated
+        # mode where apps run inside containers (not on host loopback).
+        aliases:
+          - public.localhost
 
   garage-webui:
     image: khairul169/garage-webui:1.1.0

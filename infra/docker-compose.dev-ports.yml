@@ -10,5 +10,4 @@ services:
     ports: ["5672:5672"]
   garage:
     ports:
-      - "3900:3900"  # S3 API
-      - "3902:3902"  # web endpoint (anonymous public bucket)
+      - "3900:3900"  # S3 API (web endpoint 3902 is in webui-ports.yml — shared by both modes)
