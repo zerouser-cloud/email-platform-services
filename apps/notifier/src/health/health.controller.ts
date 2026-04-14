@@ -3,8 +3,8 @@ import { HealthCheckService, HealthCheck } from '@nestjs/terminus';
 import {
   RabbitMqHealthIndicator,
   HEALTH,
-  REPORTS_STORAGE_HEALTH,
-  REPORTS_HEALTH_KEY,
+  PUBLIC_STORAGE_HEALTH,
+  PUBLIC_HEALTH_KEY,
 } from '@email-platform/foundation';
 import type { StorageHealthIndicator } from '@email-platform/foundation';
 
@@ -13,7 +13,7 @@ export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     private readonly rabbitmq: RabbitMqHealthIndicator,
-    @Inject(REPORTS_STORAGE_HEALTH) private readonly reportsStorage: StorageHealthIndicator,
+    @Inject(PUBLIC_STORAGE_HEALTH) private readonly publicStorage: StorageHealthIndicator,
   ) {}
 
   @Get(HEALTH.LIVE)
@@ -27,7 +27,7 @@ export class HealthController {
   readiness() {
     return this.health.check([
       () => this.rabbitmq.isHealthy(HEALTH.INDICATOR.RABBITMQ),
-      () => this.reportsStorage.isHealthy(REPORTS_HEALTH_KEY),
+      () => this.publicStorage.isHealthy(PUBLIC_HEALTH_KEY),
     ]);
   }
 }
