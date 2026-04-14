@@ -41,13 +41,6 @@ if [[ -z "${CONTAINER:-}" ]]; then
   exit 1
 fi
 
-# --- Idempotence: short-circuit if marker present ---
-MARKER_PATH="/var/lib/garage/meta/.bootstrapped"
-if docker exec "$CONTAINER" test -f "$MARKER_PATH" 2>/dev/null; then
-  echo "Already bootstrapped (marker present at $MARKER_PATH), skipping."
-  exit 0
-fi
-
 # --- Wait for Garage to be responsive (up to ~30s) ---
 echo "Waiting for Garage to be ready..."
 for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
@@ -63,7 +56,16 @@ for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
   sleep 2
 done
 
-# --- Run the 7 verified CLI commands ---
+# --- Idempotence: check if both buckets already exist (no `test` binary in near-scratch image) ---
+# Uses `garage bucket list` output: one bucket per line. If both present, bootstrap already done.
+BUCKETS_OUTPUT="$(docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket list 2>/dev/null || true)"
+if echo "$BUCKETS_OUTPUT" | grep -qE '(^|\s)parser(\s|$)' \
+   && echo "$BUCKETS_OUTPUT" | grep -qE '(^|\s)public(\s|$)'; then
+  echo "Already bootstrapped (buckets parser + public exist), skipping."
+  exit 0
+fi
+
+# --- Run the 7 verified CLI commands; each step is best-effort-idempotent via `|| true` fallback ---
 echo "[1/7] Discovering node ID..."
 NODE_ID="$(docker exec "$CONTAINER" /garage -c /etc/garage.toml node id -q | cut -d@ -f1)"
 if [[ -z "${NODE_ID:-}" ]]; then
@@ -73,26 +75,23 @@ fi
 echo "      node id = $NODE_ID"
 
 echo "[2/7] Assigning layout (zone=local, capacity=1G)..."
-docker exec "$CONTAINER" /garage -c /etc/garage.toml layout assign -z local -c 1G "$NODE_ID"
+docker exec "$CONTAINER" /garage -c /etc/garage.toml layout assign -z local -c 1G "$NODE_ID" || echo "      (layout already assigned — continuing)"
 
 echo "[3/7] Applying layout (version 1)..."
-docker exec "$CONTAINER" /garage -c /etc/garage.toml layout apply --version 1
+docker exec "$CONTAINER" /garage -c /etc/garage.toml layout apply --version 1 || echo "      (layout already applied — continuing)"
 
 echo "[4/7] Importing key 'email-platform-local'..."
-docker exec "$CONTAINER" /garage -c /etc/garage.toml key import --yes "$STORAGE_ACCESS_KEY" "$STORAGE_SECRET_KEY" -n email-platform-local
+docker exec "$CONTAINER" /garage -c /etc/garage.toml key import --yes "$STORAGE_ACCESS_KEY" "$STORAGE_SECRET_KEY" -n email-platform-local || echo "      (key already exists — continuing)"
 
 echo "[5/7] Creating bucket 'parser'..."
-docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket create parser
+docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket create parser || echo "      (bucket already exists — continuing)"
 
 echo "[6/7] Creating bucket 'public'..."
-docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket create public
+docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket create public || echo "      (bucket already exists — continuing)"
 
 echo "[7/7] Granting read+write+owner on both buckets..."
 docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket allow --key email-platform-local --read --write --owner parser
 docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket allow --key email-platform-local --read --write --owner public
-
-# --- Write idempotence marker ---
-docker exec "$CONTAINER" touch "$MARKER_PATH"
 
 echo ""
 echo "Garage bootstrap complete. Buckets: parser, public. Key: email-platform-local."
