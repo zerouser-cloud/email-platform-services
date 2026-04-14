@@ -34,6 +34,7 @@ export const SERVICE = {
     id: 'notifier',
     displayName: 'Notifier',
     port: 3005,
+    grpc: { port: 50055, serviceName: 'NotifierService' },
   }),
 } as const;
 

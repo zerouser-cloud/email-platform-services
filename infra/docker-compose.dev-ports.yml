@@ -8,5 +8,6 @@ services:
     ports: ["6379:6379"]
   rabbitmq:
     ports: ["5672:5672"]
-  minio:
-    ports: ["9000:9000"]
+  garage:
+    ports:
+      - "3900:3900"  # S3 API (web endpoint 3902 is in webui-ports.yml — shared by both modes)

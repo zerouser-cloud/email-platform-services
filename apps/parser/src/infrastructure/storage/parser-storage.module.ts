@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BucketStorageModule } from '@email-platform/foundation/internal';
+import { PrivateStorageModule } from '@email-platform/foundation/internal';
 import {
   PARSER_STORAGE,
   PARSER_STORAGE_HEALTH,
@@ -9,13 +9,13 @@ import {
 
 @Module({
   imports: [
-    BucketStorageModule.forBucket({
+    PrivateStorageModule.forBucket({
       bucket: PARSER_STORAGE_BUCKET,
       token: PARSER_STORAGE,
       healthToken: PARSER_STORAGE_HEALTH,
       healthKey: PARSER_STORAGE_HEALTH_KEY,
     }),
   ],
-  exports: [BucketStorageModule],
+  exports: [PrivateStorageModule],
 })
 export class ParserStorageModule {}

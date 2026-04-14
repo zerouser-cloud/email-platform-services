@@ -107,8 +107,31 @@ Plans:
 - [x] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
+### Phase 22.5: local-garage-unification (INSERTED)
+
+**Goal:** Унификация local storage backend на Garage — заменить MinIO в local-native и local-isolated окружениях на Garage Docker image, обновить docker-compose/env-schemas/runbook, чтобы все 4 окружения использовали один и тот же S3 impl. Устраняет расхождения между MinIO (local) и Garage (dev/prod) в семантике bucket policy, URL формата, CLI. Также объединяет bucket rename reports → public (DI tokens, smoke controllers, health controllers) — plumbing scope shifted from 22.4 per CONTEXT D-18..D-23.
+**Requirements**: D-01..D-33 (locked decisions in 22.5-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md)
+**Depends on:** Phase 22
+**Plans:** 4 plans
+
+Plans:
+- [ ] 22.5-01-PLAN.md — Replace MinIO with Garage v2.1.0 in compose stacks + commit garage.toml + garage-bootstrap.sh + env files + npm script
+- [ ] 22.5-02-PLAN.md — Foundation rename: external/storage/reports/ → public/, REPORTS_* → PUBLIC_* symbols, barrel flip
+- [ ] 22.5-03-PLAN.md — Update parser+notifier storage modules, smoke controllers, and health controllers to PUBLIC_* surface
+- [ ] 22.5-04-PLAN.md — Rewrite docs/runbooks/bucket-provisioning.md for all 4 envs + live local smoke+readiness acceptance checkpoint
+
+### Phase 22.4: public-bucket-abstraction (INSERTED)
+
+**Goal:** Разделить хранилище на per-service private bucket'ы + один `public` bucket для внешних download-ссылок. Убрать presigned-URL механизм. Добавить `SharedNamespaceModule` c typed namespaced-клиентами, `NamespacedStoragePort` (Readable-only, multipart через `@aws-sdk/lib-storage`). Переименовать bucket `reports` → `public`, добавить env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, переписать smoke 22.3 под новый контракт.
+**Requirements**: TBD
+**Depends on:** Phase 22, Phase 22.5
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 22.4 to break down)
+
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
-**Goal**: Each storage-using service exposes safe, env-gated HTTP endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
+**Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
 **Depends on**: Phase 22, Phase 22.1, Phase 22.2
 **Requirements**: SSMK-01, SSMK-02, SSMK-03, SSMK-04, SSMK-05
 **Success Criteria** (what must be TRUE):
@@ -117,9 +140,11 @@ Plans:
   3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
   4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
   5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
-**Plans**: 0 plans
+**Plans**: 3 plans
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.3 to break down)
+- [x] 22.3-01-PLAN.md — Proto definitions (parser.proto smoke rpc + new notifier.proto) + notifier gRPC infrastructure
+- [x] 22.3-02-PLAN.md — Storage smoke gRPC controllers in parser and notifier test/ directories
+- [x] 22.3-03-PLAN.md — Gateway REST proxy controller under /test/ with gRPC clients to parser and notifier
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
 **Goal**: Полная процедура создания S3 bucket'ов документирована как операционный runbook, покрывающий все 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage). Любой оператор может следовать runbook без предварительных знаний и получить рабочие buckets. Нулевые изменения в коде, docker-compose, env-схемах — единственный deliverable `docs/runbooks/bucket-provisioning.md`.
@@ -259,6 +284,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
+| 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
@@ -271,7 +297,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 2/2 plans complete
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)

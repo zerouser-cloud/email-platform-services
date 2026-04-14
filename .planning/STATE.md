@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Quick task: split dev-ports into service-ports and webui-ports overlays"
-last_updated: "2026-04-10T05:38:44.272Z"
-last_activity: 2026-04-09 -- Phase 22.2 planning complete
+stopped_at: "Quick task 260414-l7g complete — reset:* scripts added"
+last_updated: "2026-04-14T12:21:44.073Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 16
-  completed_phases: 5
-  total_plans: 14
-  completed_plans: 14
+  total_phases: 19
+  completed_phases: 7
+  total_plans: 22
+  completed_plans: 22
   percent: 100
 ---
 
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 22.2
+Phase: 999.1
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-09 -- Phase 22.2 planning complete
+Last activity: 2026-04-14
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100% phase, [========================
 
 **Velocity:**
 
-- Total plans completed: 49 (v1.0: 18, v2.0: 6, v3.0: 11)
+- Total plans completed: 55 (v1.0: 18, v2.0: 6, v3.0: 11)
 - Average duration: ~2min
 - Total execution time: --
 
@@ -51,6 +51,8 @@ Progress: [██████████] 100% phase, [========================
 | 21 | 2 | - | - |
 | 22 | 3 | - | - |
 | 22.1 | 5 | - | - |
+| 22.2 | 2 | - | - |
+| 22.3 | 4 | - | - |
 
 **Recent Trend:**
 
@@ -100,9 +102,11 @@ None yet.
 - Phase 22.1 inserted after Phase 22: s3-core-encapsulation (URGENT) — encapsulate S3CoreModule into per-service composition StorageModule, root modules see single storage module
 - Phase 22.2 inserted after Phase 22: bucket-provisioning-automation (URGENT) — unified automatic bucket check-and-create mechanism driven by per-service bucket constants, works on MinIO (local/docker) and Garage (dev/prod) identically, integrated with health checks
 - Phase 22.3 inserted after Phase 22: storage-smoke-test-endpoints (URGENT) — per-service HTTP debug endpoints for full CRUD cycle on each bound bucket (upload/download/delete/exists/getSignedUrl); cross-service reports bucket test (parser writes → notifier reads); gated by env flag for prod safety
+- Phase 22.4 inserted after Phase 22: public-bucket-abstraction (URGENT) — изначально storage-gateway-proxy (gateway streaming + HMAC), после discuss-phase направление скорректировано: per-service private bucket'ы + один `public` bucket с anonymous read, `SharedNamespaceModule.forNamespace(...)`, `NamespacedStoragePort` (Readable-only + multipart через `@aws-sdk/lib-storage`), env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, bucket `reports` → `public`. Блокирующий insight из research (Garage не поддерживает anonymous S3 policy, только website mode) вынудил добавить prerequisite-фазу 22.5. Phase 22.4 Depends on расширен: Phase 22 + Phase 22.5.
+- Phase 22.5 inserted after Phase 22: local-garage-unification (URGENT) — prerequisite к 22.4. Заменить MinIO на Garage Docker image в local-native и local-isolated окружениях, обновить `infra/docker-compose*.yml`, `env.example`/`env.docker`, `packages/config/src/schemas/storage.ts`, runbook `docs/runbooks/bucket-provisioning.md`. Цель — один S3 impl (Garage) во всех 4 окружениях вместо сегодняшней раздвоенной реальности MinIO↔Garage. Устраняет расхождения bucket policy / URL формата / CLI между local и dev/prod.
 
 ## Session Continuity
 
-Last session: 2026-04-10T05:38:44.270Z
-Stopped at: Quick task: split dev-ports into service-ports and webui-ports overlays
-Resume file: infra/docker-compose.webui-ports.yml
+Last session: 2026-04-14T12:21:44.071Z
+Stopped at: Quick task 260414-l7g complete — reset:* scripts added
+Resume file: .planning/STATE.md

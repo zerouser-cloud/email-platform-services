@@ -35,8 +35,7 @@ const BaseGlobalEnvSchema = composeSchemas(
 export const GlobalEnvSchema = BaseGlobalEnvSchema.refine(
   (data) => !(data.CORS_STRICT && data.CORS_ORIGINS === '*'),
   {
-    message:
-      'CORS_ORIGINS cannot be "*" when CORS_STRICT is enabled. Specify explicit origins.',
+    message: 'CORS_ORIGINS cannot be "*" when CORS_STRICT is enabled. Specify explicit origins.',
     path: ['CORS_ORIGINS'],
   },
 );
