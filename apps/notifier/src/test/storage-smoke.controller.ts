@@ -2,7 +2,7 @@ import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { NotifierProto, CommonProto } from '@email-platform/contracts';
 import type { StoragePort } from '@email-platform/foundation/internal';
-import { REPORTS_STORAGE, REPORTS_BUCKET } from '@email-platform/foundation';
+import { PUBLIC_STORAGE, PUBLIC_BUCKET } from '@email-platform/foundation';
 
 const SMOKE_TEST_CONTENT_TYPE = 'text/plain';
 const SMOKE_SIGNED_URL_EXPIRY_MS = 300_000; // 5 minutes
@@ -17,10 +17,10 @@ export class StorageSmokeController {
   private readonly buckets: SmokeBucketEntry[];
 
   constructor(
-    @Inject(REPORTS_STORAGE) private readonly reportsStorage: StoragePort,
+    @Inject(PUBLIC_STORAGE) private readonly publicStorage: StoragePort,
   ) {
     this.buckets = [
-      { bucket: REPORTS_BUCKET, storage: this.reportsStorage },
+      { bucket: PUBLIC_BUCKET, storage: this.publicStorage },
     ];
   }
 

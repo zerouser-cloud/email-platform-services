@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ReportsStorageModule } from '@email-platform/foundation';
+import { PublicStorageModule } from '@email-platform/foundation';
 
 @Module({
-  imports: [ReportsStorageModule],
-  exports: [ReportsStorageModule],
+  imports: [PublicStorageModule],
+  exports: [PublicStorageModule],
 })
 export class StorageModule {}

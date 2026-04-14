@@ -3,7 +3,7 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { ParserProto, CommonProto } from '@email-platform/contracts';
 import type { StoragePort } from '@email-platform/foundation/internal';
 import { PARSER_STORAGE, PARSER_STORAGE_BUCKET } from '../parser.constants';
-import { REPORTS_STORAGE, REPORTS_BUCKET } from '@email-platform/foundation';
+import { PUBLIC_STORAGE, PUBLIC_BUCKET } from '@email-platform/foundation';
 
 const SMOKE_TEST_CONTENT_TYPE = 'text/plain';
 const SMOKE_SIGNED_URL_EXPIRY_MS = 300_000; // 5 minutes
@@ -20,11 +20,11 @@ export class StorageSmokeController {
 
   constructor(
     @Inject(PARSER_STORAGE) private readonly parserStorage: StoragePort,
-    @Inject(REPORTS_STORAGE) private readonly reportsStorage: StoragePort,
+    @Inject(PUBLIC_STORAGE) private readonly publicStorage: StoragePort,
   ) {
     this.buckets = [
       { token: PARSER_STORAGE, bucket: PARSER_STORAGE_BUCKET, storage: this.parserStorage },
-      { token: REPORTS_STORAGE, bucket: REPORTS_BUCKET, storage: this.reportsStorage },
+      { token: PUBLIC_STORAGE, bucket: PUBLIC_BUCKET, storage: this.publicStorage },
     ];
   }
 
