@@ -1281,6 +1281,128 @@ Per-service private bucket'ы (`parser`, и любые per-service в будущ
 
 ---
 
+## Рецепты (actual reproducible flow из Phase 22.4 deploy)
+
+Эти рецепты — **проверенные пошаговки** из реального prod+dev rollout 22.4 (2026-04-14). Если тебе нужно добавить ещё один publik bucket, новый environment, или передеплоить stack — читай этот раздел.
+
+### Рецепт A: Добавить ещё один public bucket (anonymous-read через Garage web endpoint)
+
+Предположим, нужен новый bucket `artifacts` который должен быть публично readable через URL вида `https://artifacts.garage.email-platform.pp.ua/<key>`.
+
+**Шаг 1 — DNS (Cloudflare).** Добавь A-запись:
+
+| Type | Name | Content | Proxy |
+|------|------|---------|-------|
+| A | `artifacts.garage` (и `.dev` для dev) | server IP (такой же как у `garage.email-platform.pp.ua`) | Proxied |
+
+**Шаг 2 — bucket в Garage.** На prod-сервере через SSH:
+
+```bash
+# prod
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket create artifacts
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket allow --key email-platform-key --read --write --owner artifacts
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket website --allow artifacts
+
+# верификация
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket info artifacts
+# Ожидаю: Website access: true
+```
+
+На dev — аналогично через `docker exec garage-qc0oo448sock4kcs4wko0o8s ...` с ключом `email-platform-dev-key`.
+
+**Шаг 3 — Coolify Traefik labels.** В Coolify → s3 сервис → **Edit Compose File** → блок `garage:` секция `labels:` — добавь 4 строки для нового router'а (уникальное имя):
+
+```yaml
+    labels:
+      # ... существующие garage-web-prod labels для bucket public ...
+      - "traefik.http.routers.garage-artifacts-prod.rule=Host(`artifacts.garage.email-platform.pp.ua`)"
+      - "traefik.http.routers.garage-artifacts-prod.entrypoints=http"
+      - "traefik.http.routers.garage-artifacts-prod.service=garage-artifacts-prod"
+      - "traefik.http.services.garage-artifacts-prod.loadbalancer.server.port=3902"
+```
+
+Save → Restart сервиса. На dev — то же с именами `-dev` и хостом `artifacts.garage.dev.email-platform.pp.ua`.
+
+**Шаг 4 — верификация.**
+
+```bash
+curl -sI http://artifacts.garage.email-platform.pp.ua/any-key
+# Ожидаю: HTTP 404 + X-Content-Type-Options: nosniff + Content-Length: 19 + access-control-allow-origin: *
+# Это сигнатура Garage web endpoint — значит маршрут работает.
+```
+
+**Шаг 5 — код приложения** (если apps должны писать в этот bucket). В env:
+```
+STORAGE_ARTIFACTS_URL=http://artifacts.garage.email-platform.pp.ua
+```
+В коде — зарегистрировать namespace в `SharedNamespaceModule.forNamespace({...})` или аналогичной абстракции, см. Phase 22.4 Plan 01 как образец.
+
+### Рецепт B: Добавить private bucket (внутренний, без публичных ссылок)
+
+```bash
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket create sessions
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket allow --key email-platform-key --read --write --owner sessions
+# НЕ запускать `bucket website --allow` — bucket остаётся приватным
+docker exec garage-wgs8kw8o4c08840844ss0o8g /garage -c /etc/garage.toml bucket info sessions
+# Ожидаю: Website access: false
+```
+
+Никаких DNS/Traefik/env-переменных для публичных URL — bucket доступен только через S3 API (`STORAGE_ENDPOINT:3900`) с auth.
+
+### Рецепт C: Настроить новое окружение (staging, preview и т.д.)
+
+Повторить весь Phase 22.4 infra setup для нового env в Coolify:
+
+1. **DNS Cloudflare:** A-записи для `garage.{env}.email-platform.pp.ua` (WebUI) и `public.garage.{env}.email-platform.pp.ua` (public bucket)
+2. **Coolify S3 service:**
+   - Persistent Storages → Files → `garage.toml` — указать `[s3_web].root_domain = ".garage.{env}.email-platform.pp.ua"`
+   - Edit Compose File → `garage:` сервис → добавить Traefik labels (4 строки, см. Рецепт A)
+   - Env vars: `SERVICE_FQDN_GARAGE_WEBUI=garage.{env}.email-platform.pp.ua`, `GARAGE_WEB_URL=http://public.garage.{env}.email-platform.pp.ua`
+3. **На сервере** через `docker exec`:
+   - `bucket create parser`, `bucket allow ... parser` (private)
+   - `bucket create public`, `bucket allow ... public`, `bucket website --allow public`
+4. **Apps env vars** в Coolify apps сервисе:
+   - `STORAGE_ENDPOINT=garage-{uuid}.coolify`, `STORAGE_PORT=3900`, `STORAGE_ACCESS_KEY=...`, `STORAGE_SECRET_KEY=...`, `STORAGE_REGION=garage`, `STORAGE_PROTOCOL=http`
+   - `STORAGE_PUBLIC_URL=http://public.garage.{env}.email-platform.pp.ua`
+   - `STORAGE_MAX_UPLOAD_BYTES=104857600`
+5. Redeploy apps, smoke через `curl http://api.{env}.email-platform.pp.ua/test/parser/storage-service`
+
+### Pitfalls из реального rollout (избегать повторения)
+
+**1. Coolify magic `SERVICE_FQDN_<NAME>_<PORT>` НЕ работает для multi-port services.**
+Мы пробовали `SERVICE_FQDN_GARAGE_3902=public.garage...` — Coolify НЕ генерирует Traefik labels. Это известная проблема (see [coollabsio/coolify#1904](https://github.com/coollabsio/coolify/issues/1904)). **Решение:** добавлять Traefik labels вручную в Compose YAML (см. Рецепт A Шаг 3).
+
+**2. `traefik.docker.network=coolify` — обязательный label.**
+Coolify Traefik живёт в Docker сети `coolify`. Без этого label Traefik выбирает любую сеть контейнера (часто неправильную) — результат 504 Gateway Timeout. Всегда включай эту строку в labels.
+
+**3. Cloudflare кеширует 404.**
+Cache-Control в Garage response — `max-age=14400` (4 часа). Если в процессе отладки CF закешировал 404, fresh URL всё равно HIT. **Решение:** Cloudflare → Caching → **Purge Everything** на зоне.
+
+**4. Garage container не имеет shell (scratch image).**
+`docker exec ... bash` / `docker exec ... cat` не работают. Используй:
+- `docker exec <container> /garage -c /etc/garage.toml <subcommand>` — для Garage CLI
+- `docker cp <container>:/etc/garage.toml /tmp/...` + `cat` на хосте — для просмотра конфига
+
+**5. Coolify Terminal UI не работает для scratch-контейнеров.**
+«Terminal Not Available — no shell». Используй Coolify левый-меню **Terminal** (SSH на хост) или прямой SSH `root@host` → `docker exec` оттуда.
+
+**6. Bucket на проде нужно создавать отдельно от bootstrap.**
+`pnpm storage:bootstrap` — только для локальной среды. На Coolify prod/dev bucket'ы создаются через `docker exec` CLI вручную (см. Рецепт A Шаг 2). Фаза 22.5 не провижонила bucket'ы автоматически на hosted env — это операторская задача.
+
+**7. Key name отличается per-env.**
+Local: `email-platform-local` (`GKTESTLOCAL0123456789ab`). Dev: `email-platform-dev-key` (`GKfe12d7...`). Prod: `email-platform-key` (`GK2e05...`). В команде `bucket allow` всегда использовать правильный **локальный alias** ключа, а не ID.
+
+**8. Старый код на main требует `STORAGE_BUCKET` env.**
+Если redeploy apps происходит пока main ещё на pre-22.5 коде — Zod валидация падает на отсутствующий `STORAGE_BUCKET`. **Recover:** временно добавить `STORAGE_BUCKET=parser` в env → Restart. После merge 22.5+ кода переменную можно удалить (не используется).
+
+**9. Proxy entrypoint — `http`, не `https` или `websecure`.**
+В Coolify Traefik labels: `traefik.http.routers.<name>.entrypoints=http` — http-only (Cloudflare Flexible SSL терминирует TLS на CF edge, в Coolify ходит обычный HTTP). Не указывать `tls=true` / `certresolver` — это сломает роутинг на Cloudflare Flexible setup.
+
+**10. `$SERVICE_URL_*` auto-generated переменные не создаются для multi-port services.**
+Если используешь `GARAGE_WEB_URL=$SERVICE_URL_GARAGE_3902` — переменная пустая (magic не сработал, см. pitfall 1). Хардкоди URL напрямую: `GARAGE_WEB_URL=http://public.garage.email-platform.pp.ua`.
+
+---
+
 ## Приложение: быстрая матрица окружений
 
 | Окружение        | S3 backend         | Endpoint S3 API             | Public URL (Garage web endpoint, Phase 22.4)          | WebUI                                      | Verify command                                                                 |
