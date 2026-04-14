@@ -8,10 +8,10 @@ import { S3StorageService } from './s3-storage.service';
 import { S3HealthIndicator } from './s3.health';
 
 @Module({})
-export class BucketStorageModule {
+export class PrivateStorageModule {
   static forBucket(options: BucketStorageOptions): DynamicModule {
     return {
-      module: BucketStorageModule,
+      module: PrivateStorageModule,
       imports: [TerminusModule, S3CoreModule],
       providers: [
         {

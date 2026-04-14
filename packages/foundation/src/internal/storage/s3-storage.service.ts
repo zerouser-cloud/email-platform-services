@@ -7,12 +7,11 @@ import {
   PutObjectCommand,
   type S3Client,
 } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { S3_ERROR_NAME, S3_TIME } from './storage.constants';
-import type { StoragePort } from './storage.interfaces';
+import { S3_ERROR_NAME } from './storage.constants';
+import type { PrivateStoragePort } from './storage.interfaces';
 
 @Injectable()
-export class S3StorageService implements StoragePort {
+export class S3StorageService implements PrivateStoragePort {
   constructor(
     private readonly client: S3Client,
     private readonly bucket: string,
@@ -67,17 +66,6 @@ export class S3StorageService implements StoragePort {
       }
       throw error;
     }
-  }
-
-  async getSignedUrl(key: string, expiresInMs: number): Promise<string> {
-    return getSignedUrl(
-      this.client,
-      new GetObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-      }),
-      { expiresIn: Math.ceil(expiresInMs / S3_TIME.MILLIS_PER_SECOND) },
-    );
   }
 }
 

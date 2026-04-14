@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BucketStorageModule } from '../../../internal/storage';
+import { PrivateStorageModule } from '../../../internal/storage';
 import {
   PUBLIC_STORAGE,
   PUBLIC_STORAGE_HEALTH,
@@ -9,13 +9,13 @@ import {
 
 @Module({
   imports: [
-    BucketStorageModule.forBucket({
+    PrivateStorageModule.forBucket({
       bucket: PUBLIC_BUCKET,
       token: PUBLIC_STORAGE,
       healthToken: PUBLIC_STORAGE_HEALTH,
       healthKey: PUBLIC_HEALTH_KEY,
     }),
   ],
-  exports: [BucketStorageModule],
+  exports: [PrivateStorageModule],
 })
 export class PublicStorageModule {}
