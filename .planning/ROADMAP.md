@@ -107,11 +107,21 @@ Plans:
 - [x] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
-### Phase 22.4: public-bucket-abstraction (INSERTED)
+### Phase 22.5: local-garage-unification (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
+**Goal:** Унификация local storage backend на Garage — заменить MinIO в local-native и local-isolated окружениях на Garage Docker image, обновить docker-compose/env-schemas/runbook, чтобы все 4 окружения использовали один и тот же S3 impl. Устраняет расхождения между MinIO (local) и Garage (dev/prod) в семантике bucket policy, URL формата, CLI.
 **Requirements**: TBD
 **Depends on:** Phase 22
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 22.5 to break down)
+
+### Phase 22.4: public-bucket-abstraction (INSERTED)
+
+**Goal:** Разделить хранилище на per-service private bucket'ы + один `public` bucket для внешних download-ссылок. Убрать presigned-URL механизм. Добавить `SharedNamespaceModule` c typed namespaced-клиентами, `NamespacedStoragePort` (Readable-only, multipart через `@aws-sdk/lib-storage`). Переименовать bucket `reports` → `public`, добавить env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, переписать smoke 22.3 под новый контракт.
+**Requirements**: TBD
+**Depends on:** Phase 22, Phase 22.5
 **Plans:** 0 plans
 
 Plans:
