@@ -4,11 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { resolveProtoPath } from '@email-platform/foundation';
 import { SERVICE } from '@email-platform/config';
 import { StorageSmokeController } from './storage-smoke.controller';
-
-const PARSER_SMOKE_CLIENT = Symbol('ParserSmokeClient');
-const NOTIFIER_SMOKE_CLIENT = Symbol('NotifierSmokeClient');
-
-export { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT };
+import { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT } from './smoke-test.tokens';
 
 @Module({
   imports: [

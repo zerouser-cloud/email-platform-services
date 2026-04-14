@@ -1,7 +1,7 @@
 import { Controller, Get, Delete, Query, Inject, OnModuleInit } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { ParserProto, NotifierProto } from '@email-platform/contracts';
-import { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT } from './smoke-test.module';
+import { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT } from './smoke-test.tokens';
 import { firstValueFrom } from 'rxjs';
 
 const SMOKE_ROUTE_PREFIX = 'test';
