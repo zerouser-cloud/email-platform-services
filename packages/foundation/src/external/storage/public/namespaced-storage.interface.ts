@@ -10,4 +10,5 @@ export interface NamespaceOptions {
   readonly namespace: string;
   readonly contentType: string;
   readonly token: symbol;
+  readonly healthToken?: symbol;
 }

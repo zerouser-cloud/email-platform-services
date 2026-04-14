@@ -1,5 +1,5 @@
 // External storage barrel.
-// Re-exports the public PublicStorageModule facade.
+// Re-exports the public-facing `SharedNamespaceModule` surface (Phase 22.4).
 // NOTE: storage-related runtime primitives are INTENTIONALLY not re-exported here —
 // they live under packages/foundation/src/internal/storage/ and are reached via
 // @email-platform/foundation/internal (guarded by the exports field in
@@ -18,3 +18,11 @@ export * from './public';
 // This is a TYPE-ONLY export — it carries no runtime JS and cannot leak any runtime
 // storage primitive values into the public barrel.
 export type { StorageHealthIndicator } from '../../internal/storage';
+
+// Type-only re-export: PrivateStoragePort.
+// Contract surface for the per-service `*_STORAGE` DI token produced by
+// `PrivateStorageModule.forBucket(...)`. Consumers outside the infrastructure/
+// layer (e.g. smoke controllers under test/) need the type annotation but are
+// ESLint-forbidden from importing from `@email-platform/foundation/internal`.
+// Re-exported here as type-only so the public barrel exposes only the contract.
+export type { PrivateStoragePort } from '../../internal/storage';
