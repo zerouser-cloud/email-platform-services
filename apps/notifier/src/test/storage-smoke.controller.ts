@@ -51,9 +51,11 @@ export class StorageSmokeController {
     const body = Readable.from(Buffer.from(`${SMOKE.PAYLOAD_PREFIX}${Date.now()}`));
     const steps: NotifierProto.StorageSmokeStepResult[] = [];
     let producedKey = '';
+    let producedUrl = '';
     try {
       const { url, key } = await this.publicReports.upload(filename, body);
       producedKey = key;
+      producedUrl = url;
       steps.push({ step: STEP.UPLOAD, success: true, detail: key });
       const found = await this.publicReports.exists(key);
       steps.push({ step: STEP.EXISTS, success: found, detail: '' });
@@ -72,6 +74,7 @@ export class StorageSmokeController {
       testKey: producedKey,
       steps,
       allPassed: steps.every((s) => s.success),
+      publicUrl: producedUrl,
     };
   }
 }

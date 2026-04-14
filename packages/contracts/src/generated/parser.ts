@@ -71,6 +71,11 @@ export interface StorageSmokeBucketResult {
   testKey: string;
   steps: StorageSmokeStepResult[];
   allPassed: boolean;
+  /**
+   * Public download URL for the uploaded test object — populated only for
+   * anonymous-readable buckets (public). Empty for private buckets.
+   */
+  publicUrl: string;
 }
 
 export interface StorageSmokeResponse {
@@ -629,7 +634,7 @@ export const StorageSmokeStepResult: MessageFns<StorageSmokeStepResult> = {
 };
 
 function createBaseStorageSmokeBucketResult(): StorageSmokeBucketResult {
-  return { bucket: "", testKey: "", steps: [], allPassed: false };
+  return { bucket: "", testKey: "", steps: [], allPassed: false, publicUrl: "" };
 }
 
 export const StorageSmokeBucketResult: MessageFns<StorageSmokeBucketResult> = {
@@ -645,6 +650,9 @@ export const StorageSmokeBucketResult: MessageFns<StorageSmokeBucketResult> = {
     }
     if (message.allPassed !== false) {
       writer.uint32(32).bool(message.allPassed);
+    }
+    if (message.publicUrl !== "") {
+      writer.uint32(42).string(message.publicUrl);
     }
     return writer;
   },
@@ -686,6 +694,14 @@ export const StorageSmokeBucketResult: MessageFns<StorageSmokeBucketResult> = {
           }
 
           message.allPassed = reader.bool();
+          continue;
+        }
+        case 5: {
+          if (tag !== 42) {
+            break;
+          }
+
+          message.publicUrl = reader.string();
           continue;
         }
       }

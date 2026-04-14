@@ -80,6 +80,9 @@ message StorageSmokeBucketResult {
   string test_key = 2;
   repeated StorageSmokeStepResult steps = 3;
   bool all_passed = 4;
+  // Public download URL for the uploaded test object — populated only for
+  // anonymous-readable buckets (public). Empty for private buckets.
+  string public_url = 5;
 }
 
 message StorageSmokeResponse {
