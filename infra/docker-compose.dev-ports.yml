@@ -9,4 +9,6 @@ services:
   rabbitmq:
     ports: ["5672:5672"]
   garage:
-    ports: ["3900:3900"]
+    ports:
+      - "3900:3900"  # S3 API
+      - "3902:3902"  # web endpoint (anonymous public bucket)

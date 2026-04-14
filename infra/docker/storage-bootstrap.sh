@@ -89,9 +89,12 @@ docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket create parser || ech
 echo "[6/7] Creating bucket 'public'..."
 docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket create public || echo "      (bucket already exists — continuing)"
 
-echo "[7/7] Granting read+write+owner on both buckets..."
+echo "[7/8] Granting read+write+owner on both buckets..."
 docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket allow --key email-platform-local --read --write --owner parser
 docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket allow --key email-platform-local --read --write --owner public
 
+echo "[8/8] Enabling anonymous website access on 'public' bucket..."
+docker exec "$CONTAINER" /garage -c /etc/garage.toml bucket website --allow public
+
 echo ""
-echo "Garage bootstrap complete. Buckets: parser, public. Key: email-platform-local."
+echo "Garage bootstrap complete. Buckets: parser (private), public (website-enabled). Key: email-platform-local."

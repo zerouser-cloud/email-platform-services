@@ -1,5 +1,6 @@
 # Garage v2.1.0 — minimal single-node local config.
-# [s3_web] is intentionally omitted (RESEARCH Q2 — Phase 22.4 will add it for public bucket web hosting).
+# [s3_web] enables anonymous virtual-host download for the `public` bucket
+# (Phase 22.4: bucket-as-subdomain via *.localhost — RFC 6761 auto-resolves to loopback).
 # admin_token is NOT set here — Garage reads GARAGE_ADMIN_TOKEN env var instead, which is
 # injected into the garage service via docker-compose (same token passed to garage-webui as
 # API_ADMIN_KEY so both sides agree — see Pitfall 7).
@@ -16,6 +17,10 @@ rpc_secret      = "1f9b0c4e5d8a6723b4c5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a
 [s3_api]
 api_bind_addr = "[::]:3900"
 s3_region     = "garage"
+
+[s3_web]
+bind_addr   = "[::]:3902"
+root_domain = ".localhost"
 
 [admin]
 api_bind_addr = "[::]:3903"
