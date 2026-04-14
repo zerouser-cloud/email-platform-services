@@ -4,10 +4,12 @@ import {
   RabbitSchema,
   StorageSchema,
   LoggingSchema,
+  GrpcSchema,
   type GlobalTopology,
   type RabbitConfig,
   type StorageConfig,
   type LoggingConfig,
+  type GrpcConfig,
 } from '@email-platform/config';
 
 export const NotifierEnvSchema = composeSchemas(
@@ -15,6 +17,11 @@ export const NotifierEnvSchema = composeSchemas(
   RabbitSchema,
   StorageSchema,
   LoggingSchema,
+  GrpcSchema,
 );
 
-export type NotifierEnv = GlobalTopology & RabbitConfig & StorageConfig & LoggingConfig;
+export type NotifierEnv = GlobalTopology &
+  RabbitConfig &
+  StorageConfig &
+  LoggingConfig &
+  GrpcConfig;
