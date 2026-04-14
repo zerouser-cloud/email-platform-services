@@ -119,9 +119,9 @@ Plans:
   5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
 **Plans**: 3 plans
 Plans:
-- [ ] 22.3-01-PLAN.md — Proto definitions (parser.proto smoke rpc + new notifier.proto) + notifier gRPC infrastructure
-- [ ] 22.3-02-PLAN.md — Storage smoke gRPC controllers in parser and notifier test/ directories
-- [ ] 22.3-03-PLAN.md — Gateway REST proxy controller under /test/ with gRPC clients to parser and notifier
+- [x] 22.3-01-PLAN.md — Proto definitions (parser.proto smoke rpc + new notifier.proto) + notifier gRPC infrastructure
+- [x] 22.3-02-PLAN.md — Storage smoke gRPC controllers in parser and notifier test/ directories
+- [x] 22.3-03-PLAN.md — Gateway REST proxy controller under /test/ with gRPC clients to parser and notifier
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
 **Goal**: Полная процедура создания S3 bucket'ов документирована как операционный runbook, покрывающий все 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage). Любой оператор может следовать runbook без предварительных знаний и получить рабочие buckets. Нулевые изменения в коде, docker-compose, env-схемах — единственный deliverable `docs/runbooks/bucket-provisioning.md`.
@@ -261,7 +261,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
-| 22.3. Storage Smoke Test Endpoints | v4.0 | 0/3 | Planning | - |
+| 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
 | 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
@@ -274,7 +274,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 2/2 plans complete
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
