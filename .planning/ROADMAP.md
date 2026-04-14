@@ -109,13 +109,16 @@ Plans:
 
 ### Phase 22.5: local-garage-unification (INSERTED)
 
-**Goal:** Унификация local storage backend на Garage — заменить MinIO в local-native и local-isolated окружениях на Garage Docker image, обновить docker-compose/env-schemas/runbook, чтобы все 4 окружения использовали один и тот же S3 impl. Устраняет расхождения между MinIO (local) и Garage (dev/prod) в семантике bucket policy, URL формата, CLI.
-**Requirements**: TBD
+**Goal:** Унификация local storage backend на Garage — заменить MinIO в local-native и local-isolated окружениях на Garage Docker image, обновить docker-compose/env-schemas/runbook, чтобы все 4 окружения использовали один и тот же S3 impl. Устраняет расхождения между MinIO (local) и Garage (dev/prod) в семантике bucket policy, URL формата, CLI. Также объединяет bucket rename reports → public (DI tokens, smoke controllers, health controllers) — plumbing scope shifted from 22.4 per CONTEXT D-18..D-23.
+**Requirements**: D-01..D-33 (locked decisions in 22.5-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 22
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.5 to break down)
+- [ ] 22.5-01-PLAN.md — Replace MinIO with Garage v2.1.0 in compose stacks + commit garage.toml + garage-bootstrap.sh + env files + npm script
+- [ ] 22.5-02-PLAN.md — Foundation rename: external/storage/reports/ → public/, REPORTS_* → PUBLIC_* symbols, barrel flip
+- [ ] 22.5-03-PLAN.md — Update parser+notifier storage modules, smoke controllers, and health controllers to PUBLIC_* surface
+- [ ] 22.5-04-PLAN.md — Rewrite docs/runbooks/bucket-provisioning.md for all 4 envs + live local smoke+readiness acceptance checkpoint
 
 ### Phase 22.4: public-bucket-abstraction (INSERTED)
 
