@@ -107,6 +107,16 @@ Plans:
 - [x] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
+### Phase 22.4: storage-gateway-proxy (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 22
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 22.4 to break down)
+
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
 **Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
 **Depends on**: Phase 22, Phase 22.1, Phase 22.2
