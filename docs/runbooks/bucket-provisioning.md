@@ -325,6 +325,23 @@ curl -s -X DELETE "http://localhost:4000/test/parser/storage-service?bucket=publ
 curl -s -X DELETE "http://localhost:4000/test/notifier/storage-service?bucket=public&key=<key-from-response>"
 ```
 
+### Сброс до чистого состояния (reset to clean state)
+
+Когда нужно с нуля переиграть провижининг (например, изменилась layout Garage, разметка bucket'ов или schema Postgres):
+
+```bash
+pnpm reset:native
+```
+
+Это эквивалент `pnpm stop:native` + удаление ВСЕХ volume'ов, управляемых compose-стеком (Garage meta+data, Postgres, RabbitMQ, Redis). После сброса полная пересборка окружения:
+
+```bash
+pnpm start:native
+pnpm garage:bootstrap
+```
+
+Шаг `garage:bootstrap` остаётся явным и ручным (Phase 22.5 D-05/D-06) — никогда не вызывается автоматически из `start:*`.
+
 ### Common Pitfalls (local-native)
 
 - **Bootstrap не запущен → `/health/ready` DOWN с `HeadBucket 404`.** Решение: `pnpm garage:bootstrap`. Сервисы автоматически подхватят bucket'ы на следующей health-probe (~30s в зависимости от настроек), restart обычно не нужен. (Pitfall 6)
@@ -463,6 +480,23 @@ curl -s http://localhost:4000/test/notifier/storage-service | jq
 2. `pnpm garage:bootstrap` выполнен (ищи marker через `docker compose exec garage ls /var/lib/garage/meta/.bootstrapped`)
 3. Bucket'ы `parser` и `public` существуют в Garage WebUI
 4. Контейнеры parser и notifier пересобраны после изменения `.env.docker`
+
+### Сброс до чистого состояния (reset to clean state)
+
+Когда нужно с нуля переиграть провижининг (например, изменилась layout Garage, разметка bucket'ов или schema Postgres):
+
+```bash
+pnpm reset:isolated
+```
+
+Это эквивалент `pnpm stop:isolated` + удаление ВСЕХ volume'ов, управляемых compose-стеком (Garage meta+data, Postgres, RabbitMQ, Redis). После сброса полная пересборка окружения:
+
+```bash
+pnpm start:isolated
+pnpm garage:bootstrap
+```
+
+Шаг `garage:bootstrap` остаётся явным и ручным (Phase 22.5 D-05/D-06) — никогда не вызывается автоматически из `start:*`.
 
 ### Common Pitfalls (local-isolated)
 
