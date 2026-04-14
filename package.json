@@ -20,7 +20,7 @@
     "reset:isolated": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml down --volumes",
     "infra:up": "docker compose --env-file .env.docker -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml -f infra/docker-compose.webui-ports.yml up -d",
     "infra:down": "docker compose --env-file .env.docker -f infra/docker-compose.infra.yml -f infra/docker-compose.dev-ports.yml -f infra/docker-compose.webui-ports.yml down",
-    "garage:bootstrap": "bash infra/docker/garage-bootstrap.sh",
+    "storage:bootstrap": "bash infra/docker/storage-bootstrap.sh",
     "docker:up": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml up --build",
     "docker:down": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml down",
     "prepare": "husky"

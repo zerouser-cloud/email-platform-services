@@ -169,13 +169,13 @@ docker compose -f infra/docker-compose.infra.yml exec garage /garage -c /etc/gar
 
 ### Шаг 3: Создать bucket'ы
 
-**Канонический способ — `pnpm garage:bootstrap`** (идемпотентный helper, делает всё за один шаг):
+**Канонический способ — `pnpm storage:bootstrap`** (идемпотентный helper, делает всё за один шаг):
 
 ```bash
-pnpm garage:bootstrap
+pnpm storage:bootstrap
 ```
 
-Что делает скрипт (`infra/docker/garage-bootstrap.sh`, ~97 строк):
+Что делает скрипт (`infra/docker/storage-bootstrap.sh`, ~97 строк):
 
 1. Auto-discovers running garage container (поддерживает оба compose стека: infra-only и isolated).
 2. Ждёт ~30s пока `garage status` не вернёт green.
@@ -189,7 +189,7 @@ pnpm garage:bootstrap
 ```bash
 pnpm infra:down
 docker volume rm <project>_garage_meta <project>_garage_data
-pnpm infra:up && pnpm garage:bootstrap
+pnpm infra:up && pnpm storage:bootstrap
 ```
 
 > ⚠ `docker volume rm` уничтожает **всё содержимое** local Garage (все bucket'ы, все объекты). На local машине это обычно неважно, но если ты хранишь там шарю или dev данные — забэкапь сначала.
@@ -198,7 +198,7 @@ pnpm infra:up && pnpm garage:bootstrap
 
 ### Шаг 4: Конфигурация доступа
 
-`pnpm garage:bootstrap` уже привязал key `email-platform-local` к **обоим** bucket'ам с правами Read+Write+Owner. Отдельный шаг не требуется — просто verify через WebUI (Buckets → выбрать bucket → Permissions tab) или CLI:
+`pnpm storage:bootstrap` уже привязал key `email-platform-local` к **обоим** bucket'ам с правами Read+Write+Owner. Отдельный шаг не требуется — просто verify через WebUI (Buckets → выбрать bucket → Permissions tab) или CLI:
 
 ```bash
 docker compose -f infra/docker-compose.infra.yml exec garage \
@@ -276,7 +276,7 @@ curl -s http://localhost:3003/health/ready | jq
 }
 ```
 
-Если ответ `DOWN` — запусти `pnpm garage:bootstrap` (если ещё не запускал) и проверь через WebUI что **оба** bucket'а созданы с точными именами `parser` и `public` (case-sensitive).
+Если ответ `DOWN` — запусти `pnpm storage:bootstrap` (если ещё не запускал) и проверь через WebUI что **оба** bucket'а созданы с точными именами `parser` и `public` (case-sensitive).
 
 Аналогично для notifier (проверяет только `s3:public`):
 
@@ -337,14 +337,14 @@ pnpm reset:native
 
 ```bash
 pnpm start:native
-pnpm garage:bootstrap
+pnpm storage:bootstrap
 ```
 
-Шаг `garage:bootstrap` остаётся явным и ручным (Phase 22.5 D-05/D-06) — никогда не вызывается автоматически из `start:*`.
+Шаг `storage:bootstrap` остаётся явным и ручным (Phase 22.5 D-05/D-06) — никогда не вызывается автоматически из `start:*`.
 
 ### Common Pitfalls (local-native)
 
-- **Bootstrap не запущен → `/health/ready` DOWN с `HeadBucket 404`.** Решение: `pnpm garage:bootstrap`. Сервисы автоматически подхватят bucket'ы на следующей health-probe (~30s в зависимости от настроек), restart обычно не нужен. (Pitfall 6)
+- **Bootstrap не запущен → `/health/ready` DOWN с `HeadBucket 404`.** Решение: `pnpm storage:bootstrap`. Сервисы автоматически подхватят bucket'ы на следующей health-probe (~30s в зависимости от настроек), restart обычно не нужен. (Pitfall 6)
 - **Layout version mismatch при частичном bootstrap'е.** Если `layout apply` упал на полпути (например, из-за прерывания) — повторный bootstrap может видеть marker отсутствующим, но layout уже частично записан. Решение: см. "Сброс bootstrap state" в шаге 3 — `docker volume rm garage_meta garage_data` и заново. (Pitfall 2)
 - **`SignatureDoesNotMatch` при первом запросе.** Почти всегда — `STORAGE_REGION` в `.env` не равен `garage`. Проверь точное значение, перезапусти процесс. (Pitfall 8)
 - **Если ручной `garage key import` выполнялся без `--yes`** — CLI зависает на интерактивном prompt'е и команда никогда не завершится. Bootstrap скрипт всегда использует `--yes`, но если ты копируешь команды вручную — добавляй флаг. (Pitfall 1)
@@ -397,7 +397,7 @@ docker compose -f infra/docker-compose.yml exec garage \
 Идентично local-native — один шаг:
 
 ```bash
-pnpm garage:bootstrap
+pnpm storage:bootstrap
 ```
 
 Скрипт автоматически подхватит garage container из isolated стека (auto-discovery falls back from infra-only to isolated). На повторных запусках — печатает `Already bootstrapped, skipping.` и выходит с exit 0.
@@ -408,7 +408,7 @@ pnpm garage:bootstrap
 
 ### Шаг 4: Конфигурация доступа
 
-Как в local-native — `pnpm garage:bootstrap` уже создал key `email-platform-local` и привязал его к обоим bucket'ам с Read+Write+Owner. Отдельный шаг не нужен.
+Как в local-native — `pnpm storage:bootstrap` уже создал key `email-platform-local` и привязал его к обоим bucket'ам с Read+Write+Owner. Отдельный шаг не нужен.
 
 Verify через WebUI (Permissions tab каждого bucket'а должна показать `email-platform-local` с галочками R/W/Owner) или CLI:
 
@@ -477,7 +477,7 @@ curl -s http://localhost:4000/test/notifier/storage-service | jq
 Если получаешь `DOWN` — проверь в первую очередь:
 
 1. `.env.docker` содержит `STORAGE_ENDPOINT=garage` (не `localhost`) и `STORAGE_REGION=garage`
-2. `pnpm garage:bootstrap` выполнен (ищи marker через `docker compose exec garage ls /var/lib/garage/meta/.bootstrapped`)
+2. `pnpm storage:bootstrap` выполнен (ищи marker через `docker compose exec garage ls /var/lib/garage/meta/.bootstrapped`)
 3. Bucket'ы `parser` и `public` существуют в Garage WebUI
 4. Контейнеры parser и notifier пересобраны после изменения `.env.docker`
 
@@ -493,14 +493,14 @@ pnpm reset:isolated
 
 ```bash
 pnpm start:isolated
-pnpm garage:bootstrap
+pnpm storage:bootstrap
 ```
 
-Шаг `garage:bootstrap` остаётся явным и ручным (Phase 22.5 D-05/D-06) — никогда не вызывается автоматически из `start:*`.
+Шаг `storage:bootstrap` остаётся явным и ручным (Phase 22.5 D-05/D-06) — никогда не вызывается автоматически из `start:*`.
 
 ### Common Pitfalls (local-isolated)
 
-- **Bootstrap не запущен → `/health/ready` DOWN на старте.** Сервисы могут стартовать **раньше** того как bucket'ы созданы — `service_healthy` gate ловит только что Garage server жив, но не что bucket'ы провизионированы. Решение: после `pnpm start:isolated` всегда дёргать `pnpm garage:bootstrap`. Сервисы переподымутся к зелёному на следующей health-probe. (Pitfall 6)
+- **Bootstrap не запущен → `/health/ready` DOWN на старте.** Сервисы могут стартовать **раньше** того как bucket'ы созданы — `service_healthy` gate ловит только что Garage server жив, но не что bucket'ы провизионированы. Решение: после `pnpm start:isolated` всегда дёргать `pnpm storage:bootstrap`. Сервисы переподымутся к зелёному на следующей health-probe. (Pitfall 6)
 - **Layout version mismatch.** Если bootstrap прерывался на середине — `docker volume rm garage_meta garage_data` и заново. (Pitfall 2)
 - **`SignatureDoesNotMatch`.** `STORAGE_REGION` ≠ `garage`. Проверь `.env.docker`, **пересобери контейнеры** (`pnpm stop:isolated && pnpm start:isolated` — restart недостаточно, env читается при создании контейнера). (Pitfall 8)
 - **WebUI "Unable to fetch cluster status".** `GARAGE_ADMIN_TOKEN` mismatch между `garage` и `garage-webui` — проверь что `.env.docker` содержит токен и обоим сервисам он передан через `env_file` или `environment`. (Pitfall 7)
@@ -949,7 +949,7 @@ Prod credentials сервиса должны быть **минимальными
 
 Лучше **ноль кода провизии во всех окружениях** (unified manual) чем код который живёт только для local dev convenience. Local dev setup — это onboarding task делается раз, а runbook работает одинаково для всех 4 окружений одинаково детерминированно.
 
-> *Phase 22.5 (April 2026) расширил этот rationale на local окружения — `pnpm garage:bootstrap` это local-эквивалент кликов оператора в Garage WebUI; та же separation of concerns. Скрипт живёт в `infra/`, не в `apps/`, и не загружается ни в один сервис runtime'ом. Это **operator tooling**, не **application code**.*
+> *Phase 22.5 (April 2026) расширил этот rationale на local окружения — `pnpm storage:bootstrap` это local-эквивалент кликов оператора в Garage WebUI; та же separation of concerns. Скрипт живёт в `infra/`, не в `apps/`, и не загружается ни в один сервис runtime'ом. Это **operator tooling**, не **application code**.*
 
 ### Когда это решение стоит пересмотреть
 
@@ -963,7 +963,7 @@ Prod credentials сервиса должны быть **минимальными
 
 4. **Minimal permissions переосмысливаются** — если в будущем security model изменится и prod сервисы смогут иметь CreateBucket permissions без audit concerns (очень маловероятно), причина (3) отпадает.
 
-До тех пор — runbook остаётся **единственным источником истины** для bucket setup. Любая попытка "а давайте добавим маленький скрипт для local" должна быть остановлена на этом разделе: читаем rationale, понимаем trade-off, не добавляем. Local equivalent уже есть — `pnpm garage:bootstrap`, и он живёт в `infra/`, а не в коде сервисов.
+До тех пор — runbook остаётся **единственным источником истины** для bucket setup. Любая попытка "а давайте добавим маленький скрипт для local" должна быть остановлена на этом разделе: читаем rationale, понимаем trade-off, не добавляем. Local equivalent уже есть — `pnpm storage:bootstrap`, и он живёт в `infra/`, а не в коде сервисов.
 
 ---
 
@@ -989,5 +989,5 @@ Prod credentials сервиса должны быть **минимальными
 ---
 
 *Runbook создан: 2026-04-09 (Phase 22.2-bucket-provisioning-automation)*
-*Обновлён: 2026-04-14 (Phase 22.5-local-garage-unification — Garage везде, bucket `public` вместо `reports`, `pnpm garage:bootstrap`)*
+*Обновлён: 2026-04-14 (Phase 22.5-local-garage-unification — Garage везде, bucket `public` вместо `reports`, `pnpm storage:bootstrap`)*
 *Источники истины для констант: см. header sync note*
