@@ -7,6 +7,8 @@ export const StorageSchema = z.object({
   STORAGE_ACCESS_KEY: z.string().min(1),
   STORAGE_SECRET_KEY: z.string().min(1),
   STORAGE_REGION: z.string().min(1),
+  STORAGE_PUBLIC_URL: z.string().url(),
+  STORAGE_MAX_UPLOAD_BYTES: z.coerce.number().int().positive(),
 });
 
 export type StorageConfig = z.infer<typeof StorageSchema>;
