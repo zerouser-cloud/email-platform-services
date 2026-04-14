@@ -24,16 +24,66 @@
 
 Каждый раздел **self-contained** — его можно читать независимо от остальных. Если тебе нужен только prod — читай только prod, не нужно проходить local-native сначала.
 
-Каждый раздел следует одной и той же 6-шаговой структуре:
+Каждый раздел следует одной и той же 6-шаговой структуре (с под-шагом 4.5, введённым в Phase 22.4):
 
-| Шаг | Что делаем                                              |
-| --- | ------------------------------------------------------- |
-| 1   | Prerequisites                                           |
-| 2   | Open UI (открыть Garage WebUI)                          |
-| 3   | Create buckets (`parser`, `public`)                     |
-| 4   | Configure access (key + binding для Garage)             |
-| 5   | Set env vars (`STORAGE_*` в `.env` / Coolify)           |
-| 6   | Verify (`curl` / `wget` к `/health/ready` + smoke API)  |
+| Шаг | Что делаем                                                           |
+| --- | -------------------------------------------------------------------- |
+| 1   | Prerequisites                                                        |
+| 2   | Open UI (открыть Garage WebUI)                                       |
+| 3   | Create buckets (`parser`, `public`)                                  |
+| 4   | Configure access (key + binding для Garage)                          |
+| 4.5 | Apply anonymous read policy на `public` (`garage bucket website --allow`) |
+| 5   | Set env vars (`STORAGE_*` в `.env` / Coolify)                        |
+| 6   | Verify (`curl` / `wget` к `/health/ready` + smoke API + anonymous GET) |
+
+<!-- Phase 22.4 anonymous-GET shorthand: curl${STORAGE_PUBLIC_URL}/<key> — see verify steps in each env section below. -->
+
+> ⚠ **Garage virtual-host web endpoint (anonymous read) — Phase 22.4**
+>
+> Garage **НЕ поддерживает** anonymous GET на S3 API endpoint (в отличие от MinIO). Единственный способ публичной отдачи — **Garage native web endpoint** (отдельный порт, по умолчанию `3902`), который принимает **только** virtual-hosted-style URL: `Host: <bucket>.<root_domain>`. Это locked decision per OQ-1 RESOLVED — см. `.planning/phases/22.4-public-bucket-abstraction/22.4-CONTEXT.md` D-28/D-29/D-30.
+>
+> **Что это значит для `STORAGE_PUBLIC_URL`:**
+> - Hostname всегда формата `public.<root_domain>` — bucket `public` переехал из path в host. Формула URL: `${STORAGE_PUBLIC_URL}/${key}` (**БЕЗ** `/public/` сегмента в path).
+> - В local окружениях: `STORAGE_PUBLIC_URL=http://public.localhost:3902`, Garage `[s3_web]` секция с `root_domain=".localhost"`. `*.localhost` резолвится по RFC 6761 (macOS 10.6+, Windows 10+, glibc ≥ 2.34 — Arch/Ubuntu 22.04+/Fedora 35+, musl ≥ 1.2.4 — Alpine 3.19+). Проектный `node:20-alpine` на Alpine 3.20 (musl 1.2.5) — OK. Legacy Linux (glibc < 2.34, например Ubuntu 20.04) → одна строка в `/etc/hosts`:
+>   ```bash
+>   echo "127.0.0.1 public.localhost" | sudo tee -a /etc/hosts
+>   ```
+> - В dev/prod (Garage на Coolify): `STORAGE_PUBLIC_URL=https://public.garage[.dev].email-platform.pp.ua`, Garage `[s3_web]` секция с `root_domain=".garage[.dev].email-platform.pp.ua"`. Требуется (operator action):
+>   - (a) DNS A-запись на `public.garage[.dev].email-platform.pp.ua` (на тот же IP, что и существующий `garage[.dev].email-platform.pp.ua`).
+>   - (b) Coolify Traefik router с `Host:public.garage[.dev].email-platform.pp.ua` → garage container, port `3902` (НЕ 3900 — S3 API порт, там anonymous не работает).
+>   - Существующий router на `garage[.dev].email-platform.pp.ua` (WebUI) остаётся неизменным — это отдельный route, отдельный Traefik labels блок.
+> - Никакого Traefik path-rewrite. Никакого gateway proxy. Никакого presigned URL.
+>
+> **Пример `[s3_web]` секции в `garage.toml` per env:**
+>
+> | Env | `bind_addr`   | `root_domain`                          |
+> | --- | ------------- | -------------------------------------- |
+> | local-native / local-isolated | `[::]:3902` | `.localhost`                           |
+> | dev (Coolify) | `[::]:3902`   | `.garage.dev.email-platform.pp.ua`     |
+> | prod (Coolify) | `[::]:3902`  | `.garage.email-platform.pp.ua`         |
+>
+> **Forward note:** в будущей фазе планируется ребрендинг `garage` → `storage` в host names — сейчас не реализуется, но все ссылки в runbook используют env var `${STORAGE_PUBLIC_URL}` (а не хардкод доменов) чтобы переименование было one-line операцией.
+
+> ⚠ **Private bucket'ы НЕ публичны — Phase 22.4**
+>
+> `parser` (и любой будущий per-service bucket) работает **только** через приложение (аутентификация на уровне app) — **никакого** `garage bucket website --allow` на них.
+> Anonymous-read применяется **ровно к одному** bucket'у — `public`.
+>
+> **Проверка** (в каждом окружении, после Шага 4.5):
+>
+> ```bash
+> garage bucket info parser
+> # Ожидаемая строка: Website access: false
+>
+> garage bucket info public
+> # Ожидаемая строка: Website access: true
+> ```
+>
+> Если случайно включили website на private bucket'е — немедленно откатить:
+>
+> ```bash
+> garage bucket website --deny parser
+> ```
 
 ## Bucket'ы и env vars
 
@@ -56,6 +106,14 @@
 | `STORAGE_ACCESS_KEY` | string            | `GKTESTLOCAL0123456789ab`                                          | `<GARAGE_ACCESS_KEY>`        |
 | `STORAGE_SECRET_KEY` | string            | `0000000000000000000000000000000000000000000000000000000000000000` | `<GARAGE_SECRET_KEY>`        |
 | `STORAGE_REGION`     | string            | `garage`                                                           | `garage`                     |
+| `STORAGE_PUBLIC_URL` | URL               | `http://public.localhost:3902`                                     | `https://public.garage.email-platform.pp.ua` (dev: `https://public.garage.dev.email-platform.pp.ua`) |
+| `STORAGE_MAX_UPLOAD_BYTES` | number      | `104857600` (100 MiB)                                              | `104857600` (100 MiB)        |
+
+`STORAGE_PUBLIC_URL` и `STORAGE_MAX_UPLOAD_BYTES` добавлены в Phase 22.4. Важно:
+
+- **НЕ используй** S3 API port (3900) для `STORAGE_PUBLIC_URL` — Garage S3 API **не поддерживает** anonymous GET. Все 4 окружения идут через Garage web endpoint `3902` + virtual-host (bucket `public` в hostname). См. warning block "⚠ Garage virtual-host web endpoint" выше.
+- Значение per env задаётся в `.env` / `.env.docker` / Coolify Environment Variables — хардкод доменов в коде не допускается (D-29 forward-compat).
+- `STORAGE_MAX_UPLOAD_BYTES=104857600` (100 MiB) — hard ceiling для streaming upload через `@aws-sdk/lib-storage`; при превышении `NamespacedStoragePort.upload` бросает `StorageUploadTooLargeError` и multipart автоматически abort'ится (D-17/D-18).
 
 Дополнительно (только compose, не используется кодом приложения):
 
@@ -208,6 +266,47 @@ docker compose -f infra/docker-compose.infra.yml exec garage \
 # В output должен быть виден email-platform-local key с RW+Owner permissions
 ```
 
+### Шаг 4.5: Применить anonymous read policy на `public` (Phase 22.4)
+
+> ⚠ **Применяется ТОЛЬКО к bucket `public`.** Private bucket `parser` **НЕ** должен получать website access — см. warning "Private bucket'ы НЕ публичны" в начале runbook'а.
+
+**Pre-req:** `[s3_web]` секция в `infra/docker/garage.toml`:
+
+```toml
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".localhost"
+index = "index.html"
+```
+
+Если секции нет — добавить, затем `pnpm infra:down && pnpm infra:up` (перезапуск Garage контейнера чтобы применить конфиг). Порт `3902` должен быть exposed в `infra/docker-compose.dev-ports.yml` (если не exposed — добавить mapping `"3902:3902"` к garage сервису).
+
+**Применить website mode:**
+
+```bash
+docker compose -f infra/docker-compose.infra.yml exec garage \
+  /garage -c /etc/garage.toml bucket website --allow public
+```
+
+**Верификация (обязательная):**
+
+```bash
+docker compose -f infra/docker-compose.infra.yml exec garage \
+  /garage -c /etc/garage.toml bucket info public
+# Ожидаемая строка: Website access: true
+
+docker compose -f infra/docker-compose.infra.yml exec garage \
+  /garage -c /etc/garage.toml bucket info parser
+# Ожидаемая строка: Website access: false
+```
+
+Если `parser` оказался с `Website access: true` — немедленно откатить:
+
+```bash
+docker compose -f infra/docker-compose.infra.yml exec garage \
+  /garage -c /etc/garage.toml bucket website --deny parser
+```
+
 ### Шаг 5: Set env vars
 
 Для local-native режима `.env` уже содержит правильные значения если ты создал его из `.env.example`. Ключевые поля:
@@ -219,13 +318,19 @@ STORAGE_PORT=3900
 STORAGE_ACCESS_KEY=GKTESTLOCAL0123456789ab
 STORAGE_SECRET_KEY=0000000000000000000000000000000000000000000000000000000000000000
 STORAGE_REGION=garage
+STORAGE_PUBLIC_URL=http://public.localhost:3902
+STORAGE_MAX_UPLOAD_BYTES=104857600
 ```
 
-Reference для точных значений: `.env.example:35-40`.
+Reference для точных значений: `.env.example:35-43`.
 
 `STORAGE_ENDPOINT=localhost` — потому что сервисы на хосте подключаются к Garage через exposed порт Docker-контейнера на `localhost:3900` (publishing настроен в `infra/docker-compose.dev-ports.yml`).
 
 `STORAGE_REGION=garage` — Garage дефолтный region (не `us-east-1`). Mismatch региона между клиентом и сервером даст `SignatureDoesNotMatch` при подписи запросов — поэтому значение зафиксировано в коде через env, не угадывается (Pitfall 8).
+
+`STORAGE_PUBLIC_URL=http://public.localhost:3902` — Garage web endpoint (порт 3902) + virtual-host (bucket `public` в hostname). `*.localhost` резолвится RFC 6761 (macOS 10.6+, Windows 10+, glibc ≥ 2.34, musl ≥ 1.2.4). Legacy Linux без RFC 6761 — одна строка в `/etc/hosts` (см. warning block в начале runbook'а).
+
+`STORAGE_MAX_UPLOAD_BYTES=104857600` (100 MiB) — hard ceiling для streaming upload (D-06/D-18).
 
 ### Шаг 6: Verify
 
@@ -316,6 +421,24 @@ curl -s http://localhost:4000/test/notifier/storage-service | jq
   ]
 }
 ```
+
+**(в) Anonymous-read verification** (Phase 22.4 — проверка что `public` bucket реально раздаёт файлы без аутентификации):
+
+После того как smoke endpoint вернул `testKey` для `public` bucket'а (см. шаг (б) выше), выполни:
+
+```bash
+# Подставь testKey из smoke-ответа (buckets[?bucket==public].testKey)
+curl -sS -o /dev/null -w "%{http_code}\n" "${STORAGE_PUBLIC_URL}/<testKey>"
+# Expected: 200
+```
+
+**Важно:** bucket `public` находится в **hostname** (через Garage virtual-host, D-28/D-29), а **не в path** — формула URL = `${STORAGE_PUBLIC_URL}/${key}`, без `/public/` сегмента в path (D-14 amended after OQ-1 RESOLVED).
+
+Failure modes:
+
+- **`403`** → anonymous policy не применён. Вернуться к Шагу 4.5 → `garage bucket website --allow public`, снова `bucket info public` должно показать `Website access: true`.
+- **`404`** → (a) `[s3_web]` секция в `garage.toml` отсутствует или `root_domain` не совпадает с hostname в `STORAGE_PUBLIC_URL`; (b) `*.localhost` не резолвится на этой машине (legacy glibc < 2.34) → добавить `127.0.0.1 public.localhost` в `/etc/hosts`. См. warning "⚠ Garage virtual-host web endpoint" в начале runbook'а.
+- **`curl: Could not resolve host`** → DNS resolver не знает про `*.localhost`; fallback — `/etc/hosts` (см. выше).
 
 После проверки можно почистить созданные тестовые объекты:
 
@@ -419,6 +542,25 @@ docker compose -f infra/docker-compose.yml exec garage \
   /garage -c /etc/garage.toml bucket info public
 ```
 
+### Шаг 4.5: Применить anonymous read policy на `public` (Phase 22.4)
+
+Идентично local-native — pre-req на `[s3_web]` секцию в `garage.toml` + одна команда + верификация:
+
+```bash
+docker compose -f infra/docker-compose.yml exec garage \
+  /garage -c /etc/garage.toml bucket website --allow public
+
+docker compose -f infra/docker-compose.yml exec garage \
+  /garage -c /etc/garage.toml bucket info public
+# Ожидаемая строка: Website access: true
+
+docker compose -f infra/docker-compose.yml exec garage \
+  /garage -c /etc/garage.toml bucket info parser
+# Ожидаемая строка: Website access: false
+```
+
+Порт `3902` должен быть exposed в compose-стеке, чтобы host (откуда идёт smoke `curl`) мог достучаться до Garage web endpoint — см. warning "⚠ Garage virtual-host web endpoint" в начале runbook'а. Если secция `[s3_web]` ещё не добавлена в `infra/docker/garage.toml` (`bind_addr = "[::]:3902"`, `root_domain = ".localhost"`) — добавить и пересоздать контейнер (`pnpm stop:isolated && pnpm start:isolated`).
+
 ### Шаг 5: Set env vars
 
 Отредактировать `.env.docker` в корне репо. **Ключевое отличие от native:** `STORAGE_ENDPOINT` — имя сервиса в docker network, не `localhost`:
@@ -430,9 +572,15 @@ STORAGE_PORT=3900
 STORAGE_ACCESS_KEY=GKTESTLOCAL0123456789ab
 STORAGE_SECRET_KEY=0000000000000000000000000000000000000000000000000000000000000000
 STORAGE_REGION=garage
+STORAGE_PUBLIC_URL=http://public.localhost:3902
+STORAGE_MAX_UPLOAD_BYTES=104857600
 ```
 
-`garage` — имя сервиса из `infra/docker-compose.infra.yml`. Сервисы на network `infra` резолвят это имя через встроенный Docker DNS.
+`garage` — имя сервиса из `infra/docker-compose.infra.yml`. Сервисы на network `infra` резолвят это имя через встроенный Docker DNS (для S3 API трафика — `STORAGE_ENDPOINT=garage:3900` internal).
+
+`STORAGE_PUBLIC_URL=http://public.localhost:3902` — **host-based** значение. Smoke-контроллеры и любые клиенты, запускающиеся **с host-машины** (curl из терминала разработчика, браузер), ходят через published port `3902` на host. Для **контейнер-к-контейнер** anonymous GET (если когда-нибудь понадобится) используется отдельный endpoint через docker DNS (`http://public.garage:3902`) — не меняется в этой фазе, описан как deferred note в CONTEXT.md.
+
+`STORAGE_MAX_UPLOAD_BYTES=104857600` — то же значение 100 MiB (D-06).
 
 После редактирования `.env.docker` — пересобрать и перезапустить контейнеры:
 
@@ -471,6 +619,18 @@ curl -s http://localhost:4000/test/notifier/storage-service | jq
 ```
 
 Ожидаемая структура — см. local-native шаг 6 (б): `buckets: [{ bucket: "parser", allPassed: true, ... }, { bucket: "public", allPassed: true, ... }]` для parser; `buckets: [{ bucket: "public", allPassed: true, ... }]` для notifier.
+
+**(в) Anonymous-read verification** (Phase 22.4) — те же команды что в local-native:
+
+```bash
+# Подставь testKey из smoke-ответа (buckets[?bucket==public].testKey)
+curl -sS -o /dev/null -w "%{http_code}\n" "${STORAGE_PUBLIC_URL}/<testKey>"
+# Expected: 200
+# Note: bucket `public` в hostname (через virtual-host), НЕ в path — per D-14 amended after OQ-1 RESOLVED.
+# Если 403 → вернуться к Шагу 4.5 → `garage bucket website --allow public`
+# Если 404 → проверь что `[s3_web]` секция в garage.toml имеет root_domain=".localhost", Garage контейнер пересоздан после правки, порт 3902 exposed в compose, `*.localhost` резолвится (fallback — /etc/hosts).
+# См. warning "⚠ Garage virtual-host web endpoint" в начале runbook.
+```
 
 > **Не полагайся на gateway `/health/ready`.** Gateway `http://localhost:4000/health/ready` **не показывает** S3 state (см. known gap в начале runbook'а). Он вернёт `status: ok` даже при упавших S3 bucket'ах. Всегда проверяй S3 через прямой readiness parser/notifier ИЛИ через smoke endpoints — они реально гоняют объекты в S3.
 
@@ -592,6 +752,56 @@ Phase 22.5 переименовала foundation S3 bucket с `reports` на `pu
 3. **Post-deploy verify**: SSH/Terminal в parser/notifier контейнер, выполни `wget -qO- http://localhost:3003/health/ready` (parser) и `wget -qO- http://localhost:3005/health/ready` (notifier). Ожидание: оба показывают `s3:parser` AND `s3:public` со статусом `up`. Если `s3:public` DOWN — key binding на `public` не сохранился, вернись в шаг 4.2.
 4. **Defer orphan deletion**: подожди 1-2 недели стабильной работы (мониторинг, отчёты, runtime errors). Только после того как **уверен** что новый код стабильно работает с `public` и rollback не понадобится — иди в Garage WebUI → bucket `reports` → Delete (если bucket пустой — Delete напрямую; если есть остаточные объекты — Force Delete или сначала очистить). **WARNING block:** **никогда** не удаляй `reports` ДО успешной deploy-verify нового кода — это уничтожит fallback rollback path. Старый код, если придётся откатиться, ожидает что `reports` существует.
 
+### Шаг 4.5: Применить anonymous read policy на `public` (Phase 22.4)
+
+> ⚠ **Operator action (разовая настройка Garage + Coolify Traefik).** В отличие от local, требует несколько шагов вне Garage CLI: DNS-запись, Coolify Traefik router, секция `[s3_web]` в `garage.toml`.
+
+**4.5.1. Обновить `garage.toml` на dev Garage instance** (если ещё не сделано):
+
+```toml
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".garage.dev.email-platform.pp.ua"
+index = "index.html"
+```
+
+После правки — перезапустить Garage контейнер в Coolify (Redeploy Garage service).
+
+**4.5.2. DNS:** создать A-запись `public.garage.dev.email-platform.pp.ua` → тот же IP, что и существующий `garage.dev.email-platform.pp.ua` (см. memory `project_hosting_infra.md` / `project_infra_topology.md` — обычно LAN IP `192.168.1.25` через Cloudflare). DNS propagation — до 5 минут.
+
+**4.5.3. Coolify Traefik router:** в Coolify → Garage service → Configuration → Labels (или General → Domain) добавить **второй** router с правилом `Host(\`public.garage.dev.email-platform.pp.ua\`)` → target port `3902` (НЕ 3900). Существующий router на `garage.dev.email-platform.pp.ua` (WebUI, port 3903/admin или куда он указывает) **не трогать** — это отдельный route.
+
+Пример Traefik labels (если конфигурируешь напрямую):
+
+```yaml
+- "traefik.http.routers.garage-public.rule=Host(`public.garage.dev.email-platform.pp.ua`)"
+- "traefik.http.routers.garage-public.entrypoints=https"
+- "traefik.http.routers.garage-public.tls=true"
+- "traefik.http.routers.garage-public.tls.certresolver=letsencrypt"
+- "traefik.http.services.garage-public.loadbalancer.server.port=3902"
+```
+
+**4.5.4. Применить website mode на bucket `public`** (через Garage WebUI Settings → Website, или CLI):
+
+```bash
+# SSH на Coolify host → docker exec в dev garage container:
+docker exec -it <garage-dev-container> garage bucket website --allow public
+
+docker exec -it <garage-dev-container> garage bucket info public
+# Ожидаемая строка: Website access: true
+
+docker exec -it <garage-dev-container> garage bucket info parser
+# Ожидаемая строка: Website access: false
+```
+
+**4.5.5. Smoke-проверка** (перед тем как двигаться к Шагу 5):
+
+```bash
+# С любой машины с разрешающимся DNS:
+curl -sS -o /dev/null -w "%{http_code}\n" "https://public.garage.dev.email-platform.pp.ua/"
+# Ожидание: 404 (bucket пустой — путь к несуществующему ключу), НЕ 403 (website не включён) и НЕ "no such host" (DNS/Traefik не настроены).
+```
+
 ### Шаг 5: Set env vars
 
 В Coolify → project → dev environment → **Environment Variables** (не Secrets — кроме `STORAGE_ACCESS_KEY` и `STORAGE_SECRET_KEY` которые уже в Secrets с шага 4.3):
@@ -603,6 +813,8 @@ STORAGE_PORT=443
 STORAGE_ACCESS_KEY=<из Coolify secrets>
 STORAGE_SECRET_KEY=<из Coolify secrets>
 STORAGE_REGION=garage
+STORAGE_PUBLIC_URL=https://public.garage.dev.email-platform.pp.ua
+STORAGE_MAX_UPLOAD_BYTES=104857600
 ```
 
 > **`STORAGE_BUCKET` отсутствует — это намеренно (D-27).** Если в Coolify environment ещё остался legacy `STORAGE_BUCKET` — можешь удалить, приложение его не читает (Coolify игнорирует extras без ошибки, но чисто — лучше).
@@ -610,6 +822,10 @@ STORAGE_REGION=garage
 `<garage-dev-endpoint>` — S3 API endpoint Garage instance (**не** WebUI URL `garage.dev.email-platform.pp.ua`; обычно `s3.dev.email-platform.pp.ua` или аналогичный subdomain — уточнить у Coolify admin или в Garage deployment config на хосте). WebUI URL и S3 API URL — разные endpoint'ы, не перепутай.
 
 `STORAGE_REGION=garage` — фиксированное значение (Garage default region), **не** `us-east-1`. Если в существующем dev окружении был `STORAGE_REGION=us-east-1` — обнови на `garage`, иначе `SignatureDoesNotMatch` (Pitfall 8).
+
+`STORAGE_PUBLIC_URL=https://public.garage.dev.email-platform.pp.ua` — Garage virtual-host web endpoint. Bucket `public` в hostname; формула URL `${STORAGE_PUBLIC_URL}/${key}` (без `/public/` сегмента в path). Pre-req — Шаг 4.5 выполнен полностью (DNS + Traefik + `[s3_web]` + `bucket website --allow public`). См. warning "⚠ Garage virtual-host web endpoint" в начале runbook'а.
+
+`STORAGE_MAX_UPLOAD_BYTES=104857600` (100 MiB) — hard ceiling для streaming upload (D-06/D-18). Значение одинаковое во всех окружениях.
 
 После сохранения — **Redeploy** сервисов parser и notifier в Coolify чтобы подхватить новые env vars. Gateway тоже желательно передеплоить для консистентности, но gateway напрямую в S3 не ходит, поэтому его deploy не критичен для S3 readiness.
 
@@ -716,6 +932,20 @@ docker exec <notifier-container-id> wget -qO- http://localhost:3005/health/ready
 4. Env vars в Coolify указывают на правильный `STORAGE_ENDPOINT` (S3 API, не WebUI) и `STORAGE_REGION=garage` (шаг 5)
 5. Сервисы передеплоены после изменения secrets/env vars
 
+**Anonymous-read verification** (Phase 22.4) — выполнить после smoke upload (шаг (б) выше или через smoke-ответ parser'а):
+
+```bash
+# testKey — из smoke-ответа buckets[?bucket==public].testKey
+curl -sS -o /dev/null -w "%{http_code}\n" "${STORAGE_PUBLIC_URL}/<testKey>"
+# Expected: 200
+# Note: bucket `public` в hostname (через virtual-host), НЕ в path — per D-14 amended after OQ-1 RESOLVED.
+# Если 403 → `garage bucket website --allow public` не применён (Шаг 4.5.4)
+# Если 404 → (a) bucket subdomain не маршрутизируется (проверь Coolify Traefik route на `public.garage.dev.email-platform.pp.ua` → port 3902 — Шаг 4.5.3);
+#            (b) DNS A-запись отсутствует или не разошлась (Шаг 4.5.2);
+#            (c) `[s3_web].root_domain` в `garage.toml` не совпадает с hostname в STORAGE_PUBLIC_URL (Шаг 4.5.1 + redeploy Garage).
+# См. warning "⚠ Garage virtual-host web endpoint" в начале runbook.
+```
+
 ---
 
 ## 4. Prod Coolify/Garage
@@ -794,6 +1024,56 @@ Coolify → project → **prod** environment → Secrets:
 3. **Post-deploy verify:** Terminal в prod parser/notifier контейнере, `wget -qO- http://localhost:3003/health/ready` — ожидание `s3:parser` + `s3:public` `up`.
 4. **Defer orphan `reports` deletion 1-2 недели.** На prod ставка выше — стабильность нового кода должна быть подтверждена дольше, чем на dev. Только после устойчивой работы — Garage WebUI → bucket `reports` → Delete. **WARNING:** ни при каких условиях не удалять `reports` ДО успешной prod deploy verify — это единственный rollback path.
 
+### Шаг 4.5: Применить anonymous read policy на `public` (Phase 22.4)
+
+> ⚠ **Prod operator action.** Идентично dev, но на **prod** target. Двойная проверка environment перед каждым шагом.
+
+**4.5.1. Обновить `garage.toml` на prod Garage instance:**
+
+```toml
+[s3_web]
+bind_addr = "[::]:3902"
+root_domain = ".garage.email-platform.pp.ua"
+index = "index.html"
+```
+
+Redeploy prod Garage service в Coolify чтобы применить конфиг.
+
+**4.5.2. DNS:** создать A-запись `public.garage.email-platform.pp.ua` → тот же IP, что и `garage.email-platform.pp.ua` (prod Coolify host).
+
+**4.5.3. Coolify Traefik router** на prod Garage service: второй router с правилом `Host(\`public.garage.email-platform.pp.ua\`)` → port `3902`. Существующий router на `garage.email-platform.pp.ua` (WebUI) не трогать.
+
+Пример Traefik labels:
+
+```yaml
+- "traefik.http.routers.garage-public-prod.rule=Host(`public.garage.email-platform.pp.ua`)"
+- "traefik.http.routers.garage-public-prod.entrypoints=https"
+- "traefik.http.routers.garage-public-prod.tls=true"
+- "traefik.http.routers.garage-public-prod.tls.certresolver=letsencrypt"
+- "traefik.http.services.garage-public-prod.loadbalancer.server.port=3902"
+```
+
+**4.5.4. Применить website mode** на bucket `public` в prod (через prod Garage WebUI Settings → Website, или CLI):
+
+```bash
+# SSH на prod Coolify host → docker exec в PROD garage container (двойная проверка что это prod, не dev):
+docker ps | grep garage  # убедись что контейнер принадлежит prod env
+docker exec -it <garage-prod-container> garage bucket website --allow public
+
+docker exec -it <garage-prod-container> garage bucket info public
+# Ожидаемая строка: Website access: true
+
+docker exec -it <garage-prod-container> garage bucket info parser
+# Ожидаемая строка: Website access: false
+```
+
+**4.5.5. Smoke-проверка:**
+
+```bash
+curl -sS -o /dev/null -w "%{http_code}\n" "https://public.garage.email-platform.pp.ua/"
+# Ожидание: 404 (bucket пустой, website включён) — НЕ 403 (website не включён), НЕ "no such host" (DNS/Traefik).
+```
+
 ### Шаг 5: Set env vars
 
 Coolify → project → **prod** environment → Environment Variables:
@@ -805,9 +1085,15 @@ STORAGE_PORT=443
 STORAGE_ACCESS_KEY=<из Coolify prod secrets>
 STORAGE_SECRET_KEY=<из Coolify prod secrets>
 STORAGE_REGION=garage
+STORAGE_PUBLIC_URL=https://public.garage.email-platform.pp.ua
+STORAGE_MAX_UPLOAD_BYTES=104857600
 ```
 
 > **`STORAGE_BUCKET` отсутствует — D-27.** Если в Coolify environment ещё остался legacy `STORAGE_BUCKET` — можешь удалить, приложение его не читает.
+
+`STORAGE_PUBLIC_URL=https://public.garage.email-platform.pp.ua` — Garage virtual-host web endpoint на prod. **Pre-req — Шаг 4.5 выполнен полностью.** Любая переменная пути в URL не работает: bucket в hostname per D-28/D-29.
+
+`STORAGE_MAX_UPLOAD_BYTES=104857600` (100 MiB) — hard ceiling для streaming upload. На prod значение критично как DoS-защита от runaway uploads (D-06).
 
 `<garage-prod-endpoint>` — S3 API endpoint **prod** Garage instance (не WebUI URL `garage.email-platform.pp.ua`; уточнить у Coolify admin / в prod Garage deployment config). Обычно это что-то вроде `s3.email-platform.pp.ua`.
 
@@ -880,6 +1166,18 @@ docker exec <prod-notifier-container-id> wget -qO- http://localhost:3005/health/
 3. `STORAGE_ENDPOINT` указывает на WebUI URL вместо S3 API URL (шаг 5)
 4. `STORAGE_REGION` не равен `garage` (Pitfall 8 — если шёл с pre-22.5 значением `us-east-1`)
 5. Prod сервисы не передеплоены после изменения env vars (шаг 5)
+
+**Anonymous-read verification** (Phase 22.4) — после первого smoke upload на prod:
+
+```bash
+# testKey — из smoke-ответа prod parser'а для bucket public
+curl -sS -o /dev/null -w "%{http_code}\n" "${STORAGE_PUBLIC_URL}/<testKey>"
+# Expected: 200
+# Note: bucket `public` в hostname, формула URL = ${STORAGE_PUBLIC_URL}/${key} без /public/ сегмента (D-14 amended).
+# Если 403 → bucket website mode не применён (Шаг 4.5.4 на prod)
+# Если 404 → проверь Coolify Traefik route на `public.garage.email-platform.pp.ua` → port 3902 (Шаг 4.5.3); DNS A-запись (Шаг 4.5.2); `[s3_web].root_domain` в prod garage.toml (Шаг 4.5.1).
+# См. warning "⚠ Garage virtual-host web endpoint" в начале runbook.
+```
 
 ---
 
@@ -965,20 +1263,36 @@ Prod credentials сервиса должны быть **минимальными
 
 До тех пор — runbook остаётся **единственным источником истины** для bucket setup. Любая попытка "а давайте добавим маленький скрипт для local" должна быть остановлена на этом разделе: читаем rationale, понимаем trade-off, не добавляем. Local equivalent уже есть — `pnpm storage:bootstrap`, и он живёт в `infra/`, а не в коде сервисов.
 
+### Phase 22.4 (April 2026) — anonymous-read `public` bucket вместо presigned URLs
+
+Per-service private bucket'ы (`parser`, и любые per-service в будущем) обслуживают **internal-only** доступ через S3 API с ключом (текущий контракт не меняется). Отдельный `public` bucket открыт **anonymous-read** через Garage native web endpoint (port 3902) + UUID v4 obscurity (122 бита энтропии в каждом key path) — см. D-19..D-21 в `.planning/phases/22.4-public-bucket-abstraction/22.4-CONTEXT.md`.
+
+Это осознанный trade-off против TTL+signature сложности **presigned URL** механизма (который был удалён из `StoragePort` и `@aws-sdk/s3-request-presigner` — удалён из deps). Для текущего класса файлов (отчёты уже отправленные пользователям через Telegram, файлы доступные по ссылке один раз) UUID obscurity достаточно. Чувствительные данные (PII, финансы, внутренние документы) — **будущая фаза** с третьим классом bucket'ов + presigning; когда появится — вернём `@aws-sdk/s3-request-presigner` обратно в deps и добавим `SignedNamespaceModule` как parallel к `SharedNamespaceModule`.
+
+**Почему Garage native virtual-host web endpoint, а не Traefik path-rewrite или gateway proxy:**
+
+Первоначальный план 22.4 (до Wave 0 research) исходил из предпосылки что Garage умеет path-style anonymous GET как MinIO (`mc anonymous set download`). Research OQ-1 выявил: Garage S3 API **не поддерживает** anonymous GET вообще — только отдельный web endpoint (port 3902) в virtual-hosted style. Альтернативы рассмотрены и отклонены:
+
+- **Traefik path-rewrite** (`/public/<key>` → `Host: public.<web-root>`) — сильная завязка на Traefik конфиг в дуальной инфраструктуре, hard-to-debug failure modes.
+- **Gateway proxy streaming** — over-engineering для текущих потребностей; gateway-only принцип для файлов сознательно ослаблен (CONTEXT.md specifics).
+- **Presigned URL** — отложено как отдельный class (см. выше).
+
+Итоговое решение — Garage native web endpoint + virtual-host (D-28) — простейший путь: одна Garage config секция `[s3_web]` per env, одна DNS A-запись per hosting env, один Coolify Traefik router per hosting env, одна команда `garage bucket website --allow public`. Zero application code для URL generation — формула `${STORAGE_PUBLIC_URL}/${key}` (D-14 amended).
+
 ---
 
 ## Приложение: быстрая матрица окружений
 
-| Окружение        | S3 backend         | Endpoint                    | WebUI                                      | Verify command                                                                 |
-| ---------------- | ------------------ | --------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------ |
-| Local-native     | Garage v2.1.0      | `localhost:3900`            | `http://localhost:3909`                    | `curl http://localhost:3003/health/ready`                                      |
-| Local-isolated   | Garage v2.1.0      | `garage:3900` (docker DNS)  | `http://localhost:3909`                    | `docker compose exec parser wget -qO- http://localhost:3003/health/ready`      |
-| Dev Coolify      | Garage             | `<garage-dev-endpoint>:443` | `http://garage.dev.email-platform.pp.ua`   | SSH в parser container → `wget -qO- http://localhost:3003/health/ready`         |
-| Prod Coolify     | Garage             | `<garage-prod-endpoint>:443`| `http://garage.email-platform.pp.ua`       | SSH в prod parser container → `wget -qO- http://localhost:3003/health/ready`    |
+| Окружение        | S3 backend         | Endpoint S3 API             | Public URL (Garage web endpoint, Phase 22.4)          | WebUI                                      | Verify command                                                                 |
+| ---------------- | ------------------ | --------------------------- | ----------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------ |
+| Local-native     | Garage v2.1.0      | `localhost:3900`            | `http://public.localhost:3902`                        | `http://localhost:3909`                    | `curl http://localhost:3003/health/ready`                                      |
+| Local-isolated   | Garage v2.1.0      | `garage:3900` (docker DNS)  | `http://public.localhost:3902` (host-side)            | `http://localhost:3909`                    | `docker compose exec parser wget -qO- http://localhost:3003/health/ready`      |
+| Dev Coolify      | Garage             | `<garage-dev-endpoint>:443` | `https://public.garage.dev.email-platform.pp.ua`      | `http://garage.dev.email-platform.pp.ua`   | SSH в parser container → `wget -qO- http://localhost:3003/health/ready`         |
+| Prod Coolify     | Garage             | `<garage-prod-endpoint>:443`| `https://public.garage.email-platform.pp.ua`          | `http://garage.email-platform.pp.ua`       | SSH в prod parser container → `wget -qO- http://localhost:3003/health/ready`    |
 
 **Bucket names везде одинаковые:** `parser`, `public`. **Case-sensitive.**
 
-**Env vars везде одинаковые** (6 `STORAGE_*` переменных из `packages/config/src/schemas/storage.ts`): `STORAGE_PROTOCOL`, `STORAGE_ENDPOINT`, `STORAGE_PORT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_REGION`. **`STORAGE_REGION=garage`** (не `us-east-1`) — Garage default region. **`STORAGE_BUCKET` отсутствует** — bucket name приходит из кода (D-27).
+**Env vars везде одинаковые** (8 `STORAGE_*` переменных из `packages/config/src/schemas/storage.ts` после Phase 22.4): `STORAGE_PROTOCOL`, `STORAGE_ENDPOINT`, `STORAGE_PORT`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_REGION`, `STORAGE_PUBLIC_URL`, `STORAGE_MAX_UPLOAD_BYTES`. **`STORAGE_REGION=garage`** (не `us-east-1`) — Garage default region. **`STORAGE_BUCKET` отсутствует** — bucket name приходит из кода (D-27). **`STORAGE_PUBLIC_URL`** per-env через Garage virtual-host web endpoint (D-28/D-29); **`STORAGE_MAX_UPLOAD_BYTES=104857600`** одинаково во всех окружениях (D-06).
 
 **Local credentials** (одинаковые в `.env.example` и `.env.docker`): access key `GKTESTLOCAL0123456789ab`, secret = 64 нуля, key name `email-platform-local`. **Это намеренно статичные local-only значения**, безопасны для коммита, никогда не используются в hosting.
 
@@ -990,4 +1304,5 @@ Prod credentials сервиса должны быть **минимальными
 
 *Runbook создан: 2026-04-09 (Phase 22.2-bucket-provisioning-automation)*
 *Обновлён: 2026-04-14 (Phase 22.5-local-garage-unification — Garage везде, bucket `public` вместо `reports`, `pnpm storage:bootstrap`)*
+*Обновлён: 2026-04-14 (Phase 22.4-public-bucket-abstraction — anonymous-read на `public` через Garage native virtual-host web endpoint :3902, `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES` env vars, warning blocks для virtual-host + private-bucket exclusion, Шаг 4.5 на каждое окружение, verify curl `${STORAGE_PUBLIC_URL}/<key>`)*
 *Источники истины для констант: см. header sync note*
