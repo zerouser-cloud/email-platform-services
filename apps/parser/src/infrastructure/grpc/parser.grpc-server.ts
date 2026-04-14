@@ -41,9 +41,7 @@ export class ParserGrpcServer implements ParserProto.ParserServiceController {
 
   // --- Storage Smoke Test stubs (temporary -- implemented in Plan 02) ---
 
-  async runStorageSmoke(
-    _request: CommonProto.Empty,
-  ): Promise<ParserProto.StorageSmokeResponse> {
+  async runStorageSmoke(_request: CommonProto.Empty): Promise<ParserProto.StorageSmokeResponse> {
     throw new NotImplementedException('runStorageSmoke not yet implemented');
   }
 

@@ -17,12 +17,10 @@ export class StorageSmokeController implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    this.parserService = this.parserClient.getService<ParserProto.ParserServiceClient>(
-      'ParserService',
-    );
-    this.notifierService = this.notifierClient.getService<NotifierProto.NotifierServiceClient>(
-      'NotifierService',
-    );
+    this.parserService =
+      this.parserClient.getService<ParserProto.ParserServiceClient>('ParserService');
+    this.notifierService =
+      this.notifierClient.getService<NotifierProto.NotifierServiceClient>('NotifierService');
   }
 
   @Get('parser/storage-service')

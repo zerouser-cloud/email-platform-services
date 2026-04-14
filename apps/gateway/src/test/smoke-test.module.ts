@@ -15,7 +15,10 @@ import { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT } from './smoke-test.tokens'
           transport: Transport.GRPC,
           options: {
             package: SERVICE.parser.grpc.package,
-            protoPath: resolveProtoPath(SERVICE.parser.grpc.package, config.get<string>('PROTO_DIR')!),
+            protoPath: resolveProtoPath(
+              SERVICE.parser.grpc.package,
+              config.get<string>('PROTO_DIR')!,
+            ),
             url: config.get<string>('PARSER_GRPC_URL')!,
           },
         }),
@@ -27,7 +30,10 @@ import { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT } from './smoke-test.tokens'
           transport: Transport.GRPC,
           options: {
             package: SERVICE.notifier.grpc.package,
-            protoPath: resolveProtoPath(SERVICE.notifier.grpc.package, config.get<string>('PROTO_DIR')!),
+            protoPath: resolveProtoPath(
+              SERVICE.notifier.grpc.package,
+              config.get<string>('PROTO_DIR')!,
+            ),
             url: config.get<string>('NOTIFIER_GRPC_URL')!,
           },
         }),

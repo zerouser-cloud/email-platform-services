@@ -1,114 +1,122 @@
 import { Controller, Inject } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
+import { Readable } from 'node:stream';
 import { ParserProto, CommonProto } from '@email-platform/contracts';
-import type { StoragePort } from '@email-platform/foundation/internal';
+import {
+  type NamespacedStoragePort,
+  type PrivateStoragePort,
+  SHARED_REPORTS,
+  PUBLIC_BUCKET,
+} from '@email-platform/foundation';
 import { PARSER_STORAGE, PARSER_STORAGE_BUCKET } from '../parser.constants';
-import { PUBLIC_STORAGE, PUBLIC_BUCKET } from '@email-platform/foundation';
 
-const SMOKE_TEST_CONTENT_TYPE = 'text/plain';
-const SMOKE_SIGNED_URL_EXPIRY_MS = 300_000; // 5 minutes
+const SMOKE = {
+  CONTENT_TYPE: 'text/plain',
+  PAYLOAD_PREFIX: 'smoke-test-payload-',
+  KEY_PREFIX: 'smoke-test-',
+  EXT: '.txt',
+  STATUS_OK: 200,
+} as const;
 
-interface SmokeBucketEntry {
-  readonly token: symbol;
-  readonly bucket: string;
-  readonly storage: StoragePort;
-}
+const STEP = {
+  UPLOAD: 'upload',
+  EXISTS: 'exists',
+  DOWNLOAD: 'download',
+  PUBLIC_GET: 'public-get',
+} as const;
 
 @Controller()
 export class StorageSmokeController {
-  private readonly buckets: SmokeBucketEntry[];
-
   constructor(
-    @Inject(PARSER_STORAGE) private readonly parserStorage: StoragePort,
-    @Inject(PUBLIC_STORAGE) private readonly publicStorage: StoragePort,
-  ) {
-    this.buckets = [
-      { token: PARSER_STORAGE, bucket: PARSER_STORAGE_BUCKET, storage: this.parserStorage },
-      { token: PUBLIC_STORAGE, bucket: PUBLIC_BUCKET, storage: this.publicStorage },
-    ];
-  }
+    @Inject(PARSER_STORAGE) private readonly parserStorage: PrivateStoragePort,
+    @Inject(SHARED_REPORTS) private readonly publicReports: NamespacedStoragePort,
+  ) {}
 
   @GrpcMethod('ParserService', 'RunStorageSmoke')
-  async runStorageSmoke(
-    _request: CommonProto.Empty,
-  ): Promise<ParserProto.StorageSmokeResponse> {
-    const bucketResults = await Promise.all(
-      this.buckets.map((entry) => this.runSmokeCycle(entry.storage, entry.bucket)),
-    );
-    return { buckets: bucketResults };
+  async runStorageSmoke(_request: CommonProto.Empty): Promise<ParserProto.StorageSmokeResponse> {
+    const [privateResult, publicResult] = await Promise.all([
+      this.runPrivateCycle(),
+      this.runPublicCycle(),
+    ]);
+    return { buckets: [privateResult, publicResult] };
   }
 
   @GrpcMethod('ParserService', 'CleanupStorageSmoke')
   async cleanupStorageSmoke(
     request: ParserProto.CleanupSmokeRequest,
   ): Promise<ParserProto.CleanupSmokeResponse> {
-    const entry = this.buckets.find((b) => b.bucket === request.bucket);
-    if (!entry) {
-      return { success: false, detail: `Unknown bucket: ${request.bucket}` };
-    }
     try {
-      await entry.storage.delete(request.key);
-      return { success: true, detail: '' };
+      if (request.bucket === PARSER_STORAGE_BUCKET) {
+        await this.parserStorage.delete(request.key);
+        return { success: true, detail: '' };
+      }
+      if (request.bucket === PUBLIC_BUCKET) {
+        await this.publicReports.delete(request.key);
+        return { success: true, detail: '' };
+      }
+      return { success: false, detail: `Unknown bucket: ${request.bucket}` };
     } catch (err) {
       return { success: false, detail: String(err) };
     }
   }
 
-  private async runSmokeCycle(
-    storage: StoragePort,
-    bucket: string,
-  ): Promise<ParserProto.StorageSmokeBucketResult> {
-    const testKey = `smoke-test-${Date.now()}.txt`;
-    const testContent = Buffer.from(`smoke-test-payload-${Date.now()}`);
+  private async runPrivateCycle(): Promise<ParserProto.StorageSmokeBucketResult> {
+    const testKey = `${SMOKE.KEY_PREFIX}${Date.now()}${SMOKE.EXT}`;
+    const testContent = Buffer.from(`${SMOKE.PAYLOAD_PREFIX}${Date.now()}`);
     const steps: ParserProto.StorageSmokeStepResult[] = [];
-
-    // Step 1: upload
     try {
-      await storage.upload(testKey, testContent, SMOKE_TEST_CONTENT_TYPE);
-      steps.push({ step: 'upload', success: true, detail: '' });
-    } catch (err) {
-      steps.push({ step: 'upload', success: false, detail: String(err) });
-      return { bucket, testKey, steps, allPassed: false };
-    }
-
-    // Step 2: exists
-    try {
-      const found = await storage.exists(testKey);
+      await this.parserStorage.upload(testKey, testContent, SMOKE.CONTENT_TYPE);
+      steps.push({ step: STEP.UPLOAD, success: true, detail: '' });
+      const found = await this.parserStorage.exists(testKey);
       steps.push({
-        step: 'exists',
+        step: STEP.EXISTS,
         success: found,
-        detail: found ? '' : 'exists returned false after upload',
+        detail: found ? '' : 'not found after upload',
       });
-    } catch (err) {
-      steps.push({ step: 'exists', success: false, detail: String(err) });
-    }
-
-    // Step 3: download + content comparison
-    try {
-      const downloaded = await storage.download(testKey);
+      const downloaded = await this.parserStorage.download(testKey);
       const match = downloaded.equals(testContent);
       steps.push({
-        step: 'download',
+        step: STEP.DOWNLOAD,
         success: match,
         detail: match ? '' : 'content mismatch',
       });
     } catch (err) {
-      steps.push({ step: 'download', success: false, detail: String(err) });
+      steps.push({ step: STEP.UPLOAD, success: false, detail: String(err) });
     }
+    return {
+      bucket: PARSER_STORAGE_BUCKET,
+      testKey,
+      steps,
+      allPassed: steps.every((s) => s.success),
+    };
+  }
 
-    // Step 4: getSignedUrl
+  private async runPublicCycle(): Promise<ParserProto.StorageSmokeBucketResult> {
+    const filename = `${SMOKE.KEY_PREFIX}${Date.now()}${SMOKE.EXT}`;
+    const body = Readable.from(Buffer.from(`${SMOKE.PAYLOAD_PREFIX}${Date.now()}`));
+    const steps: ParserProto.StorageSmokeStepResult[] = [];
+    let producedKey = '';
     try {
-      const url = await storage.getSignedUrl(testKey, SMOKE_SIGNED_URL_EXPIRY_MS);
+      const { url, key } = await this.publicReports.upload(filename, body);
+      producedKey = key;
+      steps.push({ step: STEP.UPLOAD, success: true, detail: key });
+      const found = await this.publicReports.exists(key);
+      steps.push({ step: STEP.EXISTS, success: found, detail: '' });
+      const res = await fetch(url);
+      const ok = res.status === SMOKE.STATUS_OK;
       steps.push({
-        step: 'getSignedUrl',
-        success: url.length > 0,
-        detail: url,
+        step: STEP.PUBLIC_GET,
+        success: ok,
+        detail: ok ? '' : `status=${res.status}`,
       });
     } catch (err) {
-      steps.push({ step: 'getSignedUrl', success: false, detail: String(err) });
+      steps.push({ step: STEP.UPLOAD, success: false, detail: String(err) });
     }
-
-    const allPassed = steps.every((s) => s.success);
-    return { bucket, testKey, steps, allPassed };
+    return {
+      bucket: PUBLIC_BUCKET,
+      testKey: producedKey,
+      steps,
+      allPassed: steps.every((s) => s.success),
+    };
   }
 }
