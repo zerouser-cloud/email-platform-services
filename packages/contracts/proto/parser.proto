@@ -12,6 +12,8 @@ service ParserService {
   rpc GetTask(ParserTaskIdRequest) returns (ParserTask);
   rpc GetSettings(common.Empty) returns (ParserSettings);
   rpc UpdateSettings(UpdateParserSettingsRequest) returns (ParserSettings);
+  rpc RunStorageSmoke(common.Empty) returns (StorageSmokeResponse);
+  rpc CleanupStorageSmoke(CleanupSmokeRequest) returns (CleanupSmokeResponse);
 }
 
 // --- Requests ---
@@ -63,4 +65,36 @@ message ParserSettings {
   int32 max_pages = 1;
   int32 batch_size = 2;
   bool auto_import = 3;
+}
+
+// --- Storage Smoke Test (temporary -- delete after verification) ---
+
+message StorageSmokeStepResult {
+  string step = 1;
+  bool success = 2;
+  string detail = 3;
+}
+
+message StorageSmokeBucketResult {
+  string bucket = 1;
+  string test_key = 2;
+  repeated StorageSmokeStepResult steps = 3;
+  bool all_passed = 4;
+  // Public download URL for the uploaded test object — populated only for
+  // anonymous-readable buckets (public). Empty for private buckets.
+  string public_url = 5;
+}
+
+message StorageSmokeResponse {
+  repeated StorageSmokeBucketResult buckets = 1;
+}
+
+message CleanupSmokeRequest {
+  string bucket = 1;
+  string key = 2;
+}
+
+message CleanupSmokeResponse {
+  bool success = 1;
+  string detail = 2;
 }

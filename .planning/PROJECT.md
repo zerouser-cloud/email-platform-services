@@ -69,12 +69,14 @@
 - ✓ Build-info.json baked into Docker images (commit, branch, timestamp) — Phase 19
 - ✓ Both dev modes verified: start:native + start:isolated — Phase 19
 - ✓ Config decomposition: modular Zod sub-schemas, per-service env validation — Phase 20
+- ✓ Redis CacheModule: DI-injected client, CachePort абстракция, auto-prefix namespace, real health check — Phase 21
+- ✓ S3 StorageModule: DI-injected S3CoreModule singleton (non-global, self-contained inside BucketStorageModule.forBucket) + per-bucket health tokens, ReportsStorageModule as shared Nest module in foundation, STORAGE_PROTOCOL env var (works identically MinIO/Garage) — Phase 22, Phase 22.1
+- ✓ Foundation package encapsulation: `external/` vs `internal/` partition with package.json `exports` field + tsconfig `moduleResolution: node16` + ESLint two-override rule — three independent gates seal public/internal API, S3CoreModule reachable only via `@email-platform/foundation/internal` subpath — Phase 22.1
 
 ### Active
 - [ ] gRPC client каркас в foundation + per-service адаптеры
 - [ ] RabbitMQ publisher/consumer абстракция + per-service конфигурация
 - [ ] HTTP client каркас для внешних API + per-service адаптеры
-- [ ] S3 client через AWS SDK (unified MinIO/Garage, env rename MINIO_* → S3_*)
 - [ ] Redis client в едином стиле с остальными infrastructure modules
 - [ ] Distributed tracing (propagation через gRPC metadata, RabbitMQ headers)
 - [ ] Graceful shutdown (корректное завершение connections, in-flight запросов)
@@ -132,9 +134,12 @@ Backing services абстрагированы через модули-фасад
 
 | Модуль | Backing services | Статус |
 |--------|-----------------|--------|
-| **PersistenceModule** | PostgreSQL (pool, Drizzle ORM, health) + Redis (client, health) | PostgreSQL ready, Redis planned |
-| **StorageModule** | MinIO / S3 (client, health) | Planned |
-| **EventModule** | RabbitMQ (connection, publisher, consumer, health) | Planned |
+| **PersistenceModule** | PostgreSQL (pool, Drizzle ORM, health) | Ready — Phase 10 |
+| **CacheModule** | Redis (DI client, CachePort, namespaced keys, health) | Ready — Phase 21 |
+| **S3CoreModule + BucketStorageModule + ReportsStorageModule** | MinIO / Garage (non-global S3Client singleton via class-identity dedup, self-contained BucketStorageModule.forBucket factory, shared reports module in foundation, per-bucket health tokens, reachable only via `@email-platform/foundation/internal` subpath) | Ready — Phase 22 + 22.1 |
+| **EventModule** | RabbitMQ (connection, publisher, consumer, health) | Planned — Phase 25 |
+| **gRPC Client Wrappers** | gRPC (typed client wrappers, deadline handling) | Planned — Phase 23 |
+| **HTTP Client + Circuit Breaker** | External HTTP APIs (resilient client, retry, timeout) | Planned — Phase 24 |
 
 Сервисы собирают только нужные модули:
 - auth, sender, parser, audience → PersistenceModule
@@ -160,4 +165,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after Phase 20 complete*
+*Last updated: 2026-04-09 after Phase 22.1 complete*

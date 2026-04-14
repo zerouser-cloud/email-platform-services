@@ -6,6 +6,7 @@ import { LoggingModule, GrpcToHttpExceptionFilter } from '@email-platform/founda
 import { ThrottleModule } from './throttle/throttle.module';
 import { GrpcClientsModule } from './infrastructure/clients/grpc-clients.module';
 import { HealthController } from './health/health.controller';
+import { SmokeTestModule } from './test/smoke-test.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { HealthController } from './health/health.controller';
     LoggingModule.forHttpAsync('gateway'),
     ThrottleModule,
     GrpcClientsModule,
+    SmokeTestModule,
   ],
   controllers: [HealthController],
   providers: [GrpcToHttpExceptionFilter],

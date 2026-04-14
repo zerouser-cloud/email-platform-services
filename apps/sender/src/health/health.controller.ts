@@ -1,14 +1,14 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { RedisHealthIndicator, HEALTH, DATABASE_HEALTH } from '@email-platform/foundation';
-import type { DatabaseHealthIndicator } from '@email-platform/foundation';
+import { HEALTH, DATABASE_HEALTH, REDIS_HEALTH } from '@email-platform/foundation';
+import type { DatabaseHealthIndicator, CacheHealthIndicator } from '@email-platform/foundation';
 
 @Controller(HEALTH.ROUTE)
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     @Inject(DATABASE_HEALTH) private readonly db: DatabaseHealthIndicator,
-    private readonly redis: RedisHealthIndicator,
+    @Inject(REDIS_HEALTH) private readonly redis: CacheHealthIndicator,
   ) {}
 
   @Get(HEALTH.LIVE)

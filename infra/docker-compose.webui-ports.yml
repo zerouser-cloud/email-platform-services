@@ -1,0 +1,10 @@
+# WebUI override: exposes infra management UI ports to host.
+# Used by BOTH start:native and start:isolated modes.
+# Add new WebUI ports here (e.g., Drizzle Studio, Garage WebUI) — they become available in all dev modes.
+services:
+  rabbitmq:
+    ports: ["15672:15672"]    # RabbitMQ Management UI
+  garage:
+    ports: ["3902:3902"]      # Garage web endpoint (anonymous public bucket — for browser access)
+  garage-webui:
+    ports: ["3909:3909"]      # Garage WebUI
