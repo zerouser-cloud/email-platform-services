@@ -107,7 +107,7 @@ Plans:
 - [x] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
-### Phase 22.4: storage-gateway-proxy (INSERTED)
+### Phase 22.4: public-bucket-abstraction (INSERTED)
 
 **Goal:** [Urgent work - to be planned]
 **Requirements**: TBD

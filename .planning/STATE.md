@@ -102,10 +102,10 @@ None yet.
 - Phase 22.1 inserted after Phase 22: s3-core-encapsulation (URGENT) — encapsulate S3CoreModule into per-service composition StorageModule, root modules see single storage module
 - Phase 22.2 inserted after Phase 22: bucket-provisioning-automation (URGENT) — unified automatic bucket check-and-create mechanism driven by per-service bucket constants, works on MinIO (local/docker) and Garage (dev/prod) identically, integrated with health checks
 - Phase 22.3 inserted after Phase 22: storage-smoke-test-endpoints (URGENT) — per-service HTTP debug endpoints for full CRUD cycle on each bound bucket (upload/download/delete/exists/getSignedUrl); cross-service reports bucket test (parser writes → notifier reads); gated by env flag for prod safety
-- Phase 22.4 inserted after Phase 22: storage-gateway-proxy (URGENT) — StoragePort.getDownloadUrl returns gateway-relative URLs с HMAC-токенами, gateway стримит из S3 (internal). Устраняет публичную зависимость от MinIO/Garage, работает одинаково в start:native/start:isolated/hosting без env vars для public URL. Возвращает систему к принципу "gateway-only external surface".
+- Phase 22.4 inserted after Phase 22: public-bucket-abstraction (URGENT) — StoragePort.getDownloadUrl returns gateway-relative URLs с HMAC-токенами, gateway стримит из S3 (internal). Устраняет публичную зависимость от MinIO/Garage, работает одинаково в start:native/start:isolated/hosting без env vars для public URL. Возвращает систему к принципу "gateway-only external surface".
 
 ## Session Continuity
 
 Last session: 2026-04-14T09:30:07.563Z
 Stopped at: Phase 22.4 context gathered
-Resume file: .planning/phases/22.4-storage-gateway-proxy/22.4-CONTEXT.md
+Resume file: .planning/phases/22.4-public-bucket-abstraction/22.4-CONTEXT.md
