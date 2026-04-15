@@ -23,14 +23,11 @@ export const HTTP_CLIENT_DEFAULTS = {
   RETRY_BACKOFF_MIN_MS: 200,
   RETRY_BACKOFF_MAX_MS: 5_000,
   RETRY_JITTER_RATIO: 0.5,
-  // D-12: breaker opens after 5 consecutive failures, half-opens after 30s
+  // D-12: breaker opens after 5 consecutive failures, half-opens after 30s.
+  // Consecutive counting lives in the CB factory wrapper (opossum has no
+  // native consecutive mode — percentage/rolling-window only).
   CB_CONSECUTIVE_THRESHOLD: 5,
   CB_HALF_OPEN_AFTER_MS: 30_000,
-  // Option B sentinel: wrapper emits a single ConsecutiveThresholdError,
-  // opossum treats every volume-threshold-met failure as a 100% error rate
-  // and opens the circuit on that one sentinel.
-  CB_ERROR_PERCENT: 100,
-  CB_VOLUME_THRESHOLD: 1,
 } as const;
 
 // D-10: GET/HEAD are idempotent by default. Other methods must opt-in via

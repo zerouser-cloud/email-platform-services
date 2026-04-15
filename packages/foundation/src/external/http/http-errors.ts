@@ -39,13 +39,3 @@ export class CircuitOpenError extends Error {
     this.name = 'CircuitOpenError';
   }
 }
-
-export class ConsecutiveThresholdError extends Error {
-  constructor(
-    public readonly api: string,
-    public readonly threshold: number,
-  ) {
-    super(`Consecutive failure threshold (${threshold}) reached for ${api}`);
-    this.name = 'ConsecutiveThresholdError';
-  }
-}

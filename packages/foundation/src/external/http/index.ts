@@ -20,10 +20,4 @@ export type {
   HttpMethod,
   RetryPolicy,
 } from './http-client.types';
-export {
-  CircuitOpenError,
-  ConsecutiveThresholdError,
-  HttpError,
-  NetworkError,
-  TimeoutError,
-} from './http-errors';
+export { CircuitOpenError, HttpError, NetworkError, TimeoutError } from './http-errors';
