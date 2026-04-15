@@ -48,6 +48,7 @@ export abstract class AbstractHttpClient implements OnModuleInit {
   // Pitfall 2 / Phase 23 Pitfall 6: defer creation to onModuleInit.
   private logger!: PinoNativeLogger;
   private breaker!: CircuitBreaker<[HttpMethod, string, RequestInit, HttpCallOpts], Response>;
+  private getConsecutiveFailures!: () => number;
 
   constructor(
     private readonly cls: ClsService,
@@ -73,12 +74,35 @@ export abstract class AbstractHttpClient implements OnModuleInit {
 
   onModuleInit(): void {
     this.logger = PinoLogger.root.child({ context: this.logContext });
-    this.breaker = createCircuitBreaker<[HttpMethod, string, RequestInit, HttpCallOpts], Response>(
+    const created = createCircuitBreaker<
+      [HttpMethod, string, RequestInit, HttpCallOpts],
+      Response
+    >(
       (method, path, init, opts) => this.executeWithRetry(method, path, init, opts),
       this.logContext,
       this.cbOptions,
       (transition) => this.logCbTransition(transition),
     );
+    this.breaker = created.breaker;
+    this.getConsecutiveFailures = created.getConsecutiveFailures;
+  }
+
+  /**
+   * Diagnostic accessor — returns current CB state and the wrapper's
+   * consecutive-failure counter. Public for smoke / test endpoints; safe to
+   * call from anywhere (read-only). For business code, prefer treating CB
+   * as opaque and reacting to thrown CircuitOpenError.
+   */
+  public getCircuitState(): {
+    cb: 'closed' | 'halfOpen' | 'opened';
+    consecutiveFailures: number;
+  } {
+    const cb = this.breaker.opened
+      ? 'opened'
+      : this.breaker.halfOpen
+        ? 'halfOpen'
+        : 'closed';
+    return { cb, consecutiveFailures: this.getConsecutiveFailures() };
   }
 
   protected get<T>(path: string, opts?: HttpCallOpts): Promise<T> {

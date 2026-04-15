@@ -29,12 +29,17 @@ type Transition =
   | typeof HTTP_CLIENT_LOG.CB_HALF_OPEN
   | typeof HTTP_CLIENT_LOG.CB_CLOSE;
 
+export interface CreatedCircuitBreaker<TArgs extends unknown[], TReturn> {
+  breaker: CircuitBreaker<TArgs, TReturn>;
+  getConsecutiveFailures: () => number;
+}
+
 export function createCircuitBreaker<TArgs extends unknown[], TReturn>(
   innerFn: (...args: TArgs) => Promise<TReturn>,
   _api: string,
   cbOptions: CbOptions,
   onTransition: (transition: Transition) => void,
-): CircuitBreaker<TArgs, TReturn> {
+): CreatedCircuitBreaker<TArgs, TReturn> {
   let consecutiveFailures = 0;
   let breakerRef: CircuitBreaker<TArgs, TReturn> | undefined;
 
@@ -79,5 +84,5 @@ export function createCircuitBreaker<TArgs extends unknown[], TReturn>(
   breaker.on('halfOpen', () => onTransition(HTTP_CLIENT_LOG.CB_HALF_OPEN));
   breaker.on('close', () => onTransition(HTTP_CLIENT_LOG.CB_CLOSE));
 
-  return breaker;
+  return { breaker, getConsecutiveFailures: () => consecutiveFailures };
 }
