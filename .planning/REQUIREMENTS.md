@@ -56,7 +56,7 @@ Scope changed during `/gsd:discuss-phase` (2026-04-09): phase became docs-only r
 ### gRPC Client
 
 - [ ] **GRPC-01**: Type-safe gRPC client каркас в foundation с автоматической привязкой к proto контрактам
-- [ ] **GRPC-02**: Каждый сервис конфигурирует только контракты тех сервисов, которые ему нужны
+- [x] **GRPC-02**: Каждый сервис конфигурирует только контракты тех сервисов, которые ему нужны
 - [ ] **GRPC-03**: Gateway создаёт gRPC client для всех backend-сервисов через единый паттерн
 - [ ] **GRPC-04**: Deadline/timeout propagation встроен в каркас
 
@@ -193,7 +193,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SSMK-04 | Phase 22.3 | Pending |
 | SSMK-05 | Phase 22.3 | Pending |
 | GRPC-01 | Phase 23 | Pending |
-| GRPC-02 | Phase 23 | Pending |
+| GRPC-02 | Phase 23 | Complete |
 | GRPC-03 | Phase 23 | Pending |
 | GRPC-04 | Phase 23 | Pending |
 | HTTP-01 | Phase 24 | Pending |
