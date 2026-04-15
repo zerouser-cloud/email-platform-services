@@ -13,9 +13,7 @@ import { CLOUDFN_PATH } from './cloudfn-client.constants';
  */
 @Injectable()
 export class CloudFnClient extends AbstractHttpClient {
-  sendEmail(
-    req: CloudFnTypes.SendEmailRequest,
-  ): Promise<CloudFnTypes.SendEmailResponse> {
+  sendEmail(req: CloudFnTypes.SendEmailRequest): Promise<CloudFnTypes.SendEmailResponse> {
     return this.post<CloudFnTypes.SendEmailResponse>(CLOUDFN_PATH.SEND_EMAIL, req);
   }
 }

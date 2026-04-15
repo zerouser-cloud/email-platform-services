@@ -13,9 +13,7 @@ export class CloudFnSmokeController {
   constructor(@Inject(CLOUDFN_CLIENT) private readonly client: CloudFnClient) {}
 
   @Post(CLOUDFN_SMOKE.SEND)
-  async send(
-    @Body() body: CloudFnTypes.SendEmailRequest,
-  ): Promise<CloudFnTypes.SendEmailResponse> {
+  async send(@Body() body: CloudFnTypes.SendEmailRequest): Promise<CloudFnTypes.SendEmailResponse> {
     return this.client.sendEmail(body);
   }
 }

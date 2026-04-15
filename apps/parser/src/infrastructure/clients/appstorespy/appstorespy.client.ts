@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AbstractHttpClient } from '@email-platform/foundation';
 import { AppStoreSpyTypes } from '@email-platform/contracts';
-import {
-  APPSTORESPY_PATH,
-  APPSTORESPY_QUERY,
-} from './appstorespy-client.constants';
+import { APPSTORESPY_PATH, APPSTORESPY_QUERY } from './appstorespy-client.constants';
 
 /**
  * AppStoreSpyClient — skeleton HTTP adapter (D-18).
@@ -23,8 +20,6 @@ export class AppStoreSpyClient extends AbstractHttpClient {
       params[APPSTORESPY_QUERY.COUNTRY] = req.country;
     }
     const query = new URLSearchParams(params).toString();
-    return this.get<AppStoreSpyTypes.LookupAppResponse>(
-      `${APPSTORESPY_PATH.LOOKUP_APP}?${query}`,
-    );
+    return this.get<AppStoreSpyTypes.LookupAppResponse>(`${APPSTORESPY_PATH.LOOKUP_APP}?${query}`);
   }
 }

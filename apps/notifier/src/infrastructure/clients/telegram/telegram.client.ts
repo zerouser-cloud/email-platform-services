@@ -14,9 +14,7 @@ import { TELEGRAM_PATH } from './telegram-client.constants';
  */
 @Injectable()
 export class TelegramClient extends AbstractHttpClient {
-  sendMessage(
-    req: TelegramTypes.SendMessageRequest,
-  ): Promise<TelegramTypes.SendMessageResponse> {
+  sendMessage(req: TelegramTypes.SendMessageRequest): Promise<TelegramTypes.SendMessageResponse> {
     return this.post<TelegramTypes.SendMessageResponse>(TELEGRAM_PATH.SEND_MESSAGE, req);
   }
 }

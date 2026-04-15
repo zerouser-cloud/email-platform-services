@@ -10,9 +10,7 @@ const APPSTORESPY_SMOKE = {
 
 @Controller(APPSTORESPY_SMOKE.ROUTE)
 export class AppStoreSpySmokeController {
-  constructor(
-    @Inject(APPSTORESPY_CLIENT) private readonly client: AppStoreSpyClient,
-  ) {}
+  constructor(@Inject(APPSTORESPY_CLIENT) private readonly client: AppStoreSpyClient) {}
 
   @Post(APPSTORESPY_SMOKE.LOOKUP)
   async lookup(
