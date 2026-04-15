@@ -367,3 +367,13 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
+
+**Goal:** Telegram Bot API использует path-based auth — токен зашит в URL (`/bot<TOKEN>/method`). Это протокол Telegram, не наш выбор. Сейчас `TelegramClient` extends `AbstractHttpClient` и логирует URL как есть — токен утекает в логи (`http.client.call` с `url: ".../bot8679564424:AAF-.../sendMessage"`). Решение: переехать на vendor SDK (рекомендуется grammY — TypeScript-first, современнее; telegraf — зрелая альтернатива). SDK скрывает URL внутри и предоставляет operation-level API (`bot.api.sendMessage(chatId, text)`). `TelegramClient` становится тонкой обёрткой над SDK, логирует **операции** (`api: 'TelegramClient', operation: 'sendMessage', duration_ms, status, correlationId`), а не HTTP transport — URL с токеном физически не существует в поле лога. При этом `AbstractHttpClient` продолжает логировать URL для AppStoreSpy/CloudFn (у них auth в header, URL без секретов). Фаза закрывает D-16 долг, оставленный в Phase 24.
+**Known issue:** `apps/notifier/src/infrastructure/clients/telegram/telegram.client.ts` использует `AbstractHttpClient.post('/bot<TOKEN>/sendMessage', ...)` — URL с токеном попадает в `http.client.call` log field.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
