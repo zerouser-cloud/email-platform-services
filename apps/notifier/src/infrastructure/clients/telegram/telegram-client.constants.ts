@@ -12,8 +12,6 @@ export const TELEGRAM_ENV = {
 
 export const TELEGRAM_LOG_CONTEXT = 'TelegramClient';
 
-export const TELEGRAM_AUTH_HEADER_PREFIX = 'Bearer ';
-
 export const TELEGRAM_PATH = {
   SEND_MESSAGE: '/sendMessage',
 } as const;

@@ -4,7 +4,6 @@ import { ClsService } from 'nestjs-cls';
 import { HTTP_CLIENT_DEFAULTS } from '@email-platform/foundation';
 import { TelegramClient } from './telegram.client';
 import {
-  TELEGRAM_AUTH_HEADER_PREFIX,
   TELEGRAM_CLIENT,
   TELEGRAM_ENV,
   TELEGRAM_LOG_CONTEXT,
@@ -23,7 +22,7 @@ const clientProvider: Provider = {
         halfOpenAfterMs: HTTP_CLIENT_DEFAULTS.CB_HALF_OPEN_AFTER_MS,
       },
       TELEGRAM_LOG_CONTEXT,
-      `${TELEGRAM_AUTH_HEADER_PREFIX}${config.get<string>(TELEGRAM_ENV.BOT_TOKEN)!}`,
+      config.get<string>(TELEGRAM_ENV.BOT_TOKEN)!,
     ),
 };
 
