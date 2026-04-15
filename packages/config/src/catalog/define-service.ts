@@ -39,6 +39,6 @@ export function defineService<const Id extends string>(
       PORT: `${upperId}_PORT`,
       GRPC_URL: input.grpc ? `${upperId}_GRPC_URL` : undefined,
     },
-    diToken: input.grpc ? `${upperId}_GRPC_CLIENT` : `${upperId}_CLIENT`,
+    diToken: input.grpc ? Symbol.for(`${upperId}_GRPC_CLIENT`) : Symbol.for(`${upperId}_CLIENT`),
   } as ServiceDeclaration<Id, boolean>;
 }

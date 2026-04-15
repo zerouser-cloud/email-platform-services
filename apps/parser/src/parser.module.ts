@@ -5,9 +5,11 @@ import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
 import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
 import { StartParsingUseCase } from './application/use-cases/start-parsing.use-case';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
+import { AppStoreSpyClientModule } from './infrastructure/clients/appstorespy';
 import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
 import { StorageSmokeController } from './test/storage-smoke.controller';
+import { AppStoreSpySmokeController } from './test/appstorespy-smoke.controller';
 import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.constants';
 
 @Module({
@@ -16,8 +18,14 @@ import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.consta
     PersistenceModule.forRootAsync(),
     StorageModule,
     LoggingModule.forGrpcAsync('parser'),
+    AppStoreSpyClientModule.forRoot(),
   ],
-  controllers: [ParserGrpcServer, HealthController, StorageSmokeController],
+  controllers: [
+    ParserGrpcServer,
+    HealthController,
+    StorageSmokeController,
+    AppStoreSpySmokeController,
+  ],
   providers: [
     { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },
     { provide: START_PARSING_PORT, useClass: StartParsingUseCase },

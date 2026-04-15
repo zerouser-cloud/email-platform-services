@@ -13,7 +13,7 @@ export interface ServiceDeclaration<Id extends string = string, HasGrpc extends 
     readonly PORT: `${Uppercase<Id>}_PORT`;
     readonly GRPC_URL: HasGrpc extends true ? `${Uppercase<Id>}_GRPC_URL` : undefined;
   };
-  readonly diToken: string;
+  readonly diToken: symbol;
 }
 
 export type GrpcServiceDeclaration = ServiceDeclaration<string, true>;

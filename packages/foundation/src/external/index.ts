@@ -1,6 +1,6 @@
 export * from './constants';
 export * from './grpc/proto-resolver';
-export * from './grpc/grpc-client.module';
+export * from './grpc/clients';
 export * from './grpc/grpc-server.factory';
 export * from './logging/logging.module';
 export * from './logging/log-transport';
@@ -15,6 +15,7 @@ export * from './errors/grpc-to-http.filter';
 export * from './health/health-constants';
 export * from './cache';
 export * from './storage';
+export * from './http';
 export * from './health/indicators/rabbitmq.health';
 export * from './resilience/grpc-deadline.interceptor';
 export * from './resilience/retry-connect';

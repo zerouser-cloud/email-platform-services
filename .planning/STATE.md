@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Quick task 260414-l7g complete — reset:* scripts added"
-last_updated: "2026-04-14T12:21:44.073Z"
-last_activity: 2026-04-14
+stopped_at: "Completed 24-03 Tasks 1-2; Task 3 (checkpoint:human-verify) pending"
+last_updated: "2026-04-15T08:14:32.170Z"
+last_activity: 2026-04-15
 progress:
-  total_phases: 19
-  completed_phases: 7
-  total_plans: 22
-  completed_plans: 22
+  total_phases: 20
+  completed_phases: 10
+  total_plans: 32
+  completed_plans: 32
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 22.1 — s3-core-encapsulation
+**Current focus:** Phase 24 — http-client-circuit-breaker
 
 ## Current Position
 
-Phase: 999.1
-Plan: Not started
+Phase: 24 (http-client-circuit-breaker) — EXECUTING
+Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-04-14
+Last activity: 2026-04-15
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
 
@@ -68,6 +68,11 @@ Progress: [██████████] 100% phase, [========================
 | Phase 22.1 P03 | 2min | 2 tasks | 2 files |
 | Phase 22.1 P04 | 4min | 1 tasks | 2 files |
 | Phase 22.1 P05 | 70min | 3 tasks | 4 files |
+| Phase 23 P01 | 2min | 2 tasks | 3 files |
+| Phase 23 P02 | 2min | 2 tasks | 4 files |
+| Phase 23 P03 | 8 | 2 tasks | 17 files |
+| Phase 24 P01 | 358s | 2 tasks | 10 files |
+| Phase 24 P02 | 108s | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -88,6 +93,13 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 22.1]: [Phase 22.1-03]: Foundation package-boundary sealed at TypeScript resolution level; packages/foundation/package.json declares exports field with two subpaths (. and ./internal, types+default conditions, no wildcards, no import/require conditions); tsconfig.base.json upgraded from module:commonjs/moduleResolution:node to module:node16/moduleResolution:node16 workspace-wide; Turbo cache force-refreshed to invalidate stale dist/; CJS emission preserved (zero type:module in workspace); @email-platform/foundation/internal is now a resolvable subpath for Plan 04 consumers
 - [Phase 22.1]: [Phase 22.1-04]: ParserStorageModule now imports { BucketStorageModule, S3CoreModule } from @email-platform/foundation/internal (first real consumer of Plan 03 subpath); S3CoreModule listed as first entry in imports array before BucketStorageModule.forBucket(); Plan 02 BucketStorageModule compat shim removed from packages/foundation/src/external/storage/index.ts atomically in the same commit; type-only StorageHealthIndicator re-export preserved (Rule 3 carry-forward — removing it would break parser+notifier health controllers that import it as a type annotation); grep S3CoreModule under apps/ source now returns exactly one file (parser-storage.module.ts); workspace build 10/10 and lint 7/7 green
 - [Phase 22.1]: [Phase 22.1]: BucketStorageModule is self-contained (forBucket() imports S3CoreModule) — per-service storage wrappers re-export by class to propagate dynamic-scope Symbol tokens transitively; avoids Nest 11 dynamic-module export reflect quirk without reintroducing @Global()
+- [Phase 23]: diToken migrated to Symbol.for() for stable cross-package DI identity; obsolete GrpcClientModule removed (zero consumers)
+- [Phase 23]: [Phase 23-02]: AbstractGrpcClient uses PinoLogger.root.child({ context }) — no setContext (Pitfall 6); getService in onModuleInit (Pitfall 3); lastValueFrom for unary (Pitfall 2); per-call deadline via grpc-timeout Metadata header on top of unchanged channel interceptor (Pitfall 4 minimum-wins); base class NOT yet in external barrel — Plan 23-03 wires it with concrete modules
+- [Phase 23]: Multi-package ClientGrpc (Assumption A3) worked on first try — no fallback to separate grpc.health.v1 registration needed
+- [Phase 23]: require.resolve used directly in audience/auth/parser/sender/notifier-client.module.ts — tsconfig module=node16 emits CJS; no createRequire shim required
+- [Phase 24]: [Phase 24-01]: AbstractHttpClient in foundation is pure framework (zero per-API knowledge); opossum isolated to packages/foundation; CB Option B wrapper (ConsecutiveThresholdError sentinel + opossum volumeThreshold:1/errorThresholdPercentage:100, timeout:false) opens on 5 consecutive failures; HttpCallOpts renamed from CallOpts to avoid barrel collision with existing gRPC CallOpts
+- [Phase 24]: D-02 realised: external API types in packages/contracts/src/external/ (symmetric with generated/)
+- [Phase 24]: D-19 realised: 6 new env vars with no defaults/optionals; placeholders in .env.example + .env.docker
 
 ### Pending Todos
 
@@ -107,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-14T12:21:44.071Z
-Stopped at: Quick task 260414-l7g complete — reset:* scripts added
-Resume file: .planning/STATE.md
+Last session: 2026-04-15T08:14:32.168Z
+Stopped at: Completed 24-03 Tasks 1-2; Task 3 (checkpoint:human-verify) pending
+Resume file: None

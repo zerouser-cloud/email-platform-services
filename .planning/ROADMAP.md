@@ -57,7 +57,7 @@
 - [x] **Phase 20: Config Decomposition** - Modular Zod sub-schemas per concern replacing monolithic env-schema (completed 2026-04-08)
 - [x] **Phase 21: Redis CacheModule** - CacheModule in foundation with DI tokens, health indicator, per-service namespace isolation (completed 2026-04-08)
 - [x] **Phase 22: S3 StorageModule** - StorageModule in foundation with AWS SDK v3, unified MinIO/Garage, env rename MINIO->S3 (completed 2026-04-09)
-- [ ] **Phase 23: gRPC Client Typed Wrappers** - Type-safe gRPC client framework in foundation with deadline propagation
+- [x] **Phase 23: gRPC Client Typed Wrappers** - Type-safe gRPC client framework in foundation with deadline propagation (completed 2026-04-15)
 - [ ] **Phase 24: HTTP Client & Circuit Breaker** - HTTP client framework with retry, timeout, circuit breaker for external APIs
 - [ ] **Phase 25: RabbitMQ EventModule** - Publisher/consumer abstraction with manual ack, DLQ, typed event interfaces
 - [ ] **Phase 26: Graceful Shutdown** - Centralized ShutdownOrchestrator managing ordered teardown of all modules
@@ -122,13 +122,15 @@ Plans:
 
 ### Phase 22.4: public-bucket-abstraction (INSERTED)
 
-**Goal:** Разделить хранилище на per-service private bucket'ы + один `public` bucket для внешних download-ссылок. Убрать presigned-URL механизм. Добавить `SharedNamespaceModule` c typed namespaced-клиентами, `NamespacedStoragePort` (Readable-only, multipart через `@aws-sdk/lib-storage`). Переименовать bucket `reports` → `public`, добавить env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, переписать smoke 22.3 под новый контракт.
-**Requirements**: TBD
+**Goal:** Разделить хранилище на per-service private bucket'ы + один `public` bucket для внешних download-ссылок. Убрать presigned-URL механизм. Добавить `SharedNamespaceModule` c typed namespaced-клиентами, `NamespacedStoragePort` (Readable-only, multipart через `@aws-sdk/lib-storage`). Bucket rename `reports` → `public` уже выполнен в Phase 22.5; 22.4 добавляет env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, переписывает smoke 22.3 под новый контракт, обновляет runbook с anonymous-read policy.
+**Requirements**: SSMK-01..05 (rewritten surface); D-01..D-27 (locked decisions in 22.4-CONTEXT.md serve as primary requirement surface); SPRV-01..05 runbook additions
 **Depends on:** Phase 22, Phase 22.5
-**Plans:** 0 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.4 to break down)
+- [x] 22.4-01-PLAN.md — Foundation port+factory+deps: NamespacedStoragePort, SharedNamespaceModule.forNamespace, lib-storage multipart, size-limit Transform, env schema extension, remove presigner
+- [x] 22.4-02-PLAN.md — Apps integration: rewire parser+notifier to SHARED_REPORTS, rewrite smoke controllers (Readable + HTTP GET), sync .env* files, remove obsolete PublicStorageModule facade
+- [x] 22.4-03-PLAN.md — Runbook update: anonymous-read policy step, new env vars, Garage URL caveat, private-bucket warning, verify curl step
 
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
 **Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
@@ -189,10 +191,12 @@ Plans:
   2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
   3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
   4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
-**Plans**: 2 plans
+**Plans**: 4 plans
 Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [x] 23-01-PLAN.md — Migrate SERVICE.diToken to Symbol.for() + delete obsolete GrpcClientModule
+- [x] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
+- [x] 23-03-PLAN.md — Five per-service client modules (audience, auth, parser, sender, notifier) + barrel
+- [ ] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
 
 ### Phase 24: HTTP Client & Circuit Breaker
 **Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection
@@ -203,10 +207,11 @@ Plans:
   2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
   3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
   4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
-**Plans**: 2 plans
+**Plans**: 3 plans
 Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [x] 24-01-PLAN.md — Foundation HTTP primitives: opossum + AbstractHttpClient + retry + CB + errors + types, export via foundation barrel
+- [x] 24-02-PLAN.md — Contracts external types (Telegram/AppStoreSpy/CloudFn) + external-apis config sub-schema + per-service env extensions + .env files
+- [ ] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
 
 ### Phase 25: RabbitMQ EventModule
 **Goal**: Services can publish and consume domain events through typed interfaces with guaranteed delivery semantics, dead letter handling, and health monitoring
@@ -285,8 +290,8 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
 | 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
-| 23. gRPC Client Typed Wrappers | v4.0 | 0/0 | Not started | - |
-| 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
+| 23. gRPC Client Typed Wrappers | v4.0 | 3/4 | In Progress|  |
+| 24. HTTP Client & Circuit Breaker | v4.0 | 2/3 | In Progress|  |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
 | 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
@@ -297,7 +302,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 4/4 plans complete
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
@@ -347,6 +352,26 @@ Plans:
 ### Phase 999.6: Настроить HTTPS для Garage WebUI на Coolify (BACKLOG)
 
 **Goal:** Garage WebUI (garage.dev.email-platform.pp.ua и garage.email-platform.pp.ua) сейчас доступен только по HTTP. Настроить HTTPS — через Traefik auto-TLS или Cloudflare proxy для этих доменов. После исправления — обновить docs/runbooks/bucket-provisioning.md обратно на https:// и S3 endpoint порты с 80 на 443.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.7: Перенести gRPC client modules из foundation в infrastructure layer сервисов (BACKLOG)
+
+**Goal:** Сейчас все 5 typed-facade модулей (`AudienceClientModule`, `AuthClientModule`, `ParserClientModule`, `SenderClientModule`, `NotifierClientModule`) живут в `packages/foundation/src/external/grpc/clients/{service}/` — это вынуждает foundation импортировать `@email-platform/contracts` и знать про каждый бизнес-сервис платформы. Foundation должен оставаться domain-agnostic: предоставлять только примитивы (`AbstractGrpcClient`, `GrpcClientHealthIndicator`, deadline interceptor, logging interceptor, helper `defineGrpcClient(SERVICE.x, ClientFacadeClass)`). Per-service typed-facade модули должны жить в `apps/{service}/src/infrastructure/clients/{upstream}-client.module.ts` — каждый сервис собирает только те клиенты, которые ему нужны (sender → audience+parser, gateway → все 5, notifier → ничего). Это устранит coupling foundation→contracts и приведёт к единому паттерну с CacheModule/PersistenceModule. Принято в Phase 23 для скорости поставки; зафиксировать как техдолг.
+**Known coupling:** `packages/foundation/src/external/grpc/clients/{audience,auth,parser,sender,notifier}/{x}.client.ts` импортируют `*Proto` namespace из `@email-platform/contracts`.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
+
+**Goal:** Telegram Bot API использует path-based auth — токен зашит в URL (`/bot<TOKEN>/method`). Это протокол Telegram, не наш выбор. Сейчас `TelegramClient` extends `AbstractHttpClient` и логирует URL как есть — токен утекает в логи (`http.client.call` с `url: ".../bot8679564424:AAF-.../sendMessage"`). Решение: переехать на vendor SDK (рекомендуется grammY — TypeScript-first, современнее; telegraf — зрелая альтернатива). SDK скрывает URL внутри и предоставляет operation-level API (`bot.api.sendMessage(chatId, text)`). `TelegramClient` становится тонкой обёрткой над SDK, логирует **операции** (`api: 'TelegramClient', operation: 'sendMessage', duration_ms, status, correlationId`), а не HTTP transport — URL с токеном физически не существует в поле лога. При этом `AbstractHttpClient` продолжает логировать URL для AppStoreSpy/CloudFn (у них auth в header, URL без секретов). Фаза закрывает D-16 долг, оставленный в Phase 24.
+**Known issue:** `apps/notifier/src/infrastructure/clients/telegram/telegram.client.ts` использует `AbstractHttpClient.post('/bot<TOKEN>/sendMessage', ...)` — URL с токеном попадает в `http.client.call` log field.
 **Requirements:** TBD
 **Plans:** 0 plans
 

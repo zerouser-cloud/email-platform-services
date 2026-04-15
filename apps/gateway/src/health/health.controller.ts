@@ -1,42 +1,37 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { HealthCheckService, HealthCheck, GRPCHealthIndicator } from '@nestjs/terminus';
-import { type GrpcOptions } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
+import { HealthCheckService, HealthCheck, type HealthIndicatorResult } from '@nestjs/terminus';
+import {
+  HEALTH,
+  getBuildInfo,
+  GrpcClientHealthIndicator,
+  AUTH_GRPC_HEALTH,
+  SENDER_GRPC_HEALTH,
+  PARSER_GRPC_HEALTH,
+  AUDIENCE_GRPC_HEALTH,
+  NOTIFIER_GRPC_HEALTH,
+} from '@email-platform/foundation';
 import { SERVICE } from '@email-platform/config';
-import { HEALTH, getBuildInfo } from '@email-platform/foundation';
-
-const checkOverallHealth = (healthService: {
-  check: (data: { service: string }) => { toPromise: () => Promise<unknown> };
-}) => healthService.check({ service: HEALTH.GRPC_SERVICE_OVERALL }).toPromise();
 
 @SkipThrottle()
 @Controller(HEALTH.ROUTE)
 export class HealthController {
-  private readonly grpcServices: ReadonlyArray<{ key: string; url: string }>;
+  private readonly upstreams: ReadonlyArray<{ key: string; indicator: GrpcClientHealthIndicator }>;
 
   constructor(
     private readonly health: HealthCheckService,
-    private readonly grpc: GRPCHealthIndicator,
-    private readonly configService: ConfigService,
+    @Inject(AUTH_GRPC_HEALTH) authHealth: GrpcClientHealthIndicator,
+    @Inject(SENDER_GRPC_HEALTH) senderHealth: GrpcClientHealthIndicator,
+    @Inject(PARSER_GRPC_HEALTH) parserHealth: GrpcClientHealthIndicator,
+    @Inject(AUDIENCE_GRPC_HEALTH) audienceHealth: GrpcClientHealthIndicator,
+    @Inject(NOTIFIER_GRPC_HEALTH) notifierHealth: GrpcClientHealthIndicator,
   ) {
-    this.grpcServices = [
-      {
-        key: SERVICE.auth.id,
-        url: this.configService.get<string>(SERVICE.auth.envKeys.GRPC_URL!) ?? '',
-      },
-      {
-        key: SERVICE.sender.id,
-        url: this.configService.get<string>(SERVICE.sender.envKeys.GRPC_URL!) ?? '',
-      },
-      {
-        key: SERVICE.parser.id,
-        url: this.configService.get<string>(SERVICE.parser.envKeys.GRPC_URL!) ?? '',
-      },
-      {
-        key: SERVICE.audience.id,
-        url: this.configService.get<string>(SERVICE.audience.envKeys.GRPC_URL!) ?? '',
-      },
+    this.upstreams = [
+      { key: SERVICE.auth.id, indicator: authHealth },
+      { key: SERVICE.sender.id, indicator: senderHealth },
+      { key: SERVICE.parser.id, indicator: parserHealth },
+      { key: SERVICE.audience.id, indicator: audienceHealth },
+      { key: SERVICE.notifier.id, indicator: notifierHealth },
     ];
   }
 
@@ -50,19 +45,13 @@ export class HealthController {
   @HealthCheck()
   async readiness() {
     const results = await Promise.allSettled(
-      this.grpcServices.map(({ key, url }) =>
-        this.grpc.checkService<GrpcOptions>(key, key, {
-          url,
-          timeout: HEALTH.CHECK_TIMEOUT,
-          healthServiceCheck: checkOverallHealth,
-        }),
-      ),
+      this.upstreams.map(({ key, indicator }) => indicator.isHealthy(key)),
     );
 
     return this.health.check(
-      results.map((result) => () => {
+      results.map((result) => (): Promise<HealthIndicatorResult> => {
         if (result.status === 'fulfilled') {
-          return result.value;
+          return Promise.resolve(result.value);
         }
         throw result.reason;
       }),
