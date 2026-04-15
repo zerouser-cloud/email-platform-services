@@ -4,7 +4,6 @@ import { ClsService } from 'nestjs-cls';
 import { HTTP_CLIENT_DEFAULTS } from '@email-platform/foundation';
 import { AppStoreSpyClient } from './appstorespy.client';
 import {
-  APPSTORESPY_AUTH_HEADER_PREFIX,
   APPSTORESPY_CLIENT,
   APPSTORESPY_ENV,
   APPSTORESPY_LOG_CONTEXT,
@@ -23,7 +22,7 @@ const clientProvider: Provider = {
         halfOpenAfterMs: HTTP_CLIENT_DEFAULTS.CB_HALF_OPEN_AFTER_MS,
       },
       APPSTORESPY_LOG_CONTEXT,
-      `${APPSTORESPY_AUTH_HEADER_PREFIX}${config.get<string>(APPSTORESPY_ENV.API_KEY)!}`,
+      config.get<string>(APPSTORESPY_ENV.API_KEY)!,
     ),
 };
 

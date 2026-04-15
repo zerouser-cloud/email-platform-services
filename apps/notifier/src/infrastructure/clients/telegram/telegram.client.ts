@@ -10,8 +10,14 @@ import { TELEGRAM_PATH } from './telegram-client.constants';
  * configured in TelegramClientModule.forRoot() (D-08 isolation).
  *
  * Telegram Bot API auth is path-based: `/bot<TOKEN>/<method>`. No Authorization
- * header. botToken is held on this adapter, not in baseUrl, so the secret lives
- * in exactly one place and baseUrl stays a true base URL.
+ * header — `buildAuthHeaders` stays at its base default (`{}`). botToken is held
+ * on this adapter and injected into the request path.
+ *
+ * KNOWN ISSUE: Telegram path-auth embeds the bot token in the URL, so the
+ * `http.client.call` log field `url` leaks the token to any log aggregator.
+ * This adapter is a skeleton (Phase 24 D-18). A follow-up phase (ROADMAP 999.8)
+ * migrates this to the grammY/telegraf SDK and logs at operation level
+ * (`operation: 'sendMessage'`) so no URL ever reaches the logger.
  *
  * D-10: sendMessage is POST without `{ idempotent: true }` — Telegram offers no
  * idempotency key, so retrying after a mid-accept 5xx risks duplicate deliveries.
@@ -35,13 +41,5 @@ export class TelegramClient extends AbstractHttpClient {
       `/bot${this.botToken}${TELEGRAM_PATH.SEND_MESSAGE}`,
       req,
     );
-  }
-
-  /**
-   * D-16: Telegram path-auth embeds bot token in URL. Redact before log
-   * to avoid leaking the token to log aggregators.
-   */
-  protected override sanitizeUrlForLog(url: string): string {
-    return url.replace(/\/bot[0-9]+:[A-Za-z0-9_-]+/, '/bot***');
   }
 }

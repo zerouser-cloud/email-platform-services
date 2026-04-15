@@ -55,8 +55,21 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     protected readonly defaultTimeoutMs: number,
     protected readonly cbOptions: CbOptions,
     private readonly logContext: string,
-    private readonly authHeader?: string,
   ) {}
+
+  /**
+   * Override to inject auth headers on every request. Default: no headers.
+   * Called per-request — subclass can compute dynamically (refresh OAuth
+   * token, rotate API key, sign request). For static secrets (bot token,
+   * API key from env), return `{ 'API-KEY': this.apiKey }` etc.
+   *
+   * Header name is the subclass's choice — `Authorization: Bearer <t>`,
+   * `X-API-Key: <k>`, `API-KEY: <k>`, `X-Signature: <sig>`, whatever the
+   * vendor requires.
+   */
+  protected buildAuthHeaders(): Record<string, string> {
+    return {};
+  }
 
   onModuleInit(): void {
     this.logger = PinoLogger.root.child({ context: this.logContext });
@@ -138,7 +151,7 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     const timeoutMs = opts.timeoutMs ?? this.defaultTimeoutMs;
     const signal = AbortSignal.timeout(timeoutMs);
     const mergedHeaders: Record<string, string> = {
-      ...(this.authHeader ? { Authorization: this.authHeader } : {}),
+      ...this.buildAuthHeaders(),
       ...((init.headers as Record<string, string> | undefined) ?? {}),
       ...(opts.headers ?? {}),
     };
@@ -176,15 +189,6 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     };
   }
 
-  /**
-   * Override to redact secrets embedded in URL path before logging.
-   * D-16 extends to URL: path-based auth (e.g. Telegram /bot<TOKEN>/) leaks
-   * tokens into the url log field. Default: identity (no redaction).
-   */
-  protected sanitizeUrlForLog(url: string): string {
-    return url;
-  }
-
   private emitCallLog(
     method: HttpMethod,
     url: string,
@@ -195,10 +199,10 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     const fields: HttpClientLogFields = {
       api: this.logContext,
       method,
-      url: this.sanitizeUrlForLog(url),
+      url,
       duration_ms: Date.now() - startedAt,
       status_code,
-      // D-16: body NEVER logged; sanitizeUrlForLog strips path-embedded secrets.
+      // D-16: body NEVER logged.
       status,
       correlationId: this.cls.getId(),
     };

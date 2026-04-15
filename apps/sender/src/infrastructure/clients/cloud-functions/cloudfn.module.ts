@@ -4,7 +4,6 @@ import { ClsService } from 'nestjs-cls';
 import { HTTP_CLIENT_DEFAULTS } from '@email-platform/foundation';
 import { CloudFnClient } from './cloudfn.client';
 import {
-  CLOUDFN_AUTH_HEADER_PREFIX,
   CLOUDFN_CLIENT,
   CLOUDFN_ENV,
   CLOUDFN_LOG_CONTEXT,
@@ -23,7 +22,7 @@ const clientProvider: Provider = {
         halfOpenAfterMs: HTTP_CLIENT_DEFAULTS.CB_HALF_OPEN_AFTER_MS,
       },
       CLOUDFN_LOG_CONTEXT,
-      `${CLOUDFN_AUTH_HEADER_PREFIX}${config.get<string>(CLOUDFN_ENV.API_KEY)!}`,
+      config.get<string>(CLOUDFN_ENV.API_KEY)!,
     ),
 };
 

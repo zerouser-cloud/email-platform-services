@@ -11,7 +11,9 @@ export const APPSTORESPY_ENV = {
 
 export const APPSTORESPY_LOG_CONTEXT = 'AppStoreSpyClient';
 
-export const APPSTORESPY_AUTH_HEADER_PREFIX = 'Bearer ';
+// Verified against legacy/src/parser/helpers/appstorespy.service.ts — vendor
+// uses the custom `API-KEY` header, not standard Authorization.
+export const APPSTORESPY_AUTH_HEADER_NAME = 'API-KEY';
 
 export const APPSTORESPY_PATH = {
   LOOKUP_APP: '/app/lookup',

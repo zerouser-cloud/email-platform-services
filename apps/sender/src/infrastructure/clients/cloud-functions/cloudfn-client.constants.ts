@@ -11,7 +11,9 @@ export const CLOUDFN_ENV = {
 
 export const CLOUDFN_LOG_CONTEXT = 'CloudFnClient';
 
-export const CLOUDFN_AUTH_HEADER_PREFIX = 'Bearer ';
+// Google Cloud Functions use standard Bearer auth.
+export const CLOUDFN_AUTH_HEADER_NAME = 'Authorization';
+export const CLOUDFN_AUTH_HEADER_VALUE_PREFIX = 'Bearer ';
 
 export const CLOUDFN_PATH = {
   SEND_EMAIL: '/sendEmail',
