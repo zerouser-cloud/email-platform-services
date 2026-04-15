@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Completed 24-03 Tasks 1-2; Task 3 (checkpoint:human-verify) pending"
-last_updated: "2026-04-15T08:14:32.170Z"
+stopped_at: Phase 24 complete — HTTP client + circuit breaker shipped, verified on dev
+last_updated: "2026-04-15T12:33:22.242Z"
 last_activity: 2026-04-15
 progress:
-  total_phases: 20
+  total_phases: 21
   completed_phases: 10
   total_plans: 32
   completed_plans: 32
@@ -119,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T08:14:32.168Z
-Stopped at: Completed 24-03 Tasks 1-2; Task 3 (checkpoint:human-verify) pending
-Resume file: None
+Last session: 2026-04-15T12:33:22.239Z
+Stopped at: Phase 24 complete — HTTP client + circuit breaker shipped, verified on dev
+Resume file: .planning/ROADMAP.md

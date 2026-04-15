@@ -63,12 +63,33 @@ decisions:
 metrics:
   duration: ~10min (tasks 1+2 executor autonomous)
   completed_date: 2026-04-15
-  tasks_completed: 2
-  tasks_pending: 1
+  tasks_completed: 3
+  tasks_pending: 0
   files_created: 16
   files_modified: 4
   files_deleted: 1
   commits: 4
+  human_verify: "approved 2026-04-15 (local + dev coolify) — all 9 smoke checks pass"
+  human_verify_evidence:
+    local:
+      - "Telegram real send to @email_platform_bot group — message_id delivered"
+      - "CB opens after exactly 5 consecutive failures (burst-fail endpoint, timeoutMs=1)"
+      - "halfOpen transition at exactly resetTimeout (30s)"
+      - "halfOpen probe failure reopens CB (textbook semantics, not close)"
+      - "probe success in halfOpen closes CB"
+      - "4xx (404) single attempt, ~100ms, no retry"
+      - "5xx (500) 3 attempts with exponential backoff, ~1-2s"
+      - "AppStoreSpyClient uses API-KEY header; URL in log contains no secret"
+      - "CloudFnClient uses Authorization: Bearer; URL in log contains no secret"
+    dev_coolify:
+      - "http://api.dev.email-platform.pp.ua — all 9 smoke checks pass against deployed image"
+      - "gateway /test/http-client/{state,probe,status,burst-fail} exercise framework behavior live"
+  post_plan_fixes:
+    - "8a7da37: Telegram path-based auth (not Authorization header)"
+    - "2ee1dfd: authHeader → buildAuthHeaders() hook (variant B)"
+    - "9b5fa3c: CB opens at exactly N consecutive failures; halfOpen probe reopens on fail"
+    - "3bdb4f6: gateway /test/http-client/* diagnostic endpoints for dev/prod smoke"
+    - "a486e16: lint-fix holder object for breakerRef"
 ---
 
 # Phase 24 Plan 03: Per-Service HTTP Adapters — Summary (Tasks 1+2 complete, Task 3 pending human verify)
