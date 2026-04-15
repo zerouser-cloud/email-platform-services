@@ -20,3 +20,7 @@ export { NOTIFIER_GRPC_HEALTH } from './notifier/notifier-client.constants';
 
 // Shared primitives (type-only exposure for consumer typing of deadline opts):
 export type { CallOpts } from './grpc-client-logging.types';
+
+// Health indicator class — type-only export so consumers (e.g. gateway health controller)
+// can declare injected fields; runtime providers are registered inside each *ClientModule.
+export { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
