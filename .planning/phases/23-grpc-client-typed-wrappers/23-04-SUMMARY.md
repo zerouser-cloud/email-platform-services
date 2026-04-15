@@ -38,9 +38,17 @@ decisions:
 metrics:
   duration_min: 6
   completed: 2026-04-15
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
-  pending: "Task 3 = checkpoint:human-verify"
+  human_verify: "approved 2026-04-15 — all 6 checks pass on isolated Docker stack"
+  human_verify_evidence:
+    - "smoke parser+notifier HTTP 200, full success steps (upload/exists/download)"
+    - "readiness all 5 upstreams up (auth, sender, parser, audience, notifier)"
+    - "kill parser → readiness status:error, parser.status:down within HEALTH.CHECK_TIMEOUT"
+    - "Pitfall 6 cleared: log contexts distinct (NotifierClient, ParserClient — not shared singleton)"
+    - "pnpm build 10/10 + pnpm lint 7/7 green (post fix e739428)"
+    - "no PARSER_SMOKE_CLIENT/NOTIFIER_SMOKE_CLIENT/GrpcClientModule in .ts sources"
+  post_plan_fix: "e739428 fix(23-02): defer PinoLogger.root.child to onModuleInit — root undefined in constructor before LoggerModule init"
 ---
 
 # Phase 23 Plan 04: Gateway gRPC Client Wiring Summary (Tasks 1-2 of 3)

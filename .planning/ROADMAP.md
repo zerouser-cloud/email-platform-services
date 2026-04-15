@@ -57,7 +57,7 @@
 - [x] **Phase 20: Config Decomposition** - Modular Zod sub-schemas per concern replacing monolithic env-schema (completed 2026-04-08)
 - [x] **Phase 21: Redis CacheModule** - CacheModule in foundation with DI tokens, health indicator, per-service namespace isolation (completed 2026-04-08)
 - [x] **Phase 22: S3 StorageModule** - StorageModule in foundation with AWS SDK v3, unified MinIO/Garage, env rename MINIO->S3 (completed 2026-04-09)
-- [ ] **Phase 23: gRPC Client Typed Wrappers** - Type-safe gRPC client framework in foundation with deadline propagation
+- [x] **Phase 23: gRPC Client Typed Wrappers** - Type-safe gRPC client framework in foundation with deadline propagation (completed 2026-04-15)
 - [ ] **Phase 24: HTTP Client & Circuit Breaker** - HTTP client framework with retry, timeout, circuit breaker for external APIs
 - [ ] **Phase 25: RabbitMQ EventModule** - Publisher/consumer abstraction with manual ack, DLQ, typed event interfaces
 - [ ] **Phase 26: Graceful Shutdown** - Centralized ShutdownOrchestrator managing ordered teardown of all modules
@@ -351,6 +351,16 @@ Plans:
 ### Phase 999.6: Настроить HTTPS для Garage WebUI на Coolify (BACKLOG)
 
 **Goal:** Garage WebUI (garage.dev.email-platform.pp.ua и garage.email-platform.pp.ua) сейчас доступен только по HTTP. Настроить HTTPS — через Traefik auto-TLS или Cloudflare proxy для этих доменов. После исправления — обновить docs/runbooks/bucket-provisioning.md обратно на https:// и S3 endpoint порты с 80 на 443.
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.7: Перенести gRPC client modules из foundation в infrastructure layer сервисов (BACKLOG)
+
+**Goal:** Сейчас все 5 typed-facade модулей (`AudienceClientModule`, `AuthClientModule`, `ParserClientModule`, `SenderClientModule`, `NotifierClientModule`) живут в `packages/foundation/src/external/grpc/clients/{service}/` — это вынуждает foundation импортировать `@email-platform/contracts` и знать про каждый бизнес-сервис платформы. Foundation должен оставаться domain-agnostic: предоставлять только примитивы (`AbstractGrpcClient`, `GrpcClientHealthIndicator`, deadline interceptor, logging interceptor, helper `defineGrpcClient(SERVICE.x, ClientFacadeClass)`). Per-service typed-facade модули должны жить в `apps/{service}/src/infrastructure/clients/{upstream}-client.module.ts` — каждый сервис собирает только те клиенты, которые ему нужны (sender → audience+parser, gateway → все 5, notifier → ничего). Это устранит coupling foundation→contracts и приведёт к единому паттерну с CacheModule/PersistenceModule. Принято в Phase 23 для скорости поставки; зафиксировать как техдолг.
+**Known coupling:** `packages/foundation/src/external/grpc/clients/{audience,auth,parser,sender,notifier}/{x}.client.ts` импортируют `*Proto` namespace из `@email-platform/contracts`.
 **Requirements:** TBD
 **Plans:** 0 plans
 
