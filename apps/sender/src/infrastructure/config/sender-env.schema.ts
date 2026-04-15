@@ -5,11 +5,13 @@ import {
   RedisSchema,
   LoggingSchema,
   GrpcSchema,
+  CloudFnSchema,
   type GlobalTopology,
   type DatabaseConfig,
   type RedisConfig,
   type LoggingConfig,
   type GrpcConfig,
+  type CloudFnConfig,
 } from '@email-platform/config';
 
 export const SenderEnvSchema = composeSchemas(
@@ -18,6 +20,12 @@ export const SenderEnvSchema = composeSchemas(
   RedisSchema,
   LoggingSchema,
   GrpcSchema,
+  CloudFnSchema,
 );
 
-export type SenderEnv = GlobalTopology & DatabaseConfig & RedisConfig & LoggingConfig & GrpcConfig;
+export type SenderEnv = GlobalTopology &
+  DatabaseConfig &
+  RedisConfig &
+  LoggingConfig &
+  GrpcConfig &
+  CloudFnConfig;

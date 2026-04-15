@@ -6,3 +6,11 @@ export { LoggingSchema, type LoggingConfig } from './logging';
 export { GrpcSchema, type GrpcConfig } from './grpc';
 export { CorsSchema, type CorsConfig } from './cors';
 export { RateLimitSchema, type RateLimitConfig } from './rate-limit';
+export {
+  TelegramSchema,
+  type TelegramConfig,
+  AppStoreSpySchema,
+  type AppStoreSpyConfig,
+  CloudFnSchema,
+  type CloudFnConfig,
+} from './external-apis';
