@@ -176,6 +176,15 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     };
   }
 
+  /**
+   * Override to redact secrets embedded in URL path before logging.
+   * D-16 extends to URL: path-based auth (e.g. Telegram /bot<TOKEN>/) leaks
+   * tokens into the url log field. Default: identity (no redaction).
+   */
+  protected sanitizeUrlForLog(url: string): string {
+    return url;
+  }
+
   private emitCallLog(
     method: HttpMethod,
     url: string,
@@ -186,10 +195,10 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     const fields: HttpClientLogFields = {
       api: this.logContext,
       method,
-      url,
+      url: this.sanitizeUrlForLog(url),
       duration_ms: Date.now() - startedAt,
       status_code,
-      // D-16: body NEVER logged — only status_code + url.
+      // D-16: body NEVER logged; sanitizeUrlForLog strips path-embedded secrets.
       status,
       correlationId: this.cls.getId(),
     };

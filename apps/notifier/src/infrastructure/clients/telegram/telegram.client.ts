@@ -36,4 +36,12 @@ export class TelegramClient extends AbstractHttpClient {
       req,
     );
   }
+
+  /**
+   * D-16: Telegram path-auth embeds bot token in URL. Redact before log
+   * to avoid leaking the token to log aggregators.
+   */
+  protected override sanitizeUrlForLog(url: string): string {
+    return url.replace(/\/bot[0-9]+:[A-Za-z0-9_-]+/, '/bot***');
+  }
 }
