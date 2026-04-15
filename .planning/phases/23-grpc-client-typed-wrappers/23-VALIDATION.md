@@ -2,8 +2,8 @@
 phase: 23
 slug: grpc-client-typed-wrappers
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-15
 ---
 
@@ -83,11 +83,11 @@ _None._ The sanity probe file originally classified as a Wave 0 requirement has 
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or end-of-phase typecheck-probe dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] End-of-phase typecheck probe covers all MISSING compile-time references (sanity probe file)
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s (cached build)
-- [ ] `nyquist_compliant: true` set in frontmatter once planner fills task IDs
+- [x] All tasks have `<automated>` verify or end-of-phase typecheck-probe dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] End-of-phase typecheck probe covers all MISSING compile-time references (sanity probe file)
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s (cached build)
+- [x] `nyquist_compliant: true` set in frontmatter once planner fills task IDs
 
-**Approval:** pending
+**Approval:** pending human verification
