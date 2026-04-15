@@ -194,7 +194,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 23-01-PLAN.md — Migrate SERVICE.diToken to Symbol.for() + delete obsolete GrpcClientModule
-- [ ] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
+- [x] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
 - [ ] 23-03-PLAN.md — Five per-service client modules (audience, auth, parser, sender, notifier) + barrel
 - [ ] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
 
@@ -289,7 +289,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
 | 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
-| 23. gRPC Client Typed Wrappers | v4.0 | 1/4 | In Progress|  |
+| 23. gRPC Client Typed Wrappers | v4.0 | 2/4 | In Progress|  |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
@@ -301,7 +301,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
