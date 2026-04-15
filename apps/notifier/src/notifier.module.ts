@@ -4,11 +4,15 @@ import { AppConfigModule } from '@email-platform/config';
 import { NotifierEnvSchema } from './infrastructure/config';
 import { LoggingModule, RabbitMqHealthIndicator } from '@email-platform/foundation';
 import { HandleEventUseCase } from './application/use-cases/handle-event.use-case';
-import { TelegramNotificationSender } from './infrastructure/external/telegram-notification.sender';
+import {
+  TelegramClientModule,
+  TelegramNotificationAdapter,
+} from './infrastructure/clients/telegram';
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
 import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
 import { StorageSmokeController } from './test/storage-smoke.controller';
+import { TelegramSmokeController } from './test/telegram-smoke.controller';
 import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
 @Module({
@@ -17,10 +21,11 @@ import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constant
     TerminusModule,
     StorageModule,
     LoggingModule.forHttpAsync('notifier'),
+    TelegramClientModule.forRoot(),
   ],
-  controllers: [HealthController, StorageSmokeController],
+  controllers: [HealthController, StorageSmokeController, TelegramSmokeController],
   providers: [
-    { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationSender },
+    { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationAdapter },
     { provide: HANDLE_EVENT_PORT, useClass: HandleEventUseCase },
     RabbitMQEventSubscriber,
     RabbitMqHealthIndicator,
