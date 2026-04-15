@@ -1,6 +1,5 @@
 export * from './constants';
 export * from './grpc/proto-resolver';
-export * from './grpc/grpc-client.module';
 export * from './grpc/grpc-server.factory';
 export * from './logging/logging.module';
 export * from './logging/log-transport';
