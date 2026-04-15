@@ -34,7 +34,7 @@ export const HTTP_CLIENT_DEFAULTS = {
 } as const;
 
 // D-10: GET/HEAD are idempotent by default. Other methods must opt-in via
-// `CallOpts.idempotent = true` to be retried.
+// `HttpCallOpts.idempotent = true` to be retried.
 export const HTTP_CLIENT_IDEMPOTENT_METHODS = ['GET', 'HEAD'] as const;
 
 // D-09: 5xx retried, 4xx never retried.

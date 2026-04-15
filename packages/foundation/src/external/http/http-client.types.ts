@@ -7,7 +7,12 @@
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
 
-export interface CallOpts {
+/**
+ * Per-call options for HTTP requests. Named `HttpCallOpts` (not `CallOpts`)
+ * to avoid collision with the gRPC `CallOpts` that is already re-exported
+ * from the foundation barrel via `external/grpc/clients`.
+ */
+export interface HttpCallOpts {
   readonly timeoutMs?: number;
   /** D-10: opt-in retry flag for non-idempotent methods (POST/PUT/PATCH/DELETE). */
   readonly idempotent?: boolean;
