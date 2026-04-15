@@ -3,11 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClsService } from 'nestjs-cls';
 import { HTTP_CLIENT_DEFAULTS } from '@email-platform/foundation';
 import { TelegramClient } from './telegram.client';
-import {
-  TELEGRAM_CLIENT,
-  TELEGRAM_ENV,
-  TELEGRAM_LOG_CONTEXT,
-} from './telegram-client.constants';
+import { TELEGRAM_CLIENT, TELEGRAM_ENV, TELEGRAM_LOG_CONTEXT } from './telegram-client.constants';
 
 const clientProvider: Provider = {
   provide: TELEGRAM_CLIENT,

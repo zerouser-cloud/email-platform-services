@@ -3,11 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ClsService } from 'nestjs-cls';
 import { HTTP_CLIENT_DEFAULTS } from '@email-platform/foundation';
 import { CloudFnClient } from './cloudfn.client';
-import {
-  CLOUDFN_CLIENT,
-  CLOUDFN_ENV,
-  CLOUDFN_LOG_CONTEXT,
-} from './cloudfn-client.constants';
+import { CLOUDFN_CLIENT, CLOUDFN_ENV, CLOUDFN_LOG_CONTEXT } from './cloudfn-client.constants';
 
 const clientProvider: Provider = {
   provide: CLOUDFN_CLIENT,
