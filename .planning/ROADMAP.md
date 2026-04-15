@@ -122,13 +122,15 @@ Plans:
 
 ### Phase 22.4: public-bucket-abstraction (INSERTED)
 
-**Goal:** Разделить хранилище на per-service private bucket'ы + один `public` bucket для внешних download-ссылок. Убрать presigned-URL механизм. Добавить `SharedNamespaceModule` c typed namespaced-клиентами, `NamespacedStoragePort` (Readable-only, multipart через `@aws-sdk/lib-storage`). Переименовать bucket `reports` → `public`, добавить env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, переписать smoke 22.3 под новый контракт.
-**Requirements**: TBD
+**Goal:** Разделить хранилище на per-service private bucket'ы + один `public` bucket для внешних download-ссылок. Убрать presigned-URL механизм. Добавить `SharedNamespaceModule` c typed namespaced-клиентами, `NamespacedStoragePort` (Readable-only, multipart через `@aws-sdk/lib-storage`). Bucket rename `reports` → `public` уже выполнен в Phase 22.5; 22.4 добавляет env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, переписывает smoke 22.3 под новый контракт, обновляет runbook с anonymous-read policy.
+**Requirements**: SSMK-01..05 (rewritten surface); D-01..D-27 (locked decisions in 22.4-CONTEXT.md serve as primary requirement surface); SPRV-01..05 runbook additions
 **Depends on:** Phase 22, Phase 22.5
-**Plans:** 0 plans
+**Plans:** 3/3 plans complete
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 22.4 to break down)
+- [x] 22.4-01-PLAN.md — Foundation port+factory+deps: NamespacedStoragePort, SharedNamespaceModule.forNamespace, lib-storage multipart, size-limit Transform, env schema extension, remove presigner
+- [x] 22.4-02-PLAN.md — Apps integration: rewire parser+notifier to SHARED_REPORTS, rewrite smoke controllers (Readable + HTTP GET), sync .env* files, remove obsolete PublicStorageModule facade
+- [x] 22.4-03-PLAN.md — Runbook update: anonymous-read policy step, new env vars, Garage URL caveat, private-bucket warning, verify curl step
 
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
 **Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
@@ -189,10 +191,12 @@ Plans:
   2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
   3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
   4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
-**Plans**: 2 plans
+**Plans**: 4 plans
 Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+- [ ] 23-01-PLAN.md — Migrate SERVICE.diToken to Symbol.for() + delete obsolete GrpcClientModule
+- [ ] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
+- [ ] 23-03-PLAN.md — Five per-service client modules (audience, auth, parser, sender, notifier) + barrel
+- [ ] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
 
 ### Phase 24: HTTP Client & Circuit Breaker
 **Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection

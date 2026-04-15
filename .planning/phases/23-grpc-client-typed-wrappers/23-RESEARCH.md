@@ -495,35 +495,35 @@ No prior reference in the repo. Closest analog: `RedisCacheService` wraps an `io
 **How to avoid:** Use `@InjectPinoLogger(AudienceClient.name)` in each concrete subclass's constructor, OR pass `context` explicitly. Alternative: use `PinoLogger.root.child({ service })` pattern already in `correlation.interceptor.ts`.
 **Warning signs:** All five services log with the same `context: 'AbstractGrpcClient'`.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `AbstractGrpcClient` be generic over the raw client type?**
    - What we know: TypeScript can express `abstract class AbstractGrpcClient<TRaw>` with `protected raw!: TRaw`.
    - What's unclear: whether method-signature-level generics flow through cleanly for consumers. Hand-typed concrete methods on subclasses is simpler and already the recommended approach.
-   - Recommendation: Start without generics. `raw` is typed at the subclass level (`AudienceClient.raw: AudienceServiceClient`). Revisit only if we see duplication pain.
+   - RESOLVED: Start without generics. `raw` is typed at the subclass level (`AudienceClient.raw: AudienceServiceClient`). Revisit only if we see duplication pain.
 
 2. **Delete or keep the existing `GrpcClientModule.register()`?**
    - What we know: Unused across the repo.
-   - Recommendation: Delete in the same plan as new modules to avoid a stale symbol. Single commit that replaces the old public surface with the new one.
+   - RESOLVED: Delete in the same plan as new modules to avoid a stale symbol. Single commit that replaces the old public surface with the new one.
 
 3. **Naming:** `AudienceClient` vs `AudienceGrpcClient`?
-   - CONTEXT.md calls them `AudienceClient`, `AuthClient`, etc. in D-01. Recommendation: use `AudienceClient` (short, consumer-facing). If naming collision with future HTTP clients (Phase 24), we may rename — but Phase 24 is `HttpClientModule` with per-API adapters (AppStoreSpy etc.), so no collision in practice.
+   - RESOLVED: CONTEXT.md calls them `AudienceClient`, `AuthClient`, etc. in D-01. Use `AudienceClient` (short, consumer-facing). If naming collision with future HTTP clients (Phase 24), we may rename — but Phase 24 is `HttpClientModule` with per-API adapters (AppStoreSpy etc.), so no collision in practice.
 
 4. **Where does the `AbstractGrpcClient` helper live?**
-   - Recommendation: `packages/foundation/src/external/grpc/clients/abstract-grpc-client.ts`. Private to foundation (not exported through barrel).
+   - RESOLVED: `packages/foundation/src/external/grpc/clients/abstract-grpc-client.ts`. Private to foundation (not exported through barrel).
 
 5. **Does any existing service module consume `SERVICE.x.diToken` assuming string type?**
-   - Answer: **No** (grep confirmed). Migration is safe.
+   - RESOLVED: **No** (grep confirmed). Migration is safe.
 
 6. **OnModuleDestroy: should each `*ClientModule` close its ClientGrpc?**
    - The underlying `ClientGrpc` from `@nestjs/microservices` has a `close()` method. NestJS does not invoke it automatically.
-   - Recommendation: defer to Phase 26 (Graceful Shutdown). Leave a TODO comment in the provider factory.
+   - RESOLVED: Defer to Phase 26 (Graceful Shutdown). Leave a TODO comment in the provider factory.
 
 7. **What happens if `grpc-timeout` metadata value is larger than the channel-level deadline?**
-   - Answer: the channel-level deadline wins (Pitfall 4). Acceptable for Phase 23; flag for consumers that per-call can only **shorten** the effective deadline, not lengthen it. If lengthening is required later, add `CallOptions.interceptors` per-call clearing mechanism.
+   - RESOLVED: The channel-level deadline wins (Pitfall 4). Acceptable for Phase 23; flag for consumers that per-call can only **shorten** the effective deadline, not lengthen it. If lengthening is required later, add `CallOptions.interceptors` per-call clearing mechanism.
 
 8. **Readiness endpoint refactor — in-scope or separate plan?**
-   - Gateway's `HealthController` currently uses `GRPCHealthIndicator.checkService` with inline URL construction. D-10 requires switching to injected per-service indicators. This is in scope for Phase 23. Plan should include explicit task.
+   - RESOLVED: Gateway's `HealthController` currently uses `GRPCHealthIndicator.checkService` with inline URL construction. D-10 requires switching to injected per-service indicators. In scope for Phase 23 (Plan 23-04 Task 2).
 
 ## Assumptions Log
 
