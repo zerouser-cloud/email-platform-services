@@ -209,7 +209,7 @@ Plans:
   4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
 **Plans**: 3 plans
 Plans:
-- [ ] 24-01-PLAN.md — Foundation HTTP primitives: opossum + AbstractHttpClient + retry + CB + errors + types, export via foundation barrel
+- [x] 24-01-PLAN.md — Foundation HTTP primitives: opossum + AbstractHttpClient + retry + CB + errors + types, export via foundation barrel
 - [ ] 24-02-PLAN.md — Contracts external types (Telegram/AppStoreSpy/CloudFn) + external-apis config sub-schema + per-service env extensions + .env files
 - [ ] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
 
@@ -291,7 +291,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
 | 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
 | 23. gRPC Client Typed Wrappers | v4.0 | 3/4 | In Progress|  |
-| 24. HTTP Client & Circuit Breaker | v4.0 | 0/0 | Not started | - |
+| 24. HTTP Client & Circuit Breaker | v4.0 | 1/3 | In Progress|  |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
 | 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
@@ -302,7 +302,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 **Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
 **Requirements:** TBD
-**Plans:** 3/4 plans executed
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 24 plans created and verified
-last_updated: "2026-04-15T07:45:07.881Z"
+stopped_at: Completed 24-01-PLAN.md
+last_updated: "2026-04-15T08:00:20.156Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 9
   total_plans: 32
-  completed_plans: 29
-  percent: 91
+  completed_plans: 30
+  percent: 94
 ---
 
 # Project State
@@ -21,12 +21,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 23 — grpc-client-typed-wrappers
+**Current focus:** Phase 24 — http-client-circuit-breaker
 
 ## Current Position
 
-Phase: 23 (grpc-client-typed-wrappers) — EXECUTING
-Plan: 4 of 4
+Phase: 24 (http-client-circuit-breaker) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -71,6 +71,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 23 P01 | 2min | 2 tasks | 3 files |
 | Phase 23 P02 | 2min | 2 tasks | 4 files |
 | Phase 23 P03 | 8 | 2 tasks | 17 files |
+| Phase 24 P01 | 358s | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,7 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 23]: [Phase 23-02]: AbstractGrpcClient uses PinoLogger.root.child({ context }) — no setContext (Pitfall 6); getService in onModuleInit (Pitfall 3); lastValueFrom for unary (Pitfall 2); per-call deadline via grpc-timeout Metadata header on top of unchanged channel interceptor (Pitfall 4 minimum-wins); base class NOT yet in external barrel — Plan 23-03 wires it with concrete modules
 - [Phase 23]: Multi-package ClientGrpc (Assumption A3) worked on first try — no fallback to separate grpc.health.v1 registration needed
 - [Phase 23]: require.resolve used directly in audience/auth/parser/sender/notifier-client.module.ts — tsconfig module=node16 emits CJS; no createRequire shim required
+- [Phase 24]: [Phase 24-01]: AbstractHttpClient in foundation is pure framework (zero per-API knowledge); opossum isolated to packages/foundation; CB Option B wrapper (ConsecutiveThresholdError sentinel + opossum volumeThreshold:1/errorThresholdPercentage:100, timeout:false) opens on 5 consecutive failures; HttpCallOpts renamed from CallOpts to avoid barrel collision with existing gRPC CallOpts
 
 ### Pending Todos
 
@@ -114,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T07:45:07.879Z
-Stopped at: Phase 24 plans created and verified
-Resume file: .planning/phases/24-http-client-circuit-breaker/24-01-PLAN.md
+Last session: 2026-04-15T08:00:20.154Z
+Stopped at: Completed 24-01-PLAN.md
+Resume file: None

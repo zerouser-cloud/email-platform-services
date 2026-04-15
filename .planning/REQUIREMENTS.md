@@ -62,10 +62,10 @@ Scope changed during `/gsd:discuss-phase` (2026-04-09): phase became docs-only r
 
 ### HTTP Client
 
-- [ ] **HTTP-01**: HTTP client каркас в foundation с retry, timeout, logging
-- [ ] **HTTP-02**: Circuit breaker встроен в HTTP абстракцию для внешних вызовов
+- [x] **HTTP-01**: HTTP client каркас в foundation с retry, timeout, logging
+- [x] **HTTP-02**: Circuit breaker встроен в HTTP абстракцию для внешних вызовов
 - [ ] **HTTP-03**: Per-service адаптеры для внешних API создаются на основе каркаса (AppStoreSpy, Telegram, Cloud Functions)
-- [ ] **HTTP-04**: Circuit breaker применяется только к внешним HTTP вызовам, не к внутренним gRPC
+- [x] **HTTP-04**: Circuit breaker применяется только к внешним HTTP вызовам, не к внутренним gRPC
 
 ### RabbitMQ (EventModule)
 
@@ -196,10 +196,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GRPC-02 | Phase 23 | Complete |
 | GRPC-03 | Phase 23 | Pending |
 | GRPC-04 | Phase 23 | Complete |
-| HTTP-01 | Phase 24 | Pending |
-| HTTP-02 | Phase 24 | Pending |
+| HTTP-01 | Phase 24 | Complete |
+| HTTP-02 | Phase 24 | Complete |
 | HTTP-03 | Phase 24 | Pending |
-| HTTP-04 | Phase 24 | Pending |
+| HTTP-04 | Phase 24 | Complete |
 | EVENT-01 | Phase 25 | Pending |
 | EVENT-02 | Phase 25 | Pending |
 | EVENT-03 | Phase 25 | Pending |
