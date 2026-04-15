@@ -74,10 +74,7 @@ export abstract class AbstractHttpClient implements OnModuleInit {
 
   onModuleInit(): void {
     this.logger = PinoLogger.root.child({ context: this.logContext });
-    const created = createCircuitBreaker<
-      [HttpMethod, string, RequestInit, HttpCallOpts],
-      Response
-    >(
+    const created = createCircuitBreaker<[HttpMethod, string, RequestInit, HttpCallOpts], Response>(
       (method, path, init, opts) => this.executeWithRetry(method, path, init, opts),
       this.logContext,
       this.cbOptions,
@@ -97,11 +94,7 @@ export abstract class AbstractHttpClient implements OnModuleInit {
     cb: 'closed' | 'halfOpen' | 'opened';
     consecutiveFailures: number;
   } {
-    const cb = this.breaker.opened
-      ? 'opened'
-      : this.breaker.halfOpen
-        ? 'halfOpen'
-        : 'closed';
+    const cb = this.breaker.opened ? 'opened' : this.breaker.halfOpen ? 'halfOpen' : 'closed';
     return { cb, consecutiveFailures: this.getConsecutiveFailures() };
   }
 

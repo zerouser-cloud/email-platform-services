@@ -41,7 +41,11 @@ export function createCircuitBreaker<TArgs extends unknown[], TReturn>(
   onTransition: (transition: Transition) => void,
 ): CreatedCircuitBreaker<TArgs, TReturn> {
   let consecutiveFailures = 0;
-  let breakerRef: CircuitBreaker<TArgs, TReturn> | undefined;
+  // Holder lets `wrapped` (defined before breaker) reference the breaker
+  // through a stable object whose property is mutated after construction.
+  // Plain `let` here trips eslint prefer-const since the binding itself is
+  // assigned exactly once.
+  const ref: { breaker?: CircuitBreaker<TArgs, TReturn> } = {};
 
   const wrapped = async (...args: TArgs): Promise<TReturn> => {
     try {
@@ -52,15 +56,15 @@ export function createCircuitBreaker<TArgs extends unknown[], TReturn>(
       // Textbook CB semantics: a half-open probe that fails must reopen the
       // circuit immediately. Without this, our `errorFilter: () => true`
       // makes opossum treat every probe failure as success and auto-close.
-      if (breakerRef?.halfOpen) {
+      if (ref.breaker?.halfOpen) {
         consecutiveFailures = 0;
-        breakerRef.open();
+        ref.breaker.open();
         throw err;
       }
       consecutiveFailures += 1;
       if (consecutiveFailures >= cbOptions.consecutiveThreshold) {
         consecutiveFailures = 0;
-        breakerRef?.open();
+        ref.breaker?.open();
       }
       throw err;
     }
@@ -71,14 +75,14 @@ export function createCircuitBreaker<TArgs extends unknown[], TReturn>(
     // Pitfall 1: opossum per-fire timeout must NOT race the retry loop's
     // per-attempt AbortSignal.timeout.
     timeout: false,
-    // Delegate "when to open" entirely to the wrapper's breakerRef.open()
+    // Delegate "when to open" entirely to the wrapper's ref.breaker.open()
     // call. Returning true tells opossum to treat every thrown error as
     // filtered (not a failure for stats purposes). opossum's percentage
     // evaluator never opens the circuit; only our explicit open() does.
     errorFilter: () => true,
   });
 
-  breakerRef = breaker;
+  ref.breaker = breaker;
 
   breaker.on('open', () => onTransition(HTTP_CLIENT_LOG.CB_OPEN));
   breaker.on('halfOpen', () => onTransition(HTTP_CLIENT_LOG.CB_HALF_OPEN));
