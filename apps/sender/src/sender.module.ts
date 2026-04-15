@@ -5,7 +5,9 @@ import { LoggingModule, PersistenceModule, CacheModule } from '@email-platform/f
 import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
 import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
+import { CloudFnClientModule } from './infrastructure/clients/cloud-functions';
 import { HealthController } from './health/health.controller';
+import { CloudFnSmokeController } from './test/cloudfn-smoke.controller';
 import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constants';
 
 @Module({
@@ -14,8 +16,9 @@ import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constan
     PersistenceModule.forRootAsync(),
     CacheModule.forRootAsync({ namespace: 'sender' }),
     LoggingModule.forGrpcAsync('sender'),
+    CloudFnClientModule.forRoot(),
   ],
-  controllers: [SenderGrpcServer, HealthController],
+  controllers: [SenderGrpcServer, HealthController, CloudFnSmokeController],
   providers: [
     { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },
     { provide: CREATE_CAMPAIGN_PORT, useClass: CreateCampaignUseCase },
