@@ -14,22 +14,24 @@ export abstract class AbstractGrpcClient<TRaw extends object> implements OnModul
   // Per-instance child logger derived from the static root pino.Logger.
   // Pitfall 6: MUST NOT inject PinoLogger and call setContext — that mutates the
   // shared singleton and the last-initialized subclass overwrites all others.
+  // PinoLogger.root is initialized by LoggerModule.onModuleInit, so we defer
+  // child creation to onModuleInit (constructor runs too early — root is undefined).
   // Mirrors the precedent in packages/foundation/src/external/logging/correlation.interceptor.ts.
-  private readonly logger: PinoNativeLogger;
+  private logger!: PinoNativeLogger;
 
   constructor(
     private readonly grpc: ClientGrpc,
     private readonly cls: ClsService,
     protected readonly serviceName: string,
     protected readonly defaultDeadlineMs: number,
-    logContext: string,
-  ) {
-    this.logger = PinoLogger.root.child({ context: logContext });
-  }
+    private readonly logContext: string,
+  ) {}
 
   onModuleInit(): void {
     // Pitfall 3: must happen in lifecycle hook, not constructor.
     this.raw = this.grpc.getService<TRaw>(this.serviceName);
+    // Pitfall 6 (refined): PinoLogger.root is undefined in constructor — defer.
+    this.logger = PinoLogger.root.child({ context: this.logContext });
   }
 
   protected buildMetadata(opts?: CallOpts): Metadata {
