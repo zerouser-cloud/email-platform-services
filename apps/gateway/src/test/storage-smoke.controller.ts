@@ -1,51 +1,40 @@
-import { Controller, Get, Delete, Query, Inject, OnModuleInit } from '@nestjs/common';
-import type { ClientGrpc } from '@nestjs/microservices';
+import { Controller, Get, Delete, Query, Inject } from '@nestjs/common';
+import type { ParserClient, NotifierClient } from '@email-platform/foundation';
+import { SERVICE } from '@email-platform/config';
 import { ParserProto, NotifierProto } from '@email-platform/contracts';
-import { PARSER_SMOKE_CLIENT, NOTIFIER_SMOKE_CLIENT } from './smoke-test.tokens';
-import { firstValueFrom } from 'rxjs';
 
 const SMOKE_ROUTE_PREFIX = 'test';
 
 @Controller(SMOKE_ROUTE_PREFIX)
-export class StorageSmokeController implements OnModuleInit {
-  private parserService!: ParserProto.ParserServiceClient;
-  private notifierService!: NotifierProto.NotifierServiceClient;
-
+export class StorageSmokeController {
   constructor(
-    @Inject(PARSER_SMOKE_CLIENT) private readonly parserClient: ClientGrpc,
-    @Inject(NOTIFIER_SMOKE_CLIENT) private readonly notifierClient: ClientGrpc,
+    @Inject(SERVICE.parser.diToken) private readonly parser: ParserClient,
+    @Inject(SERVICE.notifier.diToken) private readonly notifier: NotifierClient,
   ) {}
 
-  onModuleInit(): void {
-    this.parserService =
-      this.parserClient.getService<ParserProto.ParserServiceClient>('ParserService');
-    this.notifierService =
-      this.notifierClient.getService<NotifierProto.NotifierServiceClient>('NotifierService');
-  }
-
   @Get('parser/storage-service')
-  async runParserSmoke(): Promise<ParserProto.StorageSmokeResponse> {
-    return firstValueFrom(this.parserService.runStorageSmoke({}));
+  runParserSmoke(): Promise<ParserProto.StorageSmokeResponse> {
+    return this.parser.runStorageSmoke({});
   }
 
   @Delete('parser/storage-service')
-  async cleanupParserSmoke(
+  cleanupParserSmoke(
     @Query('bucket') bucket: string,
     @Query('key') key: string,
   ): Promise<ParserProto.CleanupSmokeResponse> {
-    return firstValueFrom(this.parserService.cleanupStorageSmoke({ bucket, key }));
+    return this.parser.cleanupStorageSmoke({ bucket, key });
   }
 
   @Get('notifier/storage-service')
-  async runNotifierSmoke(): Promise<NotifierProto.StorageSmokeResponse> {
-    return firstValueFrom(this.notifierService.runStorageSmoke({}));
+  runNotifierSmoke(): Promise<NotifierProto.StorageSmokeResponse> {
+    return this.notifier.runStorageSmoke({});
   }
 
   @Delete('notifier/storage-service')
-  async cleanupNotifierSmoke(
+  cleanupNotifierSmoke(
     @Query('bucket') bucket: string,
     @Query('key') key: string,
   ): Promise<NotifierProto.CleanupSmokeResponse> {
-    return firstValueFrom(this.notifierService.cleanupStorageSmoke({ bucket, key }));
+    return this.notifier.cleanupStorageSmoke({ bucket, key });
   }
 }
