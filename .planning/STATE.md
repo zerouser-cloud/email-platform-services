@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 24-01-PLAN.md
-last_updated: "2026-04-15T08:00:20.156Z"
+stopped_at: Completed 24-02-PLAN.md
+last_updated: "2026-04-15T08:04:43.794Z"
 last_activity: 2026-04-15
 progress:
   total_phases: 20
   completed_phases: 9
   total_plans: 32
-  completed_plans: 30
-  percent: 94
+  completed_plans: 31
+  percent: 97
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 24 (http-client-circuit-breaker) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-15
 
@@ -72,6 +72,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 23 P02 | 2min | 2 tasks | 4 files |
 | Phase 23 P03 | 8 | 2 tasks | 17 files |
 | Phase 24 P01 | 358s | 2 tasks | 10 files |
+| Phase 24 P02 | 108s | 2 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,8 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 23]: Multi-package ClientGrpc (Assumption A3) worked on first try — no fallback to separate grpc.health.v1 registration needed
 - [Phase 23]: require.resolve used directly in audience/auth/parser/sender/notifier-client.module.ts — tsconfig module=node16 emits CJS; no createRequire shim required
 - [Phase 24]: [Phase 24-01]: AbstractHttpClient in foundation is pure framework (zero per-API knowledge); opossum isolated to packages/foundation; CB Option B wrapper (ConsecutiveThresholdError sentinel + opossum volumeThreshold:1/errorThresholdPercentage:100, timeout:false) opens on 5 consecutive failures; HttpCallOpts renamed from CallOpts to avoid barrel collision with existing gRPC CallOpts
+- [Phase 24]: D-02 realised: external API types in packages/contracts/src/external/ (symmetric with generated/)
+- [Phase 24]: D-19 realised: 6 new env vars with no defaults/optionals; placeholders in .env.example + .env.docker
 
 ### Pending Todos
 
@@ -116,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T08:00:20.154Z
-Stopped at: Completed 24-01-PLAN.md
+Last session: 2026-04-15T08:04:43.792Z
+Stopped at: Completed 24-02-PLAN.md
 Resume file: None
