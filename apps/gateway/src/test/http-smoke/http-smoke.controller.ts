@@ -100,9 +100,11 @@ export class HttpSmokeController {
    * 1-7s).
    */
   @Post('status')
-  async status(
-    @Query('code') code = '500',
-  ): Promise<{ ok: boolean; ms: number; error?: string }> {
+  async status(@Query('code') code = '500'): Promise<{
+    ok: boolean;
+    ms: number;
+    error?: string;
+  }> {
     const start = Date.now();
     try {
       await this.client.smokeGet(`${HTTP_SMOKE_PATH.STATUS}/${code}`);
