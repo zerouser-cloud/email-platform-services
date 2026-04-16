@@ -57,19 +57,3 @@ export { CB_DEFAULTS } from './circuit-breaker/constants';
 //   OpossumCircuitBreakerAdapter, PinoHttpClientLoggerAdapter
 // - HttpErrorNormalizer, ErrorMapper, concrete mappers    (error normaliser chain)
 // - HTTP_REQUEST_EXECUTOR, RETRY_EXECUTOR, HTTP_CLIENT_LOGGER (DI tokens — consumed by provider)
-
-// =====================================================================
-// TEMPORARY COMPAT BRIDGE — REMOVE AT END OF PLAN 03 (D-22 migration)
-// =====================================================================
-// Per-vendor modules (telegram/appstorespy/cloudfn/http-smoke) currently
-// import HTTP_CLIENT_DEFAULTS as a flat object. Plan 03 migrates them to
-// httpClientProvider and removes this bridge. Composing RETRY_DEFAULTS +
-// CB_DEFAULTS + TIMEOUT_MS here keeps Plan 02 pnpm build/typecheck green
-// across the Plan 02 → Plan 03 window.
-import { RETRY_DEFAULTS as _RETRY } from './retry/constants';
-import { CB_DEFAULTS as _CB } from './circuit-breaker/constants';
-export const HTTP_CLIENT_DEFAULTS = {
-  TIMEOUT_MS: 5_000,
-  ..._RETRY,
-  ..._CB,
-} as const;
