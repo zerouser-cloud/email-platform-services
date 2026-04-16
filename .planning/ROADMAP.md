@@ -305,7 +305,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
 | 23. gRPC Client Typed Wrappers | v4.0 | 3/4 | In Progress|  |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 2/3 | In Progress|  |
-| 24.1. HTTP client foundation hardening | v4.0 | 4/4 | Complete   | 2026-04-16 |
+| 24.1. HTTP client foundation hardening | v4.0 | 4/4 | Complete    | 2026-04-16 |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
 | 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
