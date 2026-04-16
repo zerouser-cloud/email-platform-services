@@ -1,26 +1,7 @@
-import { Module, type DynamicModule, type Provider } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ClsService } from 'nestjs-cls';
-import { HTTP_CLIENT_DEFAULTS } from '@email-platform/foundation';
+import { Module, type DynamicModule } from '@nestjs/common';
+import { httpClientProvider } from '@email-platform/foundation';
 import { TelegramClient } from './telegram.client';
 import { TELEGRAM_CLIENT, TELEGRAM_ENV, TELEGRAM_LOG_CONTEXT } from './telegram-client.constants';
-
-const clientProvider: Provider = {
-  provide: TELEGRAM_CLIENT,
-  inject: [ConfigService, ClsService],
-  useFactory: (config: ConfigService, cls: ClsService): TelegramClient =>
-    new TelegramClient(
-      cls,
-      config.get<string>(TELEGRAM_ENV.BASE_URL)!,
-      HTTP_CLIENT_DEFAULTS.TIMEOUT_MS,
-      {
-        consecutiveThreshold: HTTP_CLIENT_DEFAULTS.CB_CONSECUTIVE_THRESHOLD,
-        halfOpenAfterMs: HTTP_CLIENT_DEFAULTS.CB_HALF_OPEN_AFTER_MS,
-      },
-      TELEGRAM_LOG_CONTEXT,
-      config.get<string>(TELEGRAM_ENV.BOT_TOKEN)!,
-    ),
-};
 
 /**
  * TelegramClientModule — DynamicModule providing a single TelegramClient
@@ -32,7 +13,17 @@ export class TelegramClientModule {
   static forRoot(): DynamicModule {
     return {
       module: TelegramClientModule,
-      providers: [clientProvider],
+      providers: [
+        httpClientProvider(
+          {
+            token: TELEGRAM_CLIENT,
+            logContext: TELEGRAM_LOG_CONTEXT,
+            baseUrlEnvKey: TELEGRAM_ENV.BASE_URL,
+          },
+          (deps) =>
+            new TelegramClient(deps, deps.config.getOrThrow<string>(TELEGRAM_ENV.BOT_TOKEN)),
+        ),
+      ],
       exports: [TELEGRAM_CLIENT],
     };
   }

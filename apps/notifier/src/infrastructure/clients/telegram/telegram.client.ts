@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { ClsService } from 'nestjs-cls';
-import { AbstractHttpClient, type CbOptions } from '@email-platform/foundation';
+import { AbstractHttpClient, type HttpClientDeps } from '@email-platform/foundation';
 import { TelegramTypes } from '@email-platform/contracts';
 import { TELEGRAM_PATH } from './telegram-client.constants';
 
@@ -26,14 +25,10 @@ import { TELEGRAM_PATH } from './telegram-client.constants';
 @Injectable()
 export class TelegramClient extends AbstractHttpClient {
   constructor(
-    cls: ClsService,
-    baseUrl: string,
-    defaultTimeoutMs: number,
-    cbOptions: CbOptions,
-    logContext: string,
+    deps: HttpClientDeps,
     private readonly botToken: string,
   ) {
-    super(cls, baseUrl, defaultTimeoutMs, cbOptions, logContext);
+    super(deps);
   }
 
   sendMessage(req: TelegramTypes.SendMessageRequest): Promise<TelegramTypes.SendMessageResponse> {

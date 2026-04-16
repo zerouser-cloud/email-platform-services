@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { ClsService } from 'nestjs-cls';
-import { AbstractHttpClient, type CbOptions } from '@email-platform/foundation';
+import { AbstractHttpClient, type HttpClientDeps } from '@email-platform/foundation';
 import { AppStoreSpyTypes } from '@email-platform/contracts';
 import {
   APPSTORESPY_AUTH_HEADER_NAME,
@@ -21,14 +20,10 @@ import {
 @Injectable()
 export class AppStoreSpyClient extends AbstractHttpClient {
   constructor(
-    cls: ClsService,
-    baseUrl: string,
-    defaultTimeoutMs: number,
-    cbOptions: CbOptions,
-    logContext: string,
+    deps: HttpClientDeps,
     private readonly apiKey: string,
   ) {
-    super(cls, baseUrl, defaultTimeoutMs, cbOptions, logContext);
+    super(deps);
   }
 
   protected override buildAuthHeaders(): Record<string, string> {
