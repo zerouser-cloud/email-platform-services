@@ -3,13 +3,9 @@
 // smoke verification. All routes mounted at /test/http-client/*.
 
 import { Controller, Get, Inject, Post, Query } from '@nestjs/common';
-import { HttpSmokeClient } from './http-smoke.client';
-import {
-  HTTP_SMOKE_CLIENT,
-  HTTP_SMOKE_DEFAULTS,
-  HTTP_SMOKE_PATH,
-  HTTP_SMOKE_ROUTE,
-} from './http-smoke.constants';
+import type { CircuitState } from '@email-platform/foundation';
+import { HttpSmokeClient, HTTP_SMOKE_CLIENT } from '../../infrastructure/clients/http-smoke';
+import { HTTP_SMOKE_DEFAULTS, HTTP_SMOKE_PATH, HTTP_SMOKE_ROUTE } from './http-smoke.constants';
 
 interface CallResult {
   attempt: number;
@@ -27,7 +23,7 @@ export class HttpSmokeController {
    * Read-only; safe to poll.
    */
   @Get('state')
-  state(): { cb: 'closed' | 'halfOpen' | 'opened'; consecutiveFailures: number } {
+  state(): CircuitState {
     return this.client.getCircuitState();
   }
 
@@ -37,8 +33,8 @@ export class HttpSmokeController {
    */
   @Post('probe')
   async probe(): Promise<{
-    before: ReturnType<HttpSmokeClient['getCircuitState']>;
-    after: ReturnType<HttpSmokeClient['getCircuitState']>;
+    before: CircuitState;
+    after: CircuitState;
     outcome: { ok: boolean; ms: number; error?: string };
   }> {
     const before = this.client.getCircuitState();
@@ -48,7 +44,11 @@ export class HttpSmokeController {
       await this.client.smokeGet(HTTP_SMOKE_PATH.GET);
       outcome = { ok: true, ms: Date.now() - start };
     } catch (err) {
-      outcome = { ok: false, ms: Date.now() - start, error: String(err).slice(0, 200) };
+      outcome = {
+        ok: false,
+        ms: Date.now() - start,
+        error: String(err).slice(0, HTTP_SMOKE_DEFAULTS.ERROR_PREVIEW_CHARS),
+      };
     }
     const after = this.client.getCircuitState();
     return { before, after, outcome };
@@ -67,7 +67,7 @@ export class HttpSmokeController {
   ): Promise<{
     config: { count: number; timeoutMs: number };
     results: CallResult[];
-    finalState: ReturnType<HttpSmokeClient['getCircuitState']>;
+    finalState: CircuitState;
   }> {
     const n = Number(count);
     const tMs = Number(timeoutMs);
@@ -82,7 +82,7 @@ export class HttpSmokeController {
           attempt: i,
           ok: false,
           ms: Date.now() - start,
-          error: String(err).slice(0, 200),
+          error: String(err).slice(0, HTTP_SMOKE_DEFAULTS.ERROR_PREVIEW_CHARS),
         });
       }
     }
@@ -100,17 +100,21 @@ export class HttpSmokeController {
    * 1-7s).
    */
   @Post('status')
-  async status(@Query('code') code = '500'): Promise<{
+  async status(@Query('code') code = HTTP_SMOKE_DEFAULTS.DEFAULT_PROBE_STATUS): Promise<{
     ok: boolean;
     ms: number;
     error?: string;
   }> {
     const start = Date.now();
     try {
-      await this.client.smokeGet(`${HTTP_SMOKE_PATH.STATUS}/${code}`);
+      await this.client.smokeGet(HTTP_SMOKE_PATH.status(code));
       return { ok: true, ms: Date.now() - start };
     } catch (err) {
-      return { ok: false, ms: Date.now() - start, error: String(err).slice(0, 200) };
+      return {
+        ok: false,
+        ms: Date.now() - start,
+        error: String(err).slice(0, HTTP_SMOKE_DEFAULTS.ERROR_PREVIEW_CHARS),
+      };
     }
   }
 }
