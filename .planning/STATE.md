@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 24 complete — HTTP client + circuit breaker shipped, verified on dev
-last_updated: "2026-04-15T12:33:22.242Z"
+stopped_at: Phase 24.1 context gathered — full architectural refactor scope + env hygiene
+last_updated: "2026-04-16T06:31:53.433Z"
 last_activity: 2026-04-15
 progress:
-  total_phases: 21
+  total_phases: 22
   completed_phases: 10
   total_plans: 32
   completed_plans: 32
@@ -116,9 +116,10 @@ None yet.
 - Phase 22.3 inserted after Phase 22: storage-smoke-test-endpoints (URGENT) — per-service HTTP debug endpoints for full CRUD cycle on each bound bucket (upload/download/delete/exists/getSignedUrl); cross-service reports bucket test (parser writes → notifier reads); gated by env flag for prod safety
 - Phase 22.4 inserted after Phase 22: public-bucket-abstraction (URGENT) — изначально storage-gateway-proxy (gateway streaming + HMAC), после discuss-phase направление скорректировано: per-service private bucket'ы + один `public` bucket с anonymous read, `SharedNamespaceModule.forNamespace(...)`, `NamespacedStoragePort` (Readable-only + multipart через `@aws-sdk/lib-storage`), env `STORAGE_PUBLIC_URL` + `STORAGE_MAX_UPLOAD_BYTES`, bucket `reports` → `public`. Блокирующий insight из research (Garage не поддерживает anonymous S3 policy, только website mode) вынудил добавить prerequisite-фазу 22.5. Phase 22.4 Depends on расширен: Phase 22 + Phase 22.5.
 - Phase 22.5 inserted after Phase 22: local-garage-unification (URGENT) — prerequisite к 22.4. Заменить MinIO на Garage Docker image в local-native и local-isolated окружениях, обновить `infra/docker-compose*.yml`, `env.example`/`env.docker`, `packages/config/src/schemas/storage.ts`, runbook `docs/runbooks/bucket-provisioning.md`. Цель — один S3 impl (Garage) во всех 4 окружениях вместо сегодняшней раздвоенной реальности MinIO↔Garage. Устраняет расхождения bucket policy / URL формата / CLI между local и dev/prod.
+- Phase 24.1 inserted after Phase 24: http-client-foundation-hardening-di-env-hygiene-magic-values (URGENT) — пост-аудит фазы 24. Scope: (1) ротация утёкшего в git Telegram bot token + `git rm --cached .env.docker` + создание `.env.docker.example` + документирование назначения env-файлов; (2) Logger через DI-порт (`HttpClientLogger` + `PinoHttpClientLoggerAdapter`) вместо `PinoLogger.root.child`; (3) экстракция magic values (`Content-Type`/`application/json` в abstract-http.client, литералы 200 и '500' в http-smoke controller); (4) экспорт `CircuitState` типа из foundation; (5) хелпер `getRequiredString(config, key)` против `!` non-null assertions; (6) `createHttpClientProvider` factory-хелпер против дублирования boilerplate 4 per-service модулей; (7) перенос `HttpSmokeClient` в `apps/gateway/src/infrastructure/clients/http-smoke/` (контроллер/модуль остаются в `test/` и удаляются перед релизом, клиент остаётся); (8) `HTTP_SMOKE_PATH.status()` builder; (9) JSDoc AbstractHttpClient про ClsModule; (10) TODO-метка на `res.json() as T`. Архитектурное решение: CircuitBreaker и RetryPolicy НЕ декомпозируются через DI (overengineering для стабильного opossum) — зафиксировать в ADR.
 
 ## Session Continuity
 
-Last session: 2026-04-15T12:33:22.239Z
-Stopped at: Phase 24 complete — HTTP client + circuit breaker shipped, verified on dev
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-16T06:31:53.401Z
+Stopped at: Phase 24.1 context gathered — full architectural refactor scope + env hygiene
+Resume file: .planning/phases/24.1-http-client-foundation-hardening-di-env-hygiene-magic-values/24.1-CONTEXT.md
