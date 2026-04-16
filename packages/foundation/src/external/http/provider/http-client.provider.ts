@@ -70,10 +70,11 @@ export function httpClientProvider<T extends AbstractHttpClient>(
   build: (deps: HttpClientDeps & { config: ConfigService }) => T,
 ): Provider {
   // Developer-time guard — exactly one baseUrl source required.
-  if ((!opts.baseUrlEnvKey && !opts.baseUrlLiteral) || (opts.baseUrlEnvKey && opts.baseUrlLiteral)) {
-    throw new Error(
-      'httpClientProvider: provide exactly one of baseUrlEnvKey or baseUrlLiteral',
-    );
+  if (
+    (!opts.baseUrlEnvKey && !opts.baseUrlLiteral) ||
+    (opts.baseUrlEnvKey && opts.baseUrlLiteral)
+  ) {
+    throw new Error('httpClientProvider: provide exactly one of baseUrlEnvKey or baseUrlLiteral');
   }
 
   return {
@@ -90,8 +91,7 @@ export function httpClientProvider<T extends AbstractHttpClient>(
       const retry = new DefaultRetryExecutor();
 
       const cbOpts = {
-        consecutiveThreshold:
-          opts.cb?.consecutiveThreshold ?? CB_DEFAULTS.CB_CONSECUTIVE_THRESHOLD,
+        consecutiveThreshold: opts.cb?.consecutiveThreshold ?? CB_DEFAULTS.CB_CONSECUTIVE_THRESHOLD,
         halfOpenAfterMs: opts.cb?.halfOpenAfterMs ?? CB_DEFAULTS.CB_HALF_OPEN_AFTER_MS,
         api: opts.logContext,
       };
