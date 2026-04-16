@@ -4,8 +4,8 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 24.1 context gathered — full architectural refactor scope + env hygiene
-last_updated: "2026-04-16T07:50:24.176Z"
-last_activity: 2026-04-16 -- Phase 24.1 planning complete
+last_updated: "2026-04-16T07:51:53.062Z"
+last_activity: 2026-04-16 -- Phase 24.1 execution started
 progress:
   total_phases: 22
   completed_phases: 10
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 24 — http-client-circuit-breaker
+**Current focus:** Phase 24.1 — http-client-foundation-hardening-di-env-hygiene-magic-values
 
 ## Current Position
 
-Phase: 24 (http-client-circuit-breaker) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-04-16 -- Phase 24.1 planning complete
+Phase: 24.1 (http-client-foundation-hardening-di-env-hygiene-magic-values) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 24.1
+Last activity: 2026-04-16 -- Phase 24.1 execution started
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
 
