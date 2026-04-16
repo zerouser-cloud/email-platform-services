@@ -213,6 +213,19 @@ Plans:
 - [x] 24-02-PLAN.md — Contracts external types (Telegram/AppStoreSpy/CloudFn) + external-apis config sub-schema + per-service env extensions + .env files
 - [ ] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
 
+### Phase 24.1: HTTP client foundation hardening — DI, env hygiene, magic values, smoke refactor (INSERTED)
+
+**Goal:** Architectural hardening of the Phase 24 HTTP foundation. Decompose the 240-line AbstractHttpClient God class into thin orchestrator + ports/adapters (HttpRequestExecutor, RetryExecutorPort + DefaultRetryExecutor, CircuitBreakerPort + OpossumCircuitBreakerAdapter, HttpClientLogger + PinoHttpClientLoggerAdapter). Introduce HttpClientError abstract base + chain-of-mappers normalizer. Replace 4 `config.get<T>(KEY)!` non-null assertions with `ConfigService.getOrThrow<T>(KEY)`. Extract magic values (HTTP_CLIENT_HEADERS, HTTP_SMOKE_DEFAULTS). Introduce `httpClientProvider` factory eliminating 4-fold per-vendor boilerplate. Split HttpSmokeClient into `apps/gateway/src/infrastructure/clients/http-smoke/` (client) + `apps/gateway/src/test/http-smoke/` (controller+module with TODO remove-before-release). Rotate leaked Telegram bot token, `git rm --cached .env.docker`, create `.env.docker.example` (variant B) + `docs/runbooks/env-setup.md`. No behavior change — pure quality/security refactor verified via Phase 24 HttpSmokeController runtime invariants.
+**Requirements**: HARD-01..HARD-08 (decisions D-01..D-37 in 24.1-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md; this is a refactor of HTTP-01..HTTP-04 already Complete)
+**Depends on:** Phase 24
+**Plans:** 4 plans
+
+Plans:
+- [ ] 24.1-01-PLAN.md — Foundation port+adapter scaffolding: constants split, types, error hierarchy + chain-of-mappers, retry ports, CB port + opossum adapter, logger port + Pino adapter, DI tokens, Wave 0 scripts (check-no-bang.sh, check-env-parity.sh)
+- [ ] 24.1-02-PLAN.md — Thin AbstractHttpClient orchestrator (param-bag, ~80-120 lines) + httpClientProvider factory + D-16/D-17 barrel cleanup + delete 6 pre-24.1 root-level files
+- [ ] 24.1-03-PLAN.md — Migrate 3 per-vendor clients+modules (telegram/appstorespy/cloudfn) to param-bag + httpClientProvider + getOrThrow; split HttpSmokeClient to infrastructure/; extract HTTP_SMOKE_DEFAULTS + status(code) builder + CircuitState return types; remove HTTP_CLIENT_DEFAULTS compat bridge
+- [ ] 24.1-04-PLAN.md — Env hygiene: rotate Telegram token via @BotFather + Coolify prod/dev, git rm --cached .env.docker, create .env.docker.example (variant B), create docs/runbooks/env-setup.md (4-env matrix + rotation + sync rule), final runtime smoke verification
+
 ### Phase 25: RabbitMQ EventModule
 **Goal**: Services can publish and consume domain events through typed interfaces with guaranteed delivery semantics, dead letter handling, and health monitoring
 **Depends on**: Phase 20
@@ -292,6 +305,7 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
 | 23. gRPC Client Typed Wrappers | v4.0 | 3/4 | In Progress|  |
 | 24. HTTP Client & Circuit Breaker | v4.0 | 2/3 | In Progress|  |
+| 24.1. HTTP client foundation hardening | v4.0 | 0/4 | In Progress|  |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
 | 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
@@ -316,6 +330,7 @@ Plans:
 - Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты (связано с 999.1)
 - `foundation/cache/cache.providers.ts` — `config.get<string>('REDIS_URL')!` магическая строка + assertion
 - `foundation/persistence/persistence.providers.ts` — `config.get<string>('DATABASE_URL')` тот же паттерн
+- Foundation gRPC client modules (14+ occurrences in auth/audience/parser/sender/notifier-client.module.ts) — left out of Phase 24.1 scope per orchestrator memo
 **Requirements:** TBD
 **Plans:** 0 plans
 
