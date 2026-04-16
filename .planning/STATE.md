@@ -4,14 +4,14 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 24.1 context gathered — full architectural refactor scope + env hygiene
-last_updated: "2026-04-16T06:31:53.433Z"
-last_activity: 2026-04-15
+last_updated: "2026-04-16T07:50:24.176Z"
+last_activity: 2026-04-16 -- Phase 24.1 planning complete
 progress:
   total_phases: 22
   completed_phases: 10
-  total_plans: 32
+  total_plans: 36
   completed_plans: 32
-  percent: 100
+  percent: 89
 ---
 
 # Project State
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 Phase: 24 (http-client-circuit-breaker) — EXECUTING
 Plan: 3 of 3
 Status: Ready to execute
-Last activity: 2026-04-15
+Last activity: 2026-04-16 -- Phase 24.1 planning complete
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
 
