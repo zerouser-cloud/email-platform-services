@@ -165,4 +165,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after Phase 22.1 complete*
+*Last updated: 2026-04-16 after Phase 24.1 complete (HTTP client foundation hardened: DI ports+adapters, env hygiene, magic values extracted, HttpSmokeClient split)*
