@@ -1,67 +1,65 @@
 import type { ClientGrpc } from '@nestjs/microservices';
-import { ClsService } from 'nestjs-cls';
 import { AudienceProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
-import { AbstractGrpcClient } from '@email-platform/foundation';
-import type { CallOpts } from '@email-platform/foundation';
+import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
 
-export class AudienceClient extends AbstractGrpcClient<AudienceProto.AudienceServiceClient> {
-  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
-    super(grpc, cls, SERVICE.audience.grpc.serviceName, defaultDeadlineMs, AudienceClient.name);
+export class AudienceClient {
+  private readonly raw: AudienceProto.AudienceServiceClient;
+
+  constructor(
+    grpcClient: ClientGrpc,
+    private readonly grpc: GrpcCaller,
+  ) {
+    this.raw = grpcClient.getService<AudienceProto.AudienceServiceClient>(
+      SERVICE.audience.grpc.serviceName,
+    );
   }
 
-  healthCheck(request: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
-    return this.call('healthCheck', this.raw.healthCheck(request, this.buildMetadata(opts)));
+  healthCheck(req: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
+    return this.grpc.call('healthCheck', opts, (m) => this.raw.healthCheck(req, m));
   }
   listGroups(
-    request: AudienceProto.ListGroupsRequest,
+    req: AudienceProto.ListGroupsRequest,
     opts?: CallOpts,
   ): Promise<AudienceProto.GroupList> {
-    return this.call('listGroups', this.raw.listGroups(request, this.buildMetadata(opts)));
+    return this.grpc.call('listGroups', opts, (m) => this.raw.listGroups(req, m));
   }
   createGroup(
-    request: AudienceProto.CreateGroupRequest,
+    req: AudienceProto.CreateGroupRequest,
     opts?: CallOpts,
   ): Promise<AudienceProto.Group> {
-    return this.call('createGroup', this.raw.createGroup(request, this.buildMetadata(opts)));
+    return this.grpc.call('createGroup', opts, (m) => this.raw.createGroup(req, m));
   }
-  deleteGroup(request: AudienceProto.GroupIdRequest, opts?: CallOpts): Promise<CommonProto.Empty> {
-    return this.call('deleteGroup', this.raw.deleteGroup(request, this.buildMetadata(opts)));
+  deleteGroup(req: AudienceProto.GroupIdRequest, opts?: CallOpts): Promise<CommonProto.Empty> {
+    return this.grpc.call('deleteGroup', opts, (m) => this.raw.deleteGroup(req, m));
   }
   listRecipients(
-    request: AudienceProto.ListRecipientsRequest,
+    req: AudienceProto.ListRecipientsRequest,
     opts?: CallOpts,
   ): Promise<AudienceProto.RecipientList> {
-    return this.call('listRecipients', this.raw.listRecipients(request, this.buildMetadata(opts)));
+    return this.grpc.call('listRecipients', opts, (m) => this.raw.listRecipients(req, m));
   }
   getRecipientsByGroup(
-    request: AudienceProto.GetByGroupRequest,
+    req: AudienceProto.GetByGroupRequest,
     opts?: CallOpts,
   ): Promise<AudienceProto.RecipientList> {
-    return this.call(
-      'getRecipientsByGroup',
-      this.raw.getRecipientsByGroup(request, this.buildMetadata(opts)),
+    return this.grpc.call('getRecipientsByGroup', opts, (m) =>
+      this.raw.getRecipientsByGroup(req, m),
     );
   }
   importRecipients(
-    request: AudienceProto.ImportRecipientsRequest,
+    req: AudienceProto.ImportRecipientsRequest,
     opts?: CallOpts,
   ): Promise<AudienceProto.ImportResult> {
-    return this.call(
-      'importRecipients',
-      this.raw.importRecipients(request, this.buildMetadata(opts)),
-    );
+    return this.grpc.call('importRecipients', opts, (m) => this.raw.importRecipients(req, m));
   }
-  markAsSent(request: AudienceProto.MarkSentRequest, opts?: CallOpts): Promise<CommonProto.Empty> {
-    return this.call('markAsSent', this.raw.markAsSent(request, this.buildMetadata(opts)));
+  markAsSent(req: AudienceProto.MarkSentRequest, opts?: CallOpts): Promise<CommonProto.Empty> {
+    return this.grpc.call('markAsSent', opts, (m) => this.raw.markAsSent(req, m));
   }
   resetSendStatus(
-    request: AudienceProto.ResetStatusRequest,
+    req: AudienceProto.ResetStatusRequest,
     opts?: CallOpts,
   ): Promise<CommonProto.Empty> {
-    return this.call(
-      'resetSendStatus',
-      this.raw.resetSendStatus(request, this.buildMetadata(opts)),
-    );
+    return this.grpc.call('resetSendStatus', opts, (m) => this.raw.resetSendStatus(req, m));
   }
 }
