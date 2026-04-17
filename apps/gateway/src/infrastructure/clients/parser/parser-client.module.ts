@@ -5,7 +5,7 @@ import { ParserClient } from './parser.client';
 
 const grpc = defineGrpcClient(
   { service: SERVICE.parser, clientToken: SERVICE.parser.diToken },
-  (grpcClient, cls, deadlineMs) => new ParserClient(grpcClient, cls, deadlineMs),
+  (grpcClient, caller) => new ParserClient(grpcClient, caller),
 );
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).
