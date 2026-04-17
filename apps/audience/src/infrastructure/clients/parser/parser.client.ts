@@ -1,19 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import type { ClientGrpc } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
 import { ParserProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
 import { AbstractGrpcClient } from '@email-platform/foundation';
 import type { CallOpts } from '@email-platform/foundation';
-import { PARSER_CLIENT_GRPC } from './parser-client.constants';
 
-@Injectable()
 export class ParserClient extends AbstractGrpcClient<ParserProto.ParserServiceClient> {
-  constructor(
-    @Inject(PARSER_CLIENT_GRPC) grpc: ClientGrpc,
-    cls: ClsService,
-    defaultDeadlineMs: number,
-  ) {
+  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
     super(grpc, cls, SERVICE.parser.grpc.serviceName, defaultDeadlineMs, ParserClient.name);
   }
 
