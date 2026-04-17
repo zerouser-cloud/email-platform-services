@@ -165,4 +165,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 24.1 complete (HTTP client foundation hardened: DI ports+adapters, env hygiene, magic values extracted, HttpSmokeClient split)*
+*Last updated: 2026-04-17 after Phase 999.7 complete (gRPC client modules migrated from foundation to per-service infrastructure layer; defineGrpcClient() factory; foundation decoupled from contracts)*
