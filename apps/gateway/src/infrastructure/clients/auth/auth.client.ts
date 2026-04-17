@@ -6,10 +6,11 @@ import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
 export class AuthClient {
   private readonly raw: AuthProto.AuthServiceClient;
 
-  constructor(grpcClient: ClientGrpc, private readonly grpc: GrpcCaller) {
-    this.raw = grpcClient.getService<AuthProto.AuthServiceClient>(
-      SERVICE.auth.grpc.serviceName,
-    );
+  constructor(
+    grpcClient: ClientGrpc,
+    private readonly grpc: GrpcCaller,
+  ) {
+    this.raw = grpcClient.getService<AuthProto.AuthServiceClient>(SERVICE.auth.grpc.serviceName);
   }
 
   healthCheck(req: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
