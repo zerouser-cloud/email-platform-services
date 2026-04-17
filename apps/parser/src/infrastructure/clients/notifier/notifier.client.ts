@@ -1,34 +1,33 @@
 import type { ClientGrpc } from '@nestjs/microservices';
-import { ClsService } from 'nestjs-cls';
 import { NotifierProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
-import { AbstractGrpcClient } from '@email-platform/foundation';
-import type { CallOpts } from '@email-platform/foundation';
+import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
 
-export class NotifierClient extends AbstractGrpcClient<NotifierProto.NotifierServiceClient> {
-  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
-    super(grpc, cls, SERVICE.notifier.grpc.serviceName, defaultDeadlineMs, NotifierClient.name);
+export class NotifierClient {
+  private readonly raw: NotifierProto.NotifierServiceClient;
+
+  constructor(
+    grpcClient: ClientGrpc,
+    private readonly grpc: GrpcCaller,
+  ) {
+    this.raw = grpcClient.getService<NotifierProto.NotifierServiceClient>(
+      SERVICE.notifier.grpc.serviceName,
+    );
   }
 
-  healthCheck(request: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
-    return this.call('healthCheck', this.raw.healthCheck(request, this.buildMetadata(opts)));
+  healthCheck(req: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
+    return this.grpc.call('healthCheck', opts, (m) => this.raw.healthCheck(req, m));
   }
   runStorageSmoke(
-    request: CommonProto.Empty,
+    req: CommonProto.Empty,
     opts?: CallOpts,
   ): Promise<NotifierProto.StorageSmokeResponse> {
-    return this.call(
-      'runStorageSmoke',
-      this.raw.runStorageSmoke(request, this.buildMetadata(opts)),
-    );
+    return this.grpc.call('runStorageSmoke', opts, (m) => this.raw.runStorageSmoke(req, m));
   }
   cleanupStorageSmoke(
-    request: NotifierProto.CleanupSmokeRequest,
+    req: NotifierProto.CleanupSmokeRequest,
     opts?: CallOpts,
   ): Promise<NotifierProto.CleanupSmokeResponse> {
-    return this.call(
-      'cleanupStorageSmoke',
-      this.raw.cleanupStorageSmoke(request, this.buildMetadata(opts)),
-    );
+    return this.grpc.call('cleanupStorageSmoke', opts, (m) => this.raw.cleanupStorageSmoke(req, m));
   }
 }
