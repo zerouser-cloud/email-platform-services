@@ -24,3 +24,10 @@ export type { CallOpts } from './grpc-client-logging.types';
 // Health indicator class — type-only export so consumers (e.g. gateway health controller)
 // can declare injected fields; runtime providers are registered inside each *ClientModule.
 export { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
+
+// Factory helper — encapsulates gRPC client module boilerplate for per-service composition:
+export { defineGrpcClient } from './define-grpc-client';
+export type { DefineGrpcClientOpts, GrpcClientBuildResult } from './define-grpc-client';
+
+// Base class for typed gRPC client facades:
+export { AbstractGrpcClient } from './abstract-grpc-client';
