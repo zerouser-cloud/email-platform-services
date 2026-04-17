@@ -5,7 +5,7 @@ module.exports = {
         ecmaVersion: 2022,
         sourceType: 'module',
     },
-    plugins: ['@typescript-eslint', 'prettier'],
+    plugins: ['@typescript-eslint', 'prettier', 'check-file'],
     extends: [
         'plugin:@typescript-eslint/recommended',
         'plugin:prettier/recommended',
@@ -114,6 +114,55 @@ module.exports = {
                         ],
                         message: 'Apps cannot import from other apps. Use contracts for shared types. (Foundation internal is allowed in infrastructure/ per Phase 22.1.)',
                     }],
+                }],
+            },
+        },
+        // Override 6: Forbid @Injectable() and @Inject() on gRPC client classes (D-07 + D-12a).
+        // Rationale: gRPC clients are wired via useFactory; decorators are dead code and leak wiring concern
+        // into the domain class. See .agents/skills/infrastructure-client-layering/SKILL.md.
+        // SCOPE: enumerated 8 gRPC upstream paths (Pitfall 3 — must NOT match HTTP clients).
+        {
+            files: [
+                'apps/gateway/src/infrastructure/clients/auth/*.client.ts',
+                'apps/gateway/src/infrastructure/clients/sender/*.client.ts',
+                'apps/gateway/src/infrastructure/clients/parser/*.client.ts',
+                'apps/gateway/src/infrastructure/clients/audience/*.client.ts',
+                'apps/gateway/src/infrastructure/clients/notifier/*.client.ts',
+                'apps/sender/src/infrastructure/clients/audience/*.client.ts',
+                'apps/parser/src/infrastructure/clients/notifier/*.client.ts',
+                'apps/audience/src/infrastructure/clients/parser/*.client.ts',
+            ],
+            rules: {
+                'no-restricted-syntax': ['error',
+                    {
+                        selector: 'ClassDeclaration > Decorator > CallExpression[callee.name="Injectable"]',
+                        message: 'gRPC client classes are wired via useFactory; @Injectable() is dead code and leaks wiring concern. See .agents/skills/infrastructure-client-layering/SKILL.md.',
+                    },
+                    {
+                        selector: 'MethodDefinition[kind="constructor"] Decorator > CallExpression[callee.name="Inject"]',
+                        message: 'gRPC client classes are wired via useFactory; @Inject() decorator on constructor params is ignored. Pass tokens via factory inject array.',
+                    },
+                ],
+            },
+        },
+        // Override 7: Forbid creation of *-client.constants.ts files in gRPC client paths (D-05 + D-12b).
+        // Rationale: token names are derived inside defineGrpcClient(); apps re-export named consts
+        // (AUTH_CLIENT_GRPC = grpc.grpcToken) directly in the *-client.module.ts file.
+        // SCOPE: enumerated 8 gRPC upstream paths (Pitfall 3 — HTTP clients legitimately use *-client.constants.ts).
+        {
+            files: [
+                'apps/gateway/src/infrastructure/clients/auth/**',
+                'apps/gateway/src/infrastructure/clients/sender/**',
+                'apps/gateway/src/infrastructure/clients/parser/**',
+                'apps/gateway/src/infrastructure/clients/audience/**',
+                'apps/gateway/src/infrastructure/clients/notifier/**',
+                'apps/sender/src/infrastructure/clients/audience/**',
+                'apps/parser/src/infrastructure/clients/notifier/**',
+                'apps/audience/src/infrastructure/clients/parser/**',
+            ],
+            rules: {
+                'check-file/filename-blocklist': ['error', {
+                    '**/*-client.constants.ts': '*-client.module.ts (re-export named tokens via grpc.grpcToken / grpc.healthToken)',
                 }],
             },
         },
