@@ -196,7 +196,7 @@ Plans:
 - [x] 23-01-PLAN.md — Migrate SERVICE.diToken to Symbol.for() + delete obsolete GrpcClientModule
 - [x] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
 - [x] 23-03-PLAN.md — Five per-service client modules (audience, auth, parser, sender, notifier) + barrel
-- [ ] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
+- [x] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
 
 ### Phase 24: HTTP Client & Circuit Breaker
 **Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection
@@ -211,7 +211,7 @@ Plans:
 Plans:
 - [x] 24-01-PLAN.md — Foundation HTTP primitives: opossum + AbstractHttpClient + retry + CB + errors + types, export via foundation barrel
 - [x] 24-02-PLAN.md — Contracts external types (Telegram/AppStoreSpy/CloudFn) + external-apis config sub-schema + per-service env extensions + .env files
-- [ ] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
+- [x] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
 
 ### Phase 24.1: HTTP client foundation hardening — DI, env hygiene, magic values, smoke refactor (INSERTED)
 
@@ -236,10 +236,7 @@ Plans:
   3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
   4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
   5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
-**Plans**: 2 plans
-Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+**Plans**: 0 plans (not yet planned)
 
 ### Phase 26: Graceful Shutdown
 **Goal**: When a service receives SIGTERM, all in-flight work completes and all connections close in the correct order before the process exits
@@ -249,10 +246,7 @@ Plans:
   1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
   2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
   3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
-**Plans**: 2 plans
-Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+**Plans**: 0 plans (not yet planned)
 
 ### Phase 27: Distributed Tracing
 **Goal**: A single correlation ID follows a request from gateway entry through all downstream gRPC calls and RabbitMQ event chains, visible in every log line
@@ -262,10 +256,7 @@ Plans:
   1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
   2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
   3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
-**Plans**: 2 plans
-Plans:
-- [ ] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
-- [ ] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
+**Plans**: 0 plans (not yet planned)
 
 ## Progress
 
@@ -303,8 +294,8 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 | 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
 | 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
 | 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
-| 23. gRPC Client Typed Wrappers | v4.0 | 3/4 | In Progress|  |
-| 24. HTTP Client & Circuit Breaker | v4.0 | 2/3 | In Progress|  |
+| 23. gRPC Client Typed Wrappers | v4.0 | 4/4 | Complete    | 2026-04-15 |
+| 24. HTTP Client & Circuit Breaker | v4.0 | 3/3 | Complete    | 2026-04-15 |
 | 24.1. HTTP client foundation hardening | v4.0 | 4/4 | Complete    | 2026-04-16 |
 | 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
 | 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
@@ -375,13 +366,16 @@ Plans:
 
 ### Phase 999.7: Перенести gRPC client modules из foundation в infrastructure layer сервисов (BACKLOG)
 
-**Goal:** Сейчас все 5 typed-facade модулей (`AudienceClientModule`, `AuthClientModule`, `ParserClientModule`, `SenderClientModule`, `NotifierClientModule`) живут в `packages/foundation/src/external/grpc/clients/{service}/` — это вынуждает foundation импортировать `@email-platform/contracts` и знать про каждый бизнес-сервис платформы. Foundation должен оставаться domain-agnostic: предоставлять только примитивы (`AbstractGrpcClient`, `GrpcClientHealthIndicator`, deadline interceptor, logging interceptor, helper `defineGrpcClient(SERVICE.x, ClientFacadeClass)`). Per-service typed-facade модули должны жить в `apps/{service}/src/infrastructure/clients/{upstream}-client.module.ts` — каждый сервис собирает только те клиенты, которые ему нужны (sender → audience+parser, gateway → все 5, notifier → ничего). Это устранит coupling foundation→contracts и приведёт к единому паттерну с CacheModule/PersistenceModule. Принято в Phase 23 для скорости поставки; зафиксировать как техдолг.
-**Known coupling:** `packages/foundation/src/external/grpc/clients/{audience,auth,parser,sender,notifier}/{x}.client.ts` импортируют `*Proto` namespace из `@email-platform/contracts`.
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** Декаплинг foundation от contracts: 5 typed-facade gRPC клиентов переезжают из packages/foundation/ в apps/{consumer}/src/infrastructure/clients/{upstream}/. Foundation остаётся domain-agnostic — предоставляет только примитивы (AbstractGrpcClient, GrpcClientHealthIndicator, defineGrpcClient()). Новая factory-функция defineGrpcClient() инкапсулирует ~60-строчный boilerplate в ~15-строчный consumer-side модуль. ESLint rule блокирует foundation->contracts регрессию.
+**Requirements:** D-01..D-09 (locked decisions in 999.7-CONTEXT.md serve as requirement surface)
+**Depends on:** Phase 23
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [ ] 999.7-01-PLAN.md — Foundation defineGrpcClient() factory + barrel update
+- [ ] 999.7-02-PLAN.md — Gateway: 5 per-upstream client dirs + rewire consumers
+- [ ] 999.7-03-PLAN.md — Cross-service: sender->audience, parser->notifier, audience->parser + root modules
+- [ ] 999.7-04-PLAN.md — Foundation cleanup: delete 5 per-service dirs + ESLint guard + full workspace verify
 
 ### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
 
