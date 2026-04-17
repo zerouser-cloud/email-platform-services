@@ -134,6 +134,7 @@
 - **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.agents/skills/twelve-factor/SKILL.md` for 12-Factor rules.
 - **No infrastructure changes without user approval.** Never change ports, docker-compose, .env files, credentials, or connection strings without explicit confirmation. Standard ports must be preserved (5432, 6379, 5672, 9000). See `.agents/skills/infrastructure-guard/SKILL.md` for pre-change checklist.
 - **No defaults or optionals in env schemas.** Zod env schemas must not use `.default()` or `.optional()`. No `z.coerce.boolean()` (use `z.string().transform(v => v === 'true')`). No fallbacks in consumer code (`?? value`, `|| value`). Every env var required, every value from `.env` files. See `.agents/skills/env-schema/SKILL.md` for rules.
+- **Infrastructure-client layering.** Identity → catalog (`packages/config`). Mechanisms → foundation (`packages/foundation`). Assembly + naming → apps. Catalog stays transport-agnostic (no `*Token` for grpc/http/rmq). Foundation stays service-agnostic (no `auth`/`sender` references). Single-instance infra (DB/Redis/S3) → token in foundation. Multi-instance with catalog identity (gRPC) → derive token in foundation, name in apps. Multi-instance without catalog (HTTP) → per-app constants. Reference: Phase 999.7.x (gRPC). See `.agents/skills/infrastructure-client-layering/SKILL.md` for decision tree.
 - Prettier configured with:
 - Format and check: `pnpm lint:fix` for workspace
 - Individual app linting: `eslint src/ --ext .ts`
@@ -328,12 +329,26 @@
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+**CRITICAL: Before EVERY file-changing action (Edit, Write, Bash with side-effects), run the gsd-flow-guard checkpoint.** See `.agents/skills/gsd-flow-guard/SKILL.md` for the full decision tree.
 
-Use these entry points:
-- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd:debug` for investigation and bug fixing
-- `/gsd:execute-phase` for planned phase work
+**Self-check before any edit:**
+1. Am I inside a GSD workflow right now? → YES: continue. NO: go to 2.
+2. Which `/gsd:*` command handles this? → Route to it. None fits: go to 3.
+3. Did the user explicitly authorize a direct edit? → YES: proceed. NO: STOP and ask.
+
+**Routing table:**
+- `/gsd:fast` — trivial fixes, status updates, doc tweaks, ROADMAP checkbox flips (< 3 files, no planning needed)
+- `/gsd:quick` — medium tasks with GSD guarantees (atomic commits, state tracking)
+- `/gsd:debug` — investigation and bug fixing
+- `/gsd:execute-phase` — planned phase work
+- `/gsd:plan-phase` / `/gsd:insert-phase` — new feature or refactor requiring planning
+- `/gsd:docs-update` — project documentation generation
+
+**Common traps (historically violated):**
+- "Just update ROADMAP.md" → `/gsd:fast`, not direct Edit
+- "Small 2-file refactor" → `/gsd:fast` with atomic commit
+- "Found a bug while investigating" → report finding, route to `/gsd:debug` or `/gsd:fast`
+- "Phase done, flip the checkbox" → part of phase completion flow
 
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
