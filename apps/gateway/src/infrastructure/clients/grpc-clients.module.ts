@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
-import {
-  AudienceClientModule,
-  AuthClientModule,
-  ParserClientModule,
-  SenderClientModule,
-  NotifierClientModule,
-} from '@email-platform/foundation';
+import { AuthClientModule } from './auth';
+import { SenderClientModule } from './sender';
+import { ParserClientModule } from './parser';
+import { AudienceClientModule } from './audience';
+import { NotifierClientModule } from './notifier';
 
 @Module({
   imports: [

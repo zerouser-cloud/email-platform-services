@@ -8,14 +8,12 @@
  *
  * DO NOT import this file from any runtime module.
  */
-import type {
-  AuthClient,
-  SenderClient,
-  ParserClient,
-  AudienceClient,
-  NotifierClient,
-  CallOpts,
-} from '@email-platform/foundation';
+import type { CallOpts } from '@email-platform/foundation';
+import type { AuthClient } from '../infrastructure/clients/auth';
+import type { SenderClient } from '../infrastructure/clients/sender';
+import type { ParserClient } from '../infrastructure/clients/parser';
+import type { AudienceClient } from '../infrastructure/clients/audience';
+import type { NotifierClient } from '../infrastructure/clients/notifier';
 import type {
   AuthProto,
   SenderProto,

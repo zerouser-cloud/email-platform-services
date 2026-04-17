@@ -1,5 +1,6 @@
 import { Controller, Get, Delete, Query, Inject } from '@nestjs/common';
-import type { ParserClient, NotifierClient } from '@email-platform/foundation';
+import type { ParserClient } from '../infrastructure/clients/parser';
+import type { NotifierClient } from '../infrastructure/clients/notifier';
 import { SERVICE } from '@email-platform/config';
 import { ParserProto, NotifierProto } from '@email-platform/contracts';
 

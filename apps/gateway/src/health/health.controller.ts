@@ -1,16 +1,12 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { HealthCheckService, HealthCheck, type HealthIndicatorResult } from '@nestjs/terminus';
-import {
-  HEALTH,
-  getBuildInfo,
-  GrpcClientHealthIndicator,
-  AUTH_GRPC_HEALTH,
-  SENDER_GRPC_HEALTH,
-  PARSER_GRPC_HEALTH,
-  AUDIENCE_GRPC_HEALTH,
-  NOTIFIER_GRPC_HEALTH,
-} from '@email-platform/foundation';
+import { HEALTH, getBuildInfo, GrpcClientHealthIndicator } from '@email-platform/foundation';
+import { AUTH_GRPC_HEALTH } from '../infrastructure/clients/auth';
+import { SENDER_GRPC_HEALTH } from '../infrastructure/clients/sender';
+import { PARSER_GRPC_HEALTH } from '../infrastructure/clients/parser';
+import { AUDIENCE_GRPC_HEALTH } from '../infrastructure/clients/audience';
+import { NOTIFIER_GRPC_HEALTH } from '../infrastructure/clients/notifier';
 import { SERVICE } from '@email-platform/config';
 
 @SkipThrottle()
