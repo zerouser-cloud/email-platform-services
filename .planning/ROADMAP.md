@@ -369,11 +369,11 @@ Plans:
 **Goal:** Декаплинг foundation от contracts: 5 typed-facade gRPC клиентов переезжают из packages/foundation/ в apps/{consumer}/src/infrastructure/clients/{upstream}/. Foundation остаётся domain-agnostic — предоставляет только примитивы (AbstractGrpcClient, GrpcClientHealthIndicator, defineGrpcClient()). Новая factory-функция defineGrpcClient() инкапсулирует ~60-строчный boilerplate в ~15-строчный consumer-side модуль. ESLint rule блокирует foundation->contracts регрессию.
 **Requirements:** D-01..D-09 (locked decisions in 999.7-CONTEXT.md serve as requirement surface)
 **Depends on:** Phase 23
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 - [x] 999.7-01-PLAN.md — Foundation defineGrpcClient() factory + barrel update
-- [ ] 999.7-02-PLAN.md — Gateway: 5 per-upstream client dirs + rewire consumers
+- [x] 999.7-02-PLAN.md — Gateway: 5 per-upstream client dirs + rewire consumers
 - [ ] 999.7-03-PLAN.md — Cross-service: sender->audience, parser->notifier, audience->parser + root modules
 - [ ] 999.7-04-PLAN.md — Foundation cleanup: delete 5 per-service dirs + ESLint guard + full workspace verify
 
