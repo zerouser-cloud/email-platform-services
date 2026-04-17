@@ -9,6 +9,7 @@ import { resolveProtoPath } from '../proto-resolver';
 import { createDeadlineInterceptor } from '../../resilience/grpc-deadline.interceptor';
 import { GRPC_CLIENT_HEALTH } from './clients.constants';
 import { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
+import { GrpcCaller } from './grpc-caller';
 
 const TOKEN_SUFFIX = {
   CLIENT_GRPC: '_CLIENT_GRPC',
@@ -30,7 +31,7 @@ export interface GrpcClientBuildResult {
 
 export function defineGrpcClient<T extends object>(
   opts: DefineGrpcClientOpts,
-  build: (grpc: ClientGrpc, cls: ClsService, deadlineMs: number) => T,
+  build: (grpcClient: ClientGrpc, caller: GrpcCaller) => T,
 ): GrpcClientBuildResult {
   const upperId = opts.service.id.toUpperCase();
   const grpcToken = Symbol.for(`${upperId}${TOKEN_SUFFIX.CLIENT_GRPC}`);
@@ -39,8 +40,15 @@ export function defineGrpcClient<T extends object>(
   const facadeProvider: Provider = {
     provide: opts.clientToken,
     inject: [grpcToken, ClsService, ConfigService],
-    useFactory: (grpc: ClientGrpc, cls: ClsService, config: ConfigService) =>
-      build(grpc, cls, config.get<number>('GRPC_DEADLINE_MS')!),
+    useFactory: (grpc: ClientGrpc, cls: ClsService, config: ConfigService) => {
+      const caller = new GrpcCaller(
+        cls,
+        opts.service.grpc.serviceName,
+        config.get<number>('GRPC_DEADLINE_MS')!,
+        `${upperId}Client`,
+      );
+      return build(grpc, caller);
+    },
   };
 
   const healthProvider: Provider = {
