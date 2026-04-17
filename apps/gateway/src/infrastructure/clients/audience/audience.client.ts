@@ -1,19 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import type { ClientGrpc } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
 import { AudienceProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
 import { AbstractGrpcClient } from '@email-platform/foundation';
 import type { CallOpts } from '@email-platform/foundation';
-import { AUDIENCE_CLIENT_GRPC } from './audience-client.constants';
 
-@Injectable()
 export class AudienceClient extends AbstractGrpcClient<AudienceProto.AudienceServiceClient> {
-  constructor(
-    @Inject(AUDIENCE_CLIENT_GRPC) grpc: ClientGrpc,
-    cls: ClsService,
-    defaultDeadlineMs: number,
-  ) {
+  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
     super(grpc, cls, SERVICE.audience.grpc.serviceName, defaultDeadlineMs, AudienceClient.name);
   }
 
