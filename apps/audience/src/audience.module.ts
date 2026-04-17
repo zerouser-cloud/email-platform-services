@@ -5,6 +5,7 @@ import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
 import { AudienceGrpcServer } from './infrastructure/grpc/audience.grpc-server';
 import { ImportRecipientsUseCase } from './application/use-cases/import-recipients.use-case';
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
+import { ParserClientModule } from './infrastructure/clients/parser';
 import { HealthController } from './health/health.controller';
 import { RECIPIENT_REPOSITORY_PORT, IMPORT_RECIPIENTS_PORT } from './audience.constants';
 
@@ -13,6 +14,7 @@ import { RECIPIENT_REPOSITORY_PORT, IMPORT_RECIPIENTS_PORT } from './audience.co
     AppConfigModule.forRoot(AudienceEnvSchema),
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('audience'),
+    ParserClientModule.forRoot(),
   ],
   controllers: [AudienceGrpcServer, HealthController],
   providers: [

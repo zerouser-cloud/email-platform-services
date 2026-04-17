@@ -6,6 +6,7 @@ import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
 import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
 import { CloudFnClientModule } from './infrastructure/clients/cloud-functions';
+import { AudienceClientModule } from './infrastructure/clients/audience';
 import { HealthController } from './health/health.controller';
 import { CloudFnSmokeController } from './test/cloudfn-smoke.controller';
 import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constants';
@@ -17,6 +18,7 @@ import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constan
     CacheModule.forRootAsync({ namespace: 'sender' }),
     LoggingModule.forGrpcAsync('sender'),
     CloudFnClientModule.forRoot(),
+    AudienceClientModule.forRoot(),
   ],
   controllers: [SenderGrpcServer, HealthController, CloudFnSmokeController],
   providers: [

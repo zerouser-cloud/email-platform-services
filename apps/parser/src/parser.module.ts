@@ -6,6 +6,7 @@ import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
 import { StartParsingUseCase } from './application/use-cases/start-parsing.use-case';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
 import { AppStoreSpyClientModule } from './infrastructure/clients/appstorespy';
+import { NotifierClientModule } from './infrastructure/clients/notifier';
 import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
 import { StorageSmokeController } from './test/storage-smoke.controller';
@@ -19,6 +20,7 @@ import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.consta
     StorageModule,
     LoggingModule.forGrpcAsync('parser'),
     AppStoreSpyClientModule.forRoot(),
+    NotifierClientModule.forRoot(),
   ],
   controllers: [
     ParserGrpcServer,
