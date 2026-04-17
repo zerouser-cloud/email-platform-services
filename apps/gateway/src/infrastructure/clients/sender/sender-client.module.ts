@@ -5,7 +5,7 @@ import { SenderClient } from './sender.client';
 
 const grpc = defineGrpcClient(
   { service: SERVICE.sender, clientToken: SERVICE.sender.diToken },
-  (grpcClient, cls, deadlineMs) => new SenderClient(grpcClient, cls, deadlineMs),
+  (grpcClient, caller) => new SenderClient(grpcClient, caller),
 );
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).

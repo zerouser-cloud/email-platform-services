@@ -1,76 +1,72 @@
 import type { ClientGrpc } from '@nestjs/microservices';
-import { ClsService } from 'nestjs-cls';
 import { SenderProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
-import { AbstractGrpcClient } from '@email-platform/foundation';
-import type { CallOpts } from '@email-platform/foundation';
+import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
 
-export class SenderClient extends AbstractGrpcClient<SenderProto.SenderServiceClient> {
-  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
-    super(grpc, cls, SERVICE.sender.grpc.serviceName, defaultDeadlineMs, SenderClient.name);
+export class SenderClient {
+  private readonly raw: SenderProto.SenderServiceClient;
+
+  constructor(
+    grpcClient: ClientGrpc,
+    private readonly grpc: GrpcCaller,
+  ) {
+    this.raw = grpcClient.getService<SenderProto.SenderServiceClient>(
+      SERVICE.sender.grpc.serviceName,
+    );
   }
 
-  healthCheck(request: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
-    return this.call('healthCheck', this.raw.healthCheck(request, this.buildMetadata(opts)));
+  healthCheck(req: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
+    return this.grpc.call('healthCheck', opts, (m) => this.raw.healthCheck(req, m));
   }
   listCampaigns(
-    request: SenderProto.ListCampaignsRequest,
+    req: SenderProto.ListCampaignsRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.CampaignList> {
-    return this.call('listCampaigns', this.raw.listCampaigns(request, this.buildMetadata(opts)));
+    return this.grpc.call('listCampaigns', opts, (m) => this.raw.listCampaigns(req, m));
   }
-  getCampaign(
-    request: SenderProto.CampaignIdRequest,
-    opts?: CallOpts,
-  ): Promise<SenderProto.Campaign> {
-    return this.call('getCampaign', this.raw.getCampaign(request, this.buildMetadata(opts)));
+  getCampaign(req: SenderProto.CampaignIdRequest, opts?: CallOpts): Promise<SenderProto.Campaign> {
+    return this.grpc.call('getCampaign', opts, (m) => this.raw.getCampaign(req, m));
   }
   createCampaign(
-    request: SenderProto.CreateCampaignRequest,
+    req: SenderProto.CreateCampaignRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.Campaign> {
-    return this.call('createCampaign', this.raw.createCampaign(request, this.buildMetadata(opts)));
+    return this.grpc.call('createCampaign', opts, (m) => this.raw.createCampaign(req, m));
   }
   pauseCampaign(
-    request: SenderProto.CampaignIdRequest,
+    req: SenderProto.CampaignIdRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.Campaign> {
-    return this.call('pauseCampaign', this.raw.pauseCampaign(request, this.buildMetadata(opts)));
+    return this.grpc.call('pauseCampaign', opts, (m) => this.raw.pauseCampaign(req, m));
   }
   resumeCampaign(
-    request: SenderProto.CampaignIdRequest,
+    req: SenderProto.CampaignIdRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.Campaign> {
-    return this.call('resumeCampaign', this.raw.resumeCampaign(request, this.buildMetadata(opts)));
+    return this.grpc.call('resumeCampaign', opts, (m) => this.raw.resumeCampaign(req, m));
   }
   listRunners(
-    request: SenderProto.ListRunnersRequest,
+    req: SenderProto.ListRunnersRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.RunnerList> {
-    return this.call('listRunners', this.raw.listRunners(request, this.buildMetadata(opts)));
+    return this.grpc.call('listRunners', opts, (m) => this.raw.listRunners(req, m));
   }
-  createRunner(
-    request: SenderProto.CreateRunnerRequest,
-    opts?: CallOpts,
-  ): Promise<SenderProto.Runner> {
-    return this.call('createRunner', this.raw.createRunner(request, this.buildMetadata(opts)));
+  createRunner(req: SenderProto.CreateRunnerRequest, opts?: CallOpts): Promise<SenderProto.Runner> {
+    return this.grpc.call('createRunner', opts, (m) => this.raw.createRunner(req, m));
   }
   listMessages(
-    request: SenderProto.ListMessagesRequest,
+    req: SenderProto.ListMessagesRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.MessageList> {
-    return this.call('listMessages', this.raw.listMessages(request, this.buildMetadata(opts)));
+    return this.grpc.call('listMessages', opts, (m) => this.raw.listMessages(req, m));
   }
   createMessage(
-    request: SenderProto.CreateMessageRequest,
+    req: SenderProto.CreateMessageRequest,
     opts?: CallOpts,
   ): Promise<SenderProto.Message> {
-    return this.call('createMessage', this.raw.createMessage(request, this.buildMetadata(opts)));
+    return this.grpc.call('createMessage', opts, (m) => this.raw.createMessage(req, m));
   }
-  listMacros(
-    request: SenderProto.ListMacrosRequest,
-    opts?: CallOpts,
-  ): Promise<SenderProto.MacrosList> {
-    return this.call('listMacros', this.raw.listMacros(request, this.buildMetadata(opts)));
+  listMacros(req: SenderProto.ListMacrosRequest, opts?: CallOpts): Promise<SenderProto.MacrosList> {
+    return this.grpc.call('listMacros', opts, (m) => this.raw.listMacros(req, m));
   }
 }
