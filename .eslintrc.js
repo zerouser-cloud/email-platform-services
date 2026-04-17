@@ -117,10 +117,13 @@ module.exports = {
                 }],
             },
         },
-        // Override 6: Forbid @Injectable() and @Inject() on gRPC client classes (D-07 + D-12a).
-        // Rationale: gRPC clients are wired via useFactory; decorators are dead code and leak wiring concern
-        // into the domain class. See .agents/skills/infrastructure-client-layering/SKILL.md.
-        // SCOPE: enumerated 8 gRPC upstream paths (Pitfall 3 — must NOT match HTTP clients).
+        // Override 6: Forbid @Injectable() and @Inject() on gRPC client classes (D-07 + D-12a, 999.7.1)
+        //             AND forbid ANY `extends` on gRPC client classes (D-16, 999.7.2).
+        // Rationale: gRPC clients are wired via useFactory — decorators are dead code.
+        //            Inheritance is replaced by composition via injected GrpcCaller.
+        //            See .agents/skills/infrastructure-client-layering/SKILL.md
+        //            and .agents/skills/composition-over-inheritance/SKILL.md.
+        // SCOPE: enumerated 8 gRPC upstream paths (HTTP clients legitimately extend AbstractHttpClient).
         {
             files: [
                 'apps/gateway/src/infrastructure/clients/auth/*.client.ts',
@@ -141,6 +144,10 @@ module.exports = {
                     {
                         selector: 'MethodDefinition[kind="constructor"] Decorator > CallExpression[callee.name="Inject"]',
                         message: 'gRPC client classes are wired via useFactory; @Inject() decorator on constructor params is ignored. Pass tokens via factory inject array.',
+                    },
+                    {
+                        selector: 'ClassDeclaration[superClass]',
+                        message: 'gRPC client facade must not extend any base class — use injected GrpcCaller via composition. See .agents/skills/composition-over-inheritance/SKILL.md and .agents/skills/infrastructure-client-layering/SKILL.md.',
                     },
                 ],
             },
