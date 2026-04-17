@@ -91,8 +91,9 @@ New infra-client mechanism (HTTP/RMQ/Redis/S3/DB/...)?
 
 - **Catalog:** `SERVICE.auth = { id, diToken, grpc, envKeys }` — identity only.
 - **Foundation:** `defineGrpcClient(opts, build)` — derives `grpcToken = Symbol.for('${service.id}_CLIENT_GRPC')` and `healthToken = Symbol.for('${service.id}_GRPC_HEALTH')`. Returns them in build result.
-- **Apps:** `auth-client.module.ts` calls `defineGrpcClient`, re-exports `AUTH_GRPC_HEALTH = grpc.healthToken` for `health.controller`.
-- **Client class:** `AuthClient extends AbstractGrpcClient` — no NestJS decorators.
+- **Apps:** `auth-client.module.ts` calls `defineGrpcClient`, re-exports `AUTH_GRPC_HEALTH = grpc.healthToken` for `health.controller`. Build callback has signature `(grpcClient, caller) => new AuthClient(grpcClient, caller)`.
+- **Client class:** `AuthClient` is a plain ES class (no `extends`, no decorators, no Nest lifecycle hooks). Receives `ClientGrpc` + injected `GrpcCaller` helper via positional constructor params; initializes `this.raw = grpcClient.getService<T>(SERVICE.auth.grpc.serviceName)` in the constructor. See Phase 999.7.2 reference implementation.
+- **Helper class:** `GrpcCaller` (foundation `packages/foundation/src/external/grpc/clients/grpc-caller.ts`) is a plain ES class encapsulating metadata build + Observable→Promise conversion + structured logging. Instantiated inside `defineGrpcClient.useFactory` — one per upstream.
 
 ### HTTP (current legacy, planned refactor)
 
@@ -127,6 +128,7 @@ When refactoring these: ensure foundation module exposes `forRootAsync` cleanly;
 5. Re-export named tokens in module file                  ─→ NEVER export the raw factory-result object
 6. Token symbols use Symbol.for() when derived            ─→ Same key everywhere = same symbol
 7. Document the new infra in this skill                   ─→ Add a section under "Application by Infra Type"
+8. Composition over inheritance on client facade          ─→ Client facade gets helper via DI; does NOT extend an abstract base. See .agents/skills/composition-over-inheritance/SKILL.md.
 ```
 
 ## Anti-Patterns
@@ -164,6 +166,17 @@ export const SENDER_REDIS = Symbol('SENDER_REDIS');
 @Inject(Symbol.for('AUTH_CLIENT'))                        // ← UNNAMED USE BAD
 @Inject(SERVICE.auth.diToken)                             // ← OK (named, from catalog)
 @Inject(AUTH_GRPC_HEALTH)                                 // ← OK (named, re-exported from module)
+
+// ANTI-PATTERN 7 — Client facade extends a base class
+export class AuthClient extends AbstractGrpcClient<T> {  // ← NO: see composition-over-inheritance skill
+  /* ... */
+}
+// Use composition via injected GrpcCaller helper instead:
+export class AuthClient {
+  constructor(grpcClient: ClientGrpc, private readonly grpc: GrpcCaller) {
+    this.raw = grpcClient.getService<T>(SERVICE.auth.grpc.serviceName);
+  }
+}
 ```
 
 ## When to Apply This Skill
@@ -180,6 +193,8 @@ When the answer is unclear, follow the decision tree top-to-bottom. If the new i
 
 - `.agents/skills/no-magic-values/SKILL.md` — DI tokens use `Symbol()`/`Symbol.for()`, not strings
 - `.agents/skills/clean-ddd-hexagonal/SKILL.md` — apps/ Clean/Hexagonal architecture
+- `.agents/skills/composition-over-inheritance/SKILL.md` — universal rule forbidding inheritance outside narrow exceptions; this skill concretizes the rule for infra-client facades
 - `.agents/skills/twelve-factor/SKILL.md` — config from env via `@email-platform/config`, not direct `process.env`
 - `.planning/phases/999.7-grpc-client-modules-foundation-infrastructure-layer-backlog/` — reference: gRPC layer migration
 - `.planning/phases/999.7.1-grpc-client-tokens-refactor-generate-inside-definegrpcclient/` — reference: token derivation pattern
+- `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — reference: composition over inheritance for client facades (GrpcCaller helper + plain-class AuthClient)
