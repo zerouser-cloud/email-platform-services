@@ -5,7 +5,7 @@ import { AudienceClient } from './audience.client';
 
 const grpc = defineGrpcClient(
   { service: SERVICE.audience, clientToken: SERVICE.audience.diToken },
-  (grpcClient, cls, deadlineMs) => new AudienceClient(grpcClient, cls, deadlineMs),
+  (grpcClient, caller) => new AudienceClient(grpcClient, caller),
 );
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).
