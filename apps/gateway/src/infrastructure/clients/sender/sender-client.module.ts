@@ -2,17 +2,16 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { SERVICE } from '@email-platform/config';
 import { defineGrpcClient } from '@email-platform/foundation';
 import { SenderClient } from './sender.client';
-import { SENDER_CLIENT_GRPC, SENDER_GRPC_HEALTH } from './sender-client.constants';
 
 const grpc = defineGrpcClient(
-  {
-    service: SERVICE.sender,
-    clientToken: SERVICE.sender.diToken,
-    healthToken: SENDER_GRPC_HEALTH,
-    grpcToken: SENDER_CLIENT_GRPC,
-  },
+  { service: SERVICE.sender, clientToken: SERVICE.sender.diToken },
   (grpcClient, cls, deadlineMs) => new SenderClient(grpcClient, cls, deadlineMs),
 );
+
+// Named re-exports for local consumers (health.controller.ts via barrel — D-10).
+// Do NOT export `grpc` directly — that leaks imports/providers/exports and lets consumers bypass forRoot().
+export const SENDER_CLIENT_GRPC = grpc.grpcToken;
+export const SENDER_GRPC_HEALTH = grpc.healthToken;
 
 @Module({})
 export class SenderClientModule {
