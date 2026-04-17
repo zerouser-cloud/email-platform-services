@@ -1,61 +1,57 @@
 import type { ClientGrpc } from '@nestjs/microservices';
-import { ClsService } from 'nestjs-cls';
 import { ParserProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
-import { AbstractGrpcClient } from '@email-platform/foundation';
-import type { CallOpts } from '@email-platform/foundation';
+import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
 
-export class ParserClient extends AbstractGrpcClient<ParserProto.ParserServiceClient> {
-  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
-    super(grpc, cls, SERVICE.parser.grpc.serviceName, defaultDeadlineMs, ParserClient.name);
+export class ParserClient {
+  private readonly raw: ParserProto.ParserServiceClient;
+
+  constructor(
+    grpcClient: ClientGrpc,
+    private readonly grpc: GrpcCaller,
+  ) {
+    this.raw = grpcClient.getService<ParserProto.ParserServiceClient>(
+      SERVICE.parser.grpc.serviceName,
+    );
   }
 
-  healthCheck(request: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
-    return this.call('healthCheck', this.raw.healthCheck(request, this.buildMetadata(opts)));
+  healthCheck(req: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
+    return this.grpc.call('healthCheck', opts, (m) => this.raw.healthCheck(req, m));
   }
   createTask(
-    request: ParserProto.CreateParserTaskRequest,
+    req: ParserProto.CreateParserTaskRequest,
     opts?: CallOpts,
   ): Promise<ParserProto.ParserTask> {
-    return this.call('createTask', this.raw.createTask(request, this.buildMetadata(opts)));
+    return this.grpc.call('createTask', opts, (m) => this.raw.createTask(req, m));
   }
   listTasks(
-    request: ParserProto.ListParserTasksRequest,
+    req: ParserProto.ListParserTasksRequest,
     opts?: CallOpts,
   ): Promise<ParserProto.ParserTaskList> {
-    return this.call('listTasks', this.raw.listTasks(request, this.buildMetadata(opts)));
+    return this.grpc.call('listTasks', opts, (m) => this.raw.listTasks(req, m));
   }
-  getTask(
-    request: ParserProto.ParserTaskIdRequest,
-    opts?: CallOpts,
-  ): Promise<ParserProto.ParserTask> {
-    return this.call('getTask', this.raw.getTask(request, this.buildMetadata(opts)));
+  getTask(req: ParserProto.ParserTaskIdRequest, opts?: CallOpts): Promise<ParserProto.ParserTask> {
+    return this.grpc.call('getTask', opts, (m) => this.raw.getTask(req, m));
   }
-  getSettings(request: CommonProto.Empty, opts?: CallOpts): Promise<ParserProto.ParserSettings> {
-    return this.call('getSettings', this.raw.getSettings(request, this.buildMetadata(opts)));
+  getSettings(req: CommonProto.Empty, opts?: CallOpts): Promise<ParserProto.ParserSettings> {
+    return this.grpc.call('getSettings', opts, (m) => this.raw.getSettings(req, m));
   }
   updateSettings(
-    request: ParserProto.UpdateParserSettingsRequest,
+    req: ParserProto.UpdateParserSettingsRequest,
     opts?: CallOpts,
   ): Promise<ParserProto.ParserSettings> {
-    return this.call('updateSettings', this.raw.updateSettings(request, this.buildMetadata(opts)));
+    return this.grpc.call('updateSettings', opts, (m) => this.raw.updateSettings(req, m));
   }
   runStorageSmoke(
-    request: CommonProto.Empty,
+    req: CommonProto.Empty,
     opts?: CallOpts,
   ): Promise<ParserProto.StorageSmokeResponse> {
-    return this.call(
-      'runStorageSmoke',
-      this.raw.runStorageSmoke(request, this.buildMetadata(opts)),
-    );
+    return this.grpc.call('runStorageSmoke', opts, (m) => this.raw.runStorageSmoke(req, m));
   }
   cleanupStorageSmoke(
-    request: ParserProto.CleanupSmokeRequest,
+    req: ParserProto.CleanupSmokeRequest,
     opts?: CallOpts,
   ): Promise<ParserProto.CleanupSmokeResponse> {
-    return this.call(
-      'cleanupStorageSmoke',
-      this.raw.cleanupStorageSmoke(request, this.buildMetadata(opts)),
-    );
+    return this.grpc.call('cleanupStorageSmoke', opts, (m) => this.raw.cleanupStorageSmoke(req, m));
   }
 }
