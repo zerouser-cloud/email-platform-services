@@ -400,3 +400,20 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.9: gRPC client RxJS leakage refinements (open discussion) (BACKLOG)
+
+**Goal:** Open-for-discussion polish on `AbstractGrpcClient` (RxJS surface). Surfaced during Phase 999.7.1 retrospective. NO commitment to implement until reviewed — items 1/2/4 are minor polish; item 3 is conditional on adding streaming RPCs.
+
+**Items to evaluate:**
+1. Replace `lastValueFrom` with `firstValueFrom` in `AbstractGrpcClient.call()` — semantically tighter for unary
+2. Add `AbortSignal` cancellation support to `CallOpts` (client-side cancel via `takeUntil(fromEvent(signal, 'abort'))`)
+3. Streaming RPC adapter (`callStream`/`callIterable` returning `AsyncIterable<T>`) — only if streaming RPCs added later
+4. Pin RxJS major version range in `packages/foundation/package.json` (defensive vs NestJS RxJS upgrades)
+
+**Reference:** `packages/foundation/src/external/grpc/clients/abstract-grpc-client.ts` (Phase 999.7.x)
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd-review-backlog when ready)
