@@ -379,13 +379,17 @@ Plans:
 
 ### Phase 999.7.1: gRPC client tokens refactor — generate inside defineGrpcClient() (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Move gRPC token derivation (`grpcToken`, `healthToken`) inside the foundation `defineGrpcClient()` factory — derived from `service.id.toUpperCase()` via `Symbol.for()`. Delete 8 per-upstream `*-client.constants.ts` files; named token re-exports (`AUTH_CLIENT_GRPC = grpc.grpcToken`) live in each `*-client.module.ts`. Strip dead `@Injectable`/`@Inject` decorators from 8 gRPC client classes (useFactory ignores them — they were dead code and leaked wiring concern into domain facades). Add ESLint guards (`no-restricted-syntax` for `@Injectable()`/`@Inject()` + `check-file/filename-blocklist` for `*-client.constants.ts`) scoped to the 8 enumerated gRPC client paths. Reference implementation of `infrastructure-client-layering` skill — sets the architectural standard for future HTTP/RMQ/Redis/S3/DB+ORM refactors.
+**Requirements**: D-01..D-13 (locked decisions in 999.7.1-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; this is architectural cleanup of GRPC-01..GRPC-04 already Complete)
 **Depends on:** Phase 999.7
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.7.1 to break down)
+- [ ] 999.7.1-01-PLAN.md — Wave 0: pre-refactor inventory audit (D-11) + install eslint-plugin-check-file@^2.8.0
+- [ ] 999.7.1-02-PLAN.md — Wave 1: foundation `defineGrpcClient` signature change + internal token derivation (D-01..D-03)
+- [ ] 999.7.1-03-PLAN.md — Wave 2: refactor 5 gateway gRPC upstreams (auth/sender/parser/audience/notifier) atomically (D-04..D-09)
+- [ ] 999.7.1-04-PLAN.md — Wave 2: refactor 3 cross-service gRPC upstreams (sender→audience, parser→notifier, audience→parser) atomically (D-04..D-09)
+- [ ] 999.7.1-05-PLAN.md — Wave 3: verify D-10 zero-diff for health.controller.ts + add ESLint guards (D-12a/b) + negative fixture test + human-verify runtime smoke
 
 ### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
 
