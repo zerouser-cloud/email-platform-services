@@ -66,6 +66,7 @@ module.exports = {
                 'no-restricted-imports': ['error', {
                     patterns: [{
                         group: [
+                            '@email-platform/contracts', '@email-platform/contracts/*',
                             '@email-platform/gateway', '@email-platform/gateway/*',
                             '@email-platform/auth', '@email-platform/auth/*',
                             '@email-platform/sender', '@email-platform/sender/*',
@@ -73,7 +74,7 @@ module.exports = {
                             '@email-platform/audience', '@email-platform/audience/*',
                             '@email-platform/notifier', '@email-platform/notifier/*',
                         ],
-                        message: 'foundation cannot import apps. Direction: contracts→config→foundation→apps.',
+                        message: 'foundation cannot import contracts or apps. Direction: contracts→config→foundation→apps.',
                     }],
                 }],
             },
