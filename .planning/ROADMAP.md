@@ -398,11 +398,16 @@ Plans:
 **Why this phase:** обсуждение в Phase 999.7.1 retrospective показало что inheritance — антипаттерн для нашего случая (см. таблицу сравнения 4 альтернатив в session log). Variant A (composition + injected helper) выбран как идиоматичный для NestJS и минимальный по миграции.
 
 **Depends on:** Phase 999.7.1 (нужен чтобы 8 client классов уже были декорато-free и контракт `defineGrpcClient` стабилизировался)
-**Requirements:** TBD (детали в `/gsd-discuss-phase 999.7.2` — варианты A/B/C/D из session log переоценить, выбрать финальный, наметить миграцию)
-**Plans:** 0 plans
+**Requirements:** D-01..D-17 (locked decisions in 999.7.2-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; this is architectural cleanup)
+**Plans:** 6 plans
 
 Plans:
-- [ ] TBD (run `/gsd-discuss-phase 999.7.2` first — capture decisions, then `/gsd-plan-phase 999.7.2`)
+- [ ] 999.7.2-01-PLAN.md — Wave 1: foundation GrpcCaller helper + defineGrpcClient 2-arg build signature + barrel type export (D-01..D-09)
+- [ ] 999.7.2-02-PLAN.md — Wave 2: pilot AuthClient composition migration + runtime smoke checkpoint (D-11 + D-12)
+- [ ] 999.7.2-03a-PLAN.md — Wave 3: sweep 4 gateway-side clients (sender/parser/audience/notifier) — atomic commit per upstream (D-13 + D-14)
+- [ ] 999.7.2-03b-PLAN.md — Wave 4: sweep 3 cross-service clients (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-13 + D-14)
+- [ ] 999.7.2-04-PLAN.md — Wave 5: delete AbstractGrpcClient + update infrastructure-client-layering skill + append ESLint ClassDeclaration[superClass] guard (D-10 + D-15 + D-16)
+- [ ] 999.7.2-05-PLAN.md — Wave 6: create composition-over-inheritance universal skill + final runtime smoke BOTH start:native + start:isolated (D-17 + final D-12/D-14)
 
 ### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
 
