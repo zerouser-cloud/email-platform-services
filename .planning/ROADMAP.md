@@ -391,6 +391,19 @@ Plans:
 - [ ] 999.7.1-04-PLAN.md — Wave 2: refactor 3 cross-service gRPC upstreams (sender→audience, parser→notifier, audience→parser) atomically (D-04..D-09)
 - [ ] 999.7.1-05-PLAN.md — Wave 3: verify D-10 zero-diff for health.controller.ts + add ESLint guards (D-12a/b) + negative fixture test + human-verify runtime smoke
 
+### Phase 999.7.2: gRPC client composition refactor — replace inheritance with injected GrpcCaller (INSERTED)
+
+**Goal:** Заменить наследование `extends AbstractGrpcClient` на композицию через инжектируемый `GrpcCaller` helper. Текущая модель имеет скрытое состояние (`this.raw`, `this.call`, `this.serviceName` приходят «из base класса») и не позволяет переопределять отдельные части без extend. Композиция делает зависимости явными в конструкторе, снимает coupling «is-a», упрощает тесты (mock одной строкой), и согласуется с DI-идиомой NestJS. Foundation выносит `GrpcCaller` (метаданные + Observable→Promise + логирование) в отдельный сервис; 8 client classов получают `GrpcCaller` через DI и хранят `raw` stub явно. Также нужно расширить skill `infrastructure-client-layering`: предписать composition как стандарт для всех будущих infra clients (HTTP/RMQ/S3/Redis/DB+ORM подтянутся к этому паттерну в своих фазах).
+
+**Why this phase:** обсуждение в Phase 999.7.1 retrospective показало что inheritance — антипаттерн для нашего случая (см. таблицу сравнения 4 альтернатив в session log). Variant A (composition + injected helper) выбран как идиоматичный для NestJS и минимальный по миграции.
+
+**Depends on:** Phase 999.7.1 (нужен чтобы 8 client классов уже были декорато-free и контракт `defineGrpcClient` стабилизировался)
+**Requirements:** TBD (детали в `/gsd-discuss-phase 999.7.2` — варианты A/B/C/D из session log переоценить, выбрать финальный, наметить миграцию)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run `/gsd-discuss-phase 999.7.2` first — capture decisions, then `/gsd-plan-phase 999.7.2`)
+
 ### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
 
 **Goal:** Telegram Bot API использует path-based auth — токен зашит в URL (`/bot<TOKEN>/method`). Это протокол Telegram, не наш выбор. Сейчас `TelegramClient` extends `AbstractHttpClient` и логирует URL как есть — токен утекает в логи (`http.client.call` с `url: ".../bot8679564424:AAF-.../sendMessage"`). Решение: переехать на vendor SDK (рекомендуется grammY — TypeScript-first, современнее; telegraf — зрелая альтернатива). SDK скрывает URL внутри и предоставляет operation-level API (`bot.api.sendMessage(chatId, text)`). `TelegramClient` становится тонкой обёрткой над SDK, логирует **операции** (`api: 'TelegramClient', operation: 'sendMessage', duration_ms, status, correlationId`), а не HTTP transport — URL с токеном физически не существует в поле лога. При этом `AbstractHttpClient` продолжает логировать URL для AppStoreSpy/CloudFn (у них auth в header, URL без секретов). Фаза закрывает D-16 долг, оставленный в Phase 24.
