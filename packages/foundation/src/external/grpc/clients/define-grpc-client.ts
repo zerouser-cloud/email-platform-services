@@ -10,33 +10,42 @@ import { createDeadlineInterceptor } from '../../resilience/grpc-deadline.interc
 import { GRPC_CLIENT_HEALTH } from './clients.constants';
 import { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
 
+const TOKEN_SUFFIX = {
+  CLIENT_GRPC: '_CLIENT_GRPC',
+  GRPC_HEALTH: '_GRPC_HEALTH',
+} as const;
+
 export interface DefineGrpcClientOpts {
   readonly service: GrpcServiceDeclaration;
   readonly clientToken: symbol;
-  readonly healthToken: symbol;
-  readonly grpcToken: symbol;
 }
 
 export interface GrpcClientBuildResult {
   readonly imports: Array<Type<unknown> | DynamicModule>;
   readonly providers: Provider[];
   readonly exports: symbol[];
+  readonly grpcToken: symbol;
+  readonly healthToken: symbol;
 }
 
 export function defineGrpcClient<T extends object>(
   opts: DefineGrpcClientOpts,
   build: (grpc: ClientGrpc, cls: ClsService, deadlineMs: number) => T,
 ): GrpcClientBuildResult {
+  const upperId = opts.service.id.toUpperCase();
+  const grpcToken = Symbol.for(`${upperId}${TOKEN_SUFFIX.CLIENT_GRPC}`);
+  const healthToken = Symbol.for(`${upperId}${TOKEN_SUFFIX.GRPC_HEALTH}`);
+
   const facadeProvider: Provider = {
     provide: opts.clientToken,
-    inject: [opts.grpcToken, ClsService, ConfigService],
+    inject: [grpcToken, ClsService, ConfigService],
     useFactory: (grpc: ClientGrpc, cls: ClsService, config: ConfigService) =>
       build(grpc, cls, config.get<number>('GRPC_DEADLINE_MS')!),
   };
 
   const healthProvider: Provider = {
-    provide: opts.healthToken,
-    inject: [HealthIndicatorService, opts.grpcToken],
+    provide: healthToken,
+    inject: [HealthIndicatorService, grpcToken],
     useFactory: (his: HealthIndicatorService, grpc: ClientGrpc) =>
       new GrpcClientHealthIndicator(his, grpc),
   };
@@ -46,7 +55,7 @@ export function defineGrpcClient<T extends object>(
       TerminusModule,
       ClientsModule.registerAsync([
         {
-          name: opts.grpcToken,
+          name: grpcToken,
           inject: [ConfigService],
           useFactory: (config: ConfigService) => ({
             transport: Transport.GRPC,
@@ -58,9 +67,7 @@ export function defineGrpcClient<T extends object>(
                 require.resolve('grpc-health-check/proto/health/v1/health.proto'),
               ],
               channelOptions: {
-                interceptors: [
-                  createDeadlineInterceptor(config.get<number>('GRPC_DEADLINE_MS')!),
-                ],
+                interceptors: [createDeadlineInterceptor(config.get<number>('GRPC_DEADLINE_MS')!)],
               },
             },
           }),
@@ -68,6 +75,8 @@ export function defineGrpcClient<T extends object>(
       ]),
     ],
     providers: [facadeProvider, healthProvider],
-    exports: [opts.clientToken, opts.healthToken],
+    exports: [opts.clientToken, healthToken],
+    grpcToken,
+    healthToken,
   };
 }
