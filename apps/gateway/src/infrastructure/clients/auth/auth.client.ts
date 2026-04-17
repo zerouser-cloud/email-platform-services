@@ -1,37 +1,36 @@
 import type { ClientGrpc } from '@nestjs/microservices';
-import { ClsService } from 'nestjs-cls';
 import { AuthProto, CommonProto } from '@email-platform/contracts';
 import { SERVICE } from '@email-platform/config';
-import { AbstractGrpcClient } from '@email-platform/foundation';
-import type { CallOpts } from '@email-platform/foundation';
+import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
 
-export class AuthClient extends AbstractGrpcClient<AuthProto.AuthServiceClient> {
-  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
-    super(grpc, cls, SERVICE.auth.grpc.serviceName, defaultDeadlineMs, AuthClient.name);
+export class AuthClient {
+  private readonly raw: AuthProto.AuthServiceClient;
+
+  constructor(grpcClient: ClientGrpc, private readonly grpc: GrpcCaller) {
+    this.raw = grpcClient.getService<AuthProto.AuthServiceClient>(
+      SERVICE.auth.grpc.serviceName,
+    );
   }
 
-  healthCheck(request: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
-    return this.call('healthCheck', this.raw.healthCheck(request, this.buildMetadata(opts)));
+  healthCheck(req: CommonProto.Empty, opts?: CallOpts): Promise<CommonProto.HealthStatus> {
+    return this.grpc.call('healthCheck', opts, (m) => this.raw.healthCheck(req, m));
   }
-  login(request: AuthProto.LoginRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
-    return this.call('login', this.raw.login(request, this.buildMetadata(opts)));
+  login(req: AuthProto.LoginRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
+    return this.grpc.call('login', opts, (m) => this.raw.login(req, m));
   }
-  refreshToken(request: AuthProto.RefreshRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
-    return this.call('refreshToken', this.raw.refreshToken(request, this.buildMetadata(opts)));
+  refreshToken(req: AuthProto.RefreshRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
+    return this.grpc.call('refreshToken', opts, (m) => this.raw.refreshToken(req, m));
   }
-  validateToken(
-    request: AuthProto.ValidateRequest,
-    opts?: CallOpts,
-  ): Promise<AuthProto.UserContext> {
-    return this.call('validateToken', this.raw.validateToken(request, this.buildMetadata(opts)));
+  validateToken(req: AuthProto.ValidateRequest, opts?: CallOpts): Promise<AuthProto.UserContext> {
+    return this.grpc.call('validateToken', opts, (m) => this.raw.validateToken(req, m));
   }
-  revokeToken(request: AuthProto.RevokeRequest, opts?: CallOpts): Promise<CommonProto.Empty> {
-    return this.call('revokeToken', this.raw.revokeToken(request, this.buildMetadata(opts)));
+  revokeToken(req: AuthProto.RevokeRequest, opts?: CallOpts): Promise<CommonProto.Empty> {
+    return this.grpc.call('revokeToken', opts, (m) => this.raw.revokeToken(req, m));
   }
-  createUser(request: AuthProto.CreateUserRequest, opts?: CallOpts): Promise<AuthProto.User> {
-    return this.call('createUser', this.raw.createUser(request, this.buildMetadata(opts)));
+  createUser(req: AuthProto.CreateUserRequest, opts?: CallOpts): Promise<AuthProto.User> {
+    return this.grpc.call('createUser', opts, (m) => this.raw.createUser(req, m));
   }
-  listUsers(request: AuthProto.ListUsersRequest, opts?: CallOpts): Promise<AuthProto.UserList> {
-    return this.call('listUsers', this.raw.listUsers(request, this.buildMetadata(opts)));
+  listUsers(req: AuthProto.ListUsersRequest, opts?: CallOpts): Promise<AuthProto.UserList> {
+    return this.grpc.call('listUsers', opts, (m) => this.raw.listUsers(req, m));
   }
 }

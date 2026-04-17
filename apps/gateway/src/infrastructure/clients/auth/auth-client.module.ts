@@ -5,7 +5,7 @@ import { AuthClient } from './auth.client';
 
 const grpc = defineGrpcClient(
   { service: SERVICE.auth, clientToken: SERVICE.auth.diToken },
-  (grpcClient, cls, deadlineMs) => new AuthClient(grpcClient, cls, deadlineMs),
+  (grpcClient, caller) => new AuthClient(grpcClient, caller),
 );
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).
