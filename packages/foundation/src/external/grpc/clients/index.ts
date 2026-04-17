@@ -1,7 +1,6 @@
 // Domain-agnostic gRPC client primitives.
 // Per-service typed facades live in apps/{service}/src/infrastructure/clients/.
 
-export { AbstractGrpcClient } from './abstract-grpc-client';
 export { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
 export { defineGrpcClient } from './define-grpc-client';
 export type { DefineGrpcClientOpts, GrpcClientBuildResult } from './define-grpc-client';
