@@ -5,7 +5,7 @@ import { NotifierClient } from './notifier.client';
 
 const grpc = defineGrpcClient(
   { service: SERVICE.notifier, clientToken: SERVICE.notifier.diToken },
-  (grpcClient, cls, deadlineMs) => new NotifierClient(grpcClient, cls, deadlineMs),
+  (grpcClient, caller) => new NotifierClient(grpcClient, caller),
 );
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).
