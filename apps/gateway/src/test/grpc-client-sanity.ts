@@ -9,7 +9,6 @@
  * DO NOT import this file from any runtime module.
  */
 import type { CallOpts, Promisified } from '@email-platform/foundation';
-import type { NotifierClient } from '../infrastructure/clients/notifier';
 import type {
   AuthProto,
   SenderProto,
@@ -25,7 +24,7 @@ export async function _probePositive(
   sender: Promisified<SenderProto.SenderServiceClient>,
   parser: Promisified<ParserProto.ParserServiceClient>,
   audience: Promisified<AudienceProto.AudienceServiceClient>,
-  notifier: NotifierClient,
+  notifier: Promisified<NotifierProto.NotifierServiceClient>,
 ): Promise<void> {
   const opts: CallOpts = { deadlineMs: 2000 };
 

@@ -1,6 +1,5 @@
 import { Controller, Get, Delete, Query, Inject } from '@nestjs/common';
 import type { Promisified } from '@email-platform/foundation';
-import type { NotifierClient } from '../infrastructure/clients/notifier';
 import { SERVICE } from '@email-platform/config';
 import { ParserProto, NotifierProto } from '@email-platform/contracts';
 
@@ -11,7 +10,8 @@ export class StorageSmokeController {
   constructor(
     @Inject(SERVICE.parser.diToken)
     private readonly parser: Promisified<ParserProto.ParserServiceClient>,
-    @Inject(SERVICE.notifier.diToken) private readonly notifier: NotifierClient,
+    @Inject(SERVICE.notifier.diToken)
+    private readonly notifier: Promisified<NotifierProto.NotifierServiceClient>,
   ) {}
 
   @Get('parser/storage-service')
