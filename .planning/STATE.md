@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Phase 999.7.3 — Plan 02 complete (smoke deferred to Plan 03)"
-last_updated: "2026-04-18T09:08:00.000Z"
+stopped_at: "Phase 999.7.3 — Plan 03 complete (gateway sweep done; deferred smoke validated structural design; strict 5/5-up criterion now scoped to Plan 04 dependency)"
+last_updated: "2026-04-18T09:23:46Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 26
   completed_phases: 14
   total_plans: 57
-  completed_plans: 53
-  percent: 93
+  completed_plans: 54
+  percent: 95
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.7.3 (grpc-client-promisify-proxy-replace-per-method-wrappers) — EXECUTING
-Plan: 3 of 6
-Status: Ready to execute (Plan 02 complete — pilot AuthClient migration done; runtime smoke gate deferred to Plan 03 because gateway compile-blocked by 4 unmigrated upstream modules)
+Plan: 4 of 6
+Status: Ready to execute Plan 04 (cross-service sweep — sender→audience, parser→notifier, audience→parser). Plan 03 gateway sweep complete; gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke EXECUTED — structural design validated (gateway boots end-to-end with Promisified Proxy on all 5 upstreams; /health/ready endpoint reaches all 5 upstream gRPC facades). Strict 5/5-up criterion NOT MET because 3 cross-service apps (sender/parser/audience) cannot boot until Plan 04 closes their *.client.ts wedges — that's a planning dependency, not a Plan 03 defect.
 Last activity: 2026-04-18
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
@@ -82,6 +82,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 999.7 P04 | 99 | 2 tasks | 17 files |
 | Phase 999.7.3 P01 | 8min | 3 tasks | 4 files |
 | Phase 999.7.3 P02 | 5min | 3 tasks | 4 files |
+| Phase 999.7.3 P03 | 7min | 4 sweep + 1 deferred smoke | 14 files (10 modified, 4 deleted) |
 
 ## Accumulated Context
 
@@ -117,15 +118,16 @@ Progress: [██████████] 100% phase, [========================
 - [Phase ?]: [Phase 999.7.3-01]: Foundation Promisified Proxy primitive landed atomically; GrpcCaller deleted; defineGrpcClient<TRaw>(opts) single-arg signature with inlined Promisified Proxy; barrels updated; 16 expected interim TS errors documented for Plans 02-05 sweep
 - [Phase 999.7.3-02]: AuthClient pilot migrated to canonical 10-line shape (defineGrpcClient<AuthProto.AuthServiceClient>(opts)); auth.client.ts wrapper deleted; barrel cleaned; grpc-client-sanity.ts retyped to Promisified<AuthProto.AuthServiceClient> (Rule 3); auth wedge cleared (1 TS2554 + 1 TS2305 fixed; 8 root errors remain); BLOCKING runtime smoke gate DEFERRED to Plan 03 because gateway compile-blocked by 4 unmigrated upstream modules — auth/notifier microservices DID start cleanly, validating Plan 01 foundation safety for upstream-free services
 - [Phase 999.7.3-02]: Promisified<T> public TYPE preserves original ts-proto Metadata signature even though runtime Proxy accepts CallOpts; consumers must either omit second arg, construct Metadata manually, or wait for foundation refinement to widen typed signature to Metadata | CallOpts (backlog for Plan 05 or future fast pass)
+- [Phase 999.7.3-03]: 4 atomic per-upstream sweep commits (sender → parser → audience → notifier alphabetical) migrate gateway gRPC clients to canonical Pattern B; 4 *.client.ts deleted (227 LOC removed); gateway typecheck FULLY GREEN. Each sweep bundled its consumer Rule 3 retypes (grpc-client-sanity.ts every commit; storage-smoke.controller.ts in parser + notifier commits) — staying consistent with Plan 02 auth precedent of atomic-commit-includes-direct-consequences. storage-smoke.controller.ts retyped to Promisified<T> in Plan 03 instead of Plan 05 because the deferred BLOCKING smoke needed the gateway to compile. Deferred smoke executed: gateway boots end-to-end, /health/ready reaches all 5 Promisified Proxy facades; 2 upstreams up (auth, notifier — services without their own gRPC clients), 3 down (sender/parser/audience — blocked from boot by their own un-migrated cross-service *.client.ts files which Plan 04 sweeps). STRUCTURAL DESIGN validated; STRICT 5/5-up criterion is naturally Plan 04's gate (no defer-smoke pass marker committed).
 
 ### Pending Todos
 
-- Move Plan 02 BLOCKING runtime smoke gate (Task 3) to Plan 03 — Plan 02 cannot pass it in isolation due to 4 unmigrated upstream client modules (sender/parser/audience/notifier).
 - Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation (future fast/cleanup pass).
+- Plan 04 must close 3 cross-service *.client.ts migrations (sender→audience, parser→notifier, audience→parser) before strict 5/5-upstreams-up runtime smoke can pass.
 
 ### Blockers/Concerns
 
-- Plan 02 Task 3 (runtime smoke) NOT validated. Gateway never bound to port 3000 because nest start --watch refused to emit JS for 4 broken upstream modules. Plan 03 sweep must close those before smoke can validate the AuthClient Promisified Proxy at runtime.
+- Strict 5/5-upstreams-up runtime smoke gate carried forward from Plan 02 → Plan 03 → Plan 04. Cannot pass until Plan 04 cross-service sweep completes. Plan 03 SUMMARY documents the structural-design validation that DID pass (gateway boots, /health/ready reaches all 5 facades, 2 up + 3 down due to upstream apps blocked from boot).
 
 ### Roadmap Evolution
 
@@ -139,6 +141,6 @@ Progress: [██████████] 100% phase, [========================
 
 ## Session Continuity
 
-Last session: 2026-04-18T09:08:00.000Z
-Stopped at: "Phase 999.7.3 — Plan 02 complete (auth pilot migrated; runtime smoke deferred to Plan 03)"
+Last session: 2026-04-18T09:23:46Z
+Stopped at: "Phase 999.7.3 — Plan 03 complete (gateway sweep done — 4 atomic commits, 4 wrapper classes deleted, gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke EXECUTED with mixed result: structural design validated end-to-end, strict 5/5-up deferred to Plan 04 dependency)"
 Resume file: None
