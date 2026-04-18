@@ -409,6 +409,22 @@ Plans:
 - [x] 999.7.2-04-PLAN.md — Wave 5: delete AbstractGrpcClient + update infrastructure-client-layering skill + append ESLint ClassDeclaration[superClass] guard (D-10 + D-15 + D-16)
 - [x] 999.7.2-05-PLAN.md — Wave 6: create composition-over-inheritance universal skill + final runtime smoke BOTH start:native + start:isolated (D-17 + final D-12/D-14)
 
+
+### Phase 999.7.3: gRPC client promisify proxy — replace per-method wrappers (INSERTED)
+
+**Goal:** Заменить 8 hand-written `*.client.ts` per-method wrapper-классов и standalone `GrpcCaller` helper единым типизированным `Promisified<T>` Proxy в foundation. Consumer инжектирует `Promisified<XxxProto.XxxServiceClient>` напрямую — никаких custom client-классов в `apps/`. Proxy перехватывает любой Observable-возвращающий метод raw ts-proto клиента, добавляет `Metadata` с per-call deadline, конвертирует Observable→Promise через `lastValueFrom`, возвращает результат. Логирование/трассировку временно вырезаем (D-04 conscious observability regression) — будущая фаза по observability вернёт их через DI-injected logger (outer Proxy chain). Skill `infrastructure-client-layering` обновляется (gRPC reference section, ANTI-PATTERN 8); `composition-over-inheritance` cross-references как second canonical example.
+**Requirements**: D-01..D-21 (locked decisions in 999.7.3-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; this is architectural cleanup of GRPC-01..GRPC-04 already Complete)
+**Depends on:** Phase 999.7.2 (нужен чтобы `GrpcCaller` уже был extracted helper, чтобы клин при удалении был минимальным)
+**Plans:** 6 plans
+
+Plans:
+- [ ] 999.7.3-01-PLAN.md — Wave 1: foundation create promisify-grpc-client.ts + delete grpc-caller.ts + simplify defineGrpcClient (D-02..D-10)
+- [ ] 999.7.3-02-PLAN.md — Wave 2: pilot AuthClient migration to Promisified Proxy + runtime smoke checkpoint (D-09 + D-11 + D-15)
+- [ ] 999.7.3-03-PLAN.md — Wave 3: sweep 4 gateway upstreams (sender/parser/audience/notifier) — atomic commit per upstream (D-14 + D-15 + D-19)
+- [ ] 999.7.3-04-PLAN.md — Wave 4: sweep 3 cross-service upstreams (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-14 + D-15 + D-19)
+- [ ] 999.7.3-05-PLAN.md — Wave 5: storage-smoke.controller.ts type-only patch + workspace-wide invariant battery (D-11 + D-17)
+- [ ] 999.7.3-06-PLAN.md — Wave 6: skill updates (infrastructure-client-layering ANTI-PATTERN 8 + composition-over-inheritance cross-ref) + final dual-mode runtime smoke (D-19 + D-20 + D-21)
+
 ### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
 
 **Goal:** Telegram Bot API использует path-based auth — токен зашит в URL (`/bot<TOKEN>/method`). Это протокол Telegram, не наш выбор. Сейчас `TelegramClient` extends `AbstractHttpClient` и логирует URL как есть — токен утекает в логи (`http.client.call` с `url: ".../bot8679564424:AAF-.../sendMessage"`). Решение: переехать на vendor SDK (рекомендуется grammY — TypeScript-first, современнее; telegraf — зрелая альтернатива). SDK скрывает URL внутри и предоставляет operation-level API (`bot.api.sendMessage(chatId, text)`). `TelegramClient` становится тонкой обёрткой над SDK, логирует **операции** (`api: 'TelegramClient', operation: 'sendMessage', duration_ms, status, correlationId`), а не HTTP transport — URL с токеном физически не существует в поле лога. При этом `AbstractHttpClient` продолжает логировать URL для AppStoreSpy/CloudFn (у них auth в header, URL без секретов). Фаза закрывает D-16 долг, оставленный в Phase 24.
