@@ -5,7 +5,7 @@ import { DRIZZLE } from '@email-platform/foundation';
 import type { RecipientRepositoryPort } from '../../application/ports/outbound/recipient-repository.port';
 import type { Recipient } from '../../domain/entities/recipient.entity';
 import { recipients } from './schema/recipients.schema';
-import { RecipientMapper } from './recipient.mapper';
+import { RecipientMapper } from './mappers/recipient.mapper';
 
 @Injectable()
 export class PgRecipientRepository implements RecipientRepositoryPort {

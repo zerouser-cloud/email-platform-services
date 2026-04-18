@@ -1,5 +1,5 @@
-import { Recipient } from '../../domain/entities/recipient.entity';
-import type { recipients } from './schema/recipients.schema';
+import { Recipient } from '../../../domain/entities/recipient.entity';
+import type { recipients } from '../schema/recipients.schema';
 
 type RecipientRow = typeof recipients.$inferSelect;
 type NewRecipientRow = typeof recipients.$inferInsert;
