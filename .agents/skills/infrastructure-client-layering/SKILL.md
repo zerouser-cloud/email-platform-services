@@ -1,13 +1,13 @@
 ---
 name: infrastructure-client-layering
-description: Architectural rule for placing infrastructure-client artifacts (modules, factories, DI tokens, abstract base classes) across catalog/foundation/apps layers. Triggers on creating or refactoring HTTP clients, gRPC clients, RabbitMQ producers/consumers, Redis adapters, S3 adapters, DB/ORM modules, or any other infra-client. Apply whenever a new infra-client mechanism is introduced or an existing one is refactored. Reference implementation: Phase 999.7.x (gRPC).
+description: Architectural rule for placing infrastructure-client artifacts (modules, factories, DI tokens, abstract base classes) across catalog/foundation/apps layers. Triggers on creating or refactoring HTTP clients, gRPC clients, RabbitMQ producers/consumers, Redis adapters, S3 adapters, DB/ORM modules, or any other infra-client. Apply whenever a new infra-client mechanism is introduced or an existing one is refactored. No per-method hand-written wrapper classes; use a generic Proxy for Observable-returning interfaces (see `Promisified<T>` pattern). Reference implementation: Phase 999.7.x (gRPC).
 ---
 
 # Infrastructure Client Layering
 
 Universal rule for distributing infrastructure-client artifacts (NestJS modules, factories, DI tokens, abstract bases) across the three project layers. Establishes consistent boundaries so new infra-clients (HTTP, RabbitMQ, Redis, S3, DB/ORM, future) follow the same architectural principle.
 
-**Reference implementation:** `.planning/phases/999.7-*` and `.planning/phases/999.7.1-*` (gRPC client modules). When in doubt — read the gRPC pattern, then apply with adjustments for the new infra's specifics.
+**Reference implementation:** `.planning/phases/999.7-*`, `.planning/phases/999.7.1-*`, `.planning/phases/999.7.2-*`, `.planning/phases/999.7.3-*` (gRPC client modules). When in doubt — read the gRPC pattern, then apply with adjustments for the new infra's specifics.
 
 ## The Three-Layer Rule
 
@@ -90,10 +90,14 @@ New infra-client mechanism (HTTP/RMQ/Redis/S3/DB/...)?
 ### gRPC (reference, Phase 999.7.x)
 
 - **Catalog:** `SERVICE.auth = { id, diToken, grpc, envKeys }` — identity only.
-- **Foundation:** `defineGrpcClient(opts, build)` — derives `grpcToken = Symbol.for('${service.id}_CLIENT_GRPC')` and `healthToken = Symbol.for('${service.id}_GRPC_HEALTH')`. Returns them in build result.
-- **Apps:** `auth-client.module.ts` calls `defineGrpcClient`, re-exports `AUTH_GRPC_HEALTH = grpc.healthToken` for `health.controller`. Build callback has signature `(grpcClient, caller) => new AuthClient(grpcClient, caller)`.
-- **Client class:** `AuthClient` is a plain ES class (no `extends`, no decorators, no Nest lifecycle hooks). Receives `ClientGrpc` + injected `GrpcCaller` helper via positional constructor params; initializes `this.raw = grpcClient.getService<T>(SERVICE.auth.grpc.serviceName)` in the constructor. See Phase 999.7.2 reference implementation.
-- **Helper class:** `GrpcCaller` (foundation `packages/foundation/src/external/grpc/clients/grpc-caller.ts`) is a plain ES class encapsulating metadata build + Observable→Promise conversion + structured logging. Instantiated inside `defineGrpcClient.useFactory` — one per upstream.
+- **Foundation:** `defineGrpcClient<TRaw>(opts)` factory + `Promisified<T>` mapped type + `promisifyGrpcClient(raw, opts)` Proxy in `packages/foundation/src/external/grpc/clients/`. Single-arg factory; `useFactory` builds the Promisified Proxy directly (no build callback). Derives `grpcToken = Symbol.for('${service.id}_CLIENT_GRPC')` and `healthToken = Symbol.for('${service.id}_GRPC_HEALTH')` and returns them in the result.
+- **Apps:** Per-upstream `*-client.module.ts` (~22 lines) calls `defineGrpcClient<XxxProto.XxxServiceClient>({ service, clientToken })` and re-exports named tokens (`XXX_CLIENT_GRPC`, `XXX_GRPC_HEALTH`) for local consumers. NO per-app client class, NO custom wrapper, NO build callback.
+- **Consumer:** Inject directly as `Promisified<XxxProto.XxxServiceClient>` (no per-upstream type alias):
+  ```typescript
+  constructor(@Inject(SERVICE.auth.diToken) private readonly auth: Promisified<AuthProto.AuthServiceClient>) {}
+  await this.auth.login(req);
+  ```
+  Method calls return `Promise<R>` automatically through the Proxy trap (Observable→Promise + per-call deadline + ts-proto `Metadata`/`CallOpts` handling). Adding a new RPC to the `.proto` file becomes consumer-callable without touching any apps-level wiring code. See Phase 999.7.3 for the canonical implementation.
 
 ### HTTP (current legacy, planned refactor)
 
@@ -128,7 +132,7 @@ When refactoring these: ensure foundation module exposes `forRootAsync` cleanly;
 5. Re-export named tokens in module file                  ─→ NEVER export the raw factory-result object
 6. Token symbols use Symbol.for() when derived            ─→ Same key everywhere = same symbol
 7. Document the new infra in this skill                   ─→ Add a section under "Application by Infra Type"
-8. Composition over inheritance on client facade          ─→ Client facade gets helper via DI; does NOT extend an abstract base. See .agents/skills/composition-over-inheritance/SKILL.md.
+8. Composition over inheritance, no per-method wrappers   ─→ Client facade gets dependencies via DI; does NOT extend an abstract base. For Observable-returning interfaces (e.g., ts-proto-generated gRPC client interfaces with `nestJs=true`), use a generic `Promisified<T>` Proxy in foundation rather than writing one wrapper class per upstream with one method per RPC. Adding a new RPC to `.proto` automatically becomes consumer-callable; no manual wrapper code needed. See .agents/skills/composition-over-inheritance/SKILL.md.
 ```
 
 ## Anti-Patterns
@@ -177,6 +181,27 @@ export class AuthClient {
     this.raw = grpcClient.getService<T>(SERVICE.auth.grpc.serviceName);
   }
 }
+
+// ANTI-PATTERN 8 — Per-method hand-written wrapper class
+export class AuthClient {
+  constructor(grpcClient: ClientGrpc, private readonly grpc: GrpcCaller) {
+    this.raw = grpcClient.getService<AuthProto.AuthServiceClient>(SERVICE.auth.grpc.serviceName);
+  }
+  login(req: AuthProto.LoginRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
+    return this.grpc.call('login', opts, (m) => this.raw.login(req, m));
+  }
+  refreshToken(req: AuthProto.RefreshTokenRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
+    return this.grpc.call('refreshToken', opts, (m) => this.raw.refreshToken(req, m));
+  }
+  // ...×N more identical wrappers, ~3 lines each, mechanical
+}
+// Why bad: ~58 lines of mechanical boilerplate per service × N services. Adding a new RPC requires
+// manual wrapper update. For Observable-returning interfaces, use a generic Promisified<T> Proxy
+// in foundation:
+//   const grpc = defineGrpcClient<AuthProto.AuthServiceClient>({ service: SERVICE.auth, clientToken: SERVICE.auth.diToken });
+// Consumer:
+//   constructor(@Inject(SERVICE.auth.diToken) private readonly auth: Promisified<AuthProto.AuthServiceClient>) {}
+//   await this.auth.login(req);
 ```
 
 ## When to Apply This Skill
@@ -198,3 +223,4 @@ When the answer is unclear, follow the decision tree top-to-bottom. If the new i
 - `.planning/phases/999.7-grpc-client-modules-foundation-infrastructure-layer-backlog/` — reference: gRPC layer migration
 - `.planning/phases/999.7.1-grpc-client-tokens-refactor-generate-inside-definegrpcclient/` — reference: token derivation pattern
 - `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — reference: composition over inheritance for client facades (GrpcCaller helper + plain-class AuthClient)
+- `.planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/` — reference: `Promisified<T>` Proxy in foundation eliminates per-method wrapper classes (8 `*.client.ts` deleted; consumer injects raw proto interface directly via `@Inject(SERVICE.xxx.diToken)`)

@@ -7,7 +7,10 @@ description: Prefer composition (has-a) over inheritance (is-a) for runtime beha
 
 Runtime behavior composition should be achieved by INJECTING collaborators, not by extending an abstract base class. Inheritance is a smell requiring explicit justification — only 4 narrow exception categories are allowed across the entire codebase. This skill is codebase-wide (apps + packages, all layers). It is the universal form of the gRPC-specific rule in `infrastructure-client-layering`.
 
-**Reference implementation:** `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — the 8 gRPC client facades migrated from `extends AbstractGrpcClient<T>` to plain classes receiving an injected `GrpcCaller` helper via the constructor.
+**Reference implementations:**
+
+- `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — first canonical example: the 8 gRPC client facades migrated from `extends AbstractGrpcClient<T>` to plain classes receiving an injected `GrpcCaller` helper via the constructor.
+- `.planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/` — second canonical example: per-method wrapper classes eliminated entirely via a generic `Promisified<T>` Proxy in foundation. Wrapper classes are another form of over-engineering, kindred to inheritance — both create abstractions whose only value is mechanical intermediation. Replace with a single generic primitive in foundation; consumer apps inject the raw protocol interface directly.
 
 ## Rule
 
@@ -332,4 +335,5 @@ Legitimate `extends` usages across the codebase — classification of the 23 `ex
 - `.agents/skills/no-magic-values/SKILL.md` — related rule: prefer named constants over magic literals. Often applies alongside composition (helpers store constants that were previously hardcoded in base classes).
 - `.agents/skills/branching-patterns/SKILL.md` — related rule: prefer polymorphism via composition (Record dispatch / Map fallback / canHandle chain) over `switch/case` or `if/else` chains. Complementary to this skill — both aim at replacing behavior-via-inheritance with behavior-via-collaboration.
 - `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — canonical reference implementation: `AbstractGrpcClient` inheritance → injected `GrpcCaller` composition. 8 files migrated; skill rationale distilled from the retrospective.
+- `.planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/` — second canonical reference: per-method `*.client.ts` wrapper classes (introduced as the composition target by 999.7.2) eliminated via generic `Promisified<T>` Proxy in foundation. Demonstrates that wrapper classes are a sibling form of over-engineering to inheritance — both create abstractions whose only value is mechanical mediation. Replace with a generic Proxy + TypeScript mapped type — single foundation primitive, zero apps-level boilerplate.
 - `apps/gateway/src/infrastructure/clients/auth/auth.client.ts` — canonical post-refactor source showing the composition shape.
