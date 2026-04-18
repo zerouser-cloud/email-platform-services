@@ -9,7 +9,6 @@
  * DO NOT import this file from any runtime module.
  */
 import type { CallOpts, Promisified } from '@email-platform/foundation';
-import type { ParserClient } from '../infrastructure/clients/parser';
 import type { AudienceClient } from '../infrastructure/clients/audience';
 import type { NotifierClient } from '../infrastructure/clients/notifier';
 import type {
@@ -25,7 +24,7 @@ import type {
 export async function _probePositive(
   auth: Promisified<AuthProto.AuthServiceClient>,
   sender: Promisified<SenderProto.SenderServiceClient>,
-  parser: ParserClient,
+  parser: Promisified<ParserProto.ParserServiceClient>,
   audience: AudienceClient,
   notifier: NotifierClient,
 ): Promise<void> {
