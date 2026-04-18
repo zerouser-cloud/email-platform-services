@@ -72,6 +72,7 @@
 - ✓ Redis CacheModule: DI-injected client, CachePort абстракция, auto-prefix namespace, real health check — Phase 21
 - ✓ S3 StorageModule: DI-injected S3CoreModule singleton (non-global, self-contained inside BucketStorageModule.forBucket) + per-bucket health tokens, ReportsStorageModule as shared Nest module in foundation, STORAGE_PROTOCOL env var (works identically MinIO/Garage) — Phase 22, Phase 22.1
 - ✓ Foundation package encapsulation: `external/` vs `internal/` partition with package.json `exports` field + tsconfig `moduleResolution: node16` + ESLint two-override rule — three independent gates seal public/internal API, S3CoreModule reachable only via `@email-platform/foundation/internal` subpath — Phase 22.1
+- ✓ gRPC client `Promisified<T>` Proxy primitive: foundation provides single mapped-type Proxy factory replacing 8 hand-written per-method wrapper classes + standalone `GrpcCaller` helper; consumers `@Inject(SERVICE.x.diToken)` and get `Promisified<XxxProto.XxxServiceClient>` typed Promise-returning client directly without apps-level boilerplate; logging temporarily removed (singleton `PinoLogger.root` anti-pattern; future observability phase will return via DI-injected logger in outer Proxy chain) — Phase 999.7.3
 
 ### Active
 - [ ] gRPC client каркас в foundation + per-service адаптеры
@@ -138,7 +139,7 @@ Backing services абстрагированы через модули-фасад
 | **CacheModule** | Redis (DI client, CachePort, namespaced keys, health) | Ready — Phase 21 |
 | **S3CoreModule + BucketStorageModule + ReportsStorageModule** | MinIO / Garage (non-global S3Client singleton via class-identity dedup, self-contained BucketStorageModule.forBucket factory, shared reports module in foundation, per-bucket health tokens, reachable only via `@email-platform/foundation/internal` subpath) | Ready — Phase 22 + 22.1 |
 | **EventModule** | RabbitMQ (connection, publisher, consumer, health) | Planned — Phase 25 |
-| **gRPC Client Wrappers** | gRPC (typed client wrappers, deadline handling) | Planned — Phase 23 |
+| **gRPC Client Promisified Proxy** | gRPC (foundation `Promisified<T>` mapped type + Proxy factory; consumers inject typed Promise-returning client directly; deadline metadata + per-call CallOpts; observability deferred to future phase) | Ready — Phase 999.7.3 |
 | **HTTP Client + Circuit Breaker** | External HTTP APIs (resilient client, retry, timeout) | Planned — Phase 24 |
 
 Сервисы собирают только нужные модули:
@@ -165,4 +166,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after Phase 999.7 complete (gRPC client modules migrated from foundation to per-service infrastructure layer; defineGrpcClient() factory; foundation decoupled from contracts)*
+*Last updated: 2026-04-18 after Phase 999.7.3 complete (gRPC client `Promisified<T>` Proxy primitive replaces 8 hand-written per-method wrapper classes + `GrpcCaller` standalone; consumers inject typed Promise-returning client directly; observability removed pending future DI-injected logger phase)*
