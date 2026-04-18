@@ -32,11 +32,15 @@ export async function _probePositive(
 ): Promise<void> {
   const opts: CallOpts = { deadlineMs: 2000 };
 
+  // Promisified<T> preserves the original ts-proto signature `(req, meta?: Metadata) => Promise<R>`.
+  // The runtime Proxy accepts CallOpts as second arg (transparently overriding deadline metadata),
+  // but the public TYPE still requires Metadata. Future foundation refinement may widen the typed
+  // second-arg to `Metadata | CallOpts`. For the type probe today, omit the second arg.
   const _tokens: AuthProto.TokenPair = await auth.login(
     { email: '', password: '' } as AuthProto.LoginRequest,
-    opts,
   );
   void _tokens;
+  void opts;
 
   const _campaigns: SenderProto.CampaignList = await sender.listCampaigns(
     {} as SenderProto.ListCampaignsRequest,
