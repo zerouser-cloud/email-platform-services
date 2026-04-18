@@ -9,7 +9,6 @@
  * DO NOT import this file from any runtime module.
  */
 import type { CallOpts, Promisified } from '@email-platform/foundation';
-import type { AudienceClient } from '../infrastructure/clients/audience';
 import type { NotifierClient } from '../infrastructure/clients/notifier';
 import type {
   AuthProto,
@@ -25,7 +24,7 @@ export async function _probePositive(
   auth: Promisified<AuthProto.AuthServiceClient>,
   sender: Promisified<SenderProto.SenderServiceClient>,
   parser: Promisified<ParserProto.ParserServiceClient>,
-  audience: AudienceClient,
+  audience: Promisified<AudienceProto.AudienceServiceClient>,
   notifier: NotifierClient,
 ): Promise<void> {
   const opts: CallOpts = { deadlineMs: 2000 };
@@ -63,8 +62,8 @@ export async function _probePositive(
 }
 
 // Negative compile cases — guarded with @ts-expect-error so tsc passes iff the error is real.
-export function _probeNegative(audience: AudienceClient): void {
-  // @ts-expect-error nonExistentMethod does not exist on AudienceClient (GRPC-01)
+export function _probeNegative(audience: Promisified<AudienceProto.AudienceServiceClient>): void {
+  // @ts-expect-error nonExistentMethod does not exist on the proto interface (GRPC-01)
   audience.nonExistentMethod({});
 
   // @ts-expect-error listRecipients does not accept { wrongField } (GRPC-01)
