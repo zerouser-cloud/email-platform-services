@@ -1,10 +1,10 @@
-import type { CreateCampaignCommand } from '../../commands/create-campaign.command';
+import type { GetCampaignCommand } from '../../commands/get-campaign.command';
 
-export interface CreateCampaignPort {
-  execute(cmd: CreateCampaignCommand): Promise<CreateCampaignResult>;
+export interface GetCampaignPort {
+  execute(cmd: GetCampaignCommand): Promise<GetCampaignResult>;
 }
 
-export interface CreateCampaignResult {
+export interface GetCampaignResult {
   readonly id: string;
   readonly name: string;
   readonly status: string;

@@ -5,7 +5,7 @@ import { DRIZZLE } from '@email-platform/foundation';
 import type { CampaignRepositoryPort } from '../../application/ports/outbound/campaign-repository.port';
 import type { Campaign } from '../../domain/entities/campaign.entity';
 import { campaigns } from './schema/campaigns.schema';
-import { CampaignMapper } from './campaign.mapper';
+import { CampaignMapper } from './mappers/campaign.mapper';
 
 @Injectable()
 export class PgCampaignRepository implements CampaignRepositoryPort {
