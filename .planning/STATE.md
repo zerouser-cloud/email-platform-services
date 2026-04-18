@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: "Phase 999.7.3 — Plan 05 complete (workspace invariant battery PASSED — 6 probes all green, 1 Rule-1 prettier auto-fix in grpc-client-sanity.ts; storage-smoke retype was transitively satisfied by Plan 03)"
-last_updated: "2026-04-18T09:39:28Z"
+status: verifying
+stopped_at: "Phase 999.7.3 — Plan 06 complete (skill updates D-20 + D-21 atomically committed in 2ad4bf5; final dual-mode runtime smoke gate PASSED — native flow on host:3000 and isolated flow on host:4000 both returned HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints returned HTTP 200 with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode; atomic smoke marker commit b304a64. Phase 999.7.3 architecturally complete — all 21 D-* decisions realised across Plans 01-06; ready for /gsd:verify-work gate.)"
+last_updated: "2026-04-18T10:03:04.151Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 26
-  completed_phases: 14
+  completed_phases: 15
   total_plans: 57
-  completed_plans: 56
-  percent: 98
+  completed_plans: 57
+  percent: 100
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.7.3 (grpc-client-promisify-proxy-replace-per-method-wrappers) — EXECUTING
-Plan: 6 of 6
-Status: Plan 05 COMPLETE (`42770da`). Workspace invariant battery PASSED — all 6 probes green: (1) typecheck 12/12 turbo, 0 TS errors; (2) lint 7/7 turbo, 0 errors after one Rule-1 prettier-format auto-fix in `apps/gateway/src/test/grpc-client-sanity.ts` (cosmetic-only, `auth.login(...)` argument formatting residue from Plan 03 sweeps); (3) D-15 invariant — 0 gRPC `*.client.ts` files at the 8 enumerated paths (4 HTTP-client `*.client.ts` files remain — out of D-15 scope); (4) D-02/D-10 invariant — 0 source `GrpcCaller` references (stale `dist/*.d.ts` only); (5) D-16 ESLint guard preserved — Override 6 enumerates 8 D-15 paths with `ClassDeclaration[superClass]` selector intact (per-path enumeration form, semantically equivalent to wildcard); (6) D-17 invariant — `storage-smoke.controller.ts` uses `Promisified<ParserProto.ParserServiceClient>` + `Promisified<NotifierProto.NotifierServiceClient>` (already retyped transitively by Plan 03 commits eec1619 + 517d30f). Plan 05 Task 1 (D-17 type-only patch) was satisfied without new source patching — Plan 03's atomic Rule-3 auto-fixes over-delivered. Phase is structurally complete pending Plan 06 (D-20 + D-21 skill updates + formal dual-mode runtime smoke gate `start:native` + `start:isolated`).
+Phase: 999.7.3 (grpc-client-promisify-proxy-replace-per-method-wrappers) — VERIFYING
+Plan: 6 of 6 (COMPLETE)
+Status: Plan 06 complete (`b304a64`). Skills D-20 + D-21 updated atomically (`2ad4bf5`); final dual-mode runtime smoke gate PASSED — native flow (host:3000) + isolated flow (host:4000→container:3000) both returned HTTP 200 on `/health/ready` with all 5 upstreams `up`; both `/test/{parser,notifier}/storage-service` endpoints returned HTTP 200 with `allPassed:true` on every bucket; 0 error/warn entries across 6 containers in isolated mode. Phase 999.7.3 architecturally complete; all 21 D-* decisions (D-01..D-21) realised across Plans 01-06; 8 wrapper-class deletions in git history; foundation Promisified Proxy primitive landed and exercised end-to-end. Ready for `/gsd:verify-work` gate.
 Last activity: 2026-04-18
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
@@ -85,6 +85,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 999.7.3 P03 | 7min | 4 sweep + 1 deferred smoke | 14 files (10 modified, 4 deleted) |
 | Phase 999.7.3 P04 | 2min | 3 sweep + post-sweep smoke | 9 files (6 modified, 3 deleted) |
 | Phase 999.7.3 P05 | 2min (97s) | 1 transitive + 6-probe invariant battery + 1 Rule-1 lint-fix | 1 file modified (grpc-client-sanity.ts prettier-only) |
+| Phase 999.7.3 P06 | 12min | 4 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -123,16 +124,17 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 999.7.3-03]: 4 atomic per-upstream sweep commits (sender → parser → audience → notifier alphabetical) migrate gateway gRPC clients to canonical Pattern B; 4 *.client.ts deleted (227 LOC removed); gateway typecheck FULLY GREEN. Each sweep bundled its consumer Rule 3 retypes (grpc-client-sanity.ts every commit; storage-smoke.controller.ts in parser + notifier commits) — staying consistent with Plan 02 auth precedent of atomic-commit-includes-direct-consequences. storage-smoke.controller.ts retyped to Promisified<T> in Plan 03 instead of Plan 05 because the deferred BLOCKING smoke needed the gateway to compile. Deferred smoke executed: gateway boots end-to-end, /health/ready reaches all 5 Promisified Proxy facades; 2 upstreams up (auth, notifier — services without their own gRPC clients), 3 down (sender/parser/audience — blocked from boot by their own un-migrated cross-service *.client.ts files which Plan 04 sweeps). STRUCTURAL DESIGN validated; STRICT 5/5-up criterion is naturally Plan 04's gate (no defer-smoke pass marker committed).
 - [Phase 999.7.3-04]: 3 atomic per-upstream cross-service sweep commits (sender→audience 1458147, parser→notifier ee68136, audience→parser 9f9fece) close the cross-service tier. 3 *.client.ts deleted (155 LOC removed; 9+3+8 = 20 wrapper methods gone). NO Rule 3 patches needed — pre-task grep confirmed each consumer app had zero external references to the soon-to-be-deleted wrapper class. D-15 enumerated invariant FULLY ACHIEVED: all 8 *.client.ts paths from CONTEXT.md gone workspace-wide. Workspace typecheck FULLY GREEN: 12/12 turbo tasks successful, 0 TS2554/TS2305/TS2614(GrpcCaller) errors. Post-sweep validation PASSED with strict 5/5-upstreams-up criterion: pnpm start:native boots all 6 services; /health/ready returns HTTP 200 with auth/sender/parser/audience/notifier all `status:up`. Plan 03's deferred BLOCKING smoke gate now FULLY satisfied. Plan 05's planned storage-smoke.controller.ts retype was already atomically bundled into Plan 03 sweeps — Plan 05 has no consumer-side typecheck work left; may now focus on backlog cleanup or roll into Plan 06 dual-mode gate.
 - [Phase 999.7.3-05]: 6-probe workspace invariant battery PASSED — typecheck 12/12 turbo (0 TS errors, cached), lint 7/7 turbo (0 errors after one Rule-1 prettier auto-fix), D-15 invariant 0 gRPC `*.client.ts` files at the 8 enumerated paths, D-02/D-10 invariant 0 source `GrpcCaller` references, D-16 ESLint guard preserved (Override 6 enumerates 8 D-15 paths with `ClassDeclaration[superClass]` selector intact — implementation form is per-path enumeration not wildcard glob, semantically equivalent), D-17 invariant `storage-smoke.controller.ts` uses `Promisified<T>` for both parser + notifier injections. Plan 05 Task 1 (D-17 type-only patch) was satisfied transitively by Plan 03 atomic Rule-3 auto-fixes (commits eec1619 + 517d30f bundled storage-smoke retype into parser + notifier sweeps). Single Rule-1 deviation: pre-existing prettier-format regression in `apps/gateway/src/test/grpc-client-sanity.ts` (auth.login(...) call body — residue from Plan 03 sweeps) was auto-fixed via `eslint --fix` to clear invariant 2 (lint clean). Cosmetic-only diff (4 insertions / 3 deletions), no semantic change. Atomic verification commit `42770da`. Phase 999.7.3 is now structurally complete pending Plan 06 (D-20 + D-21 skill updates + formal dual-mode runtime smoke gate).
+- [Phase 999.7.3-06]: Two skills updated atomically (D-20 infrastructure-client-layering: 5 edits — top callout extended with 999.7.2/999.7.3, gRPC reference rewritten to Promisified<T> + promisifyGrpcClient Proxy + single-arg defineGrpcClient<TRaw>(opts), required item 8 broadened to "no per-method wrappers", ANTI-PATTERN 8 appended, See Also extended with 999.7.3 reference, frontmatter description broadened with Promisified/Proxy keywords; D-21 composition-over-inheritance additive: top callout upgraded to plural "Reference implementations:" with 999.7.3 second canonical example, See Also extended with 999.7.3 cross-reference). Final dual-mode runtime smoke gate PASSED: native (host:3000) + isolated (host:4000→container:3000) both HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints PASSED with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode. Atomic commits 2ad4bf5 (skills, exactly 2 files / 38+ 8-) + b304a64 (empty smoke marker, gate result documented in body). Phase 999.7.3 COMPLETE — all 21 D-* decisions (D-01..D-21) realised across Plans 01-06; ready for /gsd:verify-work gate.
 
 ### Pending Todos
 
-- Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation. Documented in `apps/gateway/src/test/grpc-client-sanity.ts` lines 31-34. Not blocking — sanity probe ergonomics issue only. Carry-forward to future fast/cleanup pass (no longer Plan 05 candidate; Plan 05 closed).
-- Plan 06 owns the formal dual-mode (native + isolated) runtime smoke gate; Plan 04's post-sweep smoke validates only the native flow.
-- Plan 06 owns D-20 + D-21 skill updates: `infrastructure-client-layering` ANTI-PATTERN 8 + reference rewrite; `composition-over-inheritance` cross-reference to Phase 999.7.3 as second canonical example.
+- Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation. Documented in `apps/gateway/src/test/grpc-client-sanity.ts` lines 31-34. Not blocking — sanity probe ergonomics issue only. Carry-forward to future fast/cleanup pass (no longer Plan 05/06 candidate; Phase 999.7.3 closed pending verify-work).
+- (Future observability phase) Restore the conscious D-04 regression — `grpc.client.call` per-call structured log entries are no longer emitted by the Promisified Proxy. Restoration via DI-injected logger in outer Proxy chain; rest of gRPC pipeline is unchanged so the restoration is local to `packages/foundation/src/external/grpc/clients/promisify-grpc-client.ts`.
+- (Future HTTP composition phase) 4 remaining HTTP clients still extend AbstractHttpClient (`apps/{notifier/telegram, sender/cloud-functions, parser/appstorespy, gateway/http-smoke}/.../*.client.ts`) — flagged refactor-candidate in composition-over-inheritance SKILL. Apply same pattern as 999.7.2 (composition via injected helper) once 999.7.3 verifies cleanly.
 
 ### Blockers/Concerns
 
-- None. Strict 5/5-upstreams-up runtime smoke gate (carried forward from Plans 02 → 03 → 04) was MET in Plan 04 post-sweep validation: HTTP 200 + auth/sender/parser/audience/notifier all `up`. Plan 06 will re-validate on the isolated flow.
+- None. Strict 5/5-upstreams-up runtime smoke gate met in BOTH supported flows (native + isolated) in Plan 06 final dual-mode gate. Phase 999.7.3 architecturally complete; awaiting `/gsd:verify-work` outcome.
 
 ### Roadmap Evolution
 
@@ -146,6 +148,6 @@ Progress: [██████████] 100% phase, [========================
 
 ## Session Continuity
 
-Last session: 2026-04-18T09:39:28Z
-Stopped at: "Phase 999.7.3 — Plan 05 complete (workspace invariant battery PASSED — 6 probes all green: typecheck 12/12 turbo 0 errors, lint 7/7 turbo 0 errors after one Rule-1 prettier auto-fix in grpc-client-sanity.ts cosmetic-only, D-15 0 gRPC client files at 8 enumerated paths, D-02/D-10 0 source GrpcCaller refs, D-16 ESLint guard preserved per-path enumeration form, D-17 storage-smoke uses Promisified<T>; Plan 05 Task 1 satisfied transitively by Plan 03 commits eec1619 + 517d30f; atomic verification commit 42770da)"
+Last session: 2026-04-18T10:02:55.097Z
+Stopped at: "Phase 999.7.3 — Plan 06 complete (skill updates D-20 + D-21 atomically committed in 2ad4bf5; final dual-mode runtime smoke gate PASSED — native flow on host:3000 and isolated flow on host:4000 both returned HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints returned HTTP 200 with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode; atomic smoke marker commit b304a64. Phase 999.7.3 architecturally complete — all 21 D-* decisions realised across Plans 01-06; ready for /gsd:verify-work gate.)"
 Resume file: None

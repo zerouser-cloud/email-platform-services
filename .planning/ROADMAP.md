@@ -415,7 +415,7 @@ Plans:
 **Goal:** Заменить 8 hand-written `*.client.ts` per-method wrapper-классов и standalone `GrpcCaller` helper единым типизированным `Promisified<T>` Proxy в foundation. Consumer инжектирует `Promisified<XxxProto.XxxServiceClient>` напрямую — никаких custom client-классов в `apps/`. Proxy перехватывает любой Observable-возвращающий метод raw ts-proto клиента, добавляет `Metadata` с per-call deadline, конвертирует Observable→Promise через `lastValueFrom`, возвращает результат. Логирование/трассировку временно вырезаем (D-04 conscious observability regression) — будущая фаза по observability вернёт их через DI-injected logger (outer Proxy chain). Skill `infrastructure-client-layering` обновляется (gRPC reference section, ANTI-PATTERN 8); `composition-over-inheritance` cross-references как second canonical example.
 **Requirements**: D-01..D-21 (locked decisions in 999.7.3-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; this is architectural cleanup of GRPC-01..GRPC-04 already Complete)
 **Depends on:** Phase 999.7.2 (нужен чтобы `GrpcCaller` уже был extracted helper, чтобы клин при удалении был минимальным)
-**Plans:** 6 plans
+**Plans:** 6/6 plans complete
 
 Plans:
 - [x] 999.7.3-01-PLAN.md — Wave 1: foundation create promisify-grpc-client.ts + delete grpc-caller.ts + simplify defineGrpcClient (D-02..D-10)
@@ -423,7 +423,7 @@ Plans:
 - [x] 999.7.3-03-PLAN.md — Wave 3: sweep 4 gateway upstreams (sender/parser/audience/notifier) — atomic commit per upstream (D-14 + D-15 + D-19) — gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke executed: structural design validated (gateway boots, /health/ready reaches all 5 upstreams), strict 5/5-up criterion deferred to Plan 04 (cross-service services blocked from boot)
 - [x] 999.7.3-04-PLAN.md — Wave 4: sweep 3 cross-service upstreams (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-14 + D-15 + D-19) — workspace typecheck FULLY GREEN (12/12 turbo tasks); D-15 8-path invariant achieved; post-sweep validation PASSED with strict 5/5-upstreams-up criterion (HTTP 200)
 - [x] 999.7.3-05-PLAN.md — Wave 5: storage-smoke.controller.ts type-only patch + workspace-wide invariant battery (D-11 + D-17) — Task 1 satisfied transitively by Plan 03 (storage-smoke retype bundled into eec1619 + 517d30f); Plan 05 contributes 6-probe invariant verification battery (typecheck 0, lint 0 after Rule-1 prettier-format auto-fix, D-15 0 files, 0 source GrpcCaller refs, D-16 ESLint guard preserved with 8 enumerated paths, D-17 Promisified<T> confirmed); commit `42770da`
-- [ ] 999.7.3-06-PLAN.md — Wave 6: skill updates (infrastructure-client-layering ANTI-PATTERN 8 + composition-over-inheritance cross-ref) + final dual-mode runtime smoke (D-19 + D-20 + D-21)
+- [x] 999.7.3-06-PLAN.md — Wave 6: skill updates (infrastructure-client-layering ANTI-PATTERN 8 + composition-over-inheritance cross-ref) + final dual-mode runtime smoke (D-19 + D-20 + D-21)
 
 ### Phase 999.8: Мигрировать TelegramClient на SDK (telegraf / grammY), operation-level logging (BACKLOG)
 
