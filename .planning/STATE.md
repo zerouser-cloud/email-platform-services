@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Phase 999.10 — Plan 02 (auth pilot) complete: 3 atomic commits (4202eb7 refactor file moves + constants / 30c035c feat 6 Commands + 6 inbound Ports / aeb93e6 feat use case audit D-23 + 6 Services + module rewrite); 39 file operations; 8 proto-shape auto-deviations documented; native runtime smoke PASSED after user-invoked docker restart (/health/ready HTTP 200 with all 5 upstreams up). Plans 03/04/05 sweep pattern established. Plan 04 still requires Pitfall 3 user decision (parser storage-smoke duplicate registration — Option A canonicalise vs Option C test-exception)."
-last_updated: "2026-04-18T16:03:12.334Z"
-last_activity: 2026-04-18 -- Phase 999.10 planning complete
+stopped_at: "Phase 999.10 — Plan 03 (sender sweep) complete: atomic commit 7f0f9c6 with 46 file ops (3 renames + 38 new + 5 modified); 10 Commands + 10 Ports + 10 Services + 9 Use Cases (1 shared TransitionCampaignStatusUseCase for Pause+Resume, second D-03 reuse proof after auth's IssueTokenPairUseCase); CloudFnSmokeController preserved (D-13 test-boundary); native runtime smoke PASSED first try with all 5 upstreams up; 0 proto-shape auto-deviations (Plan 02 lesson applied proactively); 1 trivial prettier auto-fix via eslint --fix. Plan 04 next (parser sweep) — remember Pitfall 3 storage-smoke duplicate-registration user decision still pending."
+last_updated: "2026-04-18T16:15:46.064Z"
+last_activity: 2026-04-18 -- Phase 999.10 Plan 03 complete
 progress:
   total_phases: 27
   completed_phases: 15
   total_plans: 64
-  completed_plans: 59
-  percent: 92
+  completed_plans: 60
+  percent: 94
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — EXECUTING
-Plan: 3 of 7 (Plans 01-02 complete — sender sweep next)
-Status: Plan 02 auth pilot complete + native smoke PASSED; ready for Plan 03 sender sweep
-Last activity: 2026-04-18 -- Plan 02 complete
+Plan: 4 of 7 (Plans 01-03 complete — parser sweep next, awaits Pitfall 3 decision)
+Status: Plan 03 sender sweep complete + native smoke PASSED; ready for Plan 04 parser sweep (blocked on user decision for storage-smoke duplicate-registration)
+Last activity: 2026-04-18 -- Plan 03 complete
 
-Progress: [██░░░░░░░░] 29% phase (2/7 plans), [==============================] 100% overall
+Progress: [████░░░░░░] 43% phase (3/7 plans), [==============================] 100% overall
 
 ## Performance Metrics
 
@@ -88,6 +88,7 @@ Progress: [██░░░░░░░░] 29% phase (2/7 plans), [=============
 | Phase 999.7.3 P05 | 2min (97s) | 1 transitive + 6-probe invariant battery + 1 Rule-1 lint-fix | 1 file modified (grpc-client-sanity.ts prettier-only) |
 | Phase 999.7.3 P06 | 12min | 4 tasks | 2 files |
 | Phase 999.10 P01 | 7min | 2 tasks | 7 files |
+| Phase 999.10 P03 | 6min | 1 tasks | 46 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,7 @@ Progress: [██░░░░░░░░] 29% phase (2/7 plans), [=============
 - [Phase 999.7.3-05]: 6-probe workspace invariant battery PASSED — typecheck 12/12 turbo (0 TS errors, cached), lint 7/7 turbo (0 errors after one Rule-1 prettier auto-fix), D-15 invariant 0 gRPC `*.client.ts` files at the 8 enumerated paths, D-02/D-10 invariant 0 source `GrpcCaller` references, D-16 ESLint guard preserved (Override 6 enumerates 8 D-15 paths with `ClassDeclaration[superClass]` selector intact — implementation form is per-path enumeration not wildcard glob, semantically equivalent), D-17 invariant `storage-smoke.controller.ts` uses `Promisified<T>` for both parser + notifier injections. Plan 05 Task 1 (D-17 type-only patch) was satisfied transitively by Plan 03 atomic Rule-3 auto-fixes (commits eec1619 + 517d30f bundled storage-smoke retype into parser + notifier sweeps). Single Rule-1 deviation: pre-existing prettier-format regression in `apps/gateway/src/test/grpc-client-sanity.ts` (auth.login(...) call body — residue from Plan 03 sweeps) was auto-fixed via `eslint --fix` to clear invariant 2 (lint clean). Cosmetic-only diff (4 insertions / 3 deletions), no semantic change. Atomic verification commit `42770da`. Phase 999.7.3 is now structurally complete pending Plan 06 (D-20 + D-21 skill updates + formal dual-mode runtime smoke gate).
 - [Phase 999.7.3-06]: Two skills updated atomically (D-20 infrastructure-client-layering: 5 edits — top callout extended with 999.7.2/999.7.3, gRPC reference rewritten to Promisified<T> + promisifyGrpcClient Proxy + single-arg defineGrpcClient<TRaw>(opts), required item 8 broadened to "no per-method wrappers", ANTI-PATTERN 8 appended, See Also extended with 999.7.3 reference, frontmatter description broadened with Promisified/Proxy keywords; D-21 composition-over-inheritance additive: top callout upgraded to plural "Reference implementations:" with 999.7.3 second canonical example, See Also extended with 999.7.3 cross-reference). Final dual-mode runtime smoke gate PASSED: native (host:3000) + isolated (host:4000→container:3000) both HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints PASSED with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode. Atomic commits 2ad4bf5 (skills, exactly 2 files / 38+ 8-) + b304a64 (empty smoke marker, gate result documented in body). Phase 999.7.3 COMPLETE — all 21 D-* decisions (D-01..D-21) realised across Plans 01-06; ready for /gsd:verify-work gate.
 - [Phase 999.10-01]: nestjs-hexagonal-mapping skill created as the third entry in the server-side triada (clean-ddd-hexagonal / infrastructure-client-layering / nestjs-hexagonal-mapping). 7 markdown files atomically committed in 2 commits: 402ec4e (SKILL.md + LAYERS.md + CALL-FLOW.md + NAMING.md) and 294a911 (EXAMPLES.md + PROTO-VISIBILITY.md + DO-DONT.md). D-15 (foundation-first — skill before code), D-16 (exact name `nestjs-hexagonal-mapping`), and D-17 (zero ESLint snippets in skill — .eslintrc.js is the single source of truth for rules, added by Plan 06) all realised. SKILL.md at 119 lines carries frontmatter with all 8 required triggers (grpc controller, service layer, use case, hexagonal nestjs, proto mapping, ts-proto controller, layer boundary, command dto), three-layer stack diagram, 8-step decision tree for adding a new RPC, 9 anti-patterns, See Also with 4 paired-skill links, references list. references/ carries per-layer definitions + canonical tree (LAYERS.md), canonical login call flow + 3 composition variants (CALL-FLOW.md), D-12 file↔class table (NAMING.md), 3 worked examples + Before/After (EXAMPLES.md), 17-row visibility matrix (PROTO-VISIBILITY.md), 9 Don't/Do/Why/Detected-by anti-pattern blocks (DO-DONT.md). pnpm lint 7/7 cache-hit green (markdown-only change). No deviations. Duration ~7min. Plan 02 auth pilot unblocked.
+- [Phase ?]: [Phase 999.10-03]: Sender sweep complete — mechanical replication of auth pilot (10 Commands + 10 Ports + 10 Services + 9 Use Cases, 1 shared TransitionCampaignStatusUseCase). CloudFnSmokeController preserved in controllers[] (D-13 test-boundary exception). Runner/Message/Macros use cases stubbed without outbound ports per research recommendation. Runtime smoke PASSED first try, all 5 upstreams up. 0 proto-shape deviations — Plan 02 lesson applied proactively by reading packages/contracts/src/generated/sender.ts before writing services. D-03 reuse pattern now demonstrated twice (auth IssueTokenPairUseCase + sender TransitionCampaignStatusUseCase).
 
 ### Pending Todos
 
@@ -151,6 +153,6 @@ Progress: [██░░░░░░░░] 29% phase (2/7 plans), [=============
 
 ## Session Continuity
 
-Last session: 2026-04-18T14:06:20Z
+Last session: 2026-04-18T16:15:25.401Z
 Stopped at: "Phase 999.10 — Plan 01 complete (nestjs-hexagonal-mapping skill: SKILL.md + 6 references/*.md in 2 atomic commits 402ec4e + 294a911; D-15/D-16/D-17 realised; zero ESLint snippets; pnpm lint 7/7 cache-hit green; self-check passed. Plan 02 auth pilot unblocked — can now cite .agents/skills/nestjs-hexagonal-mapping/SKILL.md as canonical pattern source.)"
 Resume file: None
