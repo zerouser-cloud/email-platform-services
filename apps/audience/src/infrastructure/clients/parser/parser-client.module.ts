@@ -1,12 +1,12 @@
 import { Module, type DynamicModule } from '@nestjs/common';
 import { SERVICE } from '@email-platform/config';
 import { defineGrpcClient } from '@email-platform/foundation';
-import { ParserClient } from './parser.client';
+import { ParserProto } from '@email-platform/contracts';
 
-const grpc = defineGrpcClient(
-  { service: SERVICE.parser, clientToken: SERVICE.parser.diToken },
-  (grpcClient, caller) => new ParserClient(grpcClient, caller),
-);
+const grpc = defineGrpcClient<ParserProto.ParserServiceClient>({
+  service: SERVICE.parser,
+  clientToken: SERVICE.parser.diToken,
+});
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).
 // Do NOT export `grpc` directly — that leaks imports/providers/exports and lets consumers bypass forRoot().
