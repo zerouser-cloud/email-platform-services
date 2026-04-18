@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Phase 999.10 — Plan 01 complete (nestjs-hexagonal-mapping skill: SKILL.md + 6 references/*.md in 2 atomic commits 402ec4e + 294a911; D-17 invariant verified — zero ESLint snippets across all 7 files; pnpm lint 7/7 cache-hit green; self-check passed on all artefacts and commit hashes. Plan 02 auth pilot unblocked — can now cite .agents/skills/nestjs-hexagonal-mapping/SKILL.md as canonical pattern source."
-last_updated: "2026-04-18T14:06:20Z"
-last_activity: 2026-04-18 -- Phase 999.10 Plan 01 complete (nestjs-hexagonal-mapping skill created)
+stopped_at: "Phase 999.10 — Plan 02 (auth pilot) complete: 3 atomic commits (4202eb7 refactor file moves + constants / 30c035c feat 6 Commands + 6 inbound Ports / aeb93e6 feat use case audit D-23 + 6 Services + module rewrite); 39 file operations; 8 proto-shape auto-deviations documented; native runtime smoke PASSED after user-invoked docker restart (/health/ready HTTP 200 with all 5 upstreams up). Plans 03/04/05 sweep pattern established. Plan 04 still requires Pitfall 3 user decision (parser storage-smoke duplicate registration — Option A canonicalise vs Option C test-exception)."
+last_updated: "2026-04-18T16:03:12.334Z"
+last_activity: 2026-04-18 -- Phase 999.10 planning complete
 progress:
   total_phases: 27
   completed_phases: 15
   total_plans: 64
-  completed_plans: 57
-  percent: 89
+  completed_plans: 59
+  percent: 92
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — EXECUTING
-Plan: 2 of 7 (Plan 01 complete — auth pilot next)
-Status: Executing Phase 999.10
-Last activity: 2026-04-18 -- Phase 999.10 Plan 01 complete (nestjs-hexagonal-mapping skill created; 7 files; 2 atomic commits)
+Plan: 3 of 7 (Plans 01-02 complete — sender sweep next)
+Status: Plan 02 auth pilot complete + native smoke PASSED; ready for Plan 03 sender sweep
+Last activity: 2026-04-18 -- Plan 02 complete
 
-Progress: [█░░░░░░░░░] 14% phase (1/7 plans), [==============================] 100% overall
+Progress: [██░░░░░░░░] 29% phase (2/7 plans), [==============================] 100% overall
 
 ## Performance Metrics
 

@@ -479,11 +479,11 @@ Plans:
 **Estimated scope:** 50-80 files modified/created (~4 controller renames, ~5 health moves, ~33 new services + 33 inbound ports, ~10-20 use case audit, 5 module updates, 1 new skill, 3 docs updates, optional ESLint guards). Comparable to Phase 999.7.3 (~30 files).
 
 **Requirements:** D-01..D-24 (locked decisions in 999.10-CONTEXT.md serve as primary requirement surface — no REQ-IDs in REQUIREMENTS.md; this is architectural refactoring per 24 locked D-decisions)
-**Plans:** 7 plans
+**Plans:** 2/7 plans executed
 
 Plans:
 - [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md; no code)
-- [ ] 999.10-02-PLAN.md — Auth pilot (full Controller → Service → UseCase refactor + 6 inbound ports + 6 services + 8 use cases per D-23 audit)
+- [x] 999.10-02-PLAN.md — Auth pilot (full Controller → Service → UseCase refactor + 6 inbound ports + 6 services + 8 use cases per D-23 audit)
 - [ ] 999.10-03-PLAN.md — Sender sweep (11 RPCs → 10 services + shared TransitionCampaignStatusUseCase)
 - [ ] 999.10-04-PLAN.md — Parser sweep (8 RPCs + Pitfall 3 smoke-controller decision — Option A canonicalise OR Option C test-tier exception)
 - [ ] 999.10-05-PLAN.md — Audience sweep (9 RPCs → 8 services + shared TransitionRecipientsStatusUseCase + GroupRepositoryPort symmetry)
