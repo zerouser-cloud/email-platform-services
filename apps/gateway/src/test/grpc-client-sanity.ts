@@ -9,7 +9,6 @@
  * DO NOT import this file from any runtime module.
  */
 import type { CallOpts, Promisified } from '@email-platform/foundation';
-import type { SenderClient } from '../infrastructure/clients/sender';
 import type { ParserClient } from '../infrastructure/clients/parser';
 import type { AudienceClient } from '../infrastructure/clients/audience';
 import type { NotifierClient } from '../infrastructure/clients/notifier';
@@ -25,7 +24,7 @@ import type {
 // Positive compile cases — must typecheck.
 export async function _probePositive(
   auth: Promisified<AuthProto.AuthServiceClient>,
-  sender: SenderClient,
+  sender: Promisified<SenderProto.SenderServiceClient>,
   parser: ParserClient,
   audience: AudienceClient,
   notifier: NotifierClient,
@@ -42,6 +41,7 @@ export async function _probePositive(
   void _tokens;
   void opts;
 
+  // Promisified<T>: see comment above re: Metadata vs CallOpts asymmetry. Drop second arg.
   const _campaigns: SenderProto.CampaignList = await sender.listCampaigns(
     {} as SenderProto.ListCampaignsRequest,
   );
