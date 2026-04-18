@@ -1,11 +1,11 @@
 import { Controller, Inject, NotImplementedException } from '@nestjs/common';
 import { AuthProto, CommonProto } from '@email-platform/contracts';
-import { LoginPort } from '../../application/ports/inbound/login.port';
-import { LOGIN_PORT } from '../../auth.constants';
+import { LoginPort } from '../../../application/ports/inbound/login.port';
+import { LOGIN_PORT } from '../../../auth.constants';
 
 @Controller()
 @AuthProto.AuthServiceControllerMethods()
-export class AuthGrpcServer implements AuthProto.AuthServiceController {
+export class AuthController implements AuthProto.AuthServiceController {
   constructor(@Inject(LOGIN_PORT) private readonly loginPort: LoginPort) {}
 
   async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {

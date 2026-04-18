@@ -5,7 +5,7 @@ import { DRIZZLE } from '@email-platform/foundation';
 import type { UserRepositoryPort } from '../../application/ports/outbound/user-repository.port';
 import type { User } from '../../domain/entities/user.entity';
 import { users } from './schema/users.schema';
-import { UserMapper } from './user.mapper';
+import { UserMapper } from './mappers/user.mapper';
 
 @Injectable()
 export class PgUserRepository implements UserRepositoryPort {

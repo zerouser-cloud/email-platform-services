@@ -1,5 +1,5 @@
-import { User } from '../../domain/entities/user.entity';
-import type { users } from './schema/users.schema';
+import { User } from '../../../domain/entities/user.entity';
+import type { users } from '../schema/users.schema';
 
 type UserRow = typeof users.$inferSelect;
 type NewUserRow = typeof users.$inferInsert;
