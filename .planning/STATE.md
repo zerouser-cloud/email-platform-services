@@ -4,14 +4,14 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.7.3 context gathered
-last_updated: "2026-04-18T08:44:42.383Z"
-last_activity: 2026-04-18 -- Phase 999.7.3 planning complete
+last_updated: "2026-04-18T08:59:45.180Z"
+last_activity: 2026-04-18
 progress:
   total_phases: 26
   completed_phases: 14
   total_plans: 57
-  completed_plans: 51
-  percent: 89
+  completed_plans: 52
+  percent: 91
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.7.2 — grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller
+**Current focus:** Phase 999.7.3 — grpc-client-promisify-proxy-replace-per-method-wrappers
 
 ## Current Position
 
-Phase: 999.7.2 (grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller) — EXECUTING
-Plan: 1 of 6
+Phase: 999.7.3 (grpc-client-promisify-proxy-replace-per-method-wrappers) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-04-18 -- Phase 999.7.3 planning complete
+Last activity: 2026-04-18
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
 
@@ -80,6 +80,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 999.7 P02 | 184 | 2 tasks | 25 files |
 | Phase 999.7 P03 | 147 | 2 tasks | 15 files |
 | Phase 999.7 P04 | 99 | 2 tasks | 17 files |
+| Phase 999.7.3 P01 | 8min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,7 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 999.7]: Client facades import AbstractGrpcClient and CallOpts from @email-platform/foundation (domain-agnostic base), per-service constants stay local in apps/
 - [Phase 999.7]: Single-upstream apps import XxxClientModule.forRoot() directly in root module (no compositor layer needed)
 - [Phase 999.7]: Foundation fully decoupled from @email-platform/contracts; ESLint rule guards contracts->config->foundation->apps dependency direction
+- [Phase ?]: [Phase 999.7.3-01]: Foundation Promisified Proxy primitive landed atomically; GrpcCaller deleted; defineGrpcClient<TRaw>(opts) single-arg signature with inlined Promisified Proxy; barrels updated; 16 expected interim TS errors documented for Plans 02-05 sweep
 
 ### Pending Todos
 
@@ -133,6 +135,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T07:33:28.376Z
+Last session: 2026-04-18T08:59:39.880Z
 Stopped at: Phase 999.7.3 context gathered
-Resume file: .planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/999.7.3-CONTEXT.md
+Resume file: None
