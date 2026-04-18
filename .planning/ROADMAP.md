@@ -419,7 +419,7 @@ Plans:
 
 Plans:
 - [x] 999.7.3-01-PLAN.md — Wave 1: foundation create promisify-grpc-client.ts + delete grpc-caller.ts + simplify defineGrpcClient (D-02..D-10)
-- [ ] 999.7.3-02-PLAN.md — Wave 2: pilot AuthClient migration to Promisified Proxy + runtime smoke checkpoint (D-09 + D-11 + D-15)
+- [x] 999.7.3-02-PLAN.md — Wave 2: pilot AuthClient migration to Promisified Proxy + runtime smoke checkpoint (D-09 + D-11 + D-15) — code complete; runtime smoke gate DEFERRED to Plan 03 (gateway compile-blocked by 4 unmigrated upstreams)
 - [ ] 999.7.3-03-PLAN.md — Wave 3: sweep 4 gateway upstreams (sender/parser/audience/notifier) — atomic commit per upstream (D-14 + D-15 + D-19)
 - [ ] 999.7.3-04-PLAN.md — Wave 4: sweep 3 cross-service upstreams (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-14 + D-15 + D-19)
 - [ ] 999.7.3-05-PLAN.md — Wave 5: storage-smoke.controller.ts type-only patch + workspace-wide invariant battery (D-11 + D-17)

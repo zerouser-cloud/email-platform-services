@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.7.3 context gathered
-last_updated: "2026-04-18T08:59:45.180Z"
+stopped_at: "Phase 999.7.3 — Plan 02 complete (smoke deferred to Plan 03)"
+last_updated: "2026-04-18T09:08:00.000Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 26
   completed_phases: 14
   total_plans: 57
-  completed_plans: 52
-  percent: 91
+  completed_plans: 53
+  percent: 93
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.7.3 (grpc-client-promisify-proxy-replace-per-method-wrappers) — EXECUTING
-Plan: 2 of 6
-Status: Ready to execute
+Plan: 3 of 6
+Status: Ready to execute (Plan 02 complete — pilot AuthClient migration done; runtime smoke gate deferred to Plan 03 because gateway compile-blocked by 4 unmigrated upstream modules)
 Last activity: 2026-04-18
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
@@ -81,6 +81,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 999.7 P03 | 147 | 2 tasks | 15 files |
 | Phase 999.7 P04 | 99 | 2 tasks | 17 files |
 | Phase 999.7.3 P01 | 8min | 3 tasks | 4 files |
+| Phase 999.7.3 P02 | 5min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -114,14 +115,17 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 999.7]: Single-upstream apps import XxxClientModule.forRoot() directly in root module (no compositor layer needed)
 - [Phase 999.7]: Foundation fully decoupled from @email-platform/contracts; ESLint rule guards contracts->config->foundation->apps dependency direction
 - [Phase ?]: [Phase 999.7.3-01]: Foundation Promisified Proxy primitive landed atomically; GrpcCaller deleted; defineGrpcClient<TRaw>(opts) single-arg signature with inlined Promisified Proxy; barrels updated; 16 expected interim TS errors documented for Plans 02-05 sweep
+- [Phase 999.7.3-02]: AuthClient pilot migrated to canonical 10-line shape (defineGrpcClient<AuthProto.AuthServiceClient>(opts)); auth.client.ts wrapper deleted; barrel cleaned; grpc-client-sanity.ts retyped to Promisified<AuthProto.AuthServiceClient> (Rule 3); auth wedge cleared (1 TS2554 + 1 TS2305 fixed; 8 root errors remain); BLOCKING runtime smoke gate DEFERRED to Plan 03 because gateway compile-blocked by 4 unmigrated upstream modules — auth/notifier microservices DID start cleanly, validating Plan 01 foundation safety for upstream-free services
+- [Phase 999.7.3-02]: Promisified<T> public TYPE preserves original ts-proto Metadata signature even though runtime Proxy accepts CallOpts; consumers must either omit second arg, construct Metadata manually, or wait for foundation refinement to widen typed signature to Metadata | CallOpts (backlog for Plan 05 or future fast pass)
 
 ### Pending Todos
 
-None yet.
+- Move Plan 02 BLOCKING runtime smoke gate (Task 3) to Plan 03 — Plan 02 cannot pass it in isolation due to 4 unmigrated upstream client modules (sender/parser/audience/notifier).
+- Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation (future fast/cleanup pass).
 
 ### Blockers/Concerns
 
-None yet.
+- Plan 02 Task 3 (runtime smoke) NOT validated. Gateway never bound to port 3000 because nest start --watch refused to emit JS for 4 broken upstream modules. Plan 03 sweep must close those before smoke can validate the AuthClient Promisified Proxy at runtime.
 
 ### Roadmap Evolution
 
@@ -135,6 +139,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T08:59:39.880Z
-Stopped at: Phase 999.7.3 context gathered
+Last session: 2026-04-18T09:08:00.000Z
+Stopped at: "Phase 999.7.3 — Plan 02 complete (auth pilot migrated; runtime smoke deferred to Plan 03)"
 Resume file: None
