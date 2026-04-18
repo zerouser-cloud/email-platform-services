@@ -11,7 +11,10 @@ export interface ListUsersResult {
     readonly role: string;
     readonly organization: string;
     readonly team: string;
-    readonly createdAt: number;
+    readonly createdAt: string;
   }>;
   readonly total: number;
+  readonly page: number;
+  readonly limit: number;
+  readonly pages: number;
 }

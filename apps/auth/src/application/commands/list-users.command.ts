@@ -1,6 +1,6 @@
 export class ListUsersCommand {
   constructor(
+    public readonly page: number,
     public readonly limit: number,
-    public readonly offset: number,
   ) {}
 }

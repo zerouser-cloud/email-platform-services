@@ -10,5 +10,5 @@ export interface CreateUserResult {
   readonly role: string;
   readonly organization: string;
   readonly team: string;
-  readonly createdAt: number;
+  readonly createdAt: string;
 }
