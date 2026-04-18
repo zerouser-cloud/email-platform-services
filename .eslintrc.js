@@ -173,6 +173,57 @@ module.exports = {
                 }],
             },
         },
+        // Override 8: Domain layer isolation (D-06 + D-18, Phase 999.10).
+        // Domain is pure TypeScript — no NestJS DI, no gRPC transport, no proto types,
+        // no Drizzle ORM, no pg driver. Domain entities / VOs / domain services / events
+        // must be framework-free so the business logic survives re-ORM / re-transport.
+        {
+            files: ['apps/*/src/domain/**/*.ts'],
+            rules: {
+                'no-restricted-imports': ['error', {
+                    patterns: [{
+                        group: [
+                            '@nestjs/*',
+                            '@grpc/*',
+                            '@email-platform/contracts',
+                            '@email-platform/contracts/*',
+                            'drizzle-orm',
+                            'drizzle-orm/*',
+                            'pg',
+                            'pg/*',
+                        ],
+                        message: 'domain/ layer is pure TypeScript — no NestJS, no proto, no Drizzle, no pg driver. See .agents/skills/clean-ddd-hexagonal/SKILL.md (Dependency Rule) and .agents/skills/nestjs-hexagonal-mapping/ (Proto Visibility).',
+                    }],
+                }],
+            },
+        },
+        // Override 9: Application layer isolation (D-04 + D-05 + D-18, Phase 999.10).
+        // application/ = ports + services + use cases + commands. Domain types only.
+        // Transport contracts (proto) live ONLY in infrastructure/controllers/grpc/.
+        // @nestjs/microservices decorators (GrpcMethod, etc.) are infrastructure concerns.
+        {
+            files: ['apps/*/src/application/**/*.ts'],
+            rules: {
+                'no-restricted-imports': ['error', {
+                    patterns: [
+                        {
+                            group: [
+                                '@email-platform/contracts',
+                                '@email-platform/contracts/*',
+                            ],
+                            message: 'application/ layer must not import proto types. Controllers (infrastructure/controllers/grpc/) own the proto↔domain mapping. See .agents/skills/nestjs-hexagonal-mapping/ (D-04, Proto Visibility).',
+                        },
+                        {
+                            group: [
+                                '@nestjs/microservices',
+                                '@nestjs/microservices/*',
+                            ],
+                            message: '@nestjs/microservices is a transport-adapter concern. GrpcMethod / GrpcStreamMethod / MessagePattern / EventPattern belong in infrastructure/controllers/. application/ layer is transport-agnostic. See .agents/skills/nestjs-hexagonal-mapping/.',
+                        },
+                    ],
+                }],
+            },
+        },
     ],
     ignorePatterns: ['dist/', 'node_modules/', '*.js'],
 };
