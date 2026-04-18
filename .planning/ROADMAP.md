@@ -451,3 +451,35 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
+
+### Phase 999.10: Application architecture — add Service layer + restructure Hexagonal stack across all microservices (BACKLOG)
+
+**Goal:** Standardize NestJS↔Hexagonal layer mapping across all 6 microservices. Introduce unified `Controller → Service → UseCase` 3-layer stack (Service = composition layer implementing наш inbound port, UseCase = atomic operation), rename controllers without transport suffix (`AuthGrpcServer` → `AuthController`), move health controllers to `infrastructure/controllers/rest/`, fix as skill `nestjs-hexagonal-mapping`, update CLAUDE.md / `.planning/codebase/ARCHITECTURE.md` with call-flow diagram + proto-visibility table.
+
+**Why this phase:** обсуждение между user и agent 2026-04-18 после Phase 999.7.3 (server-side gRPC pattern audit). Auth — Hexagonal reference impl, но НЕТ Application Service слоя (use cases имплементируют inbound ports напрямую). Naming inconsistency: `AuthGrpcServer` vs `HealthController`. HealthController в outlier `apps/{service}/src/health/` вместо `infrastructure/controllers/rest/`. Pattern не зафиксирован skill'ом → drift риск. Все architectural decisions уже зафиксированы в pre-discussion notes (999.10-NOTES.md, 12 D-LOCKED entries).
+
+**Locked decisions (D-LOCKED-01..D-LOCKED-12 in NOTES.md):**
+1. Унифицированный 3-слойный stack (Controller→Service→UseCase везде, всегда)
+2. Per-feature service granularity (LoginService, RegisterService — не один большой)
+3. Use case всегда отдельный класс (даже если pure delegation сегодня)
+4. Controller naming без суффикса (`AuthController` not `AuthGrpcServer`)
+5. Service implements OWN port (не proto interface)
+6. Port = TypeScript interface который МЫ пишем руками (не из proto)
+7. Один Module на bounded context (flat, без подмодулей)
+8. NestJS-овские корневые папки поглощены Hexagonal слоями
+9. Транспорт явный в пути (`infrastructure/controllers/{grpc,rest}/`)
+10. Health всегда REST в `infrastructure/controllers/rest/`
+11. Domain полностью изолирован (нет proto/Drizzle/NestJS imports)
+12. Naming convention для файлов one-to-one с классами
+
+**Open questions for discuss-phase:** scope (auth-only canary vs all 6 sweep), include CR-warnings auto-fix, skill name + scope, ESLint enforcement now or later, value objects/domain events introduction timing, Command/Query DTO convention adoption, mapper folder structure, migration order, docs update scope, existing use cases audit/refactoring impact.
+
+**Pre-discussion artifact:** `.planning/phases/999.10-app-architecture-add-service-layer-restructure-hexagonal-stack/999.10-NOTES.md` (canonical model + ASCII diagrams + file structure + 10 open questions)
+
+**Estimated scope:** 50-80 files modified/created (~4 controller renames, ~5 health moves, ~33 new services + 33 inbound ports, ~10-20 use case audit, 5 module updates, 1 new skill, 3 docs updates, optional ESLint guards). Comparable to Phase 999.7.3 (~30 files).
+
+**Requirements:** TBD (D-LOCKED-01..D-LOCKED-12 + open questions resolutions will become D-XX after `/gsd:discuss-phase 999.10`)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (resolve open questions in discuss-phase, then `/gsd:plan-phase 999.10`)
