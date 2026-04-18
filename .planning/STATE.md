@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: ""Phase 999.7.3 — Plan 06 complete (skill updates D-20 + D-21 atomically committed in 2ad4bf5; final dual-mode runtime smoke gate PASSED — native flow on host:3000 and isolated flow on host:4000 both returned HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints returned HTTP 200 with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode; atomic smoke marker commit b304a64. Phase 999.7.3 architecturally complete — all 21 D-* decisions realised across Plans 01-06; ready for /gsd:verify-work gate.)""
-last_updated: "2026-04-18T13:52:51.577Z"
-last_activity: 2026-04-18 -- Phase 999.10 planning complete
+stopped_at: "Phase 999.10 — Plan 01 complete (nestjs-hexagonal-mapping skill: SKILL.md + 6 references/*.md in 2 atomic commits 402ec4e + 294a911; D-17 invariant verified — zero ESLint snippets across all 7 files; pnpm lint 7/7 cache-hit green; self-check passed on all artefacts and commit hashes. Plan 02 auth pilot unblocked — can now cite .agents/skills/nestjs-hexagonal-mapping/SKILL.md as canonical pattern source."
+last_updated: "2026-04-18T14:06:20Z"
+last_activity: 2026-04-18 -- Phase 999.10 Plan 01 complete (nestjs-hexagonal-mapping skill created)
 progress:
   total_phases: 27
   completed_phases: 15
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.7.3 — grpc-client-promisify-proxy-replace-per-method-wrappers
+**Current focus:** Phase 999.10 — app-architecture-add-service-layer-restructure-hexagonal-stack
 
 ## Current Position
 
-Phase: 999.8
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-04-18 -- Phase 999.10 planning complete
+Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — EXECUTING
+Plan: 2 of 7 (Plan 01 complete — auth pilot next)
+Status: Executing Phase 999.10
+Last activity: 2026-04-18 -- Phase 999.10 Plan 01 complete (nestjs-hexagonal-mapping skill created; 7 files; 2 atomic commits)
 
-Progress: [██████████] 100% phase, [==============================] 100% overall
+Progress: [█░░░░░░░░░] 14% phase (1/7 plans), [==============================] 100% overall
 
 ## Performance Metrics
 
@@ -87,6 +87,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 999.7.3 P04 | 2min | 3 sweep + post-sweep smoke | 9 files (6 modified, 3 deleted) |
 | Phase 999.7.3 P05 | 2min (97s) | 1 transitive + 6-probe invariant battery + 1 Rule-1 lint-fix | 1 file modified (grpc-client-sanity.ts prettier-only) |
 | Phase 999.7.3 P06 | 12min | 4 tasks | 2 files |
+| Phase 999.10 P01 | 7min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,7 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 999.7.3-04]: 3 atomic per-upstream cross-service sweep commits (sender→audience 1458147, parser→notifier ee68136, audience→parser 9f9fece) close the cross-service tier. 3 *.client.ts deleted (155 LOC removed; 9+3+8 = 20 wrapper methods gone). NO Rule 3 patches needed — pre-task grep confirmed each consumer app had zero external references to the soon-to-be-deleted wrapper class. D-15 enumerated invariant FULLY ACHIEVED: all 8 *.client.ts paths from CONTEXT.md gone workspace-wide. Workspace typecheck FULLY GREEN: 12/12 turbo tasks successful, 0 TS2554/TS2305/TS2614(GrpcCaller) errors. Post-sweep validation PASSED with strict 5/5-upstreams-up criterion: pnpm start:native boots all 6 services; /health/ready returns HTTP 200 with auth/sender/parser/audience/notifier all `status:up`. Plan 03's deferred BLOCKING smoke gate now FULLY satisfied. Plan 05's planned storage-smoke.controller.ts retype was already atomically bundled into Plan 03 sweeps — Plan 05 has no consumer-side typecheck work left; may now focus on backlog cleanup or roll into Plan 06 dual-mode gate.
 - [Phase 999.7.3-05]: 6-probe workspace invariant battery PASSED — typecheck 12/12 turbo (0 TS errors, cached), lint 7/7 turbo (0 errors after one Rule-1 prettier auto-fix), D-15 invariant 0 gRPC `*.client.ts` files at the 8 enumerated paths, D-02/D-10 invariant 0 source `GrpcCaller` references, D-16 ESLint guard preserved (Override 6 enumerates 8 D-15 paths with `ClassDeclaration[superClass]` selector intact — implementation form is per-path enumeration not wildcard glob, semantically equivalent), D-17 invariant `storage-smoke.controller.ts` uses `Promisified<T>` for both parser + notifier injections. Plan 05 Task 1 (D-17 type-only patch) was satisfied transitively by Plan 03 atomic Rule-3 auto-fixes (commits eec1619 + 517d30f bundled storage-smoke retype into parser + notifier sweeps). Single Rule-1 deviation: pre-existing prettier-format regression in `apps/gateway/src/test/grpc-client-sanity.ts` (auth.login(...) call body — residue from Plan 03 sweeps) was auto-fixed via `eslint --fix` to clear invariant 2 (lint clean). Cosmetic-only diff (4 insertions / 3 deletions), no semantic change. Atomic verification commit `42770da`. Phase 999.7.3 is now structurally complete pending Plan 06 (D-20 + D-21 skill updates + formal dual-mode runtime smoke gate).
 - [Phase 999.7.3-06]: Two skills updated atomically (D-20 infrastructure-client-layering: 5 edits — top callout extended with 999.7.2/999.7.3, gRPC reference rewritten to Promisified<T> + promisifyGrpcClient Proxy + single-arg defineGrpcClient<TRaw>(opts), required item 8 broadened to "no per-method wrappers", ANTI-PATTERN 8 appended, See Also extended with 999.7.3 reference, frontmatter description broadened with Promisified/Proxy keywords; D-21 composition-over-inheritance additive: top callout upgraded to plural "Reference implementations:" with 999.7.3 second canonical example, See Also extended with 999.7.3 cross-reference). Final dual-mode runtime smoke gate PASSED: native (host:3000) + isolated (host:4000→container:3000) both HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints PASSED with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode. Atomic commits 2ad4bf5 (skills, exactly 2 files / 38+ 8-) + b304a64 (empty smoke marker, gate result documented in body). Phase 999.7.3 COMPLETE — all 21 D-* decisions (D-01..D-21) realised across Plans 01-06; ready for /gsd:verify-work gate.
+- [Phase 999.10-01]: nestjs-hexagonal-mapping skill created as the third entry in the server-side triada (clean-ddd-hexagonal / infrastructure-client-layering / nestjs-hexagonal-mapping). 7 markdown files atomically committed in 2 commits: 402ec4e (SKILL.md + LAYERS.md + CALL-FLOW.md + NAMING.md) and 294a911 (EXAMPLES.md + PROTO-VISIBILITY.md + DO-DONT.md). D-15 (foundation-first — skill before code), D-16 (exact name `nestjs-hexagonal-mapping`), and D-17 (zero ESLint snippets in skill — .eslintrc.js is the single source of truth for rules, added by Plan 06) all realised. SKILL.md at 119 lines carries frontmatter with all 8 required triggers (grpc controller, service layer, use case, hexagonal nestjs, proto mapping, ts-proto controller, layer boundary, command dto), three-layer stack diagram, 8-step decision tree for adding a new RPC, 9 anti-patterns, See Also with 4 paired-skill links, references list. references/ carries per-layer definitions + canonical tree (LAYERS.md), canonical login call flow + 3 composition variants (CALL-FLOW.md), D-12 file↔class table (NAMING.md), 3 worked examples + Before/After (EXAMPLES.md), 17-row visibility matrix (PROTO-VISIBILITY.md), 9 Don't/Do/Why/Detected-by anti-pattern blocks (DO-DONT.md). pnpm lint 7/7 cache-hit green (markdown-only change). No deviations. Duration ~7min. Plan 02 auth pilot unblocked.
 
 ### Pending Todos
 
@@ -149,6 +151,6 @@ Progress: [██████████] 100% phase, [========================
 
 ## Session Continuity
 
-Last session: 2026-04-18T10:02:55.097Z
-Stopped at: "Phase 999.7.3 — Plan 06 complete (skill updates D-20 + D-21 atomically committed in 2ad4bf5; final dual-mode runtime smoke gate PASSED — native flow on host:3000 and isolated flow on host:4000 both returned HTTP 200 on /health/ready with all 5 upstreams up; both /test/{parser,notifier}/storage-service endpoints returned HTTP 200 with allPassed:true on every bucket; 0 error/warn entries across 6 containers in isolated mode; atomic smoke marker commit b304a64. Phase 999.7.3 architecturally complete — all 21 D-* decisions realised across Plans 01-06; ready for /gsd:verify-work gate.)"
+Last session: 2026-04-18T14:06:20Z
+Stopped at: "Phase 999.10 — Plan 01 complete (nestjs-hexagonal-mapping skill: SKILL.md + 6 references/*.md in 2 atomic commits 402ec4e + 294a911; D-15/D-16/D-17 realised; zero ESLint snippets; pnpm lint 7/7 cache-hit green; self-check passed. Plan 02 auth pilot unblocked — can now cite .agents/skills/nestjs-hexagonal-mapping/SKILL.md as canonical pattern source.)"
 Resume file: None

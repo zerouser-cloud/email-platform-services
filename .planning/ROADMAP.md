@@ -482,7 +482,7 @@ Plans:
 **Plans:** 7 plans
 
 Plans:
-- [ ] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md; no code)
+- [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md; no code)
 - [ ] 999.10-02-PLAN.md — Auth pilot (full Controller → Service → UseCase refactor + 6 inbound ports + 6 services + 8 use cases per D-23 audit)
 - [ ] 999.10-03-PLAN.md — Sender sweep (11 RPCs → 10 services + shared TransitionCampaignStatusUseCase)
 - [ ] 999.10-04-PLAN.md — Parser sweep (8 RPCs + Pitfall 3 smoke-controller decision — Option A canonicalise OR Option C test-tier exception)
