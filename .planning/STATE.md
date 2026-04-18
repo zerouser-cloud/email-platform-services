@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Phase 999.7.3 — Plan 03 complete (gateway sweep done; deferred smoke validated structural design; strict 5/5-up criterion now scoped to Plan 04 dependency)"
-last_updated: "2026-04-18T09:23:46Z"
+stopped_at: "Phase 999.7.3 — Plan 04 complete (cross-service sweep done — 3 atomic commits, all 8 D-15 paths gone, workspace typecheck FULLY GREEN, strict 5/5-upstreams-up smoke PASSED)"
+last_updated: "2026-04-18T09:32:18Z"
 last_activity: 2026-04-18
 progress:
   total_phases: 26
   completed_phases: 14
   total_plans: 57
-  completed_plans: 54
-  percent: 95
+  completed_plans: 55
+  percent: 96
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.7.3 (grpc-client-promisify-proxy-replace-per-method-wrappers) — EXECUTING
-Plan: 4 of 6
-Status: Ready to execute Plan 04 (cross-service sweep — sender→audience, parser→notifier, audience→parser). Plan 03 gateway sweep complete; gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke EXECUTED — structural design validated (gateway boots end-to-end with Promisified Proxy on all 5 upstreams; /health/ready endpoint reaches all 5 upstream gRPC facades). Strict 5/5-up criterion NOT MET because 3 cross-service apps (sender/parser/audience) cannot boot until Plan 04 closes their *.client.ts wedges — that's a planning dependency, not a Plan 03 defect.
+Plan: 5 of 6
+Status: Ready to execute Plan 05 (final cleanup) — REVISED scope. Plan 04 cross-service sweep COMPLETE: 3 atomic commits (1458147, ee68136, 9f9fece), all 8 D-15 enumerated *.client.ts paths gone workspace-wide (155 LOC of per-method wrapper boilerplate removed across cross-service tier), workspace typecheck FULLY GREEN (12/12 turbo tasks, 0 TS2554/TS2305/TS2614 errors), post-sweep validation PASSED with strict 5/5-upstreams-up criterion (HTTP 200, all 5 upstreams `up`, gateway boots end-to-end). Plan 03's deferred BLOCKING runtime smoke gate now FULLY SATISFIED. Plan 05's planned consumer-side type fix (storage-smoke.controller.ts) was atomically bundled into Plan 03 sweeps — Plan 05 may now focus on backlog cleanup items (Promisified<T> Metadata→CallOpts widening, etc.) or roll directly into Plan 06 dual-mode validation gate.
 Last activity: 2026-04-18
 
 Progress: [██████████] 100% phase, [==============================] 100% overall
@@ -83,6 +83,7 @@ Progress: [██████████] 100% phase, [========================
 | Phase 999.7.3 P01 | 8min | 3 tasks | 4 files |
 | Phase 999.7.3 P02 | 5min | 3 tasks | 4 files |
 | Phase 999.7.3 P03 | 7min | 4 sweep + 1 deferred smoke | 14 files (10 modified, 4 deleted) |
+| Phase 999.7.3 P04 | 2min | 3 sweep + post-sweep smoke | 9 files (6 modified, 3 deleted) |
 
 ## Accumulated Context
 
@@ -119,15 +120,16 @@ Progress: [██████████] 100% phase, [========================
 - [Phase 999.7.3-02]: AuthClient pilot migrated to canonical 10-line shape (defineGrpcClient<AuthProto.AuthServiceClient>(opts)); auth.client.ts wrapper deleted; barrel cleaned; grpc-client-sanity.ts retyped to Promisified<AuthProto.AuthServiceClient> (Rule 3); auth wedge cleared (1 TS2554 + 1 TS2305 fixed; 8 root errors remain); BLOCKING runtime smoke gate DEFERRED to Plan 03 because gateway compile-blocked by 4 unmigrated upstream modules — auth/notifier microservices DID start cleanly, validating Plan 01 foundation safety for upstream-free services
 - [Phase 999.7.3-02]: Promisified<T> public TYPE preserves original ts-proto Metadata signature even though runtime Proxy accepts CallOpts; consumers must either omit second arg, construct Metadata manually, or wait for foundation refinement to widen typed signature to Metadata | CallOpts (backlog for Plan 05 or future fast pass)
 - [Phase 999.7.3-03]: 4 atomic per-upstream sweep commits (sender → parser → audience → notifier alphabetical) migrate gateway gRPC clients to canonical Pattern B; 4 *.client.ts deleted (227 LOC removed); gateway typecheck FULLY GREEN. Each sweep bundled its consumer Rule 3 retypes (grpc-client-sanity.ts every commit; storage-smoke.controller.ts in parser + notifier commits) — staying consistent with Plan 02 auth precedent of atomic-commit-includes-direct-consequences. storage-smoke.controller.ts retyped to Promisified<T> in Plan 03 instead of Plan 05 because the deferred BLOCKING smoke needed the gateway to compile. Deferred smoke executed: gateway boots end-to-end, /health/ready reaches all 5 Promisified Proxy facades; 2 upstreams up (auth, notifier — services without their own gRPC clients), 3 down (sender/parser/audience — blocked from boot by their own un-migrated cross-service *.client.ts files which Plan 04 sweeps). STRUCTURAL DESIGN validated; STRICT 5/5-up criterion is naturally Plan 04's gate (no defer-smoke pass marker committed).
+- [Phase 999.7.3-04]: 3 atomic per-upstream cross-service sweep commits (sender→audience 1458147, parser→notifier ee68136, audience→parser 9f9fece) close the cross-service tier. 3 *.client.ts deleted (155 LOC removed; 9+3+8 = 20 wrapper methods gone). NO Rule 3 patches needed — pre-task grep confirmed each consumer app had zero external references to the soon-to-be-deleted wrapper class. D-15 enumerated invariant FULLY ACHIEVED: all 8 *.client.ts paths from CONTEXT.md gone workspace-wide. Workspace typecheck FULLY GREEN: 12/12 turbo tasks successful, 0 TS2554/TS2305/TS2614(GrpcCaller) errors. Post-sweep validation PASSED with strict 5/5-upstreams-up criterion: pnpm start:native boots all 6 services; /health/ready returns HTTP 200 with auth/sender/parser/audience/notifier all `status:up`. Plan 03's deferred BLOCKING smoke gate now FULLY satisfied. Plan 05's planned storage-smoke.controller.ts retype was already atomically bundled into Plan 03 sweeps — Plan 05 has no consumer-side typecheck work left; may now focus on backlog cleanup or roll into Plan 06 dual-mode gate.
 
 ### Pending Todos
 
-- Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation (future fast/cleanup pass).
-- Plan 04 must close 3 cross-service *.client.ts migrations (sender→audience, parser→notifier, audience→parser) before strict 5/5-upstreams-up runtime smoke can pass.
+- Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation (future fast/cleanup pass; possibly Plan 05 since the originally-planned consumer-side type fix is already done).
+- Plan 06 owns the formal dual-mode (native + isolated) runtime smoke gate; Plan 04's post-sweep smoke validates only the native flow.
 
 ### Blockers/Concerns
 
-- Strict 5/5-upstreams-up runtime smoke gate carried forward from Plan 02 → Plan 03 → Plan 04. Cannot pass until Plan 04 cross-service sweep completes. Plan 03 SUMMARY documents the structural-design validation that DID pass (gateway boots, /health/ready reaches all 5 facades, 2 up + 3 down due to upstream apps blocked from boot).
+- None. Strict 5/5-upstreams-up runtime smoke gate (carried forward from Plans 02 → 03 → 04) was MET in Plan 04 post-sweep validation: HTTP 200 + auth/sender/parser/audience/notifier all `up`. Plan 06 will re-validate on the isolated flow.
 
 ### Roadmap Evolution
 
@@ -141,6 +143,6 @@ Progress: [██████████] 100% phase, [========================
 
 ## Session Continuity
 
-Last session: 2026-04-18T09:23:46Z
-Stopped at: "Phase 999.7.3 — Plan 03 complete (gateway sweep done — 4 atomic commits, 4 wrapper classes deleted, gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke EXECUTED with mixed result: structural design validated end-to-end, strict 5/5-up deferred to Plan 04 dependency)"
+Last session: 2026-04-18T09:32:18Z
+Stopped at: "Phase 999.7.3 — Plan 04 complete (cross-service sweep done — 3 atomic commits 1458147/ee68136/9f9fece, all 8 D-15 *.client.ts paths gone workspace-wide, 155 LOC of cross-service wrapper boilerplate removed, workspace typecheck FULLY GREEN 12/12, strict 5/5-upstreams-up post-sweep smoke PASSED with HTTP 200)"
 Resume file: None

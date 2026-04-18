@@ -421,7 +421,7 @@ Plans:
 - [x] 999.7.3-01-PLAN.md — Wave 1: foundation create promisify-grpc-client.ts + delete grpc-caller.ts + simplify defineGrpcClient (D-02..D-10)
 - [x] 999.7.3-02-PLAN.md — Wave 2: pilot AuthClient migration to Promisified Proxy + runtime smoke checkpoint (D-09 + D-11 + D-15) — code complete; runtime smoke gate DEFERRED to Plan 03 (gateway compile-blocked by 4 unmigrated upstreams)
 - [x] 999.7.3-03-PLAN.md — Wave 3: sweep 4 gateway upstreams (sender/parser/audience/notifier) — atomic commit per upstream (D-14 + D-15 + D-19) — gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke executed: structural design validated (gateway boots, /health/ready reaches all 5 upstreams), strict 5/5-up criterion deferred to Plan 04 (cross-service services blocked from boot)
-- [ ] 999.7.3-04-PLAN.md — Wave 4: sweep 3 cross-service upstreams (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-14 + D-15 + D-19)
+- [x] 999.7.3-04-PLAN.md — Wave 4: sweep 3 cross-service upstreams (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-14 + D-15 + D-19) — workspace typecheck FULLY GREEN (12/12 turbo tasks); D-15 8-path invariant achieved; post-sweep validation PASSED with strict 5/5-upstreams-up criterion (HTTP 200)
 - [ ] 999.7.3-05-PLAN.md — Wave 5: storage-smoke.controller.ts type-only patch + workspace-wide invariant battery (D-11 + D-17)
 - [ ] 999.7.3-06-PLAN.md — Wave 6: skill updates (infrastructure-client-layering ANTI-PATTERN 8 + composition-over-inheritance cross-ref) + final dual-mode runtime smoke (D-19 + D-20 + D-21)
 
