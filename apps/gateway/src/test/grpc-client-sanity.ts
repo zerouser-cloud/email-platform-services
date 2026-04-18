@@ -32,9 +32,10 @@ export async function _probePositive(
   // The runtime Proxy accepts CallOpts as second arg (transparently overriding deadline metadata),
   // but the public TYPE still requires Metadata. Future foundation refinement may widen the typed
   // second-arg to `Metadata | CallOpts`. For the type probe today, omit the second arg.
-  const _tokens: AuthProto.TokenPair = await auth.login(
-    { email: '', password: '' } as AuthProto.LoginRequest,
-  );
+  const _tokens: AuthProto.TokenPair = await auth.login({
+    email: '',
+    password: '',
+  } as AuthProto.LoginRequest);
   void _tokens;
   void opts;
 
