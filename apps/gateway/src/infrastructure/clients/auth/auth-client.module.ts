@@ -1,12 +1,12 @@
 import { Module, type DynamicModule } from '@nestjs/common';
 import { SERVICE } from '@email-platform/config';
 import { defineGrpcClient } from '@email-platform/foundation';
-import { AuthClient } from './auth.client';
+import { AuthProto } from '@email-platform/contracts';
 
-const grpc = defineGrpcClient(
-  { service: SERVICE.auth, clientToken: SERVICE.auth.diToken },
-  (grpcClient, caller) => new AuthClient(grpcClient, caller),
-);
+const grpc = defineGrpcClient<AuthProto.AuthServiceClient>({
+  service: SERVICE.auth,
+  clientToken: SERVICE.auth.diToken,
+});
 
 // Named re-exports for local consumers (health.controller.ts via barrel — D-10).
 // Do NOT export `grpc` directly — that leaks imports/providers/exports and lets consumers bypass forRoot().
