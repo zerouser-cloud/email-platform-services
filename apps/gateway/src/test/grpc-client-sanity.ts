@@ -8,8 +8,7 @@
  *
  * DO NOT import this file from any runtime module.
  */
-import type { CallOpts } from '@email-platform/foundation';
-import type { AuthClient } from '../infrastructure/clients/auth';
+import type { CallOpts, Promisified } from '@email-platform/foundation';
 import type { SenderClient } from '../infrastructure/clients/sender';
 import type { ParserClient } from '../infrastructure/clients/parser';
 import type { AudienceClient } from '../infrastructure/clients/audience';
@@ -25,7 +24,7 @@ import type {
 
 // Positive compile cases — must typecheck.
 export async function _probePositive(
-  auth: AuthClient,
+  auth: Promisified<AuthProto.AuthServiceClient>,
   sender: SenderClient,
   parser: ParserClient,
   audience: AudienceClient,
