@@ -69,19 +69,77 @@
 - Depends on: Application, Domain
 - Used by: Nothing depends on this layer (inverted)
 
-**Application Layer (Use Cases & Ports):**
-- Purpose: Business logic orchestration and port definitions
+**Application Layer (Services, Use Cases & Ports):**
+- Purpose: Business logic orchestration, inbound/outbound port definitions, composition seam
 - Location: `apps/*/src/application/`
-- Contains: Use case implementations, inbound ports (interfaces), outbound ports (interfaces)
+- Structure (Phase 999.10 canonical, gRPC microservices auth/sender/parser/audience):
+  - **Inbound ports** (`ports/inbound/*.port.ts`): TypeScript interfaces we author by hand defining what each RPC accepts — NOT generated from proto. One port per bounded operation (D-02).
+  - **Services** (`services/*.service.ts`): `@Injectable()` composition classes implementing inbound ports. One service per inbound port. The service is the stable seam for cross-cutting concerns (logging, transactions, events, retry). Reference: `apps/auth/src/application/services/login.service.ts`.
+  - **Use cases** (`use-cases/*.use-case.ts`): `@Injectable()` atomic operations — one domain step (hash password, issue token pair, persist user, transition status). Used by services. NEVER implement inbound ports (that's the Service's job post-999.10). Reusable intra-bounded-context (e.g. `IssueTokenPairUseCase` is injected by both `LoginService` and `RefreshTokenService`). Reference: `apps/auth/src/application/use-cases/verify-credentials.use-case.ts`.
+  - **Commands** (`commands/*.command.ts`): POJO classes (not interfaces) carrying request data from controller into service. `public readonly` constructor params, no framework imports. Reference: `apps/auth/src/application/commands/login.command.ts`.
+  - **Outbound ports** (`ports/outbound/*.port.ts`): interfaces defining what the service needs from infrastructure. Implemented by repository adapters in `infrastructure/persistence/`.
 - Depends on: Domain
 - Used by: Infrastructure adapters
+- Canonical stack: `Controller → Service → UseCase` — three layers, always, even for pure delegation. Enforced in `.eslintrc.js` Override 9 (bans `@email-platform/contracts` and `@nestjs/microservices` in `application/**`). Skill: `.agents/skills/nestjs-hexagonal-mapping/`.
 
 **Domain Layer (Core Business Logic):**
 - Purpose: Pure business logic, zero external dependencies
 - Location: `apps/*/src/domain/`
-- Contains: Entities, Value Objects, Domain Events, Domain Services
+- Contains: Entities (POJO), Value Objects, Domain Events, Domain Services
 - Depends on: Nothing
 - Used by: Application layer
+- Enforced isolation: `.eslintrc.js` Override 8 bans `@nestjs/*`, `@grpc/*`, `@email-platform/contracts`, `drizzle-orm`, `pg` in `domain/**`.
+
+## Call Flow (Canonical for gRPC microservices — auth, sender, parser, audience)
+
+The `Controller → Service → UseCase` 3-layer stack established in Phase 999.10 flows as follows:
+
+```
+gRPC request (proto types)
+  ─→ {Service}Controller.method(req)              [infrastructure/controllers/grpc/]
+       │ proto → Command DTO (domain types); implements XxxServiceController from @email-platform/contracts
+       ▼
+  ─→ {Feature}Port (inbound, interface)           [application/ports/inbound/]
+       ▼
+  ─→ {Feature}Service implements {Feature}Port    [application/services/]
+       │ composition (even for pure delegation — seam for cross-cutting)
+       ▼
+  ─→ {Operation}UseCase (atomic)                  [application/use-cases/]
+       │ may call outbound port
+       ▼
+  ─→ {Entity}RepositoryPort (outbound, interface) [application/ports/outbound/]
+       ▼
+  ─→ Pg{Entity}Repository (Drizzle + Mapper)      [infrastructure/persistence/]
+       ▼
+  Domain Entity (POJO — no framework, no ORM decorators)
+```
+
+Controller -> Service -> UseCase is the canonical 3-layer stack (Phase 999.10). Gateway (REST facade) and notifier (RMQ consumer) follow different patterns (separate future phases).
+
+**Shared use-case proof points** (D-03 reuse pattern — atomic step injected by multiple services inside the same bounded context):
+- `IssueTokenPairUseCase` — used by auth `LoginService` + auth `RefreshTokenService`
+- `TransitionCampaignStatusUseCase` — used by sender `PauseCampaignService` + sender `ResumeCampaignService`
+- `TransitionRecipientsStatusUseCase` — used by audience `MarkAsSentService` + audience `ResetSendStatusService`
+
+**See:** `.agents/skills/nestjs-hexagonal-mapping/references/CALL-FLOW.md` for branching variants (pure delegation, composite service, use-case reuse).
+
+## Proto Visibility (gRPC microservices)
+
+`@email-platform/contracts` (generated proto types) has strictly limited reach in `apps/**`:
+
+| Layer / File type | Imports `@email-platform/contracts`? |
+|---|:---:|
+| `infrastructure/controllers/grpc/*.controller.ts` | ✓ (server-side entry — proto request/response types) |
+| `infrastructure/clients/{service}/*.module.ts` | ✓ (client-side, Phase 999.7.x pattern) |
+| All `application/**` (services, use-cases, ports, commands) | ✗ (enforced by ESLint Override 9) |
+| All `domain/**` (entities, value objects) | ✗ (enforced by ESLint Override 8) |
+| `infrastructure/persistence/**` (repositories, mappers, schema) | ✗ |
+| `main.ts` | ✓ indirectly (via SERVICE catalog from `@email-platform/config`) |
+| Composition root `{svc}.module.ts` | ✗ (wires controllers/services/adapters; proto stays inside controllers) |
+
+**Why:** proto is a transport contract — it may change (field additions, service renames, gRPC → REST migration) without invalidating domain concepts. Keeping proto pinned to `infrastructure/controllers/grpc/` means domain + application survive re-transport without code edits.
+
+**Enforcement:** ESLint Override 8 (`apps/*/src/domain/**`) + Override 9 (`apps/*/src/application/**`) in `.eslintrc.js`, both linking to `.agents/skills/clean-ddd-hexagonal` + `.agents/skills/nestjs-hexagonal-mapping` in their error messages. See `.agents/skills/nestjs-hexagonal-mapping/references/PROTO-VISIBILITY.md` for the full 17-row matrix.
 
 ## Data Flow
 

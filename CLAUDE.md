@@ -327,6 +327,62 @@
 - **Parser/Notifier → MinIO/S3:** S3-compatible API for file storage
 <!-- GSD:architecture-end -->
 
+## NestJS↔Hexagonal Layer Mapping (gRPC microservices — auth, sender, parser, audience)
+
+**Canonical 3-layer server-side stack per Phase 999.10 — see `.agents/skills/nestjs-hexagonal-mapping/` for the full pattern, anti-patterns, and worked examples. This section is the surface reference; the skill is the source of truth.**
+
+| NestJS Primitive | Hexagonal Layer | Location | Concrete File Example |
+|------------------|-----------------|----------|-----------------------|
+| `@Controller()` gRPC | Infrastructure | `apps/{svc}/src/infrastructure/controllers/grpc/` | `auth.controller.ts` |
+| `@Controller('health')` REST | Infrastructure | `apps/{svc}/src/infrastructure/controllers/rest/` | `health.controller.ts` |
+| `@Injectable()` Service (implements inbound port) | Application | `apps/{svc}/src/application/services/` | `login.service.ts` |
+| `@Injectable()` UseCase (atomic operation) | Application | `apps/{svc}/src/application/use-cases/` | `verify-credentials.use-case.ts` |
+| Port interface (inbound) | Application | `apps/{svc}/src/application/ports/inbound/` | `login.port.ts` |
+| Port interface (outbound) | Application | `apps/{svc}/src/application/ports/outbound/` | `user-repository.port.ts` |
+| Command DTO (POJO class) | Application | `apps/{svc}/src/application/commands/` | `login.command.ts` |
+| Entity (POJO, zero framework deps) | Domain | `apps/{svc}/src/domain/entities/` | `user.entity.ts` |
+| Repository adapter (implements outbound port) | Infrastructure | `apps/{svc}/src/infrastructure/persistence/` | `pg-user.repository.ts` |
+| Mapper (row ↔ domain) | Infrastructure | `apps/{svc}/src/infrastructure/persistence/mappers/` | `user.mapper.ts` |
+| Composition root `@Module({})` | Root | `apps/{svc}/src/` | `auth.module.ts` |
+| DI tokens (`Symbol('XxxPort')`) | Root | `apps/{svc}/src/` | `auth.constants.ts` |
+
+**Proto visibility rules:**
+- `@email-platform/contracts` (generated proto types) is imported ONLY in `infrastructure/controllers/grpc/*.controller.ts` (server-side) and `infrastructure/clients/{service}/*.module.ts` (client-side, Phase 999.7.x). Enforced by ESLint Override 9 in `.eslintrc.js`.
+- `@nestjs/microservices` (`GrpcMethod` / `MessagePattern` decorators, `RpcException`) is a transport concern — infrastructure only. Enforced by Override 9.
+- `domain/` is pure TypeScript — no `@nestjs/*`, no `@grpc/*`, no proto, no `drizzle-orm`, no `pg`. Enforced by ESLint Override 8.
+- Full visibility matrix: `.agents/skills/nestjs-hexagonal-mapping/references/PROTO-VISIBILITY.md`.
+
+**Call flow (canonical):**
+
+```
+gRPC request → {Service}Controller.method(req)   [infrastructure/controllers/grpc — implements XxxServiceController]
+                │ proto → Command DTO (domain types)
+                ▼
+             → {Feature}Port.execute(cmd)         [application/ports/inbound — our interface]
+                ▼
+             → {Feature}Service.execute(cmd)      [application/services — implements {Feature}Port]
+                │ composition of use cases (seam for logging / transactions / events)
+                ▼
+             → {Operation}UseCase.execute(...)    [application/use-cases — atomic step]
+                │ may call outbound ports
+                ▼
+             → Pg{Entity}Repository (implements outbound port, Drizzle + Mapper)
+                ▼
+             → Domain Entity (POJO)
+```
+
+**Key rules:**
+- **Controller** implements the proto-generated interface (`implements AuthProto.AuthServiceController`). Never implements OUR port.
+- **Service** implements OUR inbound port (`implements LoginPort`). Never implements the proto interface.
+- **UseCase** is `@Injectable()` plain class. NEVER implements any inbound port (that's the Service's job per D-02). Shared across services inside the same bounded context when the operation is atomic and reusable (examples: `IssueTokenPairUseCase` in auth, `TransitionCampaignStatusUseCase` in sender, `TransitionRecipientsStatusUseCase` in audience).
+- **Command DTO** is a class (not interface) with `public readonly` constructor params. Per-feature, POJO, no framework imports.
+- **One flat `@Module({})` per bounded context** — no feature submodules. Shared infrastructure only from foundation (`PersistenceModule`, `LoggingModule`, `AppConfigModule`).
+- **No magic strings for DI tokens** — use `Symbol()` in `{svc}.constants.ts`.
+
+**Scope:** this mapping covers the four gRPC microservices (auth, sender, parser, audience). **Gateway** (REST facade) and **notifier** (RMQ consumer) follow different patterns and are NOT covered here (separate future phases).
+
+**Skill reference:** `.agents/skills/nestjs-hexagonal-mapping/SKILL.md` — full pattern with the 8-step decision tree for adding a new RPC method, 9 anti-patterns, and 3 worked examples.
+
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
 
