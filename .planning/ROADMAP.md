@@ -486,6 +486,6 @@ Plans:
 - [x] 999.10-02-PLAN.md — Auth pilot (full Controller → Service → UseCase refactor + 6 inbound ports + 6 services + 8 use cases per D-23 audit)
 - [x] 999.10-03-PLAN.md — Sender sweep (11 RPCs → 10 services + shared TransitionCampaignStatusUseCase)
 - [x] 999.10-04-PLAN.md — Parser sweep (8 RPCs via canonical stack — Pitfall 3 resolved via Option A canonicalise; StorageSmokeController deleted, smoke logic in 3 real-I/O use cases; atomic commit 22fcb5e)
-- [ ] 999.10-05-PLAN.md — Audience sweep (9 RPCs → 8 services + shared TransitionRecipientsStatusUseCase + GroupRepositoryPort symmetry)
+- [x] 999.10-05-PLAN.md — Audience sweep (9 RPCs → 8 services + shared TransitionRecipientsStatusUseCase + GroupRepositoryPort symmetry; atomic commit ce8a39d)
 - [ ] 999.10-06-PLAN.md — ESLint layer guards (Override 8 domain + Override 9 application)
 - [ ] 999.10-07-PLAN.md — Docs update (CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md) + dual-mode phase gate

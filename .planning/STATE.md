@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Phase 999.10 — Plan 04 (parser sweep) complete: atomic commit 22fcb5e with 37 file ops (3 renames + 30 new + 3 modified + 4 deleted incl. storage-smoke.controller.ts per Option A); 7 Commands + 7 Ports + 7 Services + 8 Use Cases (5 stubs + 3 real-I/O smoke cycles — RunPrivateSmokeCycleUseCase + RunPublicSmokeCycleUseCase + CleanupSmokeObjectUseCase with Record dispatch per CLAUDE.md no-switch rule); Pitfall 3 RESOLVED via user-approved Option A canonicalisation — smoke logic migrated from test/ into canonical 3-layer stack, StorageSmokeController deleted, ParserController declares full implements ParserServiceController with all 8 RPCs via @ParserServiceControllerMethods() bulk decorator; Pitfall 9 resolved (health.controller relative-import depth re-anchored 1→3); D-23 rename applied (start-parsing.* → create-task port + create-parser-task use-case matching proto RPC); AppStoreSpySmokeController preserved (D-13 test-boundary); native runtime smoke PASSED — /health/ready HTTP 200 all 5 upstreams up, /test/parser/storage-service HTTP 200 allPassed:true on BOTH private parser + public reports buckets; 0 proto-shape auto-deviations (Plan 02/03 lesson applied by reading generated/parser.ts proactively); 1 trivial prettier auto-fix via eslint --fix on 2 smoke use cases. Duration 5min36s. Plan 05 (audience sweep) next."
-last_updated: "2026-04-18T16:31:46Z"
-last_activity: 2026-04-18 -- Phase 999.10 Plan 04 complete
+stopped_at: Plan 999.10-05 audience sweep complete (atomic commit ce8a39d, 41 file changes, 1 task, 510s). 8 Commands + 8 Ports + 8 Services + 7 Use Cases with 1 SHARED TransitionRecipientsStatusUseCase (third D-03 reuse proof after auth IssueTokenPair + sender TransitionCampaignStatus — MarkAsSent + ResetSendStatus services both inject it via tagged-selector RecipientSelector discriminated union). GroupRepositoryPort + PgGroupRepository stub + Group domain POJO added for cross-aggregate symmetry (T-999.10-05-03 mitigation — prevents Recipient↔Group leak). Runtime smoke PASSED first try — /health/ready HTTP 200 all 5 upstreams up (auth + sender + parser + audience + notifier). Workspace build 10/10 + lint 7/7 green. 0 proto-shape auto-deviations + 1 trivial prettier auto-fix on transition-recipients-status.use-case.ts. Plan 06 (ESLint guards) unblocked — all 4 services swept, zero violations expected per RESEARCH.md A4.
+last_updated: "2026-04-18T16:50:02.068Z"
+last_activity: 2026-04-18 -- Plan 05 complete
 progress:
   total_phases: 27
   completed_phases: 15
   total_plans: 64
-  completed_plans: 61
-  percent: 95
+  completed_plans: 62
+  percent: 97
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — EXECUTING
-Plan: 5 of 7 (Plans 01-04 complete — audience sweep next)
-Status: Plan 04 parser sweep complete + Pitfall 3 resolved via Option A canonicalisation (user-approved); smoke endpoints fully functional through canonical 3-layer stack; native runtime smoke PASSED with allPassed:true on both parser + reports buckets; ready for Plan 05 audience sweep (mechanical replication, no pitfalls expected)
-Last activity: 2026-04-18 -- Plan 04 complete
+Plan: 6 of 7 (Plans 01-05 complete — ESLint guards next)
+Status: Plan 05 audience sweep complete (atomic commit ce8a39d); 3 pilot services + audience all demonstrate canonical 3-layer Hexagonal stack; native runtime smoke PASSED with all 5 upstreams up; ready for Plan 06 ESLint layer-guard authoring (zero violations expected per RESEARCH.md A4 since application/ is 0 contracts imports + domain/ is 0 framework imports across all 4 services)
+Last activity: 2026-04-18 -- Plan 05 complete
 
-Progress: [█████░░░░░] 57% phase (4/7 plans), [==============================] 100% overall
+Progress: [███████░░░] 71% phase (5/7 plans), [==============================] 100% overall
 
 ## Performance Metrics
 
@@ -90,6 +90,7 @@ Progress: [█████░░░░░] 57% phase (4/7 plans), [=============
 | Phase 999.10 P01 | 7min | 2 tasks | 7 files |
 | Phase 999.10 P03 | 6min | 1 tasks | 46 files |
 | Phase 999.10 P04 | 5min36s | 1 task (Task 0 pre-locked Option A) | 37 files (3 renames + 30 new + 3 modified + 4 deleted) |
+| Phase 999.10 P05 | 8min30s | 1 task | 41 files (35 new + 6 modified + 3 renames incl. one full-rewrite shown as delete+add) |
 
 ## Accumulated Context
 
@@ -132,6 +133,7 @@ Progress: [█████░░░░░] 57% phase (4/7 plans), [=============
 - [Phase 999.10-01]: nestjs-hexagonal-mapping skill created as the third entry in the server-side triada (clean-ddd-hexagonal / infrastructure-client-layering / nestjs-hexagonal-mapping). 7 markdown files atomically committed in 2 commits: 402ec4e (SKILL.md + LAYERS.md + CALL-FLOW.md + NAMING.md) and 294a911 (EXAMPLES.md + PROTO-VISIBILITY.md + DO-DONT.md). D-15 (foundation-first — skill before code), D-16 (exact name `nestjs-hexagonal-mapping`), and D-17 (zero ESLint snippets in skill — .eslintrc.js is the single source of truth for rules, added by Plan 06) all realised. SKILL.md at 119 lines carries frontmatter with all 8 required triggers (grpc controller, service layer, use case, hexagonal nestjs, proto mapping, ts-proto controller, layer boundary, command dto), three-layer stack diagram, 8-step decision tree for adding a new RPC, 9 anti-patterns, See Also with 4 paired-skill links, references list. references/ carries per-layer definitions + canonical tree (LAYERS.md), canonical login call flow + 3 composition variants (CALL-FLOW.md), D-12 file↔class table (NAMING.md), 3 worked examples + Before/After (EXAMPLES.md), 17-row visibility matrix (PROTO-VISIBILITY.md), 9 Don't/Do/Why/Detected-by anti-pattern blocks (DO-DONT.md). pnpm lint 7/7 cache-hit green (markdown-only change). No deviations. Duration ~7min. Plan 02 auth pilot unblocked.
 - [Phase ?]: [Phase 999.10-03]: Sender sweep complete — mechanical replication of auth pilot (10 Commands + 10 Ports + 10 Services + 9 Use Cases, 1 shared TransitionCampaignStatusUseCase). CloudFnSmokeController preserved in controllers[] (D-13 test-boundary exception). Runner/Message/Macros use cases stubbed without outbound ports per research recommendation. Runtime smoke PASSED first try, all 5 upstreams up. 0 proto-shape deviations — Plan 02 lesson applied proactively by reading packages/contracts/src/generated/sender.ts before writing services. D-03 reuse pattern now demonstrated twice (auth IssueTokenPairUseCase + sender TransitionCampaignStatusUseCase).
 - [Phase 999.10-04]: Parser sweep complete — Pitfall 3 RESOLVED via user-approved Option A (Canonicalise). Atomic commit 22fcb5e (37 file ops: 3 renames + 30 new + 3 modified + 4 deleted, including test/storage-smoke.controller.ts). 7 Commands + 7 Ports + 7 Services + 8 Use Cases = 29 canonical classes + 1 rewritten ParserController with all 8 RPCs via @ParserServiceControllerMethods() bulk decorator. 3 smoke use cases contain REAL I/O logic (not stubs) — RunPrivateSmokeCycleUseCase (PrivateStoragePort upload/exists/download), RunPublicSmokeCycleUseCase (NamespacedStoragePort upload/exists/public-fetch), CleanupSmokeObjectUseCase (Record<bucket, deleteFn> dispatch per CLAUDE.md no-switch rule, matches prior if/if/fallback behavior). Gateway /test/parser/storage-service endpoint now routes through canonical 3-layer stack and returned allPassed:true on BOTH private parser + public reports buckets in native smoke. D-23 rename applied (start-parsing.* → create-parser-task.use-case / CreateTaskPort matching proto RPC). Pitfall 9 resolved (health.controller relative-import depth re-anchored 1→3 post git mv). AppStoreSpySmokeController preserved (D-13 test-boundary — pure client pass-through). 0 proto-shape auto-deviations (Plan 02/03 lesson applied by reading generated/parser.ts proactively). 1 trivial prettier auto-fix via eslint --fix on 2 smoke use cases (line-break preference, cosmetic). 3 pilot services (auth + sender + parser) now all demonstrate layer isolation — unblocks Plan 05 (audience) + Plan 06 (ESLint guards authoring).
+- [Phase 999.10-05]: Audience sweep complete — atomic commit ce8a39d (41 file changes: 35 new + 6 modified + 1 rename-as-delete+add for controller). 8 Commands + 8 Ports + 8 Services + 7 Use Cases (6 non-shared stubs + 1 SHARED TransitionRecipientsStatusUseCase injected by BOTH MarkAsSentService AND ResetSendStatusService — third D-03 reuse proof after auth IssueTokenPair + sender TransitionCampaignStatus). GroupRepositoryPort + PgGroupRepository stub + Group domain POJO entity added for cross-aggregate symmetry (T-999.10-05-03 mitigation). 0 proto-shape auto-deviations. 1 trivial prettier auto-fix on transition-recipients-status.use-case.ts. Native runtime smoke PASSED first try — /health/ready HTTP 200 all 5 upstreams up. Workspace build 10/10 + lint 7/7 green. Plan 06 ESLint guards unblocked — all 4 services (auth + sender + parser + audience) now demonstrate layer isolation.
 
 ### Pending Todos
 
@@ -155,6 +157,6 @@ Progress: [█████░░░░░] 57% phase (4/7 plans), [=============
 
 ## Session Continuity
 
-Last session: 2026-04-18T16:31:46Z
-Stopped at: "Phase 999.10 — Plan 04 parser sweep complete (atomic commit 22fcb5e: 37 file ops; 7 Commands + 7 Ports + 7 Services + 8 Use Cases with 3 real-I/O smoke cycles; Pitfall 3 RESOLVED via user-approved Option A canonicalisation — StorageSmokeController deleted, smoke logic migrated into canonical 3-layer stack; ParserController has all 8 RPCs via @ParserServiceControllerMethods() bulk decorator; native runtime smoke PASSED with /health/ready all 5 upstreams up + /test/parser/storage-service allPassed:true on both buckets; 0 proto-shape deviations + 1 trivial prettier auto-fix). Plan 05 audience sweep unblocked — mechanical replication of auth/sender/parser template, no Pitfalls expected."
+Last session: 2026-04-18T16:49:20.124Z
+Stopped at: Plan 999.10-05 audience sweep complete (atomic commit ce8a39d, 41 file changes, 1 task, 510s). 8 Commands + 8 Ports + 8 Services + 7 Use Cases with 1 SHARED TransitionRecipientsStatusUseCase (third D-03 reuse proof after auth IssueTokenPair + sender TransitionCampaignStatus — MarkAsSent + ResetSendStatus services both inject it via tagged-selector RecipientSelector discriminated union). GroupRepositoryPort + PgGroupRepository stub + Group domain POJO added for cross-aggregate symmetry (T-999.10-05-03 mitigation — prevents Recipient↔Group leak). Runtime smoke PASSED first try — /health/ready HTTP 200 all 5 upstreams up (auth + sender + parser + audience + notifier). Workspace build 10/10 + lint 7/7 green. 0 proto-shape auto-deviations + 1 trivial prettier auto-fix on transition-recipients-status.use-case.ts. Plan 06 (ESLint guards) unblocked — all 4 services swept, zero violations expected per RESEARCH.md A4.
 Resume file: None
