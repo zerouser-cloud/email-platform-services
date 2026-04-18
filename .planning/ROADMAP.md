@@ -452,7 +452,7 @@ Plans:
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
-### Phase 999.10: Application architecture — add Service layer + restructure Hexagonal stack across all microservices (BACKLOG)
+### Phase 999.10: Application architecture — add Service layer + restructure Hexagonal stack across all microservices (ARCHITECTURALLY COMPLETE — awaiting /gsd:verify-work)
 
 **Goal:** Standardize NestJS↔Hexagonal layer mapping across all 6 microservices. Introduce unified `Controller → Service → UseCase` 3-layer stack (Service = composition layer implementing наш inbound port, UseCase = atomic operation), rename controllers without transport suffix (`AuthGrpcServer` → `AuthController`), move health controllers to `infrastructure/controllers/rest/`, fix as skill `nestjs-hexagonal-mapping`, update CLAUDE.md / `.planning/codebase/ARCHITECTURE.md` with call-flow diagram + proto-visibility table.
 
@@ -479,7 +479,7 @@ Plans:
 **Estimated scope:** 50-80 files modified/created (~4 controller renames, ~5 health moves, ~33 new services + 33 inbound ports, ~10-20 use case audit, 5 module updates, 1 new skill, 3 docs updates, optional ESLint guards). Comparable to Phase 999.7.3 (~30 files).
 
 **Requirements:** D-01..D-24 (locked decisions in 999.10-CONTEXT.md serve as primary requirement surface — no REQ-IDs in REQUIREMENTS.md; this is architectural refactoring per 24 locked D-decisions)
-**Plans:** 6/7 plans executed
+**Plans:** 7/7 plans complete
 
 Plans:
 - [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md; no code)
@@ -488,4 +488,4 @@ Plans:
 - [x] 999.10-04-PLAN.md — Parser sweep (8 RPCs via canonical stack — Pitfall 3 resolved via Option A canonicalise; StorageSmokeController deleted, smoke logic in 3 real-I/O use cases; atomic commit 22fcb5e)
 - [x] 999.10-05-PLAN.md — Audience sweep (9 RPCs → 8 services + shared TransitionRecipientsStatusUseCase + GroupRepositoryPort symmetry; atomic commit ce8a39d)
 - [x] 999.10-06-PLAN.md — ESLint layer guards (Override 8 domain + Override 9 application)
-- [ ] 999.10-07-PLAN.md — Docs update (CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md) + dual-mode phase gate
+- [x] 999.10-07-PLAN.md — Docs update (CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md) + dual-mode phase gate — PASSED (native + isolated HTTP 200 5/5 upstreams up, 0 error/warn across 6 Docker containers, 13/13 structural invariants PASS; atomic docs commit 2c1b249; user "approved")

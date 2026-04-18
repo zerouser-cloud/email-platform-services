@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Plan 999.10-06 ESLint layer guards complete (atomic commit f5f46e8, 1 file changed, 1 task, 97s). Override 8 (apps/*/src/domain/**) bans @nestjs/*, @grpc/*, @email-platform/contracts[/*], drizzle-orm[/*], pg[/*]. Override 9 (apps/*/src/application/**) bans @email-platform/contracts[/*] + @nestjs/microservices[/*]. Both error messages link to clean-ddd-hexagonal + nestjs-hexagonal-mapping skills. D-18 realised mechanically — layer isolation is now provably enforced at CI time (not convention-only). RESEARCH.md Assumption A4 empirically confirmed: pnpm lint --force green 7/7, zero new violations across all 4 swept services (auth+sender+parser+audience). Negative fixture probe (apps/auth/src/domain/bad-entity.ts, temporary) confirmed Override 8 fires with correct skill-linked message. Fixture removed pre-commit. Existing Overrides 1-7 byte-preserved. Plan 07 (D-20 docs phase-gate — final phase closer) fully unblocked.
-last_updated: "2026-04-18T16:55:56.030Z"
-last_activity: 2026-04-18
+status: verifying
+stopped_at: Phase 999.10 architecturally COMPLETE — all 7 plans landed, all 24 D-* decisions realised, dual-mode smoke PASSED (native + isolated HTTP 200 on /health/ready with 5/5 upstreams up; /test/parser/storage-service allPassed:true on every bucket in both modes; 0 error/warn across 6 Docker containers in last 2m of isolated logs), 13/13 structural invariants PASS, docs updated (CLAUDE.md + .planning/codebase/ARCHITECTURE.md + STRUCTURE.md). Plan 07 Task 1 commit 2c1b249 (docs) + Task 2 checkpoint:human-verify "approved" by user + atomic metadata close commit. Ready for /gsd:verify-work 999.10.
+last_updated: "2026-04-18T17:15:00.000Z"
+last_activity: 2026-04-18 — Phase 999.10 complete
 progress:
   total_phases: 27
-  completed_phases: 15
+  completed_phases: 16
   total_plans: 64
-  completed_plans: 63
-  percent: 98
+  completed_plans: 64
+  percent: 100
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — EXECUTING
-Plan: 7 of 7 (Plans 01-06 complete — docs phase-gate next)
-Status: Plan 06 ESLint guards complete (atomic commit f5f46e8); Override 8 + Override 9 appended to .eslintrc.js; A4 empirically confirmed (zero new violations across auth+sender+parser+audience); D-18 realised mechanically; negative fixture probe confirmed Override 8 fires with correct skill-linked error message; Overrides 1-7 byte-preserved; ready for Plan 07 docs phase-gate (D-20 CLAUDE.md addendum + phase-complete gate)
-Last activity: 2026-04-18 -- Plan 06 complete
+Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — ARCHITECTURALLY COMPLETE
+Plan: 7 of 7 (all plans complete — ready for /gsd:verify-work 999.10)
+Status: Plan 07 complete — Task 1 docs commit 2c1b249 (CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md) + Task 2 blocking checkpoint:human-verify phase gate PASSED (user "approved"): static (lint 7/7 + build 10/10) + 13/13 structural invariants PASS + native HTTP 200 5/5 upstreams up + /test/parser/storage-service allPassed:true + isolated HTTP 200 5/5 upstreams up + isolated /test/parser/storage-service allPassed:true + 0 error/warn across 6 Docker containers + user-reviewed docs diffs. All 24 D-* decisions realised across Plans 01-07. Ready for /gsd:verify-work 999.10.
+Last activity: 2026-04-18 — Phase 999.10 complete
 
-Progress: [█████████░] 86% phase (6/7 plans), [==============================] 98% overall
+Progress: [██████████] 100% phase (7/7 plans), [==============================] 100% overall
 
 ## Performance Metrics
 
@@ -92,6 +92,8 @@ Progress: [█████████░] 86% phase (6/7 plans), [=============
 | Phase 999.10 P04 | 5min36s | 1 task (Task 0 pre-locked Option A) | 37 files (3 renames + 30 new + 3 modified + 4 deleted) |
 | Phase 999.10 P05 | 8min30s | 1 task | 41 files (35 new + 6 modified + 3 renames incl. one full-rewrite shown as delete+add) |
 | Phase 999.10 P06 | 97 | 1 tasks | 1 files |
+| Phase 999.10 P07 | ~3min (docs + gate + metadata close) | 2 tasks (1 auto + 1 checkpoint:human-verify) | 3 docs + 3 metadata files |
+| Phase 999.10 TOTAL | ~40min across 7 plans | 7 plans / 9 tasks | 140+ file operations (skill, auth pilot, 3 sweeps, ESLint guards, docs, phase gate) |
 
 ## Accumulated Context
 
@@ -136,6 +138,7 @@ Progress: [█████████░] 86% phase (6/7 plans), [=============
 - [Phase 999.10-04]: Parser sweep complete — Pitfall 3 RESOLVED via user-approved Option A (Canonicalise). Atomic commit 22fcb5e (37 file ops: 3 renames + 30 new + 3 modified + 4 deleted, including test/storage-smoke.controller.ts). 7 Commands + 7 Ports + 7 Services + 8 Use Cases = 29 canonical classes + 1 rewritten ParserController with all 8 RPCs via @ParserServiceControllerMethods() bulk decorator. 3 smoke use cases contain REAL I/O logic (not stubs) — RunPrivateSmokeCycleUseCase (PrivateStoragePort upload/exists/download), RunPublicSmokeCycleUseCase (NamespacedStoragePort upload/exists/public-fetch), CleanupSmokeObjectUseCase (Record<bucket, deleteFn> dispatch per CLAUDE.md no-switch rule, matches prior if/if/fallback behavior). Gateway /test/parser/storage-service endpoint now routes through canonical 3-layer stack and returned allPassed:true on BOTH private parser + public reports buckets in native smoke. D-23 rename applied (start-parsing.* → create-parser-task.use-case / CreateTaskPort matching proto RPC). Pitfall 9 resolved (health.controller relative-import depth re-anchored 1→3 post git mv). AppStoreSpySmokeController preserved (D-13 test-boundary — pure client pass-through). 0 proto-shape auto-deviations (Plan 02/03 lesson applied by reading generated/parser.ts proactively). 1 trivial prettier auto-fix via eslint --fix on 2 smoke use cases (line-break preference, cosmetic). 3 pilot services (auth + sender + parser) now all demonstrate layer isolation — unblocks Plan 05 (audience) + Plan 06 (ESLint guards authoring).
 - [Phase 999.10-05]: Audience sweep complete — atomic commit ce8a39d (41 file changes: 35 new + 6 modified + 1 rename-as-delete+add for controller). 8 Commands + 8 Ports + 8 Services + 7 Use Cases (6 non-shared stubs + 1 SHARED TransitionRecipientsStatusUseCase injected by BOTH MarkAsSentService AND ResetSendStatusService — third D-03 reuse proof after auth IssueTokenPair + sender TransitionCampaignStatus). GroupRepositoryPort + PgGroupRepository stub + Group domain POJO entity added for cross-aggregate symmetry (T-999.10-05-03 mitigation). 0 proto-shape auto-deviations. 1 trivial prettier auto-fix on transition-recipients-status.use-case.ts. Native runtime smoke PASSED first try — /health/ready HTTP 200 all 5 upstreams up. Workspace build 10/10 + lint 7/7 green. Plan 06 ESLint guards unblocked — all 4 services (auth + sender + parser + audience) now demonstrate layer isolation.
 - [Phase ?]: [Phase 999.10-06]: Two ESLint overrides appended to .eslintrc.js (Override 8 domain isolation + Override 9 application isolation). Override 8 bans @nestjs/*, @grpc/*, @email-platform/contracts[/*], drizzle-orm[/*], pg[/*] in apps/*/src/domain/**. Override 9 bans @email-platform/contracts[/*] + @nestjs/microservices[/*] in apps/*/src/application/**. Both carry skill-linked error messages (clean-ddd-hexagonal + nestjs-hexagonal-mapping). D-18 realised mechanically. A4 empirically confirmed: pnpm lint --force green 7/7, zero new violations across auth+sender+parser+audience. Negative fixture probe confirmed Override 8 fires with correct skill-linked message. Atomic commit f5f46e8 (+51 lines, 1 file). Overrides 1-7 byte-preserved. Plan 07 (docs phase-gate) unblocked.
+- [Phase 999.10-07]: Docs update + dual-mode phase gate. Task 1 commit 2c1b249: CLAUDE.md §Architecture gains "NestJS↔Hexagonal Layer Mapping" subsection (12-row file↔class↔layer↔location table + proto-visibility rules naming Override 8/9 + canonical ASCII call-flow + key rules + skill cross-reference); .planning/codebase/ARCHITECTURE.md §Layers.Application expanded with Service-vs-UseCase distinction + new §Call Flow (Canonical for gRPC microservices) ASCII diagram + new §Proto Visibility matrix; .planning/codebase/STRUCTURE.md rewritten with canonical post-999.10 trees for all 4 gRPC services (no src/health/ outliers, mappers/ subfolder, application/{services,use-cases,commands,ports}/ structure, controllers/{grpc,rest}/ split). Task 2 blocking checkpoint:human-verify dual-mode phase gate PASSED (user "approved"): Phase A static (lint 7/7 + build 10/10 green); Phase B 13/13 structural invariants PASS (no old *.grpc-server.ts, no old src/health/, 4/4 services with new controller path + REST health path + commands folder + services folder + mappers subfolder, domain+application isolation grep clean, no GrpcServer/GrpcController suffix, skill exists, .eslintrc.js Override 8+9 present); Phase C native HTTP 200 /health/ready with 5/5 upstreams up + /test/parser/storage-service allPassed:true; Phase D isolated HTTP 200 /health/ready with 5/5 upstreams up + /test/parser/storage-service allPassed:true + 0 error/warn across 6 Docker containers in last 2m of logs; Phase E user-reviewed docs diffs — accurate. PHASE 999.10 ARCHITECTURALLY COMPLETE — all 24 D-* decisions (D-01..D-24) realised across Plans 01-07; ready for /gsd:verify-work 999.10.
 
 ### Pending Todos
 
@@ -145,7 +148,7 @@ Progress: [█████████░] 86% phase (6/7 plans), [=============
 
 ### Blockers/Concerns
 
-- None. Strict 5/5-upstreams-up runtime smoke gate met in BOTH supported flows (native + isolated) in Plan 06 final dual-mode gate. Phase 999.7.3 architecturally complete; awaiting `/gsd:verify-work` outcome.
+- None. Strict 5/5-upstreams-up runtime smoke gate met in BOTH supported flows (native + isolated) in Plan 999.10-07 final dual-mode phase gate. Phase 999.10 architecturally complete; awaiting `/gsd:verify-work 999.10` outcome.
 
 ### Roadmap Evolution
 
@@ -159,6 +162,6 @@ Progress: [█████████░] 86% phase (6/7 plans), [=============
 
 ## Session Continuity
 
-Last session: 2026-04-18T16:55:38.289Z
-Stopped at: Plan 999.10-06 ESLint layer guards complete (atomic commit f5f46e8, 1 file / +51 lines, 1 task, 97s). Override 8 (apps/*/src/domain/**) bans @nestjs/*, @grpc/*, @email-platform/contracts[/*], drizzle-orm[/*], pg[/*]. Override 9 (apps/*/src/application/**) bans @email-platform/contracts[/*] + @nestjs/microservices[/*]. Both error messages link to clean-ddd-hexagonal + nestjs-hexagonal-mapping skills. D-18 realised mechanically — layer isolation now provably enforced at CI time (not convention-only). RESEARCH.md Assumption A4 empirically confirmed: pnpm lint --force green 7/7, zero new violations across all 4 swept services. Negative fixture probe (apps/auth/src/domain/bad-entity.ts, temporary) confirmed Override 8 fires with correct skill-linked message. Fixture removed pre-commit. Existing Overrides 1-7 byte-preserved. Plan 07 (D-20 CLAUDE.md docs phase-gate — final phase closer) fully unblocked.
+Last session: 2026-04-18T17:15:00.000Z
+Stopped at: Phase 999.10 architecturally COMPLETE — all 7 plans landed (Plans 01-07), all 24 D-* decisions (D-01..D-24) realised. Plan 07 Task 1 commit 2c1b249 (docs: CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md — NestJS↔Hexagonal mapping table + proto-visibility rules + canonical call flow + canonical per-service trees) + Task 2 blocking checkpoint:human-verify dual-mode phase gate PASSED (user "approved"): static (lint 7/7 + build 10/10 green) + 13/13 structural grep invariants PASS + native `/health/ready` HTTP 200 with 5/5 upstreams up + native `/test/parser/storage-service` allPassed:true on every bucket + isolated same criteria + 0 error/warn across 6 Docker containers in last 2m of logs + user-reviewed docs diffs accurate. Atomic metadata close commit lands SUMMARY 999.10-07-SUMMARY.md + STATE.md + ROADMAP.md. Ready for /gsd:verify-work 999.10.
 Resume file: None
