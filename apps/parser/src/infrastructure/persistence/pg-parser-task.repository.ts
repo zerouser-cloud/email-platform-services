@@ -5,7 +5,7 @@ import { DRIZZLE } from '@email-platform/foundation';
 import type { ParserTaskRepositoryPort } from '../../application/ports/outbound/parser-task-repository.port';
 import type { ParserTask } from '../../domain/entities/parser-task.entity';
 import { parserTasks } from './schema/parser-tasks.schema';
-import { ParserTaskMapper } from './parser-task.mapper';
+import { ParserTaskMapper } from './mappers/parser-task.mapper';
 
 @Injectable()
 export class PgParserTaskRepository implements ParserTaskRepositoryPort {

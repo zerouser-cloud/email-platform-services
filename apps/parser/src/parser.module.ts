@@ -1,17 +1,42 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { ParserEnvSchema } from './infrastructure/config';
 import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
-import { StartParsingUseCase } from './application/use-cases/start-parsing.use-case';
+import { ParserEnvSchema } from './infrastructure/config';
+import { ParserController } from './infrastructure/controllers/grpc/parser.controller';
+import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
 import { AppStoreSpyClientModule } from './infrastructure/clients/appstorespy';
 import { NotifierClientModule } from './infrastructure/clients/notifier';
 import { StorageModule } from './infrastructure/storage';
-import { HealthController } from './health/health.controller';
-import { StorageSmokeController } from './test/storage-smoke.controller';
 import { AppStoreSpySmokeController } from './test/appstorespy-smoke.controller';
-import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.constants';
+// Services (inbound port adapters)
+import { CreateTaskService } from './application/services/create-task.service';
+import { ListTasksService } from './application/services/list-tasks.service';
+import { GetTaskService } from './application/services/get-task.service';
+import { GetSettingsService } from './application/services/get-settings.service';
+import { UpdateSettingsService } from './application/services/update-settings.service';
+import { RunStorageSmokeService } from './application/services/run-storage-smoke.service';
+import { CleanupStorageSmokeService } from './application/services/cleanup-storage-smoke.service';
+// Use cases (plain injectables, no tokens)
+import { CreateParserTaskUseCase } from './application/use-cases/create-parser-task.use-case';
+import { ListParserTasksUseCase } from './application/use-cases/list-parser-tasks.use-case';
+import { GetParserTaskUseCase } from './application/use-cases/get-parser-task.use-case';
+import { GetParserSettingsUseCase } from './application/use-cases/get-parser-settings.use-case';
+import { UpdateParserSettingsUseCase } from './application/use-cases/update-parser-settings.use-case';
+import { RunPrivateSmokeCycleUseCase } from './application/use-cases/run-private-smoke-cycle.use-case';
+import { RunPublicSmokeCycleUseCase } from './application/use-cases/run-public-smoke-cycle.use-case';
+import { CleanupSmokeObjectUseCase } from './application/use-cases/cleanup-smoke-object.use-case';
+// DI tokens
+import {
+  PARSER_TASK_REPOSITORY_PORT,
+  CREATE_TASK_PORT,
+  LIST_TASKS_PORT,
+  GET_TASK_PORT,
+  GET_SETTINGS_PORT,
+  UPDATE_SETTINGS_PORT,
+  RUN_STORAGE_SMOKE_PORT,
+  CLEANUP_STORAGE_SMOKE_PORT,
+} from './parser.constants';
 
 @Module({
   imports: [
@@ -22,15 +47,29 @@ import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.consta
     AppStoreSpyClientModule.forRoot(),
     NotifierClientModule.forRoot(),
   ],
-  controllers: [
-    ParserGrpcServer,
-    HealthController,
-    StorageSmokeController,
-    AppStoreSpySmokeController,
-  ],
+  controllers: [ParserController, HealthController, AppStoreSpySmokeController],
   providers: [
+    // Zone 1: Outbound port → adapter
     { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },
-    { provide: START_PARSING_PORT, useClass: StartParsingUseCase },
+
+    // Zone 2: Inbound ports → services (D-02 per-feature)
+    { provide: CREATE_TASK_PORT, useClass: CreateTaskService },
+    { provide: LIST_TASKS_PORT, useClass: ListTasksService },
+    { provide: GET_TASK_PORT, useClass: GetTaskService },
+    { provide: GET_SETTINGS_PORT, useClass: GetSettingsService },
+    { provide: UPDATE_SETTINGS_PORT, useClass: UpdateSettingsService },
+    { provide: RUN_STORAGE_SMOKE_PORT, useClass: RunStorageSmokeService },
+    { provide: CLEANUP_STORAGE_SMOKE_PORT, useClass: CleanupStorageSmokeService },
+
+    // Zone 3: Use cases — plain @Injectable providers (no Symbol tokens — type-injected)
+    CreateParserTaskUseCase,
+    ListParserTasksUseCase,
+    GetParserTaskUseCase,
+    GetParserSettingsUseCase,
+    UpdateParserSettingsUseCase,
+    RunPrivateSmokeCycleUseCase,
+    RunPublicSmokeCycleUseCase,
+    CleanupSmokeObjectUseCase,
   ],
 })
 export class ParserModule implements OnModuleDestroy {

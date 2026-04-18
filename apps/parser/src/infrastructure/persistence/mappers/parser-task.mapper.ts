@@ -1,5 +1,5 @@
-import { ParserTask } from '../../domain/entities/parser-task.entity';
-import type { parserTasks } from './schema/parser-tasks.schema';
+import { ParserTask } from '../../../domain/entities/parser-task.entity';
+import type { parserTasks } from '../schema/parser-tasks.schema';
 
 type ParserTaskRow = typeof parserTasks.$inferSelect;
 type NewParserTaskRow = typeof parserTasks.$inferInsert;

@@ -1,0 +1,17 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { CreateTaskCommand } from '../commands/create-task.command';
+import type { CreateTaskResult } from '../ports/inbound/create-task.port';
+import type { ParserTaskRepositoryPort } from '../ports/outbound/parser-task-repository.port';
+import { PARSER_TASK_REPOSITORY_PORT } from '../../parser.constants';
+
+@Injectable()
+export class CreateParserTaskUseCase {
+  constructor(
+    @Inject(PARSER_TASK_REPOSITORY_PORT)
+    private readonly tasks: ParserTaskRepositoryPort,
+  ) {}
+
+  async execute(_cmd: CreateTaskCommand): Promise<CreateTaskResult> {
+    throw new Error('CreateParserTaskUseCase not yet implemented');
+  }
+}

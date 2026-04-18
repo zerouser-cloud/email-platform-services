@@ -2,7 +2,7 @@ import { Controller, Get, Inject } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
 import { HEALTH, DATABASE_HEALTH } from '@email-platform/foundation';
 import type { DatabaseHealthIndicator, StorageHealthIndicator } from '@email-platform/foundation';
-import { PARSER_STORAGE_HEALTH, PARSER_STORAGE_HEALTH_KEY } from '../parser.constants';
+import { PARSER_STORAGE_HEALTH, PARSER_STORAGE_HEALTH_KEY } from '../../../parser.constants';
 
 @Controller(HEALTH.ROUTE)
 export class HealthController {
