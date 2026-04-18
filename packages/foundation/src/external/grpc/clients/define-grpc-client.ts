@@ -3,13 +3,12 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { TerminusModule, HealthIndicatorService } from '@nestjs/terminus';
-import { ClsService } from 'nestjs-cls';
 import type { GrpcServiceDeclaration } from '@email-platform/config';
 import { resolveProtoPath } from '../proto-resolver';
 import { createDeadlineInterceptor } from '../../resilience/grpc-deadline.interceptor';
 import { GRPC_CLIENT_HEALTH } from './clients.constants';
 import { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
-import { GrpcCaller } from './grpc-caller';
+import { promisifyGrpcClient, type Promisified } from './promisify-grpc-client';
 
 const TOKEN_SUFFIX = {
   CLIENT_GRPC: '_CLIENT_GRPC',
@@ -29,9 +28,9 @@ export interface GrpcClientBuildResult {
   readonly healthToken: symbol;
 }
 
-export function defineGrpcClient<T extends object>(
+// CHANGED (D-09): removed `build` callback parameter; useFactory builds Promisified Proxy directly.
+export function defineGrpcClient<TRaw extends object>(
   opts: DefineGrpcClientOpts,
-  build: (grpcClient: ClientGrpc, caller: GrpcCaller) => T,
 ): GrpcClientBuildResult {
   const upperId = opts.service.id.toUpperCase();
   const grpcToken = Symbol.for(`${upperId}${TOKEN_SUFFIX.CLIENT_GRPC}`);
@@ -39,15 +38,12 @@ export function defineGrpcClient<T extends object>(
 
   const facadeProvider: Provider = {
     provide: opts.clientToken,
-    inject: [grpcToken, ClsService, ConfigService],
-    useFactory: (grpc: ClientGrpc, cls: ClsService, config: ConfigService) => {
-      const caller = new GrpcCaller(
-        cls,
-        opts.service.grpc.serviceName,
-        config.get<number>('GRPC_DEADLINE_MS')!,
-        `${upperId}Client`,
-      );
-      return build(grpc, caller);
+    inject: [grpcToken, ConfigService],
+    useFactory: (grpc: ClientGrpc, config: ConfigService): Promisified<TRaw> => {
+      const raw = grpc.getService<TRaw>(opts.service.grpc.serviceName);
+      return promisifyGrpcClient(raw, {
+        defaultDeadlineMs: config.get<number>('GRPC_DEADLINE_MS')!,
+      });
     },
   };
 
