@@ -73,6 +73,7 @@
 - ✓ S3 StorageModule: DI-injected S3CoreModule singleton (non-global, self-contained inside BucketStorageModule.forBucket) + per-bucket health tokens, ReportsStorageModule as shared Nest module in foundation, STORAGE_PROTOCOL env var (works identically MinIO/Garage) — Phase 22, Phase 22.1
 - ✓ Foundation package encapsulation: `external/` vs `internal/` partition with package.json `exports` field + tsconfig `moduleResolution: node16` + ESLint two-override rule — three independent gates seal public/internal API, S3CoreModule reachable only via `@email-platform/foundation/internal` subpath — Phase 22.1
 - ✓ gRPC client `Promisified<T>` Proxy primitive: foundation provides single mapped-type Proxy factory replacing 8 hand-written per-method wrapper classes + standalone `GrpcCaller` helper; consumers `@Inject(SERVICE.x.diToken)` and get `Promisified<XxxProto.XxxServiceClient>` typed Promise-returning client directly without apps-level boilerplate; logging temporarily removed (singleton `PinoLogger.root` anti-pattern; future observability phase will return via DI-injected logger in outer Proxy chain) — Phase 999.7.3
+- ✓ Smoke/test surface area removed: all `/test/*` production endpoints deleted from gateway (storage-smoke + http-smoke orphan), parser backend storage-smoke hexagonal slice deleted (9 application files + partial controller/module/constants edits), notifier storage-smoke controller deleted, parser.proto + notifier.proto edited (2 RPCs + 5 message types each removed, NotifierService becomes HealthCheck-only), ts-proto regenerated; 6 atomic commits in consumer-first order; D-07 dual-mode runtime smoke gate passed (native + isolated, 5/5 upstreams up each) — Phase 999.11
 
 ### Active
 - [ ] gRPC client каркас в foundation + per-service адаптеры
@@ -166,4 +167,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 999.7.3 complete (gRPC client `Promisified<T>` Proxy primitive replaces 8 hand-written per-method wrapper classes + `GrpcCaller` standalone; consumers inject typed Promise-returning client directly; observability removed pending future DI-injected logger phase)*
+*Last updated: 2026-04-19 after Phase 999.11 complete (smoke/test surface area deleted across gateway/parser/notifier/proto in 6 atomic commits; D-07 dual-mode runtime smoke gate passed; follow-up phases 999.12–999.15 unblocked for canonical-pattern audit work)*
