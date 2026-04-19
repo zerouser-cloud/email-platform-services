@@ -30,13 +30,14 @@ import {
 @ParserProto.ParserServiceControllerMethods()
 export class ParserController implements ParserProto.ParserServiceController {
   constructor(
-    @Inject(CREATE_TASK_PORT) private readonly createTaskPort: CreateTaskPort,
-    @Inject(LIST_TASKS_PORT) private readonly listTasksPort: ListTasksPort,
-    @Inject(GET_TASK_PORT) private readonly getTaskPort: GetTaskPort,
-    @Inject(GET_SETTINGS_PORT) private readonly getSettingsPort: GetSettingsPort,
-    @Inject(UPDATE_SETTINGS_PORT) private readonly updateSettingsPort: UpdateSettingsPort,
-    @Inject(RUN_STORAGE_SMOKE_PORT) private readonly runSmokePort: RunStorageSmokePort,
-    @Inject(CLEANUP_STORAGE_SMOKE_PORT) private readonly cleanupSmokePort: CleanupStorageSmokePort,
+    @Inject(CREATE_TASK_PORT) private readonly createTaskService: CreateTaskPort,
+    @Inject(LIST_TASKS_PORT) private readonly listTasksService: ListTasksPort,
+    @Inject(GET_TASK_PORT) private readonly getTaskService: GetTaskPort,
+    @Inject(GET_SETTINGS_PORT) private readonly getSettingsService: GetSettingsPort,
+    @Inject(UPDATE_SETTINGS_PORT) private readonly updateSettingsService: UpdateSettingsPort,
+    @Inject(RUN_STORAGE_SMOKE_PORT) private readonly runStorageSmokeService: RunStorageSmokePort,
+    @Inject(CLEANUP_STORAGE_SMOKE_PORT)
+    private readonly cleanupStorageSmokeService: CleanupStorageSmokePort,
   ) {}
 
   async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {
@@ -47,7 +48,7 @@ export class ParserController implements ParserProto.ParserServiceController {
 
   async createTask(req: ParserProto.CreateParserTaskRequest): Promise<ParserProto.ParserTask> {
     const cmd = new CreateTaskCommand(req.category, req.dateFrom, req.dateTo, req.userId);
-    const result = await this.createTaskPort.execute(cmd);
+    const result = await this.createTaskService.execute(cmd);
     return {
       id: result.id,
       category: result.category,
@@ -67,7 +68,7 @@ export class ParserController implements ParserProto.ParserServiceController {
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListTasksCommand(page, limit, req.userId);
-    const result = await this.listTasksPort.execute(cmd);
+    const result = await this.listTasksService.execute(cmd);
     return {
       tasks: result.tasks.map((t) => ({
         id: t.id,
@@ -93,7 +94,7 @@ export class ParserController implements ParserProto.ParserServiceController {
 
   async getTask(req: ParserProto.ParserTaskIdRequest): Promise<ParserProto.ParserTask> {
     const cmd = new GetTaskCommand(req.id);
-    const result = await this.getTaskPort.execute(cmd);
+    const result = await this.getTaskService.execute(cmd);
     return {
       id: result.id,
       category: result.category,
@@ -111,7 +112,7 @@ export class ParserController implements ParserProto.ParserServiceController {
 
   async getSettings(_request: CommonProto.Empty): Promise<ParserProto.ParserSettings> {
     const cmd = new GetSettingsCommand();
-    const result = await this.getSettingsPort.execute(cmd);
+    const result = await this.getSettingsService.execute(cmd);
     return {
       maxPages: result.maxPages,
       batchSize: result.batchSize,
@@ -123,7 +124,7 @@ export class ParserController implements ParserProto.ParserServiceController {
     req: ParserProto.UpdateParserSettingsRequest,
   ): Promise<ParserProto.ParserSettings> {
     const cmd = new UpdateSettingsCommand(req.maxPages, req.batchSize, req.autoImport);
-    const result = await this.updateSettingsPort.execute(cmd);
+    const result = await this.updateSettingsService.execute(cmd);
     return {
       maxPages: result.maxPages,
       batchSize: result.batchSize,
@@ -133,7 +134,7 @@ export class ParserController implements ParserProto.ParserServiceController {
 
   async runStorageSmoke(_request: CommonProto.Empty): Promise<ParserProto.StorageSmokeResponse> {
     const cmd = new RunStorageSmokeCommand();
-    const result = await this.runSmokePort.execute(cmd);
+    const result = await this.runStorageSmokeService.execute(cmd);
     return {
       buckets: result.buckets.map((b) => ({
         bucket: b.bucket,
@@ -153,7 +154,7 @@ export class ParserController implements ParserProto.ParserServiceController {
     req: ParserProto.CleanupSmokeRequest,
   ): Promise<ParserProto.CleanupSmokeResponse> {
     const cmd = new CleanupStorageSmokeCommand(req.bucket, req.key);
-    const result = await this.cleanupSmokePort.execute(cmd);
+    const result = await this.cleanupStorageSmokeService.execute(cmd);
     return {
       success: result.success,
       detail: result.detail,
