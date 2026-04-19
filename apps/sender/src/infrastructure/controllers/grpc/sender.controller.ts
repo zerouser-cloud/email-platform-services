@@ -39,16 +39,16 @@ import {
 @SenderProto.SenderServiceControllerMethods()
 export class SenderController implements SenderProto.SenderServiceController {
   constructor(
-    @Inject(LIST_CAMPAIGNS_PORT) private readonly listCampaignsPort: ListCampaignsPort,
-    @Inject(GET_CAMPAIGN_PORT) private readonly getCampaignPort: GetCampaignPort,
-    @Inject(CREATE_CAMPAIGN_PORT) private readonly createCampaignPort: CreateCampaignPort,
-    @Inject(PAUSE_CAMPAIGN_PORT) private readonly pauseCampaignPort: PauseCampaignPort,
-    @Inject(RESUME_CAMPAIGN_PORT) private readonly resumeCampaignPort: ResumeCampaignPort,
-    @Inject(LIST_RUNNERS_PORT) private readonly listRunnersPort: ListRunnersPort,
-    @Inject(CREATE_RUNNER_PORT) private readonly createRunnerPort: CreateRunnerPort,
-    @Inject(LIST_MESSAGES_PORT) private readonly listMessagesPort: ListMessagesPort,
-    @Inject(CREATE_MESSAGE_PORT) private readonly createMessagePort: CreateMessagePort,
-    @Inject(LIST_MACROS_PORT) private readonly listMacrosPort: ListMacrosPort,
+    @Inject(LIST_CAMPAIGNS_PORT) private readonly listCampaignsService: ListCampaignsPort,
+    @Inject(GET_CAMPAIGN_PORT) private readonly getCampaignService: GetCampaignPort,
+    @Inject(CREATE_CAMPAIGN_PORT) private readonly createCampaignService: CreateCampaignPort,
+    @Inject(PAUSE_CAMPAIGN_PORT) private readonly pauseCampaignService: PauseCampaignPort,
+    @Inject(RESUME_CAMPAIGN_PORT) private readonly resumeCampaignService: ResumeCampaignPort,
+    @Inject(LIST_RUNNERS_PORT) private readonly listRunnersService: ListRunnersPort,
+    @Inject(CREATE_RUNNER_PORT) private readonly createRunnerService: CreateRunnerPort,
+    @Inject(LIST_MESSAGES_PORT) private readonly listMessagesService: ListMessagesPort,
+    @Inject(CREATE_MESSAGE_PORT) private readonly createMessageService: CreateMessagePort,
+    @Inject(LIST_MACROS_PORT) private readonly listMacrosService: ListMacrosPort,
   ) {}
 
   async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {
@@ -61,7 +61,7 @@ export class SenderController implements SenderProto.SenderServiceController {
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListCampaignsCommand(page, limit, req.userId);
-    const result = await this.listCampaignsPort.execute(cmd);
+    const result = await this.listCampaignsService.execute(cmd);
     return {
       campaigns: result.campaigns.map((c) => ({
         id: c.id,
@@ -87,7 +87,7 @@ export class SenderController implements SenderProto.SenderServiceController {
 
   async getCampaign(req: SenderProto.CampaignIdRequest): Promise<SenderProto.Campaign> {
     const cmd = new GetCampaignCommand(req.id);
-    const result = await this.getCampaignPort.execute(cmd);
+    const result = await this.getCampaignService.execute(cmd);
     return {
       id: result.id,
       name: result.name,
@@ -111,7 +111,7 @@ export class SenderController implements SenderProto.SenderServiceController {
       req.groupId,
       req.userId,
     );
-    const result = await this.createCampaignPort.execute(cmd);
+    const result = await this.createCampaignService.execute(cmd);
     return {
       id: result.id,
       name: result.name,
@@ -129,7 +129,7 @@ export class SenderController implements SenderProto.SenderServiceController {
 
   async pauseCampaign(req: SenderProto.CampaignIdRequest): Promise<SenderProto.Campaign> {
     const cmd = new PauseCampaignCommand(req.id);
-    const result = await this.pauseCampaignPort.execute(cmd);
+    const result = await this.pauseCampaignService.execute(cmd);
     return {
       id: result.id,
       name: result.name,
@@ -147,7 +147,7 @@ export class SenderController implements SenderProto.SenderServiceController {
 
   async resumeCampaign(req: SenderProto.CampaignIdRequest): Promise<SenderProto.Campaign> {
     const cmd = new ResumeCampaignCommand(req.id);
-    const result = await this.resumeCampaignPort.execute(cmd);
+    const result = await this.resumeCampaignService.execute(cmd);
     return {
       id: result.id,
       name: result.name,
@@ -167,7 +167,7 @@ export class SenderController implements SenderProto.SenderServiceController {
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListRunnersCommand(page, limit);
-    const result = await this.listRunnersPort.execute(cmd);
+    const result = await this.listRunnersService.execute(cmd);
     return {
       runners: result.runners.map((r) => ({
         id: r.id,
@@ -197,7 +197,7 @@ export class SenderController implements SenderProto.SenderServiceController {
       req.intervalSeconds,
       req.cooldownSeconds,
     );
-    const result = await this.createRunnerPort.execute(cmd);
+    const result = await this.createRunnerService.execute(cmd);
     return {
       id: result.id,
       name: result.name,
@@ -214,7 +214,7 @@ export class SenderController implements SenderProto.SenderServiceController {
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListMessagesCommand(page, limit);
-    const result = await this.listMessagesPort.execute(cmd);
+    const result = await this.listMessagesService.execute(cmd);
     return {
       messages: result.messages.map((m) => ({
         id: m.id,
@@ -234,7 +234,7 @@ export class SenderController implements SenderProto.SenderServiceController {
 
   async createMessage(req: SenderProto.CreateMessageRequest): Promise<SenderProto.Message> {
     const cmd = new CreateMessageCommand(req.subject, req.body, req.userId);
-    const result = await this.createMessagePort.execute(cmd);
+    const result = await this.createMessageService.execute(cmd);
     return {
       id: result.id,
       subject: result.subject,
@@ -248,7 +248,7 @@ export class SenderController implements SenderProto.SenderServiceController {
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListMacrosCommand(page, limit);
-    const result = await this.listMacrosPort.execute(cmd);
+    const result = await this.listMacrosService.execute(cmd);
     return {
       macros: result.macros.map((m) => ({
         id: m.id,
