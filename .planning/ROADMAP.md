@@ -535,3 +535,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.12: redis-canonical-alignment (BACKLOG)
+
+**Goal:** Align Redis CacheModule setup with gRPC canonical reference (established in 999.11) — move config to `apps/*/src/infrastructure/cache/`, mirror foundation factory pattern (analog of `defineGrpcClient`), ensure `ioredis` hidden behind `CachePort` (ESLint guard). Absorbs existing backlog Phase 999.5 (CacheModule config to infrastructure layer). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.12".
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
