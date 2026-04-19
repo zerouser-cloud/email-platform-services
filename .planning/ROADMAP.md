@@ -492,7 +492,7 @@ Plans:
 
 ---
 
-### Phase 999.10.1: Hexagonal naming convention refactor — apply Option B + runtime-identity field naming across 4 gRPC services (BACKLOG)
+### Phase 999.10.1: Hexagonal naming convention refactor — apply Option B + runtime-identity field naming across 4 gRPC services (ARCHITECTURALLY COMPLETE — awaiting /gsd:verify-work)
 
 **Goal:** Apply the naming conventions resolved in post-999.10 dialogue (2026-04-19) across all 4 gRPC microservices (auth/sender/parser/audience) and document them in `CLAUDE.md` + `nestjs-hexagonal-mapping` skill. The refactor eliminates Hungarian-notation redundancy on fields while preserving architectural signal on types and DI tokens.
 
@@ -518,11 +518,11 @@ Plans:
 **Estimated scope:** ~50-80 files modified (field renames across 4 services × 3 layers × N RPCs; docs updates: CLAUDE.md + `.planning/codebase/ARCHITECTURE.md` + `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md`). Comparable to Phase 999.10 sweep size but mechanical (rename-only).
 
 **Requirements:** Locked decisions above serve as primary requirement surface (no REQ-IDs; naming convention refactor per user dialogue 2026-04-19).
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 999.10.1-01-PLAN.md — auth pilot (6 controller + 4 use-case Repository field renames; services 6/6 already compliant) — PASSED (2 atomic commits 16c52f3 + e6ab119; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 13/13 structural grep invariants PASS on auth slice)
 - [x] 999.10.1-02-PLAN.md — sender sweep (10 controller + 4 use-case Repository + 10 service UseCase field renames per D-19) — PASSED (3 atomic commits 06f6889 + 4ceaf24 + 11235dd; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 18/18 structural grep invariants PASS; D-19 strict composed rule validated — pause/resume both use transitionCampaignStatus)
 - [x] 999.10.1-03-PLAN.md — parser sweep (7 controller incl. 2 edge-case type-stem derivations + 3 use-case Repository + 7 service UseCase incl. 1 dual-field service) — PASSED (3 atomic commits d532800 + 6aa600e + 8e3b417; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up + `/test/parser/storage-service` `allPassed:true` both buckets; 29/29 structural grep invariants PASS on parser slice; D-01 A.edge rule first empirically validated — runStorageSmokeService/cleanupStorageSmokeService derived from TYPE STEM, NOT short form; D-19 strict dual-field rule second application on run-storage-smoke.service.ts)
 - [x] 999.10.1-04-PLAN.md — audience sweep (8 controller collision-showcase + 7 use-case Repository with D-20 atomic underscore drop + 8 service UseCase incl. shared TransitionRecipientsStatusUseCase) — PASSED (3 atomic commits 20a758b + fd61e45 + 071e96b; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 32/32 structural grep invariants PASS on audience slice + phase-level rollup; D-16 collision showcase validated — `listGroupsService: ListGroupsPort` resolves method↔field clash; D-20 atomic underscore drop realised — 0 `_\w+` fields in audience application layer; D-19 strict third real-world application — mark-as-sent + reset-send-status both use `transitionRecipientsStatus` from shared TransitionRecipientsStatusUseCase; PHASE-LEVEL INVARIANTS ALL GREEN: 0 Port-fields / 31 Service-fields / 18 Repository-fields / 0 underscores workspace-wide)
-- [ ] 999.10.1-05-PLAN.md — docs finalization (6 docs files atomic commit per D-13/D-14/D-22 + checkpoint:human-verify phase gate)
+- [x] 999.10.1-05-PLAN.md — docs finalization (atomic 6-file commit 58ea450 per D-13/D-14/D-22: CLAUDE.md + ARCHITECTURE.md + NAMING.md + EXAMPLES.md + DO-DONT.md + SKILL.md; NAMING.md gains ~170-line "## Field Naming Rules (Phase 999.10.1)" section with 7 sub-blocks a-g incl. 3 worked examples + 6-author reference split table + Clean Code ch.2 Hungarian anti-pattern citation; DO-DONT.md adds anti-pattern #10 with grep detector; SKILL.md D-22 mini-update; 12 Task 1 grep invariants + 4 phase-level D-01/D-02/D-04/D-20 invariants all PASS; pnpm lint 7/7 + pnpm build 10/10 cached green; Task 2 human-verify deferred to /gsd:verify-work 999.10.1; PHASE 999.10.1 ARCHITECTURALLY COMPLETE — all 22 D-* decisions D-01..D-22 realised)
