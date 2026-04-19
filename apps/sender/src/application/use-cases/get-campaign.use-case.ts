@@ -8,7 +8,7 @@ import { CAMPAIGN_REPOSITORY_PORT } from '../../sender.constants';
 export class GetCampaignUseCase {
   constructor(
     @Inject(CAMPAIGN_REPOSITORY_PORT)
-    private readonly campaigns: CampaignRepositoryPort,
+    private readonly campaignRepository: CampaignRepositoryPort,
   ) {}
 
   async execute(_cmd: GetCampaignCommand): Promise<GetCampaignResult> {

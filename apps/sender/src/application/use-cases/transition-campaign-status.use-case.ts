@@ -14,7 +14,7 @@ export type CampaignLifecycleStatus = 'paused' | 'active';
 export class TransitionCampaignStatusUseCase {
   constructor(
     @Inject(CAMPAIGN_REPOSITORY_PORT)
-    private readonly campaigns: CampaignRepositoryPort,
+    private readonly campaignRepository: CampaignRepositoryPort,
   ) {}
 
   async execute(_id: string, _newStatus: CampaignLifecycleStatus): Promise<Campaign> {
