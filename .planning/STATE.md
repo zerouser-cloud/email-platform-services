@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: "Phase 999.11 Plan 04 COMPLETE — FINAL plan of the phase. 1 atomic commit fb23e24 on feature/phase-20-config-decomposition (Commit 6 of 6 per D-04): 5 files (2 proto + 2 regenerated ts-proto + 1 controller stub removal), -782/+17 line delta. packages/contracts/proto/parser.proto 100→68 lines (ParserService reduced from 8→6 RPCs, all 5 smoke message types removed); packages/contracts/proto/notifier.proto 45→14 lines (NotifierService reduced from 3→1 RPC — HealthCheck only; service comment expanded to document Pitfall 3 — minimal surface intentional, grpc-health-check registered independently, real traffic via RabbitMQ); packages/contracts/src/generated/parser.ts 1030→687 lines regenerated via pnpm generate:contracts (ts-proto + grpc-tools turbo pipeline); packages/contracts/src/generated/notifier.ts 418→80 lines; apps/parser/src/infrastructure/controllers/grpc/parser.controller.ts -19 lines (bridge comment block + 2 throwing stubs from Plan 02 removed, implements ParserServiceController preserved post-regen). Single atomic Commit 6 bundle preserves bisect-green per Pitfall 1 (intermediate split would reference deleted types or miss impls). Per-commit D-06 gate green twice (pre-commit + pre-D-07 re-check): pnpm lint 7/7 + pnpm build 10/10 exit 0; 2 pre-existing rabbitmq-event.subscriber.ts warnings unchanged (out-of-scope). D-07 dual-mode runtime smoke gate PASSED first try: native (localhost:3000) HTTP 200 attempt 2 of 36 (~10s boot), isolated (localhost:4000) HTTP 200 attempt 10 of 60 (~50s boot incl. docker compose up --build), both responses status=ok + .info all 5 upstreams status=up (auth/sender/parser/audience/notifier); isolated 6/6 containers `Up (healthy)` in docker ps; 0 error/warn entries across 6 isolated containers (docker logs --since 2m, grep 'level:error|level:warn'). Workspace-wide grep invariant (9 symbols × apps/src + proto + generated) = 0 matches. Security Invariants SI-1/SI-2/SI-3 all green (no @Controller('test') in gateway; no @GrpcMethod('(Run|Cleanup)StorageSmoke') anywhere; 0 smoke rpc/message in proto). Phase 999.11 total = 6 atomic refactor commits (3b111c2 + 7476702 + 226d877 + d5db160 + f78d74e + fb23e24) per D-04 consumer-first order; 0 deviations, 0 auto-fixes, 0 retries, 0 architectural escalations across all 4 plans. All 7 D-* decisions (D-01..D-07) realised; all 3 Open Questions (OQ-1 http-smoke orphan resolved atomically in Plan 01 Commit 2, OQ-2 regen-before-smoke + no-amendment-on-failure resolved by D-07 running as separate gate, OQ-3 empty directories fell out naturally per Git tree) resolved in-plan; all 6 Pitfalls pre-empted or mitigated. Path-scoped staging excluded pre-existing promisify-grpc-client.ts modification + ~140 untracked .claude/* artifacts (carry-over from prior sessions). Phase 999.11 ARCHITECTURALLY COMPLETE — ready for /gsd:verify-work 999.11."
-last_updated: "2026-04-19T18:50:00.000Z"
+status: verifying
+stopped_at: "Phase 999.11 Plan 04 COMPLETE — FINAL plan. Phase 999.11 architecturally complete. 1 atomic Commit 6 (fb23e24) on feature/phase-20-config-decomposition: 5 files (2 proto + 2 regenerated ts-proto + 1 controller stub removal), -782/+17 line delta per D-04 + Pitfall 1 single-atomic-commit. packages/contracts/proto/parser.proto 100→68 lines (ParserService 8→6 RPCs); packages/contracts/proto/notifier.proto 45→14 lines (NotifierService HealthCheck-only + Pitfall 3 hardened comment block); packages/contracts/src/generated/parser.ts 1030→687 regenerated; packages/contracts/src/generated/notifier.ts 418→80 regenerated; apps/parser/src/infrastructure/controllers/grpc/parser.controller.ts -19 lines (stubs + bridge comment gone). D-06 gate green twice (pnpm lint 7/7 + pnpm build 10/10 exit 0). D-07 dual-mode runtime smoke gate PASSED first try: native http://localhost:3000/health/ready HTTP 200 attempt 2 of 36 (~10s boot) + isolated http://localhost:4000/health/ready HTTP 200 attempt 10 of 60 (~50s boot incl. docker compose up --build), both status=ok + 5/5 upstreams up (auth/sender/parser/audience/notifier); isolated 6/6 containers Up (healthy); 0 error/warn entries across 6 isolated containers (docker logs --since 2m). Response bodies saved to /tmp/999.11-native-ready.json + /tmp/999.11-isolated-ready.json. Workspace-wide grep invariant (9 smoke symbols × apps/src + proto + generated) = 0 matches. Security Invariants SI-1/SI-2/SI-3 all green. Phase 999.11 total = 6 atomic refactor commits per D-04 (3b111c2 + 7476702 + 226d877 + d5db160 + f78d74e + fb23e24); 0 deviations, 0 auto-fixes, 0 retries, 0 architectural escalations across all 4 plans. All 7 D-* decisions realised, all 3 Open Questions resolved in-plan, all 6 Pitfalls pre-empted or mitigated. Follow-up phases 999.12 (Redis canonical alignment) / 999.13 (RabbitMQ canonical abstraction) / 999.14 (S3 canonical audit) / 999.15 (production health contract + CI post-deploy smoke) all unblocked. Ready for /gsd:verify-work 999.11 gate."
+last_updated: "2026-04-19T15:57:50.710Z"
 last_activity: 2026-04-19
 progress:
   total_phases: 33
   completed_phases: 18
-  total_plans: 74
-  completed_plans: 74
+  total_plans: 73
+  completed_plans: 73
   percent: 100
 ---
 
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.11 (infra-abstraction-audit-smoke-cleanup) — ARCHITECTURALLY COMPLETE (pending `/gsd:verify-work 999.11`)
-Plan: 4 of 4 (COMPLETE)
+Phase: 999.12
+Plan: Not started
 Status: All 4 plans executed, 6 atomic refactor commits landed per D-04, D-07 dual-mode smoke gate PASSED. Ready for /gsd:verify-work 999.11 gate.
 Last activity: 2026-04-19
 
