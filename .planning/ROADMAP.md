@@ -562,3 +562,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.15: production-health-contract-ci-smoke (BACKLOG)
+
+**Goal:** Establish production health contract 3-tier (`/health/live` + `/health/ready` + optional `/health/startup`) across all 6 services, covering all infra deps via shallow checks (PG SELECT 1, Redis PING, S3 HeadBucket, RMQ channel status, gRPC upstream health). Move deep CRUD validation to CI post-deploy smoke job (GitHub Actions workflow + shell scripts per infra system) with Telegram alerts via existing notifier. Finalization phase after all infra abstractions aligned (999.11 → 999.12 → 999.13 → 999.14). Deferred: external synthetic monitoring (Datadog/Checkly), auto-rollback via Coolify API, scheduled continuous probes. Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.15".
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
