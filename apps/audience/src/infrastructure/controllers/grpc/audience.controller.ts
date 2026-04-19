@@ -33,15 +33,15 @@ import {
 @AudienceProto.AudienceServiceControllerMethods()
 export class AudienceController implements AudienceProto.AudienceServiceController {
   constructor(
-    @Inject(LIST_GROUPS_PORT) private readonly listGroupsPort: ListGroupsPort,
-    @Inject(CREATE_GROUP_PORT) private readonly createGroupPort: CreateGroupPort,
-    @Inject(DELETE_GROUP_PORT) private readonly deleteGroupPort: DeleteGroupPort,
-    @Inject(LIST_RECIPIENTS_PORT) private readonly listRecipientsPort: ListRecipientsPort,
+    @Inject(LIST_GROUPS_PORT) private readonly listGroupsService: ListGroupsPort,
+    @Inject(CREATE_GROUP_PORT) private readonly createGroupService: CreateGroupPort,
+    @Inject(DELETE_GROUP_PORT) private readonly deleteGroupService: DeleteGroupPort,
+    @Inject(LIST_RECIPIENTS_PORT) private readonly listRecipientsService: ListRecipientsPort,
     @Inject(GET_RECIPIENTS_BY_GROUP_PORT)
-    private readonly getRecipientsByGroupPort: GetRecipientsByGroupPort,
-    @Inject(IMPORT_RECIPIENTS_PORT) private readonly importRecipientsPort: ImportRecipientsPort,
-    @Inject(MARK_AS_SENT_PORT) private readonly markAsSentPort: MarkAsSentPort,
-    @Inject(RESET_SEND_STATUS_PORT) private readonly resetSendStatusPort: ResetSendStatusPort,
+    private readonly getRecipientsByGroupService: GetRecipientsByGroupPort,
+    @Inject(IMPORT_RECIPIENTS_PORT) private readonly importRecipientsService: ImportRecipientsPort,
+    @Inject(MARK_AS_SENT_PORT) private readonly markAsSentService: MarkAsSentPort,
+    @Inject(RESET_SEND_STATUS_PORT) private readonly resetSendStatusService: ResetSendStatusPort,
   ) {}
 
   async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {
@@ -54,7 +54,7 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListGroupsCommand(page, limit, req.userId);
-    const result = await this.listGroupsPort.execute(cmd);
+    const result = await this.listGroupsService.execute(cmd);
     return {
       groups: result.groups.map((g) => ({
         id: g.id,
@@ -74,7 +74,7 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
 
   async createGroup(req: AudienceProto.CreateGroupRequest): Promise<AudienceProto.Group> {
     const cmd = new CreateGroupCommand(req.name, req.userId);
-    const result = await this.createGroupPort.execute(cmd);
+    const result = await this.createGroupService.execute(cmd);
     return {
       id: result.id,
       name: result.name,
@@ -86,7 +86,7 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
 
   async deleteGroup(req: AudienceProto.GroupIdRequest): Promise<CommonProto.Empty> {
     const cmd = new DeleteGroupCommand(req.id);
-    await this.deleteGroupPort.execute(cmd);
+    await this.deleteGroupService.execute(cmd);
     return {};
   }
 
@@ -96,7 +96,7 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListRecipientsCommand(page, limit, req.groupId);
-    const result = await this.listRecipientsPort.execute(cmd);
+    const result = await this.listRecipientsService.execute(cmd);
     return {
       recipients: result.recipients.map((r) => ({
         id: r.id,
@@ -120,7 +120,7 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
     req: AudienceProto.GetByGroupRequest,
   ): Promise<AudienceProto.RecipientList> {
     const cmd = new GetRecipientsByGroupCommand(req.groupId, req.onlyUnsent);
-    const result = await this.getRecipientsByGroupPort.execute(cmd);
+    const result = await this.getRecipientsByGroupService.execute(cmd);
     return {
       recipients: result.recipients.map((r) => ({
         id: r.id,
@@ -148,7 +148,7 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
         company: r.company,
       })),
     );
-    const result = await this.importRecipientsPort.execute(cmd);
+    const result = await this.importRecipientsService.execute(cmd);
     return {
       imported: result.imported,
       duplicates: result.duplicates,
@@ -158,13 +158,13 @@ export class AudienceController implements AudienceProto.AudienceServiceControll
 
   async markAsSent(req: AudienceProto.MarkSentRequest): Promise<CommonProto.Empty> {
     const cmd = new MarkAsSentCommand(req.recipientIds);
-    await this.markAsSentPort.execute(cmd);
+    await this.markAsSentService.execute(cmd);
     return {};
   }
 
   async resetSendStatus(req: AudienceProto.ResetStatusRequest): Promise<CommonProto.Empty> {
     const cmd = new ResetSendStatusCommand(req.groupId);
-    await this.resetSendStatusPort.execute(cmd);
+    await this.resetSendStatusService.execute(cmd);
     return {};
   }
 }
