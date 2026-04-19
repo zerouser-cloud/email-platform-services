@@ -532,10 +532,10 @@ Plans:
 **Goal:** Remove all `/test/*` production endpoint code (smoke/test endpoints, controllers, modules) from `apps/gateway`, `apps/parser`, `apps/notifier`, plus the backing gRPC smoke RPCs in `packages/contracts/proto/{parser,notifier}.proto`. Scope narrowed during `/gsd:discuss-phase` (2026-04-19) from the original "audit + cleanup" to deletion-only (Area 1); architecture audit / canonical-reference work deferred to Phases 999.12–999.15. Full context in `.planning/phases/999.11-infra-abstraction-audit-smoke-cleanup/999.11-CONTEXT.md` and `.planning/notes/2026-04-19-infra-consistency-discussion.md`.
 **Depends on:** Phase 999.10.1
 **Requirements:** D-01..D-07 (locked decisions in 999.11-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; this is a deletion phase)
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 999.11-01-PLAN.md — Gateway smoke removal (3 atomic commits: storage-smoke + http-smoke + grpc-client-sanity; OQ-1 resolution deletes infrastructure/clients/http-smoke/ atomically)
+- [x] 999.11-01-PLAN.md — Gateway smoke removal (3 atomic commits: storage-smoke + http-smoke + grpc-client-sanity; OQ-1 resolution deletes infrastructure/clients/http-smoke/ atomically)
 - [ ] 999.11-02-PLAN.md — Parser backend smoke hexagonal slice deletion (1 atomic commit; 9 application files + 3 infrastructure edits; parser.controller.ts keeps throwing stubs until Plan 04)
 - [ ] 999.11-03-PLAN.md — Notifier backend smoke deletion (1 atomic commit; 2 file changes — no hexagonal slice exists, asymmetric with parser per RESEARCH.md Pitfall 2)
 - [ ] 999.11-04-PLAN.md — Proto edits + ts-proto regeneration + parser.controller.ts stub removal (1 atomic commit) + D-07 dual-mode runtime smoke gate (native + isolated)
