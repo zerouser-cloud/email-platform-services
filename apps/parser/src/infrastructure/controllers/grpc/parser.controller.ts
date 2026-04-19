@@ -122,23 +122,4 @@ export class ParserController implements ParserProto.ParserServiceController {
       autoImport: result.autoImport,
     };
   }
-
-  // Storage smoke endpoints — temporary stubs during Phase 999.11 commit sequence.
-  // The proto interface `ParserProto.ParserServiceController` still declares
-  // these methods (packages/contracts/src/generated/parser.ts). Plan 04 regenerates
-  // the proto after removing the RPC definitions; these stubs disappear along with
-  // the interface requirement. Runtime calls would throw — but gateway's
-  // StorageSmokeController was deleted in Plan 01 (Commit 1), so nothing invokes
-  // these methods between Commit 4 and Commit 6.
-  async runStorageSmoke(_request: CommonProto.Empty): Promise<ParserProto.StorageSmokeResponse> {
-    throw new Error('runStorageSmoke removed in Phase 999.11 — proto cleanup pending in Plan 04');
-  }
-
-  async cleanupStorageSmoke(
-    _req: ParserProto.CleanupSmokeRequest,
-  ): Promise<ParserProto.CleanupSmokeResponse> {
-    throw new Error(
-      'cleanupStorageSmoke removed in Phase 999.11 — proto cleanup pending in Plan 04',
-    );
-  }
 }

@@ -60,38 +60,6 @@ export interface ParserSettings {
   autoImport: boolean;
 }
 
-export interface StorageSmokeStepResult {
-  step: string;
-  success: boolean;
-  detail: string;
-}
-
-export interface StorageSmokeBucketResult {
-  bucket: string;
-  testKey: string;
-  steps: StorageSmokeStepResult[];
-  allPassed: boolean;
-  /**
-   * Public download URL for the uploaded test object — populated only for
-   * anonymous-readable buckets (public). Empty for private buckets.
-   */
-  publicUrl: string;
-}
-
-export interface StorageSmokeResponse {
-  buckets: StorageSmokeBucketResult[];
-}
-
-export interface CleanupSmokeRequest {
-  bucket: string;
-  key: string;
-}
-
-export interface CleanupSmokeResponse {
-  success: boolean;
-  detail: string;
-}
-
 export const PARSER_PACKAGE_NAME = "parser";
 
 function createBaseParserTaskIdRequest(): ParserTaskIdRequest {
@@ -574,279 +542,6 @@ export const ParserSettings: MessageFns<ParserSettings> = {
   },
 };
 
-function createBaseStorageSmokeStepResult(): StorageSmokeStepResult {
-  return { step: "", success: false, detail: "" };
-}
-
-export const StorageSmokeStepResult: MessageFns<StorageSmokeStepResult> = {
-  encode(message: StorageSmokeStepResult, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.step !== "") {
-      writer.uint32(10).string(message.step);
-    }
-    if (message.success !== false) {
-      writer.uint32(16).bool(message.success);
-    }
-    if (message.detail !== "") {
-      writer.uint32(26).string(message.detail);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): StorageSmokeStepResult {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStorageSmokeStepResult();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.step = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 16) {
-            break;
-          }
-
-          message.success = reader.bool();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.detail = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseStorageSmokeBucketResult(): StorageSmokeBucketResult {
-  return { bucket: "", testKey: "", steps: [], allPassed: false, publicUrl: "" };
-}
-
-export const StorageSmokeBucketResult: MessageFns<StorageSmokeBucketResult> = {
-  encode(message: StorageSmokeBucketResult, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.bucket !== "") {
-      writer.uint32(10).string(message.bucket);
-    }
-    if (message.testKey !== "") {
-      writer.uint32(18).string(message.testKey);
-    }
-    for (const v of message.steps) {
-      StorageSmokeStepResult.encode(v!, writer.uint32(26).fork()).join();
-    }
-    if (message.allPassed !== false) {
-      writer.uint32(32).bool(message.allPassed);
-    }
-    if (message.publicUrl !== "") {
-      writer.uint32(42).string(message.publicUrl);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): StorageSmokeBucketResult {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStorageSmokeBucketResult();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.bucket = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.testKey = reader.string();
-          continue;
-        }
-        case 3: {
-          if (tag !== 26) {
-            break;
-          }
-
-          message.steps.push(StorageSmokeStepResult.decode(reader, reader.uint32()));
-          continue;
-        }
-        case 4: {
-          if (tag !== 32) {
-            break;
-          }
-
-          message.allPassed = reader.bool();
-          continue;
-        }
-        case 5: {
-          if (tag !== 42) {
-            break;
-          }
-
-          message.publicUrl = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseStorageSmokeResponse(): StorageSmokeResponse {
-  return { buckets: [] };
-}
-
-export const StorageSmokeResponse: MessageFns<StorageSmokeResponse> = {
-  encode(message: StorageSmokeResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    for (const v of message.buckets) {
-      StorageSmokeBucketResult.encode(v!, writer.uint32(10).fork()).join();
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): StorageSmokeResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseStorageSmokeResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.buckets.push(StorageSmokeBucketResult.decode(reader, reader.uint32()));
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseCleanupSmokeRequest(): CleanupSmokeRequest {
-  return { bucket: "", key: "" };
-}
-
-export const CleanupSmokeRequest: MessageFns<CleanupSmokeRequest> = {
-  encode(message: CleanupSmokeRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.bucket !== "") {
-      writer.uint32(10).string(message.bucket);
-    }
-    if (message.key !== "") {
-      writer.uint32(18).string(message.key);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CleanupSmokeRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCleanupSmokeRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break;
-          }
-
-          message.bucket = reader.string();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.key = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-};
-
-function createBaseCleanupSmokeResponse(): CleanupSmokeResponse {
-  return { success: false, detail: "" };
-}
-
-export const CleanupSmokeResponse: MessageFns<CleanupSmokeResponse> = {
-  encode(message: CleanupSmokeResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.success !== false) {
-      writer.uint32(8).bool(message.success);
-    }
-    if (message.detail !== "") {
-      writer.uint32(18).string(message.detail);
-    }
-    return writer;
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): CleanupSmokeResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input);
-    const end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseCleanupSmokeResponse();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 8) {
-            break;
-          }
-
-          message.success = reader.bool();
-          continue;
-        }
-        case 2: {
-          if (tag !== 18) {
-            break;
-          }
-
-          message.detail = reader.string();
-          continue;
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skip(tag & 7);
-    }
-    return message;
-  },
-};
-
 /** Service responsible for managing parser tasks and settings. */
 
 export interface ParserServiceClient {
@@ -861,10 +556,6 @@ export interface ParserServiceClient {
   getSettings(request: Empty, metadata?: Metadata): Observable<ParserSettings>;
 
   updateSettings(request: UpdateParserSettingsRequest, metadata?: Metadata): Observable<ParserSettings>;
-
-  runStorageSmoke(request: Empty, metadata?: Metadata): Observable<StorageSmokeResponse>;
-
-  cleanupStorageSmoke(request: CleanupSmokeRequest, metadata?: Metadata): Observable<CleanupSmokeResponse>;
 }
 
 /** Service responsible for managing parser tasks and settings. */
@@ -893,16 +584,6 @@ export interface ParserServiceController {
     request: UpdateParserSettingsRequest,
     metadata?: Metadata,
   ): Promise<ParserSettings> | Observable<ParserSettings> | ParserSettings;
-
-  runStorageSmoke(
-    request: Empty,
-    metadata?: Metadata,
-  ): Promise<StorageSmokeResponse> | Observable<StorageSmokeResponse> | StorageSmokeResponse;
-
-  cleanupStorageSmoke(
-    request: CleanupSmokeRequest,
-    metadata?: Metadata,
-  ): Promise<CleanupSmokeResponse> | Observable<CleanupSmokeResponse> | CleanupSmokeResponse;
 }
 
 export function ParserServiceControllerMethods() {
@@ -914,8 +595,6 @@ export function ParserServiceControllerMethods() {
       "getTask",
       "getSettings",
       "updateSettings",
-      "runStorageSmoke",
-      "cleanupStorageSmoke",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
@@ -991,26 +670,6 @@ export const ParserServiceService = {
     responseSerialize: (value: ParserSettings): Buffer => Buffer.from(ParserSettings.encode(value).finish()),
     responseDeserialize: (value: Buffer): ParserSettings => ParserSettings.decode(value),
   },
-  runStorageSmoke: {
-    path: "/parser.ParserService/RunStorageSmoke",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: Empty): Buffer => Buffer.from(Empty.encode(value).finish()),
-    requestDeserialize: (value: Buffer): Empty => Empty.decode(value),
-    responseSerialize: (value: StorageSmokeResponse): Buffer =>
-      Buffer.from(StorageSmokeResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): StorageSmokeResponse => StorageSmokeResponse.decode(value),
-  },
-  cleanupStorageSmoke: {
-    path: "/parser.ParserService/CleanupStorageSmoke",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: CleanupSmokeRequest): Buffer => Buffer.from(CleanupSmokeRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer): CleanupSmokeRequest => CleanupSmokeRequest.decode(value),
-    responseSerialize: (value: CleanupSmokeResponse): Buffer =>
-      Buffer.from(CleanupSmokeResponse.encode(value).finish()),
-    responseDeserialize: (value: Buffer): CleanupSmokeResponse => CleanupSmokeResponse.decode(value),
-  },
 } as const;
 
 export interface ParserServiceServer extends UntypedServiceImplementation {
@@ -1020,8 +679,6 @@ export interface ParserServiceServer extends UntypedServiceImplementation {
   getTask: handleUnaryCall<ParserTaskIdRequest, ParserTask>;
   getSettings: handleUnaryCall<Empty, ParserSettings>;
   updateSettings: handleUnaryCall<UpdateParserSettingsRequest, ParserSettings>;
-  runStorageSmoke: handleUnaryCall<Empty, StorageSmokeResponse>;
-  cleanupStorageSmoke: handleUnaryCall<CleanupSmokeRequest, CleanupSmokeResponse>;
 }
 
 export interface MessageFns<T> {
