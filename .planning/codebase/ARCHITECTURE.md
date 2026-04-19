@@ -121,6 +121,14 @@ Controller -> Service -> UseCase is the canonical 3-layer stack (Phase 999.10). 
 - `TransitionCampaignStatusUseCase` — used by sender `PauseCampaignService` + sender `ResumeCampaignService`
 - `TransitionRecipientsStatusUseCase` — used by audience `MarkAsSentService` + audience `ResetSendStatusService`
 
+**Field naming convention (from Phase 999.10.1):**
+
+Field names reflect **runtime identity** (what DI binds): controller fields use `{verb}{Noun}Service` (e.g., `listGroupsService`); service fields use action verbs for UseCase composition (e.g., `verifyCredentials`); use-case fields mirror domain-role suffixes like `Repository` (e.g., `userRepository`). Types retain the `Port` suffix as architectural contracts; DI tokens retain `_PORT` as architectural artifacts.
+
+Example: `@Inject(LIST_GROUPS_PORT) private readonly listGroupsService: ListGroupsPort`.
+
+Full treatment: `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules".
+
 **See:** `.agents/skills/nestjs-hexagonal-mapping/references/CALL-FLOW.md` for branching variants (pure delegation, composite service, use-case reuse).
 
 ## Proto Visibility (gRPC microservices)

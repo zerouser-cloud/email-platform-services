@@ -13,11 +13,11 @@ All snippets derived from Phase 999.10 auth pilot (Plan 02). Method bodies stay 
 @Controller()
 @AuthProto.AuthServiceControllerMethods()
 export class AuthController implements AuthProto.AuthServiceController {
-  constructor(@Inject(LOGIN_PORT) private readonly loginPort: LoginPort) {}
+  constructor(@Inject(LOGIN_PORT) private readonly loginService: LoginPort) {}
 
   async login(req: AuthProto.LoginRequest): Promise<AuthProto.TokenPair> {
     const cmd = new LoginCommand(req.email, req.password);          // proto → command
-    const result = await this.loginPort.execute(cmd);               // cross boundary
+    const result = await this.loginService.execute(cmd);            // cross boundary
     return {                                                        // domain → proto
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
@@ -57,7 +57,7 @@ export class LoginService implements LoginPort {
 // 5. Use case — atomic step (apps/auth/src/application/use-cases/verify-credentials.use-case.ts)
 @Injectable()
 export class VerifyCredentialsUseCase {
-  constructor(@Inject(USER_REPOSITORY_PORT) private readonly users: UserRepositoryPort) {}
+  constructor(@Inject(USER_REPOSITORY_PORT) private readonly userRepository: UserRepositoryPort) {}
   async execute(email: string, password: string): Promise<User> {
     throw new Error('VerifyCredentialsUseCase not yet implemented'); // D-stub
   }
@@ -75,6 +75,7 @@ Key observations:
 - **Service `implements LoginPort`** — our own interface, not the generated `AuthServiceController`.
 - **UseCase does NOT `implements LoginPort`** — it's a plain `@Injectable()` class. The Service owns the port contract; the UseCase is an atomic step the Service composes.
 - **Use cases are injected by class reference**, not by Symbol token. Outbound ports are injected by Symbol token (`USER_REPOSITORY_PORT`).
+- **Field names reflect runtime identity per Phase 999.10.1** — see `references/NAMING.md` §"Field Naming Rules" for the full treatment (controller `xxxService: XxxPort`, service `verbNoun: VerbNounUseCase`, use-case `xxxRepository: XxxRepositoryPort`).
 
 ---
 
@@ -86,10 +87,10 @@ When the D-23 audit concludes one atomic use case suffices for an RPC, the Servi
 // apps/sender/src/application/services/create-campaign.service.ts
 @Injectable()
 export class CreateCampaignService implements CreateCampaignPort {
-  constructor(private readonly useCase: CreateCampaignUseCase) {}
+  constructor(private readonly createCampaign: CreateCampaignUseCase) {}
 
   async execute(cmd: CreateCampaignCommand): Promise<CreateCampaignResult> {
-    return this.useCase.execute(cmd);
+    return this.createCampaign.execute(cmd);
   }
 }
 ```
@@ -111,7 +112,7 @@ The Controller owns the proto↔domain boundary. The Command DTO is constructed 
 ```typescript
 async login(req: AuthProto.LoginRequest): Promise<AuthProto.TokenPair> {
   const cmd = new LoginCommand(req.email, req.password);   // proto → command
-  const result = await this.loginPort.execute(cmd);        // cross port boundary
+  const result = await this.loginService.execute(cmd);     // cross port boundary
   return {                                                  // domain → proto
     accessToken: result.accessToken,
     refreshToken: result.refreshToken,
@@ -180,7 +181,7 @@ export class LoginService implements LoginPort {
 // apps/auth/src/application/use-cases/verify-credentials.use-case.ts (NEW — split from LoginUseCase)
 @Injectable()
 export class VerifyCredentialsUseCase {
-  constructor(@Inject(USER_REPOSITORY_PORT) private readonly users: UserRepositoryPort) {}
+  constructor(@Inject(USER_REPOSITORY_PORT) private readonly userRepository: UserRepositoryPort) {}
   async execute(email: string, password: string): Promise<User> {
     throw new Error('VerifyCredentialsUseCase not yet implemented');
   }

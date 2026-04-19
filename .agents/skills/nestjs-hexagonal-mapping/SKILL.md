@@ -71,6 +71,7 @@ New RPC method in a proto file?
 +-- Step 6: Create Service
 |   +-- apps/{svc}/src/application/services/{feature}.service.ts
 |   +-- @Injectable() export class {Feature}Service implements {Feature}Port { execute(cmd) }
+|   +-- Field injecting UseCase uses action-verb name (see references/NAMING.md §Field Naming Rules)
 |
 +-- Step 7: Wire Controller method
 |   +-- Inject {FEATURE}_PORT in controller constructor
@@ -99,6 +100,7 @@ Enforced mechanically by ESLint Override 8 (domain isolation) and Override 9 (ap
 7. **HealthController at `apps/{svc}/src/health/`** — must be at `apps/{svc}/src/infrastructure/controllers/rest/`.
 8. **Mappers flat in `infrastructure/persistence/`** — must be in `infrastructure/persistence/mappers/`.
 9. **Feature submodules** (`LoginModule`, `RegisterModule`) — one flat module per bounded context; submodules only for shared infrastructure from foundation.
+10. **Hungarian notation on DI field names** — field should reflect runtime identity (`xxxService`, `userRepository`), not repeat the `Port` type suffix (`xxxPort: XxxPort`). See `references/NAMING.md` §Field Naming Rules.
 
 Full Don't / Do / Why / Detected-by block for each in `references/DO-DONT.md`.
 
@@ -113,7 +115,7 @@ Full Don't / Do / Why / Detected-by block for each in `references/DO-DONT.md`.
 
 - `references/LAYERS.md` — per-layer (`infrastructure/`, `application/`, `domain/`) subfolder definitions with allowed imports and canonical file names.
 - `references/CALL-FLOW.md` — canonical ASCII call flow (Login example) plus variants: pure delegation, composite service, use-case reuse.
-- `references/NAMING.md` — one-to-one file↔class table (D-12) plus class-name rules (Controller/Service/UseCase/Port/Command/Mapper/Entity).
+- `references/NAMING.md` — one-to-one file↔class table (D-12) plus class-name rules (Controller/Service/UseCase/Port/Command/Mapper/Entity) plus **field-naming rules (Phase 999.10.1)**.
 - `references/EXAMPLES.md` — three worked examples (composite service, pure delegation, proto↔command mapping) plus 2-layer-to-3-layer before/after.
 - `references/PROTO-VISIBILITY.md` — 17-row table: who sees `@email-platform/contracts` / `@nestjs/microservices` / Drizzle / NestJS DI per file type.
 - `references/DO-DONT.md` — 9 anti-patterns in Don't / Do / Why / Detected-by format.

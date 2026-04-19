@@ -346,6 +346,20 @@
 | Composition root `@Module({})` | Root | `apps/{svc}/src/` | `auth.module.ts` |
 | DI tokens (`Symbol('XxxPort')`) | Root | `apps/{svc}/src/` | `auth.constants.ts` |
 
+**Field Naming Rules (from Phase 999.10.1):**
+
+Dependency-injected field names reflect **runtime identity** — what DI actually binds at runtime. Field types retain the `Port` suffix as the **architectural contract**. DI tokens retain the `_PORT` suffix as **architectural artifacts**. Grep `_PORT` → full list of ports in a service.
+
+| Layer | Field name | Type | DI token | Runtime class |
+|-------|-----------|------|----------|---------------|
+| Controller → inbound port | `listGroupsService` | `ListGroupsPort` | `LIST_GROUPS_PORT` | `ListGroupsService` |
+| Service → use case | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class ref) | `VerifyCredentialsUseCase` |
+| UseCase → outbound port | `userRepository` | `UserRepositoryPort` | `USER_REPOSITORY_PORT` | `PgUserRepository` |
+
+**Domain-role suffixes** (`Repository`, `Factory`, `Policy`, `Sender` — ubiquitous language) ARE mirrored on the field. **Architectural-role suffixes** (`Port`, `Adapter`, `UseCase`, `Boundary` — hexagonal jargon) are NOT. Duplicating `Port` on the field is Hungarian notation — Clean Code ch.2 calls type encoding in variable names "impediments today."
+
+Full treatment: `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules".
+
 **Proto visibility rules:**
 - `@email-platform/contracts` (generated proto types) is imported ONLY in `infrastructure/controllers/grpc/*.controller.ts` (server-side) and `infrastructure/clients/{service}/*.module.ts` (client-side, Phase 999.7.x). Enforced by ESLint Override 9 in `.eslintrc.js`.
 - `@nestjs/microservices` (`GrpcMethod` / `MessagePattern` decorators, `RpcException`) is a transport concern — infrastructure only. Enforced by Override 9.
@@ -378,6 +392,7 @@ gRPC request → {Service}Controller.method(req)   [infrastructure/controllers/g
 - **Command DTO** is a class (not interface) with `public readonly` constructor params. Per-feature, POJO, no framework imports.
 - **One flat `@Module({})` per bounded context** — no feature submodules. Shared infrastructure only from foundation (`PersistenceModule`, `LoggingModule`, `AppConfigModule`).
 - **No magic strings for DI tokens** — use `Symbol()` in `{svc}.constants.ts`.
+- **Field names reflect runtime identity** — `Port` suffix appears on types and DI tokens, never on field names (see §Field Naming Rules above).
 
 **Scope:** this mapping covers the four gRPC microservices (auth, sender, parser, audience). **Gateway** (REST facade) and **notifier** (RMQ consumer) follow different patterns and are NOT covered here (separate future phases).
 

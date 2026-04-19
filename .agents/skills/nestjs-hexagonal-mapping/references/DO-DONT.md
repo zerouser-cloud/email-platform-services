@@ -287,3 +287,33 @@ export class AuthModule {}
 **Why:** D-11 — one module per bounded context. Submodules are reserved for shared infrastructure from foundation (`PersistenceModule`, `LoggingModule`, `AppConfigModule`). Feature submodules add nesting with no architectural benefit — the bounded context is already the `apps/{svc}/` directory.
 
 **Detected by:** `find apps/{auth,sender,parser,audience}/src -name "*.module.ts"` should return exactly one file per service (plus whatever foundation compat shims exist in `infrastructure/clients/`).
+
+---
+
+### 10. Hungarian notation in DI field names
+
+**Don't:**
+
+```ts
+@Inject(LIST_GROUPS_PORT) private readonly listGroupsPort: ListGroupsPort
+@Inject(USER_REPOSITORY_PORT) private readonly userRepositoryPort: UserRepositoryPort
+```
+
+**Do:**
+
+```ts
+@Inject(LIST_GROUPS_PORT) private readonly listGroupsService: ListGroupsPort
+@Inject(USER_REPOSITORY_PORT) private readonly userRepository: UserRepositoryPort
+```
+
+**Why:** Phase 999.10.1 D-01..D-05 — field name reflects **runtime identity** (what DI actually injects), type retains `Port` as the **architectural contract**, DI token retains `_PORT` as the **architectural artifact**. Duplicating `Port` on the field is Hungarian type encoding, which Clean Code ch.2 calls "impediments today" — readers learn to ignore the suffix and it becomes noise. Domain-role suffixes like `Repository` ARE mirrored on the field (per D-04, DDD ubiquitous language); architectural-role suffixes like `Port`/`Adapter`/`UseCase` are NOT.
+
+**Detected by:** code review; grep invariant:
+
+```bash
+grep -rE "private readonly \w+Port: \w+Port" apps/*/src/infrastructure/controllers/grpc/
+```
+
+Returns empty after Phase 999.10.1 — any match is a regression.
+
+**See also:** `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules (Phase 999.10.1)".
