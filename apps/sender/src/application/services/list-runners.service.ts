@@ -5,9 +5,9 @@ import { ListRunnersUseCase } from '../use-cases/list-runners.use-case';
 
 @Injectable()
 export class ListRunnersService implements ListRunnersPort {
-  constructor(private readonly useCase: ListRunnersUseCase) {}
+  constructor(private readonly listRunners: ListRunnersUseCase) {}
 
   async execute(cmd: ListRunnersCommand): Promise<ListRunnersResult> {
-    return this.useCase.execute(cmd);
+    return this.listRunners.execute(cmd);
   }
 }

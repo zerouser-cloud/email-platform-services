@@ -8,9 +8,9 @@ import { CreateCampaignUseCase } from '../use-cases/create-campaign.use-case';
 
 @Injectable()
 export class CreateCampaignService implements CreateCampaignPort {
-  constructor(private readonly useCase: CreateCampaignUseCase) {}
+  constructor(private readonly createCampaign: CreateCampaignUseCase) {}
 
   async execute(cmd: CreateCampaignCommand): Promise<CreateCampaignResult> {
-    return this.useCase.execute(cmd);
+    return this.createCampaign.execute(cmd);
   }
 }

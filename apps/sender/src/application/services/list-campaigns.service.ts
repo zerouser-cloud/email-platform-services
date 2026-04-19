@@ -5,9 +5,9 @@ import { ListCampaignsUseCase } from '../use-cases/list-campaigns.use-case';
 
 @Injectable()
 export class ListCampaignsService implements ListCampaignsPort {
-  constructor(private readonly useCase: ListCampaignsUseCase) {}
+  constructor(private readonly listCampaigns: ListCampaignsUseCase) {}
 
   async execute(cmd: ListCampaignsCommand): Promise<ListCampaignsResult> {
-    return this.useCase.execute(cmd);
+    return this.listCampaigns.execute(cmd);
   }
 }

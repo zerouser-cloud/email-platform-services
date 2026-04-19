@@ -8,10 +8,10 @@ import { TransitionCampaignStatusUseCase } from '../use-cases/transition-campaig
 
 @Injectable()
 export class ResumeCampaignService implements ResumeCampaignPort {
-  constructor(private readonly transition: TransitionCampaignStatusUseCase) {}
+  constructor(private readonly transitionCampaignStatus: TransitionCampaignStatusUseCase) {}
 
   async execute(cmd: ResumeCampaignCommand): Promise<ResumeCampaignResult> {
-    const updated = await this.transition.execute(cmd.id, 'active');
+    const updated = await this.transitionCampaignStatus.execute(cmd.id, 'active');
     return {
       id: updated.id,
       name: updated.name,

@@ -5,9 +5,9 @@ import { ListMessagesUseCase } from '../use-cases/list-messages.use-case';
 
 @Injectable()
 export class ListMessagesService implements ListMessagesPort {
-  constructor(private readonly useCase: ListMessagesUseCase) {}
+  constructor(private readonly listMessages: ListMessagesUseCase) {}
 
   async execute(cmd: ListMessagesCommand): Promise<ListMessagesResult> {
-    return this.useCase.execute(cmd);
+    return this.listMessages.execute(cmd);
   }
 }

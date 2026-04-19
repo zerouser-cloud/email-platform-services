@@ -5,9 +5,9 @@ import { ListMacrosUseCase } from '../use-cases/list-macros.use-case';
 
 @Injectable()
 export class ListMacrosService implements ListMacrosPort {
-  constructor(private readonly useCase: ListMacrosUseCase) {}
+  constructor(private readonly listMacros: ListMacrosUseCase) {}
 
   async execute(cmd: ListMacrosCommand): Promise<ListMacrosResult> {
-    return this.useCase.execute(cmd);
+    return this.listMacros.execute(cmd);
   }
 }

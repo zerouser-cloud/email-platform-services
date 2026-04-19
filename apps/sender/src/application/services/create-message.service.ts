@@ -5,9 +5,9 @@ import { CreateMessageUseCase } from '../use-cases/create-message.use-case';
 
 @Injectable()
 export class CreateMessageService implements CreateMessagePort {
-  constructor(private readonly useCase: CreateMessageUseCase) {}
+  constructor(private readonly createMessage: CreateMessageUseCase) {}
 
   async execute(cmd: CreateMessageCommand): Promise<CreateMessageResult> {
-    return this.useCase.execute(cmd);
+    return this.createMessage.execute(cmd);
   }
 }

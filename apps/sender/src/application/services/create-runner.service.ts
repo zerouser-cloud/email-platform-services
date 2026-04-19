@@ -5,9 +5,9 @@ import { CreateRunnerUseCase } from '../use-cases/create-runner.use-case';
 
 @Injectable()
 export class CreateRunnerService implements CreateRunnerPort {
-  constructor(private readonly useCase: CreateRunnerUseCase) {}
+  constructor(private readonly createRunner: CreateRunnerUseCase) {}
 
   async execute(cmd: CreateRunnerCommand): Promise<CreateRunnerResult> {
-    return this.useCase.execute(cmd);
+    return this.createRunner.execute(cmd);
   }
 }

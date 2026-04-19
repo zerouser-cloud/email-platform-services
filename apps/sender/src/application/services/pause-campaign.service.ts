@@ -5,10 +5,10 @@ import { TransitionCampaignStatusUseCase } from '../use-cases/transition-campaig
 
 @Injectable()
 export class PauseCampaignService implements PauseCampaignPort {
-  constructor(private readonly transition: TransitionCampaignStatusUseCase) {}
+  constructor(private readonly transitionCampaignStatus: TransitionCampaignStatusUseCase) {}
 
   async execute(cmd: PauseCampaignCommand): Promise<PauseCampaignResult> {
-    const updated = await this.transition.execute(cmd.id, 'paused');
+    const updated = await this.transitionCampaignStatus.execute(cmd.id, 'paused');
     // Minimal projection — business-logic phase will populate the remaining
     // proto fields (messageId/runnerId/etc) once the Campaign entity gains them.
     return {
