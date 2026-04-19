@@ -11,7 +11,6 @@ import {
 import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
 import { StorageModule } from './infrastructure/storage';
 import { HealthController } from './health/health.controller';
-import { StorageSmokeController } from './test/storage-smoke.controller';
 import { TelegramSmokeController } from './test/telegram-smoke.controller';
 import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
@@ -23,7 +22,7 @@ import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constant
     LoggingModule.forHttpAsync('notifier'),
     TelegramClientModule.forRoot(),
   ],
-  controllers: [HealthController, StorageSmokeController, TelegramSmokeController],
+  controllers: [HealthController, TelegramSmokeController],
   providers: [
     { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationAdapter },
     { provide: HANDLE_EVENT_PORT, useClass: HandleEventUseCase },
