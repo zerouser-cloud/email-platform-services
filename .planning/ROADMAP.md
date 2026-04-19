@@ -518,7 +518,11 @@ Plans:
 **Estimated scope:** ~50-80 files modified (field renames across 4 services × 3 layers × N RPCs; docs updates: CLAUDE.md + `.planning/codebase/ARCHITECTURE.md` + `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md`). Comparable to Phase 999.10 sweep size but mechanical (rename-only).
 
 **Requirements:** Locked decisions above serve as primary requirement surface (no REQ-IDs; naming convention refactor per user dialogue 2026-04-19).
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run `/gsd:discuss-phase 999.10.1` to refine, then `/gsd:plan-phase 999.10.1`)
+- [ ] 999.10.1-01-PLAN.md — auth pilot (6 controller + 4 use-case Repository field renames; services 6/6 already compliant)
+- [ ] 999.10.1-02-PLAN.md — sender sweep (10 controller + 4 use-case Repository + 10 service UseCase field renames per D-19)
+- [ ] 999.10.1-03-PLAN.md — parser sweep (7 controller incl. 2 edge-case type-stem derivations + 3 use-case Repository + 7 service UseCase incl. 1 dual-field service)
+- [ ] 999.10.1-04-PLAN.md — audience sweep (8 controller collision-showcase + 7 use-case Repository with D-20 atomic underscore drop + 8 service UseCase incl. shared TransitionRecipientsStatusUseCase)
+- [ ] 999.10.1-05-PLAN.md — docs finalization (6 docs files atomic commit per D-13/D-14/D-22 + checkpoint:human-verify phase gate)
