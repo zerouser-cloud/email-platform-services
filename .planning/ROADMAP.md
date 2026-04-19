@@ -527,14 +527,18 @@ Plans:
 - [x] 999.10.1-04-PLAN.md — audience sweep (8 controller collision-showcase + 7 use-case Repository with D-20 atomic underscore drop + 8 service UseCase incl. shared TransitionRecipientsStatusUseCase) — PASSED (3 atomic commits 20a758b + fd61e45 + 071e96b; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 32/32 structural grep invariants PASS on audience slice + phase-level rollup; D-16 collision showcase validated — `listGroupsService: ListGroupsPort` resolves method↔field clash; D-20 atomic underscore drop realised — 0 `_\w+` fields in audience application layer; D-19 strict third real-world application — mark-as-sent + reset-send-status both use `transitionRecipientsStatus` from shared TransitionRecipientsStatusUseCase; PHASE-LEVEL INVARIANTS ALL GREEN: 0 Port-fields / 31 Service-fields / 18 Repository-fields / 0 underscores workspace-wide)
 - [x] 999.10.1-05-PLAN.md — docs finalization (atomic 6-file commit 58ea450 per D-13/D-14/D-22: CLAUDE.md + ARCHITECTURE.md + NAMING.md + EXAMPLES.md + DO-DONT.md + SKILL.md; NAMING.md gains ~170-line "## Field Naming Rules (Phase 999.10.1)" section with 7 sub-blocks a-g incl. 3 worked examples + 6-author reference split table + Clean Code ch.2 Hungarian anti-pattern citation; DO-DONT.md adds anti-pattern #10 with grep detector; SKILL.md D-22 mini-update; 12 Task 1 grep invariants + 4 phase-level D-01/D-02/D-04/D-20 invariants all PASS; pnpm lint 7/7 + pnpm build 10/10 cached green; Task 2 human-verify deferred to /gsd:verify-work 999.10.1; PHASE 999.10.1 ARCHITECTURALLY COMPLETE — all 22 D-* decisions D-01..D-22 realised)
 
-### Phase 999.11: infra-abstraction-audit-smoke-cleanup (BACKLOG)
+### Phase 999.11: infra-abstraction-audit-smoke-cleanup
 
-**Goal:** Remove `/test/*` production endpoints and audit all 6 services + foundation for canonical pattern compliance; establish gRPC client layer as canonical reference for infrastructure abstractions. Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` (session discussion + industry survey + 5-phase sequencing rationale).
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** Remove all `/test/*` production endpoint code (smoke/test endpoints, controllers, modules) from `apps/gateway`, `apps/parser`, `apps/notifier`, plus the backing gRPC smoke RPCs in `packages/contracts/proto/{parser,notifier}.proto`. Scope narrowed during `/gsd:discuss-phase` (2026-04-19) from the original "audit + cleanup" to deletion-only (Area 1); architecture audit / canonical-reference work deferred to Phases 999.12–999.15. Full context in `.planning/phases/999.11-infra-abstraction-audit-smoke-cleanup/999.11-CONTEXT.md` and `.planning/notes/2026-04-19-infra-consistency-discussion.md`.
+**Depends on:** Phase 999.10.1
+**Requirements:** D-01..D-07 (locked decisions in 999.11-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; this is a deletion phase)
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+- [ ] 999.11-01-PLAN.md — Gateway smoke removal (3 atomic commits: storage-smoke + http-smoke + grpc-client-sanity; OQ-1 resolution deletes infrastructure/clients/http-smoke/ atomically)
+- [ ] 999.11-02-PLAN.md — Parser backend smoke hexagonal slice deletion (1 atomic commit; 9 application files + 3 infrastructure edits; parser.controller.ts keeps throwing stubs until Plan 04)
+- [ ] 999.11-03-PLAN.md — Notifier backend smoke deletion (1 atomic commit; 2 file changes — no hexagonal slice exists, asymmetric with parser per RESEARCH.md Pitfall 2)
+- [ ] 999.11-04-PLAN.md — Proto edits + ts-proto regeneration + parser.controller.ts stub removal (1 atomic commit) + D-07 dual-mode runtime smoke gate (native + isolated)
 
 ### Phase 999.12: redis-canonical-alignment (BACKLOG)
 
