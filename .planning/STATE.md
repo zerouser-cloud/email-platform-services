@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
+status: executing
 stopped_at: "Phase 999.10 architecturally COMPLETE — all 7 plans landed (Plans 01-07), all 24 D-* decisions (D-01..D-24) realised. Plan 07 Task 1 commit 2c1b249 (docs: CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md — NestJS↔Hexagonal mapping table + proto-visibility rules + canonical call flow + canonical per-service trees) + Task 2 blocking checkpoint:human-verify dual-mode phase gate PASSED (user "approved"): static (lint 7/7 + build 10/10 green) + 13/13 structural grep invariants PASS + native `/health/ready` HTTP 200 with 5/5 upstreams up + native `/test/parser/storage-service` allPassed:true on every bucket + isolated same criteria + 0 error/warn across 6 Docker containers in last 2m of logs + user-reviewed docs diffs accurate. Atomic metadata close commit lands SUMMARY 999.10-07-SUMMARY.md + STATE.md + ROADMAP.md. Ready for /gsd:verify-work 999.10."
-last_updated: "2026-04-19T09:58:55.132Z"
-last_activity: 2026-04-18 — Phase 999.10 complete
+last_updated: "2026-04-19T10:53:41.585Z"
+last_activity: 2026-04-19 -- Phase 999.10.1 execution started
 progress:
   total_phases: 28
   completed_phases: 16
-  total_plans: 64
+  total_plans: 69
   completed_plans: 64
-  percent: 100
+  percent: 93
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.10 — app-architecture-add-service-layer-restructure-hexagonal-stack
+**Current focus:** Phase 999.10.1 — hexagonal-naming-convention-refactor
 
 ## Current Position
 
-Phase: 999.10 (app-architecture-add-service-layer-restructure-hexagonal-stack) — ARCHITECTURALLY COMPLETE
-Plan: 7 of 7 (all plans complete — ready for /gsd:verify-work 999.10)
-Status: Plan 07 complete — Task 1 docs commit 2c1b249 (CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md) + Task 2 blocking checkpoint:human-verify phase gate PASSED (user "approved"): static (lint 7/7 + build 10/10) + 13/13 structural invariants PASS + native HTTP 200 5/5 upstreams up + /test/parser/storage-service allPassed:true + isolated HTTP 200 5/5 upstreams up + isolated /test/parser/storage-service allPassed:true + 0 error/warn across 6 Docker containers + user-reviewed docs diffs. All 24 D-* decisions realised across Plans 01-07. Ready for /gsd:verify-work 999.10.
-Last activity: 2026-04-18 — Phase 999.10 complete
+Phase: 999.10.1 (hexagonal-naming-convention-refactor) — EXECUTING
+Plan: 1 of 5
+Status: Executing Phase 999.10.1
+Last activity: 2026-04-19 -- Phase 999.10.1 execution started
 
 Progress: [██████████] 100% phase (7/7 plans), [==============================] 100% overall
 
