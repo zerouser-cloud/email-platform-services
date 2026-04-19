@@ -7,7 +7,7 @@ import { USER_REPOSITORY_PORT } from '../../auth.constants';
 export class ListUsersUseCase {
   constructor(
     @Inject(USER_REPOSITORY_PORT)
-    private readonly users: UserRepositoryPort,
+    private readonly userRepository: UserRepositoryPort,
   ) {}
 
   async execute(
