@@ -23,7 +23,7 @@ export type RecipientSelector =
 export class TransitionRecipientsStatusUseCase {
   constructor(
     @Inject(RECIPIENT_REPOSITORY_PORT)
-    private readonly _recipients: RecipientRepositoryPort,
+    private readonly recipientRepository: RecipientRepositoryPort,
   ) {}
 
   async execute(_selector: RecipientSelector, _newStatus: RecipientLifecycleStatus): Promise<void> {

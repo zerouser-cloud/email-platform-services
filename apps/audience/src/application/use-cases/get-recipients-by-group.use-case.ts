@@ -8,7 +8,7 @@ import { RECIPIENT_REPOSITORY_PORT } from '../../audience.constants';
 export class GetRecipientsByGroupUseCase {
   constructor(
     @Inject(RECIPIENT_REPOSITORY_PORT)
-    private readonly _recipients: RecipientRepositoryPort,
+    private readonly recipientRepository: RecipientRepositoryPort,
   ) {}
 
   async execute(_cmd: GetRecipientsByGroupCommand): Promise<GetRecipientsByGroupResult> {

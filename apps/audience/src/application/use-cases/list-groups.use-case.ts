@@ -8,7 +8,7 @@ import { GROUP_REPOSITORY_PORT } from '../../audience.constants';
 export class ListGroupsUseCase {
   constructor(
     @Inject(GROUP_REPOSITORY_PORT)
-    private readonly _groups: GroupRepositoryPort,
+    private readonly groupRepository: GroupRepositoryPort,
   ) {}
 
   async execute(_cmd: ListGroupsCommand): Promise<ListGroupsResult> {
