@@ -522,7 +522,7 @@ Plans:
 
 Plans:
 - [x] 999.10.1-01-PLAN.md — auth pilot (6 controller + 4 use-case Repository field renames; services 6/6 already compliant) — PASSED (2 atomic commits 16c52f3 + e6ab119; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 13/13 structural grep invariants PASS on auth slice)
-- [ ] 999.10.1-02-PLAN.md — sender sweep (10 controller + 4 use-case Repository + 10 service UseCase field renames per D-19)
+- [x] 999.10.1-02-PLAN.md — sender sweep (10 controller + 4 use-case Repository + 10 service UseCase field renames per D-19) — PASSED (3 atomic commits 06f6889 + 4ceaf24 + 11235dd; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 18/18 structural grep invariants PASS; D-19 strict composed rule validated — pause/resume both use transitionCampaignStatus)
 - [ ] 999.10.1-03-PLAN.md — parser sweep (7 controller incl. 2 edge-case type-stem derivations + 3 use-case Repository + 7 service UseCase incl. 1 dual-field service)
 - [ ] 999.10.1-04-PLAN.md — audience sweep (8 controller collision-showcase + 7 use-case Repository with D-20 atomic underscore drop + 8 service UseCase incl. shared TransitionRecipientsStatusUseCase)
 - [ ] 999.10.1-05-PLAN.md — docs finalization (6 docs files atomic commit per D-13/D-14/D-22 + checkpoint:human-verify phase gate)
