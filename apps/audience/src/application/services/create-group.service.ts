@@ -5,9 +5,9 @@ import { CreateGroupUseCase } from '../use-cases/create-group.use-case';
 
 @Injectable()
 export class CreateGroupService implements CreateGroupPort {
-  constructor(private readonly useCase: CreateGroupUseCase) {}
+  constructor(private readonly createGroup: CreateGroupUseCase) {}
 
   async execute(cmd: CreateGroupCommand): Promise<CreateGroupResult> {
-    return this.useCase.execute(cmd);
+    return this.createGroup.execute(cmd);
   }
 }

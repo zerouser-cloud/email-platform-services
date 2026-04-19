@@ -8,9 +8,9 @@ import { GetRecipientsByGroupUseCase } from '../use-cases/get-recipients-by-grou
 
 @Injectable()
 export class GetRecipientsByGroupService implements GetRecipientsByGroupPort {
-  constructor(private readonly useCase: GetRecipientsByGroupUseCase) {}
+  constructor(private readonly getRecipientsByGroup: GetRecipientsByGroupUseCase) {}
 
   async execute(cmd: GetRecipientsByGroupCommand): Promise<GetRecipientsByGroupResult> {
-    return this.useCase.execute(cmd);
+    return this.getRecipientsByGroup.execute(cmd);
   }
 }

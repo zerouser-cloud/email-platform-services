@@ -5,9 +5,9 @@ import { DeleteGroupUseCase } from '../use-cases/delete-group.use-case';
 
 @Injectable()
 export class DeleteGroupService implements DeleteGroupPort {
-  constructor(private readonly useCase: DeleteGroupUseCase) {}
+  constructor(private readonly deleteGroup: DeleteGroupUseCase) {}
 
   async execute(cmd: DeleteGroupCommand): Promise<void> {
-    await this.useCase.execute(cmd);
+    await this.deleteGroup.execute(cmd);
   }
 }

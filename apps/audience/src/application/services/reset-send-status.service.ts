@@ -5,9 +5,12 @@ import { TransitionRecipientsStatusUseCase } from '../use-cases/transition-recip
 
 @Injectable()
 export class ResetSendStatusService implements ResetSendStatusPort {
-  constructor(private readonly transition: TransitionRecipientsStatusUseCase) {}
+  constructor(private readonly transitionRecipientsStatus: TransitionRecipientsStatusUseCase) {}
 
   async execute(cmd: ResetSendStatusCommand): Promise<void> {
-    await this.transition.execute({ kind: 'by-group', groupId: cmd.groupId }, 'pending');
+    await this.transitionRecipientsStatus.execute(
+      { kind: 'by-group', groupId: cmd.groupId },
+      'pending',
+    );
   }
 }

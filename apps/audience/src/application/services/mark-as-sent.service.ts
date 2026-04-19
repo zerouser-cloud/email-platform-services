@@ -5,9 +5,12 @@ import { TransitionRecipientsStatusUseCase } from '../use-cases/transition-recip
 
 @Injectable()
 export class MarkAsSentService implements MarkAsSentPort {
-  constructor(private readonly transition: TransitionRecipientsStatusUseCase) {}
+  constructor(private readonly transitionRecipientsStatus: TransitionRecipientsStatusUseCase) {}
 
   async execute(cmd: MarkAsSentCommand): Promise<void> {
-    await this.transition.execute({ kind: 'by-ids', recipientIds: cmd.recipientIds }, 'sent');
+    await this.transitionRecipientsStatus.execute(
+      { kind: 'by-ids', recipientIds: cmd.recipientIds },
+      'sent',
+    );
   }
 }

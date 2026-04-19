@@ -5,9 +5,9 @@ import { ListGroupsUseCase } from '../use-cases/list-groups.use-case';
 
 @Injectable()
 export class ListGroupsService implements ListGroupsPort {
-  constructor(private readonly useCase: ListGroupsUseCase) {}
+  constructor(private readonly listGroups: ListGroupsUseCase) {}
 
   async execute(cmd: ListGroupsCommand): Promise<ListGroupsResult> {
-    return this.useCase.execute(cmd);
+    return this.listGroups.execute(cmd);
   }
 }

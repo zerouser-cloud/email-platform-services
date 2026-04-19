@@ -8,9 +8,9 @@ import { ImportRecipientsUseCase } from '../use-cases/import-recipients.use-case
 
 @Injectable()
 export class ImportRecipientsService implements ImportRecipientsPort {
-  constructor(private readonly useCase: ImportRecipientsUseCase) {}
+  constructor(private readonly importRecipients: ImportRecipientsUseCase) {}
 
   async execute(cmd: ImportRecipientsCommand): Promise<ImportRecipientsResult> {
-    return this.useCase.execute(cmd);
+    return this.importRecipients.execute(cmd);
   }
 }
