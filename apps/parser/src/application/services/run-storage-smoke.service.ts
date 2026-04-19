@@ -10,14 +10,14 @@ import { RunPublicSmokeCycleUseCase } from '../use-cases/run-public-smoke-cycle.
 @Injectable()
 export class RunStorageSmokeService implements RunStorageSmokePort {
   constructor(
-    private readonly privateCycle: RunPrivateSmokeCycleUseCase,
-    private readonly publicCycle: RunPublicSmokeCycleUseCase,
+    private readonly runPrivateCycle: RunPrivateSmokeCycleUseCase,
+    private readonly runPublicCycle: RunPublicSmokeCycleUseCase,
   ) {}
 
   async execute(_cmd: RunStorageSmokeCommand): Promise<RunStorageSmokeResult> {
     const [privateResult, publicResult] = await Promise.all([
-      this.privateCycle.execute(),
-      this.publicCycle.execute(),
+      this.runPrivateCycle.execute(),
+      this.runPublicCycle.execute(),
     ]);
     return { buckets: [privateResult, publicResult] };
   }

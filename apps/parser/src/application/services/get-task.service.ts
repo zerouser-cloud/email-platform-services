@@ -6,9 +6,9 @@ import { GetParserTaskUseCase } from '../use-cases/get-parser-task.use-case';
 
 @Injectable()
 export class GetTaskService implements GetTaskPort {
-  constructor(private readonly useCase: GetParserTaskUseCase) {}
+  constructor(private readonly getParserTask: GetParserTaskUseCase) {}
 
   async execute(cmd: GetTaskCommand): Promise<CreateTaskResult> {
-    return this.useCase.execute(cmd);
+    return this.getParserTask.execute(cmd);
   }
 }

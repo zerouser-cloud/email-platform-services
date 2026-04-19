@@ -5,9 +5,9 @@ import { ListParserTasksUseCase } from '../use-cases/list-parser-tasks.use-case'
 
 @Injectable()
 export class ListTasksService implements ListTasksPort {
-  constructor(private readonly useCase: ListParserTasksUseCase) {}
+  constructor(private readonly listParserTasks: ListParserTasksUseCase) {}
 
   async execute(cmd: ListTasksCommand): Promise<ListTasksResult> {
-    return this.useCase.execute(cmd);
+    return this.listParserTasks.execute(cmd);
   }
 }

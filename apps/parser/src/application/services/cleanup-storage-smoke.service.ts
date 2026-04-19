@@ -8,9 +8,9 @@ import { CleanupSmokeObjectUseCase } from '../use-cases/cleanup-smoke-object.use
 
 @Injectable()
 export class CleanupStorageSmokeService implements CleanupStorageSmokePort {
-  constructor(private readonly useCase: CleanupSmokeObjectUseCase) {}
+  constructor(private readonly cleanupSmokeObject: CleanupSmokeObjectUseCase) {}
 
   async execute(cmd: CleanupStorageSmokeCommand): Promise<CleanupStorageSmokeResult> {
-    return this.useCase.execute(cmd.bucket, cmd.key);
+    return this.cleanupSmokeObject.execute(cmd.bucket, cmd.key);
   }
 }

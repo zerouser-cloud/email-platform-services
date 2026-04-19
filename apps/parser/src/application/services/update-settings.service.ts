@@ -6,9 +6,9 @@ import { UpdateParserSettingsUseCase } from '../use-cases/update-parser-settings
 
 @Injectable()
 export class UpdateSettingsService implements UpdateSettingsPort {
-  constructor(private readonly useCase: UpdateParserSettingsUseCase) {}
+  constructor(private readonly updateParserSettings: UpdateParserSettingsUseCase) {}
 
   async execute(cmd: UpdateSettingsCommand): Promise<ParserSettingsResult> {
-    return this.useCase.execute(cmd);
+    return this.updateParserSettings.execute(cmd);
   }
 }

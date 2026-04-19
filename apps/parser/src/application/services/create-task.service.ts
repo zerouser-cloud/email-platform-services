@@ -5,9 +5,9 @@ import { CreateParserTaskUseCase } from '../use-cases/create-parser-task.use-cas
 
 @Injectable()
 export class CreateTaskService implements CreateTaskPort {
-  constructor(private readonly useCase: CreateParserTaskUseCase) {}
+  constructor(private readonly createParserTask: CreateParserTaskUseCase) {}
 
   async execute(cmd: CreateTaskCommand): Promise<CreateTaskResult> {
-    return this.useCase.execute(cmd);
+    return this.createParserTask.execute(cmd);
   }
 }

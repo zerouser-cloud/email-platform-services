@@ -5,9 +5,9 @@ import { GetParserSettingsUseCase } from '../use-cases/get-parser-settings.use-c
 
 @Injectable()
 export class GetSettingsService implements GetSettingsPort {
-  constructor(private readonly useCase: GetParserSettingsUseCase) {}
+  constructor(private readonly getParserSettings: GetParserSettingsUseCase) {}
 
   async execute(cmd: GetSettingsCommand): Promise<ParserSettingsResult> {
-    return this.useCase.execute(cmd);
+    return this.getParserSettings.execute(cmd);
   }
 }
