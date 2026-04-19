@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: "Phase 999.10 architecturally COMPLETE — all 7 plans landed (Plans 01-07), all 24 D-* decisions (D-01..D-24) realised. Plan 07 Task 1 commit 2c1b249 (docs: CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md — NestJS↔Hexagonal mapping table + proto-visibility rules + canonical call flow + canonical per-service trees) + Task 2 blocking checkpoint:human-verify dual-mode phase gate PASSED (user "approved"): static (lint 7/7 + build 10/10 green) + 13/13 structural grep invariants PASS + native `/health/ready` HTTP 200 with 5/5 upstreams up + native `/test/parser/storage-service` allPassed:true on every bucket + isolated same criteria + 0 error/warn across 6 Docker containers in last 2m of logs + user-reviewed docs diffs accurate. Atomic metadata close commit lands SUMMARY 999.10-07-SUMMARY.md + STATE.md + ROADMAP.md. Ready for /gsd:verify-work 999.10."
-last_updated: "2026-04-19T10:53:41.585Z"
-last_activity: 2026-04-19 -- Phase 999.10.1 execution started
+stopped_at: "Phase 999.10.1 Plan 01 COMPLETE — auth pilot: 2 atomic commits on feature/phase-20-config-decomposition (D-21): 16c52f3 controller rename (6 inbound-port fields: loginPort→loginService etc. + 6 use-site renames per D-01/D-16) and e6ab119 use-case Repository rename (4 files: users→userRepository per D-04 domain-role mirror). auth.constants.ts + auth.module.ts git diff empty (D-03/D-17 invariants preserved). Auth application services untouched (6/6 already compliant per D-05 row 2 baseline — bonus finding confirmed). D-10 dual-mode runtime smoke PASSED: native (localhost:3000) + isolated (localhost:4000) both HTTP 200 on /health/ready with 5/5 upstreams up (auth/sender/parser/audience/notifier). 13/13 structural grep invariants PASS on auth slice. 0 deviations, 0 auto-fixes, 0 retries. Plans 02-04 unblocked for mechanical replication."
+last_updated: "2026-04-19T11:09:27Z"
+last_activity: 2026-04-19 -- Phase 999.10.1 Plan 01 auth pilot complete
 progress:
   total_phases: 28
   completed_phases: 16
   total_plans: 69
-  completed_plans: 64
-  percent: 93
+  completed_plans: 65
+  percent: 94
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.10.1 (hexagonal-naming-convention-refactor) — EXECUTING
-Plan: 1 of 5
+Plan: 2 of 5 (Plan 01 auth pilot COMPLETE)
 Status: Executing Phase 999.10.1
-Last activity: 2026-04-19 -- Phase 999.10.1 execution started
+Last activity: 2026-04-19 -- Phase 999.10.1 Plan 01 auth pilot complete (2 atomic commits + dual-mode smoke PASS)
 
-Progress: [██████████] 100% phase (7/7 plans), [==============================] 100% overall
+Progress: [██░░░░░░░░] 20% phase (1/5 plans), [=============================] 94% overall
 
 ## Performance Metrics
 
@@ -94,6 +94,7 @@ Progress: [██████████] 100% phase (7/7 plans), [============
 | Phase 999.10 P06 | 97 | 1 tasks | 1 files |
 | Phase 999.10 P07 | ~3min (docs + gate + metadata close) | 2 tasks (1 auto + 1 checkpoint:human-verify) | 3 docs + 3 metadata files |
 | Phase 999.10 TOTAL | ~40min across 7 plans | 7 plans / 9 tasks | 140+ file operations (skill, auth pilot, 3 sweeps, ESLint guards, docs, phase gate) |
+| Phase 999.10.1 P01 | ~5min (319s) | 2 code tasks + 1 verification gate | 5 files modified (1 controller + 4 use-cases; +16 / -16 lines) |
 
 ## Accumulated Context
 
@@ -139,6 +140,7 @@ Progress: [██████████] 100% phase (7/7 plans), [============
 - [Phase 999.10-05]: Audience sweep complete — atomic commit ce8a39d (41 file changes: 35 new + 6 modified + 1 rename-as-delete+add for controller). 8 Commands + 8 Ports + 8 Services + 7 Use Cases (6 non-shared stubs + 1 SHARED TransitionRecipientsStatusUseCase injected by BOTH MarkAsSentService AND ResetSendStatusService — third D-03 reuse proof after auth IssueTokenPair + sender TransitionCampaignStatus). GroupRepositoryPort + PgGroupRepository stub + Group domain POJO entity added for cross-aggregate symmetry (T-999.10-05-03 mitigation). 0 proto-shape auto-deviations. 1 trivial prettier auto-fix on transition-recipients-status.use-case.ts. Native runtime smoke PASSED first try — /health/ready HTTP 200 all 5 upstreams up. Workspace build 10/10 + lint 7/7 green. Plan 06 ESLint guards unblocked — all 4 services (auth + sender + parser + audience) now demonstrate layer isolation.
 - [Phase ?]: [Phase 999.10-06]: Two ESLint overrides appended to .eslintrc.js (Override 8 domain isolation + Override 9 application isolation). Override 8 bans @nestjs/*, @grpc/*, @email-platform/contracts[/*], drizzle-orm[/*], pg[/*] in apps/*/src/domain/**. Override 9 bans @email-platform/contracts[/*] + @nestjs/microservices[/*] in apps/*/src/application/**. Both carry skill-linked error messages (clean-ddd-hexagonal + nestjs-hexagonal-mapping). D-18 realised mechanically. A4 empirically confirmed: pnpm lint --force green 7/7, zero new violations across auth+sender+parser+audience. Negative fixture probe confirmed Override 8 fires with correct skill-linked message. Atomic commit f5f46e8 (+51 lines, 1 file). Overrides 1-7 byte-preserved. Plan 07 (docs phase-gate) unblocked.
 - [Phase 999.10-07]: Docs update + dual-mode phase gate. Task 1 commit 2c1b249: CLAUDE.md §Architecture gains "NestJS↔Hexagonal Layer Mapping" subsection (12-row file↔class↔layer↔location table + proto-visibility rules naming Override 8/9 + canonical ASCII call-flow + key rules + skill cross-reference); .planning/codebase/ARCHITECTURE.md §Layers.Application expanded with Service-vs-UseCase distinction + new §Call Flow (Canonical for gRPC microservices) ASCII diagram + new §Proto Visibility matrix; .planning/codebase/STRUCTURE.md rewritten with canonical post-999.10 trees for all 4 gRPC services (no src/health/ outliers, mappers/ subfolder, application/{services,use-cases,commands,ports}/ structure, controllers/{grpc,rest}/ split). Task 2 blocking checkpoint:human-verify dual-mode phase gate PASSED (user "approved"): Phase A static (lint 7/7 + build 10/10 green); Phase B 13/13 structural invariants PASS (no old *.grpc-server.ts, no old src/health/, 4/4 services with new controller path + REST health path + commands folder + services folder + mappers subfolder, domain+application isolation grep clean, no GrpcServer/GrpcController suffix, skill exists, .eslintrc.js Override 8+9 present); Phase C native HTTP 200 /health/ready with 5/5 upstreams up + /test/parser/storage-service allPassed:true; Phase D isolated HTTP 200 /health/ready with 5/5 upstreams up + /test/parser/storage-service allPassed:true + 0 error/warn across 6 Docker containers in last 2m of logs; Phase E user-reviewed docs diffs — accurate. PHASE 999.10 ARCHITECTURALLY COMPLETE — all 24 D-* decisions (D-01..D-24) realised across Plans 01-07; ready for /gsd:verify-work 999.10.
+- [Phase 999.10.1-01]: Auth pilot — hexagonal naming convention refactor applied mechanically. 2 atomic commits on feature/phase-20-config-decomposition (D-21): (1) 16c52f3 controller rename — 6 inbound-port fields in apps/auth/src/infrastructure/controllers/grpc/auth.controller.ts renamed xxxPort: XxxPort → xxxService: XxxPort per D-01/D-16 (loginPort→loginService, refreshTokenPort→refreshTokenService, validateTokenPort→validateTokenService, revokeTokenPort→revokeTokenService, createUserPort→createUserService, listUsersPort→listUsersService) + 6 use-site renames in method bodies (this.xxxPort.execute → this.xxxService.execute); DI tokens and type annotations preserved per D-02/D-03. (2) e6ab119 use-case Repository rename — 4 files (verify-credentials, validate-refresh-token, list-users, persist-user) renamed users: UserRepositoryPort → userRepository: UserRepositoryPort per D-04 domain-role mirror; stub bodies preserved per SP-3. auth.constants.ts + auth.module.ts git diff empty (D-03/D-17 strict invariants preserved). Auth application services (login.service.ts et al, 6 files) NOT modified — bonus finding RESEARCH §2bis.1 confirmed (6/6 already compliant with D-05 row 2 verb-field pattern). D-10 dual-mode runtime smoke PASSED first try: native (localhost:3000) + isolated (localhost:4000) both HTTP 200 on /health/ready with 5/5 upstreams up (auth/sender/parser/audience/notifier). 13/13 structural grep invariants PASS on auth slice (D-01, D-02, D-03, D-04, D-10, D-17, D-21 sub-invariants all green). 0 deviations, 0 auto-fixes, 0 retries, 0 architectural escalations. Pre-existing notifier warnings (eventType/payload unused args) logged out-of-scope per Rule Scope Boundary. Plans 02/03/04 unblocked for mechanical replication.
 
 ### Pending Todos
 
@@ -162,6 +164,6 @@ Progress: [██████████] 100% phase (7/7 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-18T17:15:00.000Z
-Stopped at: Phase 999.10 architecturally COMPLETE — all 7 plans landed (Plans 01-07), all 24 D-* decisions (D-01..D-24) realised. Plan 07 Task 1 commit 2c1b249 (docs: CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md — NestJS↔Hexagonal mapping table + proto-visibility rules + canonical call flow + canonical per-service trees) + Task 2 blocking checkpoint:human-verify dual-mode phase gate PASSED (user "approved"): static (lint 7/7 + build 10/10 green) + 13/13 structural grep invariants PASS + native `/health/ready` HTTP 200 with 5/5 upstreams up + native `/test/parser/storage-service` allPassed:true on every bucket + isolated same criteria + 0 error/warn across 6 Docker containers in last 2m of logs + user-reviewed docs diffs accurate. Atomic metadata close commit lands SUMMARY 999.10-07-SUMMARY.md + STATE.md + ROADMAP.md. Ready for /gsd:verify-work 999.10.
+Last session: 2026-04-19T11:09:27Z
+Stopped at: Phase 999.10.1 Plan 01 auth pilot COMPLETE. 2 atomic commits on feature/phase-20-config-decomposition: 16c52f3 (controller rename, 6 inbound-port fields + 6 use-sites per D-01/D-16) and e6ab119 (use-case Repository rename, 4 files per D-04). D-10 dual-mode runtime smoke PASSED (native + isolated both HTTP 200 5/5 upstreams up). 13/13 structural invariants PASS on auth slice. Auth application services UNTOUCHED (6/6 already compliant per D-05 row 2). 0 deviations. Ready for Plan 02 sender sweep (mechanical replication of auth template).
 Resume file: None
