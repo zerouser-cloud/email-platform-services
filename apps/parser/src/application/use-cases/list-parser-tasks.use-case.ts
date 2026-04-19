@@ -8,7 +8,7 @@ import { PARSER_TASK_REPOSITORY_PORT } from '../../parser.constants';
 export class ListParserTasksUseCase {
   constructor(
     @Inject(PARSER_TASK_REPOSITORY_PORT)
-    private readonly tasks: ParserTaskRepositoryPort,
+    private readonly parserTaskRepository: ParserTaskRepositoryPort,
   ) {}
 
   async execute(_cmd: ListTasksCommand): Promise<ListTasksResult> {
