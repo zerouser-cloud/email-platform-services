@@ -553,3 +553,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.14: s3-canonical-audit (BACKLOG)
+
+**Goal:** Audit Phase 22/22.1 S3 StorageModule setup against gRPC canonical reference from 999.11 — confirm S3CoreModule + BucketStorageModule.forBucket + per-bucket health tokens + foundation external/internal encapsulation + ESLint 3-gate protection as "second sibling pattern", or realign minor details. Likely near-no-op (S3 is the most mature infra abstraction), but audit clarifies universal-vs-gRPC-specific canonical pattern. Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.14".
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
