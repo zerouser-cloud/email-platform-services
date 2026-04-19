@@ -15,17 +15,12 @@ import { ListTasksService } from './application/services/list-tasks.service';
 import { GetTaskService } from './application/services/get-task.service';
 import { GetSettingsService } from './application/services/get-settings.service';
 import { UpdateSettingsService } from './application/services/update-settings.service';
-import { RunStorageSmokeService } from './application/services/run-storage-smoke.service';
-import { CleanupStorageSmokeService } from './application/services/cleanup-storage-smoke.service';
 // Use cases (plain injectables, no tokens)
 import { CreateParserTaskUseCase } from './application/use-cases/create-parser-task.use-case';
 import { ListParserTasksUseCase } from './application/use-cases/list-parser-tasks.use-case';
 import { GetParserTaskUseCase } from './application/use-cases/get-parser-task.use-case';
 import { GetParserSettingsUseCase } from './application/use-cases/get-parser-settings.use-case';
 import { UpdateParserSettingsUseCase } from './application/use-cases/update-parser-settings.use-case';
-import { RunPrivateSmokeCycleUseCase } from './application/use-cases/run-private-smoke-cycle.use-case';
-import { RunPublicSmokeCycleUseCase } from './application/use-cases/run-public-smoke-cycle.use-case';
-import { CleanupSmokeObjectUseCase } from './application/use-cases/cleanup-smoke-object.use-case';
 // DI tokens
 import {
   PARSER_TASK_REPOSITORY_PORT,
@@ -34,8 +29,6 @@ import {
   GET_TASK_PORT,
   GET_SETTINGS_PORT,
   UPDATE_SETTINGS_PORT,
-  RUN_STORAGE_SMOKE_PORT,
-  CLEANUP_STORAGE_SMOKE_PORT,
 } from './parser.constants';
 
 @Module({
@@ -58,8 +51,6 @@ import {
     { provide: GET_TASK_PORT, useClass: GetTaskService },
     { provide: GET_SETTINGS_PORT, useClass: GetSettingsService },
     { provide: UPDATE_SETTINGS_PORT, useClass: UpdateSettingsService },
-    { provide: RUN_STORAGE_SMOKE_PORT, useClass: RunStorageSmokeService },
-    { provide: CLEANUP_STORAGE_SMOKE_PORT, useClass: CleanupStorageSmokeService },
 
     // Zone 3: Use cases — plain @Injectable providers (no Symbol tokens — type-injected)
     CreateParserTaskUseCase,
@@ -67,9 +58,6 @@ import {
     GetParserTaskUseCase,
     GetParserSettingsUseCase,
     UpdateParserSettingsUseCase,
-    RunPrivateSmokeCycleUseCase,
-    RunPublicSmokeCycleUseCase,
-    CleanupSmokeObjectUseCase,
   ],
 })
 export class ParserModule implements OnModuleDestroy {

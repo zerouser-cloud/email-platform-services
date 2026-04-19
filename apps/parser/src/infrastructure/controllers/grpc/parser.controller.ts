@@ -6,23 +6,17 @@ import type { ListTasksPort } from '../../../application/ports/inbound/list-task
 import type { GetTaskPort } from '../../../application/ports/inbound/get-task.port';
 import type { GetSettingsPort } from '../../../application/ports/inbound/get-settings.port';
 import type { UpdateSettingsPort } from '../../../application/ports/inbound/update-settings.port';
-import type { RunStorageSmokePort } from '../../../application/ports/inbound/run-storage-smoke.port';
-import type { CleanupStorageSmokePort } from '../../../application/ports/inbound/cleanup-storage-smoke.port';
 import { CreateTaskCommand } from '../../../application/commands/create-task.command';
 import { ListTasksCommand } from '../../../application/commands/list-tasks.command';
 import { GetTaskCommand } from '../../../application/commands/get-task.command';
 import { GetSettingsCommand } from '../../../application/commands/get-settings.command';
 import { UpdateSettingsCommand } from '../../../application/commands/update-settings.command';
-import { RunStorageSmokeCommand } from '../../../application/commands/run-storage-smoke.command';
-import { CleanupStorageSmokeCommand } from '../../../application/commands/cleanup-storage-smoke.command';
 import {
   CREATE_TASK_PORT,
   LIST_TASKS_PORT,
   GET_TASK_PORT,
   GET_SETTINGS_PORT,
   UPDATE_SETTINGS_PORT,
-  RUN_STORAGE_SMOKE_PORT,
-  CLEANUP_STORAGE_SMOKE_PORT,
   PAGINATION_DEFAULTS,
 } from '../../../parser.constants';
 
@@ -35,9 +29,6 @@ export class ParserController implements ParserProto.ParserServiceController {
     @Inject(GET_TASK_PORT) private readonly getTaskService: GetTaskPort,
     @Inject(GET_SETTINGS_PORT) private readonly getSettingsService: GetSettingsPort,
     @Inject(UPDATE_SETTINGS_PORT) private readonly updateSettingsService: UpdateSettingsPort,
-    @Inject(RUN_STORAGE_SMOKE_PORT) private readonly runStorageSmokeService: RunStorageSmokePort,
-    @Inject(CLEANUP_STORAGE_SMOKE_PORT)
-    private readonly cleanupStorageSmokeService: CleanupStorageSmokePort,
   ) {}
 
   async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {
@@ -132,32 +123,22 @@ export class ParserController implements ParserProto.ParserServiceController {
     };
   }
 
+  // Storage smoke endpoints — temporary stubs during Phase 999.11 commit sequence.
+  // The proto interface `ParserProto.ParserServiceController` still declares
+  // these methods (packages/contracts/src/generated/parser.ts). Plan 04 regenerates
+  // the proto after removing the RPC definitions; these stubs disappear along with
+  // the interface requirement. Runtime calls would throw — but gateway's
+  // StorageSmokeController was deleted in Plan 01 (Commit 1), so nothing invokes
+  // these methods between Commit 4 and Commit 6.
   async runStorageSmoke(_request: CommonProto.Empty): Promise<ParserProto.StorageSmokeResponse> {
-    const cmd = new RunStorageSmokeCommand();
-    const result = await this.runStorageSmokeService.execute(cmd);
-    return {
-      buckets: result.buckets.map((b) => ({
-        bucket: b.bucket,
-        testKey: b.testKey,
-        steps: b.steps.map((s) => ({
-          step: s.step,
-          success: s.success,
-          detail: s.detail,
-        })),
-        allPassed: b.allPassed,
-        publicUrl: b.publicUrl,
-      })),
-    };
+    throw new Error('runStorageSmoke removed in Phase 999.11 — proto cleanup pending in Plan 04');
   }
 
   async cleanupStorageSmoke(
-    req: ParserProto.CleanupSmokeRequest,
+    _req: ParserProto.CleanupSmokeRequest,
   ): Promise<ParserProto.CleanupSmokeResponse> {
-    const cmd = new CleanupStorageSmokeCommand(req.bucket, req.key);
-    const result = await this.cleanupStorageSmokeService.execute(cmd);
-    return {
-      success: result.success,
-      detail: result.detail,
-    };
+    throw new Error(
+      'cleanupStorageSmoke removed in Phase 999.11 — proto cleanup pending in Plan 04',
+    );
   }
 }

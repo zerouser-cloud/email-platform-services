@@ -13,8 +13,6 @@ export const LIST_TASKS_PORT = Symbol('ListTasksPort');
 export const GET_TASK_PORT = Symbol('GetTaskPort');
 export const GET_SETTINGS_PORT = Symbol('GetSettingsPort');
 export const UPDATE_SETTINGS_PORT = Symbol('UpdateSettingsPort');
-export const RUN_STORAGE_SMOKE_PORT = Symbol('RunStorageSmokePort');
-export const CLEANUP_STORAGE_SMOKE_PORT = Symbol('CleanupStorageSmokePort');
 
 // Pagination defaults applied at the proto->Command boundary when the client omits pagination.
 // Real pagination policy is deferred until business logic lands; these are conservative stubs.
