@@ -544,3 +544,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
+
+**Goal:** Build RabbitMQ client abstraction following gRPC canonical reference from 999.11 — foundation primitive (connection factory, channel lifecycle, publish/consume helpers), per-service modules in `apps/*/src/infrastructure/messaging/`, Symbol DI tokens, real `RabbitMqHealthIndicator` replacing current stub. Possibly merges with Phase 25 EventModule (or precedes it as canonical-pattern prerequisite). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.13".
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
