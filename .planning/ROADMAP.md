@@ -489,3 +489,36 @@ Plans:
 - [x] 999.10-05-PLAN.md — Audience sweep (9 RPCs → 8 services + shared TransitionRecipientsStatusUseCase + GroupRepositoryPort symmetry; atomic commit ce8a39d)
 - [x] 999.10-06-PLAN.md — ESLint layer guards (Override 8 domain + Override 9 application)
 - [x] 999.10-07-PLAN.md — Docs update (CLAUDE.md + ARCHITECTURE.md + STRUCTURE.md) + dual-mode phase gate — PASSED (native + isolated HTTP 200 5/5 upstreams up, 0 error/warn across 6 Docker containers, 13/13 structural invariants PASS; atomic docs commit 2c1b249; user "approved")
+
+---
+
+### Phase 999.10.1: Hexagonal naming convention refactor — apply Option B + runtime-identity field naming across 4 gRPC services (BACKLOG)
+
+**Goal:** Apply the naming conventions resolved in post-999.10 dialogue (2026-04-19) across all 4 gRPC microservices (auth/sender/parser/audience) and document them in `CLAUDE.md` + `nestjs-hexagonal-mapping` skill. The refactor eliminates Hungarian-notation redundancy on fields while preserving architectural signal on types and DI tokens.
+
+**Why this phase:** После архитектурного пилота 999.10 пользователь провёл research на best practices нейминга в Hexagonal (Cockburn, Vernon, Hombergs, Uncle Bob, Mark Seemann + enterprise codebases). Текущий pattern `listGroupsPort: ListGroupsPort` содержит triple-suffix redundancy которая противоречит Clean Code ch.2 "Meaningful Names" (Hungarian notation anti-pattern). Правильный pattern: field name отражает **runtime identity** (что DI bind'ит — Service / UseCase / Repository), type отражает **architectural contract** (Port interface), token остаётся architectural. Это разграничение доменно-role suffixes (Repository — сохраняем) от architectural-role suffixes (Port — не mirrorится на поле).
+
+**Locked naming decisions (from 2026-04-19 dialogue):**
+
+1. **Field name = runtime identity** (что DI bind'ит в runtime)
+2. **Type = architectural contract** (через что abstraction проходит)
+3. **Token (в constants.ts) = architectural concern** (хранит `_PORT` суффикс)
+4. **Port — это concept уровня типа и токена, не имени переменной**
+
+**Конкретные правила per слой:**
+
+| Слой | Field name | Type | DI token | Runtime class |
+|------|-----------|------|----------|---------------|
+| Controller injects inbound port | `listGroupsService` | `ListGroupsPort` | `LIST_GROUPS_PORT` | `ListGroupsService` |
+| Service injects use case | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class reference) | `VerifyCredentialsUseCase` |
+| UseCase injects outbound port | `userRepository` | `UserRepositoryPort` | `USER_REPOSITORY_PORT` | `PgUserRepository` |
+
+**Pre-discussion artifact:** `.planning/phases/999.10.1-hexagonal-naming-convention-refactor/999.10.1-NOTES.md` (full dialogue snapshot + 2 research reports + locked decisions + open questions)
+
+**Estimated scope:** ~50-80 files modified (field renames across 4 services × 3 layers × N RPCs; docs updates: CLAUDE.md + `.planning/codebase/ARCHITECTURE.md` + `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md`). Comparable to Phase 999.10 sweep size but mechanical (rename-only).
+
+**Requirements:** Locked decisions above serve as primary requirement surface (no REQ-IDs; naming convention refactor per user dialogue 2026-04-19).
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run `/gsd:discuss-phase 999.10.1` to refine, then `/gsd:plan-phase 999.10.1`)
