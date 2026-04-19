@@ -27,12 +27,12 @@ import {
 @AuthProto.AuthServiceControllerMethods()
 export class AuthController implements AuthProto.AuthServiceController {
   constructor(
-    @Inject(LOGIN_PORT) private readonly loginPort: LoginPort,
-    @Inject(REFRESH_TOKEN_PORT) private readonly refreshTokenPort: RefreshTokenPort,
-    @Inject(VALIDATE_TOKEN_PORT) private readonly validateTokenPort: ValidateTokenPort,
-    @Inject(REVOKE_TOKEN_PORT) private readonly revokeTokenPort: RevokeTokenPort,
-    @Inject(CREATE_USER_PORT) private readonly createUserPort: CreateUserPort,
-    @Inject(LIST_USERS_PORT) private readonly listUsersPort: ListUsersPort,
+    @Inject(LOGIN_PORT) private readonly loginService: LoginPort,
+    @Inject(REFRESH_TOKEN_PORT) private readonly refreshTokenService: RefreshTokenPort,
+    @Inject(VALIDATE_TOKEN_PORT) private readonly validateTokenService: ValidateTokenPort,
+    @Inject(REVOKE_TOKEN_PORT) private readonly revokeTokenService: RevokeTokenPort,
+    @Inject(CREATE_USER_PORT) private readonly createUserService: CreateUserPort,
+    @Inject(LIST_USERS_PORT) private readonly listUsersService: ListUsersPort,
   ) {}
 
   async healthCheck(_request: CommonProto.Empty): Promise<CommonProto.HealthStatus> {
@@ -43,7 +43,7 @@ export class AuthController implements AuthProto.AuthServiceController {
 
   async login(req: AuthProto.LoginRequest): Promise<AuthProto.TokenPair> {
     const cmd = new LoginCommand(req.email, req.password);
-    const result = await this.loginPort.execute(cmd);
+    const result = await this.loginService.execute(cmd);
     return {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
@@ -52,7 +52,7 @@ export class AuthController implements AuthProto.AuthServiceController {
 
   async refreshToken(req: AuthProto.RefreshRequest): Promise<AuthProto.TokenPair> {
     const cmd = new RefreshTokenCommand(req.refreshToken);
-    const result = await this.refreshTokenPort.execute(cmd);
+    const result = await this.refreshTokenService.execute(cmd);
     return {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
@@ -61,7 +61,7 @@ export class AuthController implements AuthProto.AuthServiceController {
 
   async validateToken(req: AuthProto.ValidateRequest): Promise<AuthProto.UserContext> {
     const cmd = new ValidateTokenCommand(req.accessToken);
-    const result = await this.validateTokenPort.execute(cmd);
+    const result = await this.validateTokenService.execute(cmd);
     return {
       userId: result.userId,
       role: result.role,
@@ -72,7 +72,7 @@ export class AuthController implements AuthProto.AuthServiceController {
 
   async revokeToken(req: AuthProto.RevokeRequest): Promise<CommonProto.Empty> {
     const cmd = new RevokeTokenCommand(req.refreshToken);
-    await this.revokeTokenPort.execute(cmd);
+    await this.revokeTokenService.execute(cmd);
     return {};
   }
 
@@ -84,7 +84,7 @@ export class AuthController implements AuthProto.AuthServiceController {
       req.organization,
       req.team,
     );
-    const result = await this.createUserPort.execute(cmd);
+    const result = await this.createUserService.execute(cmd);
     return {
       id: result.id,
       email: result.email,
@@ -99,7 +99,7 @@ export class AuthController implements AuthProto.AuthServiceController {
     const page = req.pagination?.page ?? PAGINATION_DEFAULTS.PAGE;
     const limit = req.pagination?.limit ?? PAGINATION_DEFAULTS.LIMIT;
     const cmd = new ListUsersCommand(page, limit);
-    const result = await this.listUsersPort.execute(cmd);
+    const result = await this.listUsersService.execute(cmd);
     return {
       users: result.users.map((u) => ({
         id: u.id,
