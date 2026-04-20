@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.1-07-drizzle-config-env-hygiene-PLAN.md
-last_updated: "2026-04-20T08:46:48.337Z"
+stopped_at: Completed 999.11.1-03-relocate-throttle-gateway-config-PLAN.md
+last_updated: "2026-04-20T08:52:59.864Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
   completed_phases: 18
   total_plans: 83
-  completed_plans: 76
+  completed_plans: 77
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
-Plan: 4 of 10
+Plan: 5 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -107,6 +107,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P01 | 3min 28s | 3 tasks | 24 files |
 | Phase 999.11.1 P02 | 1min 34s | 2 tasks | 4 files |
 | Phase 999.11.1 P07 | ~2min | 1 tasks | 4 files |
+| Phase 999.11.1 P03 | 159s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -166,6 +167,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1-07]: Shape A (inline DatabaseSchema.parse) adopted per RESEARCH.md §6 recommendation — 4 files × 3 extra lines below DRY threshold; each drizzle.config.ts stays self-contained without a shared helper module
 - [Phase 999.11.1-07]: Dual entry point for config schemas: NestJS loadConfig() at runtime + raw Zod Schema.parse(process.env) at CLI/build-time — SAME source of truth (@email-platform/config DatabaseSchema); PT-03 empirically validated via drizzle-kit check 4/4 green
 - [Phase 999.11.1-07]: Workspace invariant sealed: zero process.env.X! patterns in apps/ (grep 0 matches); only legitimate process.env reads remaining are inside packages/config/src/config-loader.ts and 4 drizzle.config.ts DatabaseSchema.parse(process.env) CLI entry points
+- [Phase 999.11.1]: [Phase 999.11.1-03]: ThrottleModule relocated to infrastructure/throttle/ canonical path via git mv at 57% similarity (NH-03 feature submodule resolved). First end-to-end consumer of GATEWAY_CONFIG Symbol — Canonical Config Access Contract chain (gateway.constants.ts → gateway-config.provider.ts → providers[] → inject: [GATEWAY_CONFIG]) validated. 4 configService.get<number>('RATE_LIMIT_*')! callsites migrated to 4 typed config.RATE_LIMIT_* reads from GatewayEnv (IC-09 resolved, D-12 partial 4/14+). @nestjs/config import removed from throttle.module.ts (D-11 partial progress). THROTTLE_TIER 'as const' preserved verbatim (no-magic-values). 1 atomic commit c1672a0 (2 files, 9+/8- delta, rename+body-rewrite detected at 57%). D-14 gate green: lint 7/7 + build 10/10 (gateway cache miss executed clean). 0 deviations, 0 auto-fixes. Pattern proven for Plans 04-06 foundation narrow-config cascade + 3rd-party forRootAsync migration template established.
 
 ### Pending Todos
 
@@ -191,6 +193,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T08:46:48.333Z
-Stopped at: Completed 999.11.1-07-drizzle-config-env-hygiene-PLAN.md
+Last session: 2026-04-20T08:52:59.861Z
+Stopped at: Completed 999.11.1-03-relocate-throttle-gateway-config-PLAN.md
 Resume file: None
