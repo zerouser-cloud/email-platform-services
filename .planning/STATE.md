@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.2-01-migrate-auth-PLAN.md
-last_updated: "2026-04-20T13:27:33.844Z"
+stopped_at: Completed 999.11.2-02-migrate-audience-PLAN.md
+last_updated: "2026-04-20T13:36:31.940Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
   total_plans: 93
-  completed_plans: 84
+  completed_plans: 85
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
-Plan: 2 of 10
+Plan: 3 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -115,6 +115,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P09 | 330s | 4 tasks | 17 files |
 | Phase 999.11.1 P10 | 15min | 3 tasks | 16 files |
 | Phase 999.11.2 P01 | 227s | 5 tasks | 23 files |
+| Phase 999.11.2 P02 | 5min | 5 tasks | 30 files |
 
 ## Accumulated Context
 
@@ -186,6 +187,9 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2]: D-AUTH-01: Sub-modules (UserModule + HealthModule) each explicitly import foundation PersistenceModule.forRootAsync() because foundation's module is NOT @Global(); root auth.module.ts drops direct import
 - [Phase 999.11.2]: App-level composer named AppPersistenceModule (App* prefix) to avoid naming collision with foundation's PersistenceModule inside service composition roots
 - [Phase 999.11.2]: Config one-file-per-export (D-10): @Global() AuthConfigModule split from authConfigProvider into sibling auth-config.module.ts; AUTH_CONFIG Symbol moved to dedicated auth-config.constants.ts file
+- [Phase 999.11.2]: D-AUDIENCE-01: Audience HealthModule + RecipientModule + GroupModule each own foundation PersistenceModule.forRootAsync() import — validates Plan 01 D-AUTH-01 pattern across 2 aggregates; root audience.module.ts drops PersistenceModule.forRootAsync
+- [Phase 999.11.2]: OQ-3 cross-aggregate schema import deferred for audience: pg-group.repository.ts is pure stub with no schema import; forward-looking decision (dedicated group/schema/ vs cross-aggregate ../recipient/schema/) lands with business-logic phase
+- [Phase 999.11.2]: Audience first real multi-sub persistence composer: AppPersistenceModule aggregates RecipientModule + GroupModule — proves D-06 pattern scales; first real single-sub grpc-clients composer (GrpcClientsModule wraps ParserClientModule) preserves composer layer per D-06 verbatim for uniformity
 
 ### Pending Todos
 
@@ -212,6 +216,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T13:27:33.841Z
-Stopped at: Completed 999.11.2-01-migrate-auth-PLAN.md
+Last session: 2026-04-20T13:36:31.937Z
+Stopped at: Completed 999.11.2-02-migrate-audience-PLAN.md
 Resume file: None
