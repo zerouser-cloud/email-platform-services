@@ -1,7 +1,18 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AudienceEnvSchema, audienceConfigProvider } from './infrastructure/config';
+import {
+  LoggingModule,
+  PersistenceModule,
+  LOGGING_CONFIG_PORT,
+  PERSISTENCE_CONFIG_PORT,
+  type LoggingConfig,
+  type PersistenceConfig,
+} from '@email-platform/foundation';
+import {
+  AudienceEnvSchema,
+  audienceConfigProvider,
+  type AudienceEnv,
+} from './infrastructure/config';
 import { AudienceController } from './infrastructure/controllers/grpc/audience.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
@@ -36,6 +47,7 @@ import {
   IMPORT_RECIPIENTS_PORT,
   MARK_AS_SENT_PORT,
   RESET_SEND_STATUS_PORT,
+  AUDIENCE_CONFIG,
 } from './audience.constants';
 
 @Module({
@@ -48,6 +60,21 @@ import {
   controllers: [AudienceController, HealthController],
   providers: [
     audienceConfigProvider,
+
+    // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config slices.
+    {
+      provide: PERSISTENCE_CONFIG_PORT,
+      useFactory: (c: AudienceEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
+      inject: [AUDIENCE_CONFIG],
+    },
+    {
+      provide: LOGGING_CONFIG_PORT,
+      useFactory: (c: AudienceEnv): LoggingConfig => ({
+        LOG_LEVEL: c.LOG_LEVEL,
+        LOG_FORMAT: c.LOG_FORMAT,
+      }),
+      inject: [AUDIENCE_CONFIG],
+    },
 
     // Zone 1: Outbound ports → adapters (2 aggregates: Recipient + Group)
     { provide: RECIPIENT_REPOSITORY_PORT, useClass: PgRecipientRepository },

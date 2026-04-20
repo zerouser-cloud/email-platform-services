@@ -1,7 +1,18 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { ParserEnvSchema, parserConfigProvider } from './infrastructure/config';
+import {
+  LoggingModule,
+  PersistenceModule,
+  LOGGING_CONFIG_PORT,
+  PERSISTENCE_CONFIG_PORT,
+  STORAGE_CORE_CONFIG_PORT,
+  PUBLIC_STORAGE_CONFIG_PORT,
+  type LoggingConfig,
+  type PersistenceConfig,
+  type StorageCoreConfig,
+  type PublicStorageConfig,
+} from '@email-platform/foundation';
+import { ParserEnvSchema, parserConfigProvider, type ParserEnv } from './infrastructure/config';
 import { ParserController } from './infrastructure/controllers/grpc/parser.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
@@ -28,6 +39,7 @@ import {
   GET_TASK_PORT,
   GET_SETTINGS_PORT,
   UPDATE_SETTINGS_PORT,
+  PARSER_CONFIG,
 } from './parser.constants';
 
 @Module({
@@ -42,6 +54,41 @@ import {
   controllers: [ParserController, HealthController],
   providers: [
     parserConfigProvider,
+
+    // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config slices.
+    {
+      provide: PERSISTENCE_CONFIG_PORT,
+      useFactory: (c: ParserEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
+      inject: [PARSER_CONFIG],
+    },
+    {
+      provide: LOGGING_CONFIG_PORT,
+      useFactory: (c: ParserEnv): LoggingConfig => ({
+        LOG_LEVEL: c.LOG_LEVEL,
+        LOG_FORMAT: c.LOG_FORMAT,
+      }),
+      inject: [PARSER_CONFIG],
+    },
+    {
+      provide: STORAGE_CORE_CONFIG_PORT,
+      useFactory: (c: ParserEnv): StorageCoreConfig => ({
+        STORAGE_PROTOCOL: c.STORAGE_PROTOCOL,
+        STORAGE_ENDPOINT: c.STORAGE_ENDPOINT,
+        STORAGE_PORT: c.STORAGE_PORT,
+        STORAGE_REGION: c.STORAGE_REGION,
+        STORAGE_ACCESS_KEY: c.STORAGE_ACCESS_KEY,
+        STORAGE_SECRET_KEY: c.STORAGE_SECRET_KEY,
+      }),
+      inject: [PARSER_CONFIG],
+    },
+    {
+      provide: PUBLIC_STORAGE_CONFIG_PORT,
+      useFactory: (c: ParserEnv): PublicStorageConfig => ({
+        STORAGE_PUBLIC_URL: c.STORAGE_PUBLIC_URL,
+        STORAGE_MAX_UPLOAD_BYTES: c.STORAGE_MAX_UPLOAD_BYTES,
+      }),
+      inject: [PARSER_CONFIG],
+    },
 
     // Zone 1: Outbound port → adapter
     { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },

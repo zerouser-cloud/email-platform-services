@@ -18,3 +18,16 @@ export interface BucketStorageOptions {
   readonly healthToken: symbol;
   readonly healthKey: string;
 }
+
+// Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config interface.
+// Only fields consumed by S3CoreModule to build the S3Client. The public-URL slice
+// (STORAGE_PUBLIC_URL + STORAGE_MAX_UPLOAD_BYTES) lives in PublicStorageConfig.
+// The app-owned useFactory binds {SVC}_CONFIG → StorageCoreConfig shape for STORAGE_CORE_CONFIG_PORT.
+export interface StorageCoreConfig {
+  readonly STORAGE_PROTOCOL: string;
+  readonly STORAGE_ENDPOINT: string;
+  readonly STORAGE_PORT: number;
+  readonly STORAGE_REGION: string;
+  readonly STORAGE_ACCESS_KEY: string;
+  readonly STORAGE_SECRET_KEY: string;
+}

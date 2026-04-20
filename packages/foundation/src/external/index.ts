@@ -3,6 +3,8 @@ export * from './grpc/proto-resolver';
 export * from './grpc/clients';
 export * from './grpc/grpc-server.factory';
 export * from './logging/logging.module';
+export * from './logging/logging.constants';
+export * from './logging/logging.interfaces';
 export * from './logging/log-transport';
 export * from './logging/correlation.interceptor';
 export * from './logging/grpc-logging.interceptor';

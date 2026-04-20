@@ -1,7 +1,17 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { LoggingModule, PersistenceModule, CacheModule } from '@email-platform/foundation';
-import { SenderEnvSchema, senderConfigProvider } from './infrastructure/config';
+import {
+  LoggingModule,
+  PersistenceModule,
+  CacheModule,
+  LOGGING_CONFIG_PORT,
+  PERSISTENCE_CONFIG_PORT,
+  CACHE_CONFIG_PORT,
+  type LoggingConfig,
+  type PersistenceConfig,
+  type CacheConfig,
+} from '@email-platform/foundation';
+import { SenderEnvSchema, senderConfigProvider, type SenderEnv } from './infrastructure/config';
 import { SenderController } from './infrastructure/controllers/grpc/sender.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
@@ -41,6 +51,7 @@ import {
   LIST_MESSAGES_PORT,
   CREATE_MESSAGE_PORT,
   LIST_MACROS_PORT,
+  SENDER_CONFIG,
 } from './sender.constants';
 
 @Module({
@@ -55,6 +66,26 @@ import {
   controllers: [SenderController, HealthController],
   providers: [
     senderConfigProvider,
+
+    // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config slices.
+    {
+      provide: PERSISTENCE_CONFIG_PORT,
+      useFactory: (c: SenderEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
+      inject: [SENDER_CONFIG],
+    },
+    {
+      provide: LOGGING_CONFIG_PORT,
+      useFactory: (c: SenderEnv): LoggingConfig => ({
+        LOG_LEVEL: c.LOG_LEVEL,
+        LOG_FORMAT: c.LOG_FORMAT,
+      }),
+      inject: [SENDER_CONFIG],
+    },
+    {
+      provide: CACHE_CONFIG_PORT,
+      useFactory: (c: SenderEnv): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
+      inject: [SENDER_CONFIG],
+    },
 
     // Zone 1: Outbound port → adapter
     { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },

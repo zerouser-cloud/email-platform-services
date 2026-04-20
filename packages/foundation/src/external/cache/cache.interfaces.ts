@@ -13,3 +13,8 @@ export interface CacheHealthIndicator {
 export interface CacheModuleOptions {
   namespace: string;
 }
+
+// Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config re-export.
+// Re-exported from @email-platform/config to keep a single source of truth.
+// The app-owned useFactory binds {SVC}_CONFIG → CacheConfig shape for CACHE_CONFIG_PORT.
+export type { RedisConfig as CacheConfig } from '@email-platform/config';
