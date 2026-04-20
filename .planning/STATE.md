@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.2-02-migrate-audience-PLAN.md
-last_updated: "2026-04-20T13:36:31.940Z"
+stopped_at: Completed 999.11.2-03-migrate-sender-PLAN.md
+last_updated: "2026-04-20T13:46:18.569Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
   total_plans: 93
-  completed_plans: 85
+  completed_plans: 86
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
-Plan: 3 of 10
+Plan: 4 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -116,6 +116,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P10 | 15min | 3 tasks | 16 files |
 | Phase 999.11.2 P01 | 227s | 5 tasks | 23 files |
 | Phase 999.11.2 P02 | 5min | 5 tasks | 30 files |
+| Phase 999.11.2 P03 | 5min6s | 6 tasks | 33 files |
 
 ## Accumulated Context
 
@@ -190,6 +191,9 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2]: D-AUDIENCE-01: Audience HealthModule + RecipientModule + GroupModule each own foundation PersistenceModule.forRootAsync() import — validates Plan 01 D-AUTH-01 pattern across 2 aggregates; root audience.module.ts drops PersistenceModule.forRootAsync
 - [Phase 999.11.2]: OQ-3 cross-aggregate schema import deferred for audience: pg-group.repository.ts is pure stub with no schema import; forward-looking decision (dedicated group/schema/ vs cross-aggregate ../recipient/schema/) lands with business-logic phase
 - [Phase 999.11.2]: Audience first real multi-sub persistence composer: AppPersistenceModule aggregates RecipientModule + GroupModule — proves D-06 pattern scales; first real single-sub grpc-clients composer (GrpcClientsModule wraps ParserClientModule) preserves composer layer per D-06 verbatim for uniformity
+- [Phase 999.11.2]: D-SENDER-01: CampaignModule + HealthModule own foundation PersistenceModule imports; HealthModule dual-wires CacheModule({namespace:'sender'}) for REDIS_HEALTH
+- [Phase 999.11.2]: D-SENDER-02: First HTTP composer — HttpClientsModule mirrors GrpcClientsModule shape; single-sub per D-06 verbatim
+- [Phase 999.11.2]: D-SENDER-03: Pitfall 3 net-cancel resolved — cloudfn.module.ts SENDER_CONFIG import depth stays 3 .. via bootstrap/config path rewrite
 
 ### Pending Todos
 
@@ -216,6 +220,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T13:36:31.937Z
-Stopped at: Completed 999.11.2-02-migrate-audience-PLAN.md
+Last session: 2026-04-20T13:46:09.279Z
+Stopped at: Completed 999.11.2-03-migrate-sender-PLAN.md
 Resume file: None
