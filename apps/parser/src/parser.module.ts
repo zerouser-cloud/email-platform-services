@@ -1,7 +1,7 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { ParserEnvSchema } from './infrastructure/config';
+import { ParserEnvSchema, parserConfigProvider } from './infrastructure/config';
 import { ParserController } from './infrastructure/controllers/grpc/parser.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
@@ -42,6 +42,8 @@ import {
   ],
   controllers: [ParserController, HealthController, AppStoreSpySmokeController],
   providers: [
+    parserConfigProvider,
+
     // Zone 1: Outbound port → adapter
     { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },
 

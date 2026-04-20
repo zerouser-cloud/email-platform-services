@@ -1,7 +1,7 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AuthEnvSchema } from './infrastructure/config';
+import { AuthEnvSchema, authConfigProvider } from './infrastructure/config';
 import { AuthController } from './infrastructure/controllers/grpc/auth.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
@@ -40,6 +40,8 @@ import {
   ],
   controllers: [AuthController, HealthController],
   providers: [
+    authConfigProvider,
+
     // Zone 1: Outbound port → adapter
     { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
 

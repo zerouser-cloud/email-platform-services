@@ -1,6 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
-import { GatewayEnvSchema } from './infrastructure/config';
+import { GatewayEnvSchema, gatewayConfigProvider } from './infrastructure/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { LoggingModule, GrpcToHttpExceptionFilter } from '@email-platform/foundation';
 import { ThrottleModule } from './throttle/throttle.module';
@@ -16,7 +16,7 @@ import { HealthController } from './health/health.controller';
     GrpcClientsModule,
   ],
   controllers: [HealthController],
-  providers: [GrpcToHttpExceptionFilter],
+  providers: [gatewayConfigProvider, GrpcToHttpExceptionFilter],
 })
 export class GatewayModule implements OnModuleDestroy {
   private readonly logger = new Logger(GatewayModule.name);

@@ -1,7 +1,7 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule, PersistenceModule, CacheModule } from '@email-platform/foundation';
-import { SenderEnvSchema } from './infrastructure/config';
+import { SenderEnvSchema, senderConfigProvider } from './infrastructure/config';
 import { SenderController } from './infrastructure/controllers/grpc/sender.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
@@ -55,6 +55,8 @@ import {
   ],
   controllers: [SenderController, HealthController, CloudFnSmokeController],
   providers: [
+    senderConfigProvider,
+
     // Zone 1: Outbound port → adapter
     { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },
 

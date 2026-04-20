@@ -1,7 +1,7 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { AppConfigModule } from '@email-platform/config';
 import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AudienceEnvSchema } from './infrastructure/config';
+import { AudienceEnvSchema, audienceConfigProvider } from './infrastructure/config';
 import { AudienceController } from './infrastructure/controllers/grpc/audience.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
@@ -47,6 +47,8 @@ import {
   ],
   controllers: [AudienceController, HealthController],
   providers: [
+    audienceConfigProvider,
+
     // Zone 1: Outbound ports → adapters (2 aggregates: Recipient + Group)
     { provide: RECIPIENT_REPOSITORY_PORT, useClass: PgRecipientRepository },
     { provide: GROUP_REPOSITORY_PORT, useClass: PgGroupRepository },

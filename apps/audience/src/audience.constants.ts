@@ -12,6 +12,9 @@ export const IMPORT_RECIPIENTS_PORT = Symbol('ImportRecipientsPort');
 export const MARK_AS_SENT_PORT = Symbol('MarkAsSentPort');
 export const RESET_SEND_STATUS_PORT = Symbol('ResetSendStatusPort');
 
+// Canonical Config Access Contract (Phase 999.11.1 D-08) — per-service {SVC}_CONFIG Symbol.
+export const AUDIENCE_CONFIG = Symbol('AUDIENCE_CONFIG');
+
 // Pagination defaults applied at the proto->Command boundary when the client omits pagination.
 // Real audience pagination policy is deferred until business logic lands; these are conservative stubs.
 export const PAGINATION_DEFAULTS = {
