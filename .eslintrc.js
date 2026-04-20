@@ -126,14 +126,14 @@ module.exports = {
         // SCOPE: enumerated 8 gRPC upstream paths (HTTP clients legitimately extend AbstractHttpClient).
         {
             files: [
-                'apps/gateway/src/infrastructure/clients/auth/*.client.ts',
-                'apps/gateway/src/infrastructure/clients/sender/*.client.ts',
-                'apps/gateway/src/infrastructure/clients/parser/*.client.ts',
-                'apps/gateway/src/infrastructure/clients/audience/*.client.ts',
-                'apps/gateway/src/infrastructure/clients/notifier/*.client.ts',
-                'apps/sender/src/infrastructure/clients/audience/*.client.ts',
-                'apps/parser/src/infrastructure/clients/notifier/*.client.ts',
-                'apps/audience/src/infrastructure/clients/parser/*.client.ts',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/auth/*.client.ts',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/sender/*.client.ts',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/parser/*.client.ts',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/audience/*.client.ts',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/notifier/*.client.ts',
+                'apps/sender/src/infrastructure/outbound/grpc-clients/audience/*.client.ts',
+                'apps/parser/src/infrastructure/outbound/grpc-clients/notifier/*.client.ts',
+                'apps/audience/src/infrastructure/outbound/grpc-clients/parser/*.client.ts',
             ],
             rules: {
                 'no-restricted-syntax': ['error',
@@ -158,14 +158,14 @@ module.exports = {
         // SCOPE: enumerated 8 gRPC upstream paths (Pitfall 3 — HTTP clients legitimately use *-client.constants.ts).
         {
             files: [
-                'apps/gateway/src/infrastructure/clients/auth/**',
-                'apps/gateway/src/infrastructure/clients/sender/**',
-                'apps/gateway/src/infrastructure/clients/parser/**',
-                'apps/gateway/src/infrastructure/clients/audience/**',
-                'apps/gateway/src/infrastructure/clients/notifier/**',
-                'apps/sender/src/infrastructure/clients/audience/**',
-                'apps/parser/src/infrastructure/clients/notifier/**',
-                'apps/audience/src/infrastructure/clients/parser/**',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/auth/**',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/sender/**',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/parser/**',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/audience/**',
+                'apps/gateway/src/infrastructure/outbound/grpc-clients/notifier/**',
+                'apps/sender/src/infrastructure/outbound/grpc-clients/audience/**',
+                'apps/parser/src/infrastructure/outbound/grpc-clients/notifier/**',
+                'apps/audience/src/infrastructure/outbound/grpc-clients/parser/**',
             ],
             rules: {
                 'check-file/filename-blocklist': ['error', {
@@ -197,10 +197,10 @@ module.exports = {
                 }],
             },
         },
-        // Override 9: Application layer isolation (D-04 + D-05 + D-18, Phase 999.10).
+        // Override 9: Application layer isolation (D-04 + D-05 + D-18, Phase 999.10 + 999.11.2).
         // application/ = ports + services + use cases + commands. Domain types only.
-        // Transport contracts (proto) live ONLY in infrastructure/controllers/grpc/.
-        // @nestjs/microservices decorators (GrpcMethod, etc.) are infrastructure concerns.
+        // Transport contracts (proto) live ONLY in infrastructure/inbound/grpc/ and infrastructure/outbound/grpc-clients/.
+        // @nestjs/microservices decorators (GrpcMethod, MessagePattern, etc.) are infrastructure concerns.
         {
             files: ['apps/*/src/application/**/*.ts'],
             rules: {
@@ -211,14 +211,14 @@ module.exports = {
                                 '@email-platform/contracts',
                                 '@email-platform/contracts/*',
                             ],
-                            message: 'application/ layer must not import proto types. Controllers (infrastructure/controllers/grpc/) own the proto↔domain mapping. See .agents/skills/nestjs-hexagonal-mapping/ (D-04, Proto Visibility).',
+                            message: 'application/ layer must not import proto types. gRPC controllers (infrastructure/inbound/grpc/) and outbound gRPC clients (infrastructure/outbound/grpc-clients/) own the proto↔domain mapping. See .agents/skills/nestjs-hexagonal-mapping/ (D-04, Proto Visibility).',
                         },
                         {
                             group: [
                                 '@nestjs/microservices',
                                 '@nestjs/microservices/*',
                             ],
-                            message: '@nestjs/microservices is a transport-adapter concern. GrpcMethod / GrpcStreamMethod / MessagePattern / EventPattern belong in infrastructure/controllers/. application/ layer is transport-agnostic. See .agents/skills/nestjs-hexagonal-mapping/.',
+                            message: '@nestjs/microservices is a transport-adapter concern. GrpcMethod / GrpcStreamMethod / MessagePattern / EventPattern belong in infrastructure/inbound/{grpc,rmq}/. application/ layer is transport-agnostic. See .agents/skills/nestjs-hexagonal-mapping/.',
                         },
                     ],
                 }],
