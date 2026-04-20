@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: verifying
-stopped_at: "Completed 999.11.1-10-docs-update-smoke-gate-PLAN.md — Phase 999.11.1 architecturally complete, ready for /gsd:verify-work"
-last_updated: "2026-04-20T10:06:43.319Z"
+stopped_at: Phase 999.11.2 context gathered
+last_updated: "2026-04-20T11:49:18.239Z"
 last_activity: 2026-04-20
 progress:
-  total_phases: 34
+  total_phases: 35
   completed_phases: 19
   total_plans: 83
   completed_plans: 83
@@ -204,9 +204,10 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - Phase 24.1 inserted after Phase 24: http-client-foundation-hardening-di-env-hygiene-magic-values (URGENT) — пост-аудит фазы 24. Scope: (1) ротация утёкшего в git Telegram bot token + `git rm --cached .env.docker` + создание `.env.docker.example` + документирование назначения env-файлов; (2) Logger через DI-порт (`HttpClientLogger` + `PinoHttpClientLoggerAdapter`) вместо `PinoLogger.root.child`; (3) экстракция magic values (`Content-Type`/`application/json` в abstract-http.client, литералы 200 и '500' в http-smoke controller); (4) экспорт `CircuitState` типа из foundation; (5) хелпер `getRequiredString(config, key)` против `!` non-null assertions; (6) `createHttpClientProvider` factory-хелпер против дублирования boilerplate 4 per-service модулей; (7) перенос `HttpSmokeClient` в `apps/gateway/src/infrastructure/clients/http-smoke/` (контроллер/модуль остаются в `test/` и удаляются перед релизом, клиент остаётся); (8) `HTTP_SMOKE_PATH.status()` builder; (9) JSDoc AbstractHttpClient про ClsModule; (10) TODO-метка на `res.json() as T`. Архитектурное решение: CircuitBreaker и RetryPolicy НЕ декомпозируются через DI (overengineering для стабильного opossum) — зафиксировать в ADR.
 - Phase 999.7.1 inserted after Phase 999.7: grpc-client-tokens-refactor-generate-inside-definegrpcclient (URGENT) — убрать per-service `*-client.constants.ts` файлы. `defineGrpcClient()` генерит внутренние токены (`grpcToken`, `healthToken`) из `service.id`, возвращает их в результате. SERVICE catalog остаётся domain-focused с только `diToken`. Consistency с существующими infrastructure modules (Persistence/Cache/Storage имеют свои токены внутри foundation, не в catalog). Discovered в /gsd:verify-work 999.7 discussion 2026-04-17.
 - Phase 999.11.1 inserted after Phase 999.11: architecture-compliance-audit-and-fix (URGENT) — post-999.11 cleanup. Обнаружены нарушения NestJS↔Hexagonal mapping: (1) `apps/gateway/src/health/health.controller.ts` и `apps/notifier/src/health/health.controller.ts` лежат в `src/health/` вместо `src/infrastructure/controllers/rest/`; (2) три smoke-контроллера (`notifier/telegram-smoke`, `sender/cloudfn-smoke`, `parser/appstorespy-smoke`) лежат в `src/test/` вместо `src/infrastructure/controllers/{grpc|rest}/`; (3) `apps/{parser,audience,sender,auth}/drizzle.config.ts` напрямую используют `process.env.DATABASE_URL!` — нарушение twelve-factor + env-schema skill'ов (всё должно идти через Zod config). Audit-and-fix mode: чинить в одной фазе атомарными коммитами. Scope расширяется исследованием — полная матрица `infrastructure/controllers/{grpc,rest}/` vs факт, все `process.env` вне packages/config и main.ts, domain purity, proto visibility, feature-модули. Должно закрыть архитектурный долг до начала canonical-alignment phases (999.12–999.15).
+- Phase 999.11.2 inserted after Phase 999.11: infrastructure-tree-canonical-split (URGENT) — рефакторинг `apps/{svc}/src/infrastructure/` во всех 6 сервисах на canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4. Внутри каждого направления — feature-slicing (per aggregate / upstream service / vendor / cross-cutting concern). Source of truth: `.planning/research/nest-module-structure-ddd-hex-v2.md` (+ v1 первичный research). ~50 file moves + CLAUDE.md §Layer-Mapping refinement + ESLint layer paths + skill update. Behavior-preserving; D-15 dual-mode smoke gate на выходе. Должно завершиться ДО начала canonical-alignment phases (999.12–999.15), чтобы они наследовали новые paths.
 
 ## Session Continuity
 
-Last session: 2026-04-20T09:59:33.746Z
-Stopped at: Completed 999.11.1-10-docs-update-smoke-gate-PLAN.md — Phase 999.11.1 architecturally complete, ready for /gsd:verify-work
-Resume file: None
+Last session: 2026-04-20T11:49:18.202Z
+Stopped at: Phase 999.11.2 context gathered
+Resume file: .planning/phases/999.11.2-infrastructure-tree-canonical-split/999.11.2-CONTEXT.md
