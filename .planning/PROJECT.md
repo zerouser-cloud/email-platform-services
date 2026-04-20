@@ -129,6 +129,8 @@
 | CI push-based deploy вместо Diun | Diun слал 6 webhooks per cycle, CI вызывает Coolify API 1 раз после сборки | ✓ Good |
 | Garage вместо MinIO на prod | Coolify one-click, S3-compatible, легковесный | ✓ Good |
 | Build-info.json вместо env vars | Зашито в образ при сборке, не зависит от runtime env | ✓ Good |
+| Canonical Config Access Contract (per-service `{SVC}_CONFIG` Symbol) | Единый pattern для config-инъекции — идентичность сервиса задаёт root Symbol; foundation объявляет narrow config interfaces (`CacheConfig`/`PersistenceConfig`/`GrpcClientConfig`/…); apps собирают slice-factories через `{SVC}_CONFIG`. Заменяет `@nestjs/config` полностью. `@Global()` per-service `{Svc}ConfigModule` — обязательно для резолва nested `forRootAsync` | ✓ Good — Phase 999.11.1 |
+| Use-case config-purity (D-09) | `application/use-cases/` получают env-values как method args, не через DI. Keeps use-cases чистыми и тестируемыми без config fixtures | ✓ Good — Phase 999.11.1 |
 
 ## Infrastructure Module Architecture
 
@@ -167,4 +169,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-19 after Phase 999.11 complete (smoke/test surface area deleted across gateway/parser/notifier/proto in 6 atomic commits; D-07 dual-mode runtime smoke gate passed; follow-up phases 999.12–999.15 unblocked for canonical-pattern audit work)*
+*Last updated: 2026-04-20 after Phase 999.11.1 complete (architecture-compliance-audit-and-fix — full audit of 6 services + foundation against 9 project skills; 18 BLOCKER findings resolved in 10 atomic commits: 2 health controllers relocated, 3 smoke controllers deleted, 4 drizzle.config.ts Zod-validated, ThrottleModule canonicalised, Canonical Config Access Contract established — per-service {SVC}_CONFIG Symbol + 5 foundation narrow configs + 14+ callsites migrated + @nestjs/config fully removed from workspace; Phase 999.2 absorbed; D-15 dual-mode smoke gate passed (native + isolated); Rule 3 discovery: @Global() required on {Svc}ConfigModule for nested forRootAsync resolution — pattern folded into infrastructure-client-layering skill)*
