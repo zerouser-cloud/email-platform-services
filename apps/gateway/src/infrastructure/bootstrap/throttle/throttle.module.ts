@@ -1,13 +1,9 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { GATEWAY_CONFIG } from '../../gateway.constants';
+import { GATEWAY_CONFIG } from '../config/gateway-config.constants';
 import type { GatewayEnv } from '../config';
-
-const THROTTLE_TIER = {
-  BURST: 'burst',
-  SUSTAINED: 'sustained',
-} as const;
+import { THROTTLE_TIER } from './throttle.constants';
 
 @Module({
   imports: [

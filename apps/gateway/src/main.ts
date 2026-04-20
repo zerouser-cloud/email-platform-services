@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import { loadConfig } from '@email-platform/config';
-import { GatewayEnvSchema, type GatewayEnv } from './infrastructure/config';
+import { GatewayEnvSchema, type GatewayEnv } from './infrastructure/bootstrap/config';
 import { GrpcToHttpExceptionFilter, SERVER, CORS, BOOTSTRAP } from '@email-platform/foundation';
 import { GatewayModule } from './gateway.module';
 

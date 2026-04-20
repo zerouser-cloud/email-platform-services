@@ -1,26 +1,13 @@
-import { Global, Module, type DynamicModule, type Provider } from '@nestjs/common';
-import { loadConfig } from '@email-platform/config';
+import { Global, Module, type DynamicModule } from '@nestjs/common';
 import {
   LOGGING_CONFIG_PORT,
   GRPC_CLIENT_CONFIG_PORT,
   type LoggingConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { GatewayEnvSchema, type GatewayEnv } from './gateway-env.schema';
-import { GATEWAY_CONFIG } from '../../gateway.constants';
-
-/**
- * Gateway config provider (Phase 999.11.1 D-08) — binds GATEWAY_CONFIG symbol
- * to the validated GatewayEnv value. useValue (not useFactory): loadConfig
- * is cached by schema reference (see packages/config/src/config-loader.ts),
- * eager call at module-definition time is safe.
- *
- * Cast stays until Phase 999.1 (TopologySchema static refactor per PT-04).
- */
-export const gatewayConfigProvider: Provider = {
-  provide: GATEWAY_CONFIG,
-  useValue: loadConfig(GatewayEnvSchema) as GatewayEnv,
-};
+import { gatewayConfigProvider } from './gateway-config.provider';
+import { GATEWAY_CONFIG } from './gateway-config.constants';
+import type { GatewayEnv } from './gateway-env.schema';
 
 /**
  * Gateway config module (Phase 999.11.1 D-10 fix, 2026-04-20) — @Global() so the
@@ -29,6 +16,9 @@ export const gatewayConfigProvider: Provider = {
  * `ThrottlerModule.forRootAsync`, `defineGrpcClient` → `ClientsModule.registerAsync`)
  * whose nested `forRootAsync({inject: [...]})` can't walk up to the root module's
  * providers. See Plan 10 SUMMARY "Rule 3 — NestJS DI scope fix" for the root cause.
+ *
+ * Moved to sibling file per Phase 999.11.2 D-10 (one-file-per-export convention).
+ * @Global() preserved per Phase 999.11.1 Plan 10 Rule 3 fix.
  */
 @Global()
 @Module({})
