@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { SERVICE, loadConfig } from '@email-platform/config';
-import { AudienceEnvSchema, type AudienceEnv } from './infrastructure/config';
+import { AudienceEnvSchema, type AudienceEnv } from './infrastructure/bootstrap/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { AudienceModule } from './audience.module';
 

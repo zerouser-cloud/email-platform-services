@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '@email-platform/foundation';
-import type { GroupRepositoryPort } from '../../application/ports/outbound/group-repository.port';
-import type { Group } from '../../domain/entities/group.entity';
+import type { GroupRepositoryPort } from '../../../../application/ports/outbound/group-repository.port';
+import type { Group } from '../../../../domain/entities/group.entity';
 
 /**
  * Stub adapter — no Drizzle `groups` schema exists yet. Per PROJECT.md

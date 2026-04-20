@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '@email-platform/foundation';
-import type { RecipientRepositoryPort } from '../../application/ports/outbound/recipient-repository.port';
-import type { Recipient } from '../../domain/entities/recipient.entity';
+import type { RecipientRepositoryPort } from '../../../../application/ports/outbound/recipient-repository.port';
+import type { Recipient } from '../../../../domain/entities/recipient.entity';
 import { recipients } from './schema/recipients.schema';
 import { RecipientMapper } from './mappers/recipient.mapper';
 

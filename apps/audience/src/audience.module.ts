@@ -1,11 +1,10 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AudienceConfigModule } from './infrastructure/config';
-import { AudienceController } from './infrastructure/controllers/grpc/audience.controller';
-import { HealthController } from './infrastructure/controllers/rest/health.controller';
-import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
-import { PgGroupRepository } from './infrastructure/persistence/pg-group.repository';
-import { ParserClientModule } from './infrastructure/clients/parser';
+import { LoggingModule } from '@email-platform/foundation';
+import { AudienceConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { AppPersistenceModule } from './infrastructure/outbound/persistence';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
 // Services (inbound port adapters)
 import { ListGroupsService } from './application/services/list-groups.service';
 import { CreateGroupService } from './application/services/create-group.service';
@@ -23,10 +22,8 @@ import { ListRecipientsUseCase } from './application/use-cases/list-recipients.u
 import { GetRecipientsByGroupUseCase } from './application/use-cases/get-recipients-by-group.use-case';
 import { ImportRecipientsUseCase } from './application/use-cases/import-recipients.use-case';
 import { TransitionRecipientsStatusUseCase } from './application/use-cases/transition-recipients-status.use-case';
-// DI tokens
+// DI tokens (domain ports — D-11b: kept at root)
 import {
-  RECIPIENT_REPOSITORY_PORT,
-  GROUP_REPOSITORY_PORT,
   LIST_GROUPS_PORT,
   CREATE_GROUP_PORT,
   DELETE_GROUP_PORT,
@@ -42,17 +39,17 @@ import {
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
     AudienceConfigModule.forRoot(),
-    PersistenceModule.forRootAsync(),
+    HealthModule,
     LoggingModule.forGrpcAsync('audience'),
-    ParserClientModule.forRoot(),
+    AppPersistenceModule,
+    GrpcClientsModule,
+    GrpcModule,
   ],
-  controllers: [AudienceController, HealthController],
+  controllers: [],
   providers: [
-    // Zone 1: Outbound ports → adapters (2 aggregates: Recipient + Group)
-    { provide: RECIPIENT_REPOSITORY_PORT, useClass: PgRecipientRepository },
-    { provide: GROUP_REPOSITORY_PORT, useClass: PgGroupRepository },
-
-    // Zone 2: Inbound ports → services (D-02 per-feature)
+    // Zone 2: Inbound ports → services (D-02 per-feature).
+    // Outbound RECIPIENT_REPOSITORY_PORT + GROUP_REPOSITORY_PORT bindings owned by
+    // RecipientModule + GroupModule (outbound/persistence/{recipient,group}).
     { provide: LIST_GROUPS_PORT, useClass: ListGroupsService },
     { provide: CREATE_GROUP_PORT, useClass: CreateGroupService },
     { provide: DELETE_GROUP_PORT, useClass: DeleteGroupService },

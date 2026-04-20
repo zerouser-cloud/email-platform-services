@@ -1,4 +1,4 @@
-import { Recipient } from '../../../domain/entities/recipient.entity';
+import { Recipient } from '../../../../../domain/entities/recipient.entity';
 import type { recipients } from '../schema/recipients.schema';
 
 type RecipientRow = typeof recipients.$inferSelect;
