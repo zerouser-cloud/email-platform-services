@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.2-03-migrate-sender-PLAN.md
-last_updated: "2026-04-20T13:46:18.569Z"
+stopped_at: Completed 999.11.2-04-migrate-parser-PLAN.md
+last_updated: "2026-04-20T13:57:48.475Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
   total_plans: 93
-  completed_plans: 86
+  completed_plans: 87
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
-Plan: 4 of 10
+Plan: 5 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -117,6 +117,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P01 | 227s | 5 tasks | 23 files |
 | Phase 999.11.2 P02 | 5min | 5 tasks | 30 files |
 | Phase 999.11.2 P03 | 5min6s | 6 tasks | 33 files |
+| Phase 999.11.2 P04 | 5min33s | 6 tasks | 42 files |
 
 ## Accumulated Context
 
@@ -194,6 +195,10 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2]: D-SENDER-01: CampaignModule + HealthModule own foundation PersistenceModule imports; HealthModule dual-wires CacheModule({namespace:'sender'}) for REDIS_HEALTH
 - [Phase 999.11.2]: D-SENDER-02: First HTTP composer — HttpClientsModule mirrors GrpcClientsModule shape; single-sub per D-06 verbatim
 - [Phase 999.11.2]: D-SENDER-03: Pitfall 3 net-cancel resolved — cloudfn.module.ts SENDER_CONFIG import depth stays 3 .. via bootstrap/config path rewrite
+- [Phase 999.11.2]: D-PARSER-01: ParserTaskModule + HealthModule each own foundation PersistenceModule imports; HealthModule additionally imports parser AppStorageModule for PARSER_STORAGE_HEALTH propagation through the storage composer
+- [Phase 999.11.2]: D-PARSER-02: Four-composer milestone — parser exercises all four outbound composer categories in one plan (persistence + grpc-clients + http-clients + storage); composer layer kept even for single-sub per D-06 verbatim
+- [Phase 999.11.2]: D-PARSER-03: Storage double-module canonical split (DC-06 preserved): ParserStorageModule → BucketModule; inline SharedNamespaceModule.forNamespace({namespace:'reports'}) extracted into ReportsModule; AppStorageModule composer aggregates both
+- [Phase 999.11.2]: D-PARSER-04: Pitfall 3 net-cancel (second real-world proof) — appstorespy.module.ts PARSER_CONFIG import stays 3 .. through the double-move to bootstrap/config/parser-config.constants
 
 ### Pending Todos
 
@@ -220,6 +225,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T13:46:09.279Z
-Stopped at: Completed 999.11.2-03-migrate-sender-PLAN.md
+Last session: 2026-04-20T13:57:48.472Z
+Stopped at: Completed 999.11.2-04-migrate-parser-PLAN.md
 Resume file: None
