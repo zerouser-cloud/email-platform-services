@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.2-05-migrate-notifier-PLAN.md
-last_updated: "2026-04-20T14:12:49.718Z"
+stopped_at: Completed 999.11.2-06-migrate-gateway-PLAN.md
+last_updated: "2026-04-20T14:25:23.163Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
   total_plans: 93
-  completed_plans: 88
+  completed_plans: 89
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
-Plan: 6 of 10
+Plan: 7 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -119,6 +119,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P03 | 5min6s | 6 tasks | 33 files |
 | Phase 999.11.2 P04 | 5min33s | 6 tasks | 42 files |
 | Phase 999.11.2 P05 | 583s | 6 tasks | 25 files |
+| Phase 999.11.2 P06 | 6min 40s (400s) | 5 tasks | 27 files |
 
 ## Accumulated Context
 
@@ -208,6 +209,10 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2]: D-NOTIFIER-06: All 3 anomalous dirs classified — external/ (empty → DELETE), messaging/ → inbound/rmq/event.consumer.ts (rename + relocate), storage/ → outbound/storage/reports/reports.module.ts + AppStorageModule composer
 - [Phase 999.11.2]: D-NOTIFIER-07: Vestigial apps/notifier/src/health/ directory (empty since 999.11.1 Plan 02 relocated health.controller.ts) deleted atomically in this plan's commit — vestigial-dir cleanup as part of slice migration
 - [Phase 999.11.2]: D-NOTIFIER-08 (Pitfall 3): telegram.module.ts NOTIFIER_CONFIG + NotifierEnv imports rewritten to bootstrap/config path with preserved 3 .. depth count (source depth +1 + target depth -2 = pivot-with-preserved-count)
+- [Phase 999.11.2]: Plan 06 / D-GATEWAY-01: Gateway HealthModule imports TerminusModule + GrpcClientsModule (no PersistenceModule) — REST facade has zero DB access, diverges from auth/sender/parser/audience HealthModule shape
+- [Phase 999.11.2]: Plan 06 / D-GATEWAY-02: Gateway has no inbound/ directory — REST facade exposes only HealthController (in bootstrap/), no proto controllers, no non-health REST groups yet; D-01 3-bin is logically complete with 2 bins for this service type
+- [Phase 999.11.2]: Plan 06 / D-11a realized: gateway.constants.ts DELETED (unique to gateway — post-GATEWAY_CONFIG relocation left zero exports; other 5 services retain root constants per D-11)
+- [Phase 999.11.2]: Plan 06 / Pitfall 9 resolution: health.controller.ts 5 individual upstream-barrel imports consolidated to 1 composer-barrel import — reusable pattern for multi-upstream consumers
 
 ### Pending Todos
 
@@ -234,6 +239,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T14:12:19.449Z
-Stopped at: Completed 999.11.2-05-migrate-notifier-PLAN.md
+Last session: 2026-04-20T14:25:06.735Z
+Stopped at: Completed 999.11.2-06-migrate-gateway-PLAN.md
 Resume file: None
