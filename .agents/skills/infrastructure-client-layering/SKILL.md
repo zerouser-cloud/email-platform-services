@@ -107,17 +107,44 @@ Config is infra-like — every service needs "env data" the same way it needs a 
 - **Foundation (`packages/foundation`):** declares narrow `*Config` interfaces — `CacheConfig`, `PersistenceConfig`, `LoggingConfig`, `StorageCoreConfig`, `PublicStorageConfig`, `GrpcClientConfig`, plus a generic `TEnv`-parameterised HTTP shape — alongside matching `*_CONFIG_PORT` Symbol tokens. Factories inject the narrow interface via the Port (`inject: [CACHE_CONFIG_PORT]`) — foundation DOES NOT know about `SenderEnv` / `AuthEnv`. No `@nestjs/config` import anywhere in foundation.
 - **Apps (`apps/{service}`):**
   - **Identity:** `{SVC}_CONFIG = Symbol('{SVC}_CONFIG')` in `apps/{svc}/src/{svc}.constants.ts` — one per service, alongside port Symbols.
-  - **Assembly:** `apps/{svc}/src/infrastructure/config/{svc}-config.provider.ts` binds `{SVC}_CONFIG` to `loadConfig({Svc}EnvSchema)` via `useValue` (`loadConfig` is schema-cache-idempotent — one eager call at module definition is safe).
-  - **Composition root:** `apps/{svc}/src/{svc}.module.ts` registers `{svc}ConfigProvider` + per-slice providers. Each slice `useFactory: (c: {Svc}Env) => ({ FIELD: c.FIELD }), inject: [{SVC}_CONFIG]` projects into the narrow foundation shape. Apps pay for only what they import — a service without Redis adds no `CACHE_CONFIG_PORT` slice.
+  - **Assembly:** `apps/{svc}/src/infrastructure/config/{svc}-config.provider.ts` exports both (a) the `{svc}ConfigProvider` binding `{SVC}_CONFIG` to `loadConfig({Svc}EnvSchema)` via `useValue` (`loadConfig` is schema-cache-idempotent — one eager call at module definition is safe), AND (b) a **`@Global()`-decorated** `{Svc}ConfigModule` with `static forRoot(): DynamicModule` that registers the provider + every narrow `*_CONFIG_PORT` slice the service needs AND `exports:[]` all of them.
+  - **Composition root:** `apps/{svc}/src/{svc}.module.ts` imports `{Svc}ConfigModule.forRoot()` FIRST in `imports:[]` (before any foundation module with nested `forRootAsync`). No more slice-provider churn at root level — the global module is the single source of truth.
 
 ```typescript
-// apps/sender/src/sender.module.ts (slice for foundation CacheModule)
-{
-  provide: CACHE_CONFIG_PORT,
-  useFactory: (c: SenderEnv): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
-  inject: [SENDER_CONFIG],
+// apps/sender/src/infrastructure/config/sender-config.provider.ts
+@Global()
+@Module({})
+export class SenderConfigModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: SenderConfigModule,
+      providers: [
+        senderConfigProvider, // { provide: SENDER_CONFIG, useValue: loadConfig(...) }
+        {
+          provide: CACHE_CONFIG_PORT,
+          useFactory: (c: SenderEnv): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
+          inject: [SENDER_CONFIG],
+        },
+        // ...PERSISTENCE_CONFIG_PORT, LOGGING_CONFIG_PORT, GRPC_CLIENT_CONFIG_PORT slices
+      ],
+      exports: [SENDER_CONFIG, CACHE_CONFIG_PORT, /* ...all registered tokens */],
+    };
+  }
 }
+
+// apps/sender/src/sender.module.ts
+@Module({
+  imports: [
+    SenderConfigModule.forRoot(), // FIRST — precedes every foundation module
+    PersistenceModule.forRootAsync(),
+    CacheModule.forRootAsync({ namespace: 'sender' }),
+    LoggingModule.forGrpcAsync('sender'),
+    /* ...gRPC client modules */
+  ],
+})
 ```
+
+**Critical: `@Global()` is REQUIRED, not optional.** Foundation modules that do nested third-party `forRootAsync` — `LoggingModule.forXxxAsync` → `PinoLoggerModule.forRootAsync({inject: [LOGGING_CONFIG_PORT]})`, `defineGrpcClient` → `ClientsModule.registerAsync({inject: [GRPC_CLIENT_CONFIG_PORT]})`, `ThrottlerModule.forRootAsync({inject: [GATEWAY_CONFIG]})` — run in a nested DI scope that CANNOT resolve tokens from the root module's `providers:[]` array. Without `@Global()` the app fails at boot with `UnknownDependenciesException: can't resolve Symbol(LOGGING_CONFIG_PORT)`. The `@Global()` decoration makes the exported tokens visible to every nested dynamic module across the app, matching the visibility `AppConfigModule.forRoot({ isGlobal: true })` used to provide for `ConfigService` before Phase 999.11.1 removed `@nestjs/config`.
 
 **Consumer injection rule (D-09 from Phase 999.11.1):**
 - ✅ `infrastructure/**` (controllers, adapters, clients, repositories) — `@Inject({SVC}_CONFIG) private readonly config: {Svc}Env`
