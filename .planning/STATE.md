@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.2-06-migrate-gateway-PLAN.md
-last_updated: "2026-04-20T14:25:23.163Z"
+stopped_at: Completed 999.11.2-07-refine-claude-md-PLAN.md
+last_updated: "2026-04-20T14:32:00.964Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
   total_plans: 93
-  completed_plans: 89
+  completed_plans: 90
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
-Plan: 7 of 10
+Plan: 8 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -120,6 +120,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P04 | 5min33s | 6 tasks | 42 files |
 | Phase 999.11.2 P05 | 583s | 6 tasks | 25 files |
 | Phase 999.11.2 P06 | 6min 40s (400s) | 5 tasks | 27 files |
+| Phase 999.11.2 P07 | 2min45s | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -213,6 +214,8 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2]: Plan 06 / D-GATEWAY-02: Gateway has no inbound/ directory — REST facade exposes only HealthController (in bootstrap/), no proto controllers, no non-health REST groups yet; D-01 3-bin is logically complete with 2 bins for this service type
 - [Phase 999.11.2]: Plan 06 / D-11a realized: gateway.constants.ts DELETED (unique to gateway — post-GATEWAY_CONFIG relocation left zero exports; other 5 services retain root constants per D-11)
 - [Phase 999.11.2]: Plan 06 / Pitfall 9 resolution: health.controller.ts 5 individual upstream-barrel imports consolidated to 1 composer-barrel import — reusable pattern for multi-upstream consumers
+- [Phase 999.11.2]: D-15 realised (Plan 07): CLAUDE.md §NestJS↔Hexagonal Layer Mapping replaced verbatim with RESEARCH §8 refinement draft — all 6 services now share the canonical infrastructure/{inbound,outbound,bootstrap}/ tree as authoritative. grep invariants green: Direction split=1, inbound/grpc=2, outbound/persistence=3, bootstrap/config=1; old paths (controllers/grpc, clients/)=0.
+- [Phase 999.11.2]: Scope broadened (Plan 07): CLAUDE.md mapping now explicitly covers all 6 services (gateway + notifier share the inbound/outbound/bootstrap tree; only inbound transport differs — grpc vs rest vs rmq).
 
 ### Pending Todos
 
@@ -239,6 +242,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T14:25:06.735Z
-Stopped at: Completed 999.11.2-06-migrate-gateway-PLAN.md
+Last session: 2026-04-20T14:31:46.688Z
+Stopped at: Completed 999.11.2-07-refine-claude-md-PLAN.md
 Resume file: None

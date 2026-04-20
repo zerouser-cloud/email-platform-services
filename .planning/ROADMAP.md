@@ -551,7 +551,7 @@ Plans:
 **Goal:** Refactor `apps/{svc}/src/infrastructure/` across all 6 microservices into canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4 + Graca Explicit Architecture. Feature-slicing per direction (per aggregate / upstream / vendor / cross-cutting concern). Create HealthModule across all 6 services (D-08). Move {SVC}_CONFIG into bootstrap/config/ (D-10). Delete empty gateway.constants.ts (D-11a). Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping + .eslintrc.js Override 6/7/9 paths + infrastructure-client-layering skill. D-14 dual-mode smoke gate at phase end per 999.11.1 precedent. Behavior-preserving — no business logic, no tests. ~65 file moves + ~36 creates + 1 delete + 5 empty-dir cleanups.
 **Requirements**: D-01..D-17 (locked decisions in 999.11.2-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 999.11
-**Plans:** 6/10 plans executed
+**Plans:** 7/10 plans executed
 
 Plans:
 - [ ] 999.11.2-01-PLAN.md — Migrate auth service (template for plans 02-06; 1 aggregate, 1 proto, 0 cross-app clients; Commit 1)
