@@ -5,8 +5,6 @@ import { HealthModule } from './infrastructure/bootstrap/health';
 import { RmqModule } from './infrastructure/inbound/rmq';
 import { HttpClientsModule } from './infrastructure/outbound/http-clients';
 import { AppStorageModule } from './infrastructure/outbound/storage';
-import { TelegramNotificationAdapter } from './infrastructure/outbound/http-clients/telegram';
-import { NOTIFICATION_SENDER_PORT } from './notifier.constants';
 
 @Module({
   imports: [
@@ -17,18 +15,12 @@ import { NOTIFICATION_SENDER_PORT } from './notifier.constants';
     LoggingModule.forHttpAsync('notifier'),
     HttpClientsModule,
     AppStorageModule,
+    // RmqModule owns HANDLE_EVENT_PORT + NOTIFICATION_SENDER_PORT bindings
+    // (Plan 10 Option A — consumer-cohesive with the RMQ inbound boundary).
     RmqModule,
   ],
   controllers: [],
-  providers: [
-    // OQ-5: NOTIFICATION_SENDER_PORT binding stays at the composition root —
-    // TelegramNotificationAdapter is an outbound adapter used by application
-    // services (not just the RMQ inbound consumer), so keeping the binding
-    // here avoids coupling it to a specific inbound boundary.
-    { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationAdapter },
-    // HANDLE_EVENT_PORT binding moved into RmqModule (cohesive with EventConsumer).
-    // RabbitMqHealthIndicator provider owned by HealthModule.
-  ],
+  providers: [],
 })
 export class NotifierModule implements OnModuleDestroy {
   private readonly logger = new Logger(NotifierModule.name);
