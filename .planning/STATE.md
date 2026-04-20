@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.1-04-foundation-narrow-config-cache-persistence-logging-storage-PLAN.md
-last_updated: "2026-04-20T09:09:37.815Z"
+stopped_at: Completed 999.11.1-05-foundation-grpc-narrow-config-cascade-PLAN.md
+last_updated: "2026-04-20T09:17:58.377Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
   completed_phases: 18
   total_plans: 83
-  completed_plans: 79
+  completed_plans: 80
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
-Plan: 7 of 10
+Plan: 8 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -110,6 +110,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P03 | 159s | 2 tasks | 2 files |
 | Phase 999.11.1 P08 | 1min14s | 1 tasks | 6 files |
 | Phase 999.11.1 P04 | 7min 26s | 4 tasks | 26 files |
+| Phase 999.11.1 P05 | 209s | 4 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -172,6 +173,8 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1]: [Phase 999.11.1-03]: ThrottleModule relocated to infrastructure/throttle/ canonical path via git mv at 57% similarity (NH-03 feature submodule resolved). First end-to-end consumer of GATEWAY_CONFIG Symbol — Canonical Config Access Contract chain (gateway.constants.ts → gateway-config.provider.ts → providers[] → inject: [GATEWAY_CONFIG]) validated. 4 configService.get<number>('RATE_LIMIT_*')! callsites migrated to 4 typed config.RATE_LIMIT_* reads from GatewayEnv (IC-09 resolved, D-12 partial 4/14+). @nestjs/config import removed from throttle.module.ts (D-11 partial progress). THROTTLE_TIER 'as const' preserved verbatim (no-magic-values). 1 atomic commit c1672a0 (2 files, 9+/8- delta, rename+body-rewrite detected at 57%). D-14 gate green: lint 7/7 + build 10/10 (gateway cache miss executed clean). 0 deviations, 0 auto-fixes. Pattern proven for Plans 04-06 foundation narrow-config cascade + 3rd-party forRootAsync migration template established.
 - [Phase 999.11.1]: Plan 08: Atomic single-commit deletion of 3 smoke controllers (Telegram/CloudFn/AppStoreSpy) — HTTP clients preserved for Phase 999.15 CI post-deploy smoke; D-05 phase invariant fully green (zero controllers outside infrastructure/).
 - [Phase 999.11.1]: Plan 04: Foundation narrow-config (D-10) — 5 *_CONFIG_PORT Symbols + 5 narrow Config interfaces; IC-01/02/03/07/08 resolved;  casts gone; re-export over bespoke for zero-drift; STORAGE_CORE_CONFIG_PORT surfaced via external/storage barrel to avoid internal leak
+- [Phase 999.11.1]: Plan 05: grpcUrls as Record<string,string> keyed by SERVICE.{svc}.envKeys.GRPC_URL — multi-instance narrow-config shape for gRPC clients (apps project typed reads, foundation does O(1) key lookup)
+- [Phase 999.11.1]: Plan 05: per-app scope — each app includes only upstreams it consumes (gateway=5 URLs, sender/parser/audience=1 each, notifier+auth=none)
 
 ### Pending Todos
 
@@ -197,6 +200,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T09:09:37.811Z
-Stopped at: Completed 999.11.1-04-foundation-narrow-config-cache-persistence-logging-storage-PLAN.md
+Last session: 2026-04-20T09:17:41.669Z
+Stopped at: Completed 999.11.1-05-foundation-grpc-narrow-config-cascade-PLAN.md
 Resume file: None
