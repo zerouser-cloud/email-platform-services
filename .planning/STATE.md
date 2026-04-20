@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
-stopped_at: Phase 999.11.2 context gathered
-last_updated: "2026-04-20T11:49:18.239Z"
+status: executing
+stopped_at: Completed 999.11.2-01-migrate-auth-PLAN.md
+last_updated: "2026-04-20T13:27:33.844Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
-  total_plans: 83
-  completed_plans: 83
+  total_plans: 93
+  completed_plans: 84
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.11.1 — architecture-compliance-audit-and-fix
+**Current focus:** Phase 999.11.2 — infrastructure-tree-canonical-split
 
 ## Current Position
 
-Phase: 999.12
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
+Plan: 2 of 10
+Status: Ready to execute
 Last activity: 2026-04-20
 
 Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
@@ -114,6 +114,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P06 | 2min 41s | 2 tasks | 4 files |
 | Phase 999.11.1 P09 | 330s | 4 tasks | 17 files |
 | Phase 999.11.1 P10 | 15min | 3 tasks | 16 files |
+| Phase 999.11.2 P01 | 227s | 5 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -182,6 +183,9 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1]: Plan 09: Removed @nestjs/config entirely from workspace — deleted AppConfigModule (22 LoC), scrubbed 8 package.json files, regenerated pnpm-lock.yaml. {SVC}_CONFIG providers now the sole config path. Three VALIDATION rows flip green: D-09 acid (no @Inject in use-cases), D-11 inv1+2 (no imports + no deps), D-12 rechecked (no configService.get).
 - [Phase 999.11.1]: Plan 10 Rule 3 auto-fix: @Global() config modules per service resolve latent NestJS DI scope bug exposed by Plan 04 + Plan 09 combined changes. SKILL.md Config subsection now names @Global() as required. D-15 dual-mode smoke gate PASSED (native HTTP 200 @12s + isolated HTTP 200 @58s, both 5/5 upstreams up, 0 error/warn across 6 containers).
 - [Phase 999.11.1]: Phase 999.11.1 architecturally COMPLETE (10/10 plans). 18 BLOCKER resolved + 6 NON-BLOCKER documented; D-01..D-15 all green. Absorbed original Phase 999.2 scope. Ready for /gsd:verify-work 999.11.1.
+- [Phase 999.11.2]: D-AUTH-01: Sub-modules (UserModule + HealthModule) each explicitly import foundation PersistenceModule.forRootAsync() because foundation's module is NOT @Global(); root auth.module.ts drops direct import
+- [Phase 999.11.2]: App-level composer named AppPersistenceModule (App* prefix) to avoid naming collision with foundation's PersistenceModule inside service composition roots
+- [Phase 999.11.2]: Config one-file-per-export (D-10): @Global() AuthConfigModule split from authConfigProvider into sibling auth-config.module.ts; AUTH_CONFIG Symbol moved to dedicated auth-config.constants.ts file
 
 ### Pending Todos
 
@@ -208,6 +212,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T11:49:18.202Z
-Stopped at: Phase 999.11.2 context gathered
-Resume file: .planning/phases/999.11.2-infrastructure-tree-canonical-split/999.11.2-CONTEXT.md
+Last session: 2026-04-20T13:27:33.841Z
+Stopped at: Completed 999.11.2-01-migrate-auth-PLAN.md
+Resume file: None
