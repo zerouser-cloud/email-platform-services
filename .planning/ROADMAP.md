@@ -540,6 +540,26 @@ Plans:
 - [x] 999.11-03-PLAN.md — Notifier backend smoke deletion (1 atomic commit f78d74e: 2 file changes — 1 edit + 1 delete; asymmetric scope confirmed empirically pre-edit — no hexagonal slice existed to remove per RESEARCH.md Pitfall 2; StorageSmokeController + @GrpcMethod handlers for NotifierService.RunStorageSmoke/CleanupStorageSmoke gone from runtime; TelegramSmokeController preserved per D-03; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10)
 - [x] 999.11-04-PLAN.md — Proto edits + ts-proto regeneration + parser.controller.ts stub removal (1 atomic commit fb23e24: 5 file changes — 2 proto edits + 2 regenerated .ts + 1 controller stub removal; -782/+17 line delta; parser.proto 100→68 lines with 6 RPCs; notifier.proto 45→14 lines with HealthCheck-only per Pitfall 3; generated/parser.ts 1030→687; generated/notifier.ts 418→80; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10) + D-07 dual-mode runtime smoke gate PASSED first try (native HTTP 200 @~10s boot + isolated HTTP 200 @~50s boot, both with 5/5 upstreams up + 0 error/warn across 6 isolated containers). Workspace-wide grep for 9 smoke symbols = 0 matches. Security Invariants SI-1/SI-2/SI-3 all green. Phase 999.11 total = 6 atomic refactor commits per D-04; 0 deviations, 0 auto-fixes, 0 escalations.
 
+### Phase 999.11.1: architecture-compliance-audit-and-fix (INSERTED)
+
+**Goal:** Полный архитектурный аудит 6 сервисов + packages/foundation на соответствие NestJS↔Hexagonal mapping (CLAUDE.md), twelve-factor skill'у, env-schema skill'у и domain purity — с немедленным исправлением найденных нарушений в рамках этой же фазы (audit-and-fix mode). Известные нарушения на момент вставки: (1) `gateway/src/health/health.controller.ts` + `notifier/src/health/health.controller.ts` в неправильном месте — должны быть в `infrastructure/controllers/rest/`; (2) три smoke-контроллера (`notifier/telegram-smoke`, `sender/cloudfn-smoke`, `parser/appstorespy-smoke`) в `src/test/` вместо `infrastructure/controllers/{grpc,rest}/`; (3) все 4 `apps/*/drizzle.config.ts` используют `process.env.DATABASE_URL!` напрямую — нарушение twelve-factor и env-schema, должно идти через Zod config. Scope расширяется в research: полная матрица controllers placement + все `process.env` usages вне `packages/config` и `main.ts` + domain purity + proto visibility + feature-модули. Должно закрыть архитектурный долг ДО начала canonical-alignment фаз (999.12–999.15).
+**Requirements:** D-01..D-15 (locked decisions in 999.11.1-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
+**Depends on:** Phase 999.11
+**Plans:** 10 plans
+
+Plans:
+- [ ] 999.11.1-01-PLAN.md — Register {SVC}_CONFIG Symbols + providers in all 6 services (dormant, D-08)
+- [ ] 999.11.1-02-PLAN.md — Relocate 2 health controllers (gateway + notifier) to infrastructure/controllers/rest (D-05)
+- [ ] 999.11.1-03-PLAN.md — Relocate ThrottleModule to infrastructure/throttle + migrate to GATEWAY_CONFIG (D-06, first real consumer)
+- [ ] 999.11.1-04-PLAN.md — Foundation narrow-config migration: cache + persistence + logging + storage (D-10, IC-01..IC-03, IC-07, IC-08)
+- [ ] 999.11.1-05-PLAN.md — Foundation gRPC narrow config + cascade 5 client modules + delete obsolete GrpcClientModule (D-10, IC-04, DC-01)
+- [ ] 999.11.1-06-PLAN.md — Foundation HTTP narrow config + cascade 3 vendor modules (D-10, IC-06, IC-10..IC-12)
+- [ ] 999.11.1-07-PLAN.md — drizzle.config.ts env-hygiene fix (4 files atomic, D-07, TF-01..TF-04)
+- [ ] 999.11.1-08-PLAN.md — Delete 3 smoke controllers + module cleanups (D-03/D-04, NH-04..NH-06)
+- [ ] 999.11.1-09-PLAN.md — Remove @nestjs/config — delete AppConfigModule + scrub deps across workspace (D-11)
+- [ ] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
+
+
 ### Phase 999.12: redis-canonical-alignment (BACKLOG)
 
 **Goal:** Align Redis CacheModule setup with gRPC canonical reference (established in 999.11) — move config to `apps/*/src/infrastructure/cache/`, mirror foundation factory pattern (analog of `defineGrpcClient`), ensure `ioredis` hidden behind `CachePort` (ESLint guard). Absorbs existing backlog Phase 999.5 (CacheModule config to infrastructure layer). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.12".
