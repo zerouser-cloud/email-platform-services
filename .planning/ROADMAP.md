@@ -312,21 +312,27 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 Plans:
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
-### Phase 999.2: Type-safe config access — eliminate ConfigService type loss (BACKLOG)
+### Phase 999.2: Type-safe config access — ABSORBED INTO Phase 999.11.1 (2026-04-20)
 
-**Goal:** ConfigService.get<string>() теряет Zod-гарантии — возвращает `string | undefined` хотя Zod уже валидировал. Это вынуждает использовать `!` и `?? ''` повсюду. Нужен типизированный доступ к конфигу, чтобы TypeScript видел гарантии Zod. Возможные подходы: typed ConfigService wrapper, inject parsed config напрямую, или custom provider.
-**Known occurrences:**
-- `gateway/health/health.controller.ts` — `SERVICE.auth.envKeys.GRPC_URL!` и `?? ''` для gRPC service list
-- `gateway/throttle/throttle.module.ts` — `configService.get<number>('RATE_LIMIT_BURST_TTL')!` и другие магические строки (нарушает no-magic-values skill)
-- Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты (связано с 999.1)
-- `foundation/cache/cache.providers.ts` — `config.get<string>('REDIS_URL')!` магическая строка + assertion
-- `foundation/persistence/persistence.providers.ts` — `config.get<string>('DATABASE_URL')` тот же паттерн
-- Foundation gRPC client modules (14+ occurrences in auth/audience/parser/sender/notifier-client.module.ts) — left out of Phase 24.1 scope per orchestrator memo
-**Requirements:** TBD
-**Plans:** 0 plans
+**Status:** ABSORBED. Original scope (eliminate `configService.get<T>()!` non-null assertions, type-safe config access per service) was folded into Phase 999.11.1 — architecture-compliance-audit-and-fix — per that phase's CONTEXT.md decision D-12 (rationale: same files, shared migration window, atomic commits preferable to a 2-phase split with coordination overhead).
+
+**Outcome realised by 999.11.1:** per-service `{SVC}_CONFIG` Symbol pattern (Canonical Config Access Contract per D-08..D-12), foundation narrow config interfaces (D-10), full `@nestjs/config` replace (D-11), 18 callsites migrated across 10 files + cascade through 3 HTTP vendor modules. All known occurrences listed below — `gateway/health/health.controller.ts`, `gateway/throttle/throttle.module.ts`, foundation cache/persistence/logging/storage/grpc/http — resolved in Phase 999.11.1 Plans 01-09.
+
+**Original known occurrences (all closed by 999.11.1):**
+- `gateway/health/health.controller.ts` — closed via D-05 relocation (Plan 02, commit `6dc6279`) + D-12 migration
+- `gateway/throttle/throttle.module.ts` — closed via Plan 03 (commit `c1672a0`, IC-09 resolved)
+- Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты remain (scheduled for separate Phase 999.1 — TopologySchema Static Refactor, not absorbed)
+- `foundation/cache/cache.providers.ts` + `foundation/persistence/persistence.providers.ts` + `foundation/logging` + `foundation/storage` — closed via Plan 04 (commit `ab918d5`, D-10 narrow-config interfaces)
+- Foundation gRPC client modules (5 × `*-client.module.ts`) — closed via Plan 05 (commit `7c591d7`, obsolete `grpc-client.module.ts` deleted)
+- Foundation HTTP client + 3 vendor modules (telegram / appstorespy / cloudfn) — closed via Plan 06 (commit `930eca6`)
+- `@nestjs/config` full removal — Plan 09 (commit `2d14d30`, D-11)
+
+**Remaining Phase 999.2-adjacent work:** Phase 999.1 (TopologySchema Static Refactor) — not absorbed, backlog separate phase — will remove `as XxxEnv` casts in main.ts × 6 after TopologySchema static rewrite enables `z.infer` to resolve per-service composed schemas.
+
+**Plans:** 0 plans (scope folded into 999.11.1)
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [x] ABSORBED — see Phase 999.11.1 Plans 01-09 for implementation; Plan 10 docs-update commit records the absorption
 
 ### Phase 999.4: CacheService quality — improve get() type safety and error handling (BACKLOG)
 
@@ -542,22 +548,22 @@ Plans:
 
 ### Phase 999.11.1: architecture-compliance-audit-and-fix (INSERTED)
 
-**Goal:** Полный архитектурный аудит 6 сервисов + packages/foundation на соответствие NestJS↔Hexagonal mapping (CLAUDE.md), twelve-factor skill'у, env-schema skill'у и domain purity — с немедленным исправлением найденных нарушений в рамках этой же фазы (audit-and-fix mode). Известные нарушения на момент вставки: (1) `gateway/src/health/health.controller.ts` + `notifier/src/health/health.controller.ts` в неправильном месте — должны быть в `infrastructure/controllers/rest/`; (2) три smoke-контроллера (`notifier/telegram-smoke`, `sender/cloudfn-smoke`, `parser/appstorespy-smoke`) в `src/test/` вместо `infrastructure/controllers/{grpc,rest}/`; (3) все 4 `apps/*/drizzle.config.ts` используют `process.env.DATABASE_URL!` напрямую — нарушение twelve-factor и env-schema, должно идти через Zod config. Scope расширяется в research: полная матрица controllers placement + все `process.env` usages вне `packages/config` и `main.ts` + domain purity + proto visibility + feature-модули. Должно закрыть архитектурный долг ДО начала canonical-alignment фаз (999.12–999.15).
+**Goal:** Полный архитектурный аудит 6 сервисов + packages/foundation на соответствие NestJS↔Hexagonal mapping (CLAUDE.md), twelve-factor skill'у, env-schema skill'у и domain purity — с немедленным исправлением найденных нарушений в рамках этой же фазы (audit-and-fix mode). Известные нарушения на момент вставки: (1) `gateway/src/health/health.controller.ts` + `notifier/src/health/health.controller.ts` в неправильном месте — должны быть в `infrastructure/controllers/rest/`; (2) три smoke-контроллера (`notifier/telegram-smoke`, `sender/cloudfn-smoke`, `parser/appstorespy-smoke`) в `src/test/` вместо `infrastructure/controllers/{grpc,rest}/`; (3) все 4 `apps/*/drizzle.config.ts` используют `process.env.DATABASE_URL!` напрямую — нарушение twelve-factor и env-schema, должно идти через Zod config. Scope расширяется в research: полная матрица controllers placement + все `process.env` usages вне `packages/config` и `main.ts` + domain purity + proto visibility + feature-модули. Должно закрыть архитектурный долг ДО начала canonical-alignment фаз (999.12–999.15). **Absorbed the original Phase 999.2 scope** — canonical per-service `{SVC}_CONFIG` Symbol pattern + `@nestjs/config` full replace landed here.
 **Requirements:** D-01..D-15 (locked decisions in 999.11.1-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 999.11
-**Plans:** 9/10 plans executed
+**Plans:** 10/10 plans executed
 
 Plans:
-- [ ] 999.11.1-01-PLAN.md — Register {SVC}_CONFIG Symbols + providers in all 6 services (dormant, D-08)
-- [ ] 999.11.1-02-PLAN.md — Relocate 2 health controllers (gateway + notifier) to infrastructure/controllers/rest (D-05)
-- [ ] 999.11.1-03-PLAN.md — Relocate ThrottleModule to infrastructure/throttle + migrate to GATEWAY_CONFIG (D-06, first real consumer)
-- [ ] 999.11.1-04-PLAN.md — Foundation narrow-config migration: cache + persistence + logging + storage (D-10, IC-01..IC-03, IC-07, IC-08)
-- [ ] 999.11.1-05-PLAN.md — Foundation gRPC narrow config + cascade 5 client modules + delete obsolete GrpcClientModule (D-10, IC-04, DC-01)
+- [x] 999.11.1-01-PLAN.md — Register {SVC}_CONFIG Symbols + providers in all 6 services (dormant, D-08)
+- [x] 999.11.1-02-PLAN.md — Relocate 2 health controllers (gateway + notifier) to infrastructure/controllers/rest (D-05)
+- [x] 999.11.1-03-PLAN.md — Relocate ThrottleModule to infrastructure/throttle + migrate to GATEWAY_CONFIG (D-06, first real consumer)
+- [x] 999.11.1-04-PLAN.md — Foundation narrow-config migration: cache + persistence + logging + storage (D-10, IC-01..IC-03, IC-07, IC-08)
+- [x] 999.11.1-05-PLAN.md — Foundation gRPC narrow config + cascade 5 client modules + delete obsolete GrpcClientModule (D-10, IC-04, DC-01)
 - [x] 999.11.1-06-PLAN.md — Foundation HTTP narrow config + cascade 3 vendor modules (D-10, IC-06, IC-10..IC-12)
-- [ ] 999.11.1-07-PLAN.md — drizzle.config.ts env-hygiene fix (4 files atomic, D-07, TF-01..TF-04)
-- [ ] 999.11.1-08-PLAN.md — Delete 3 smoke controllers + module cleanups (D-03/D-04, NH-04..NH-06)
+- [x] 999.11.1-07-PLAN.md — drizzle.config.ts env-hygiene fix (4 files atomic, D-07, TF-01..TF-04)
+- [x] 999.11.1-08-PLAN.md — Delete 3 smoke controllers + module cleanups (D-03/D-04, NH-04..NH-06)
 - [x] 999.11.1-09-PLAN.md — Remove @nestjs/config — delete AppConfigModule + scrub deps across workspace (D-11)
-- [ ] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
+- [x] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
 
 
 ### Phase 999.12: redis-canonical-alignment (BACKLOG)

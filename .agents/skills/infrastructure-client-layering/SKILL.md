@@ -1,6 +1,6 @@
 ---
 name: infrastructure-client-layering
-description: Architectural rule for placing infrastructure-client artifacts (modules, factories, DI tokens, abstract base classes) across catalog/foundation/apps layers. Triggers on creating or refactoring HTTP clients, gRPC clients, RabbitMQ producers/consumers, Redis adapters, S3 adapters, DB/ORM modules, or any other infra-client. Apply whenever a new infra-client mechanism is introduced or an existing one is refactored. No per-method hand-written wrapper classes; use a generic Proxy for Observable-returning interfaces (see `Promisified<T>` pattern). Reference implementation: Phase 999.7.x (gRPC).
+description: Architectural rule for placing infrastructure-client artifacts (modules, factories, DI tokens, abstract base classes) across catalog/foundation/apps layers. Triggers on creating or refactoring HTTP clients, gRPC clients, RabbitMQ producers/consumers, Redis adapters, S3 adapters, DB/ORM modules, CONFIG MODULES, or any other infra-client. Apply whenever a new infra-client mechanism is introduced or an existing one is refactored. No per-method hand-written wrapper classes; use a generic Proxy for Observable-returning interfaces (see `Promisified<T>` pattern). Reference implementations: Phase 999.7.x (gRPC), Phase 999.11.1 (Config).
 ---
 
 # Infrastructure Client Layering
@@ -98,6 +98,42 @@ New infra-client mechanism (HTTP/RMQ/Redis/S3/DB/...)?
   await this.auth.login(req);
   ```
   Method calls return `Promise<R>` automatically through the Proxy trap (Observable→Promise + per-call deadline + ts-proto `Metadata`/`CallOpts` handling). Adding a new RPC to the `.proto` file becomes consumer-callable without touching any apps-level wiring code. See Phase 999.7.3 for the canonical implementation.
+
+### Config (reference, Phase 999.11.1)
+
+Config is infra-like — every service needs "env data" the same way it needs a gRPC channel or DB pool. Phase 999.11.1 applies the three-layer rule to config (absorbed the original Phase 999.2 scope):
+
+- **Catalog (`packages/config`):** stays schema-only. Per-service `{Svc}EnvSchema` composes `composeSchemas(DatabaseSchema, RedisSchema, LoggingSchema, ...)` from `packages/config/src/schemas/`. NO DI tokens for env values live here (transport-agnostic principle — catalog never names a concrete service's config instance).
+- **Foundation (`packages/foundation`):** declares narrow `*Config` interfaces — `CacheConfig`, `PersistenceConfig`, `LoggingConfig`, `StorageCoreConfig`, `PublicStorageConfig`, `GrpcClientConfig`, plus a generic `TEnv`-parameterised HTTP shape — alongside matching `*_CONFIG_PORT` Symbol tokens. Factories inject the narrow interface via the Port (`inject: [CACHE_CONFIG_PORT]`) — foundation DOES NOT know about `SenderEnv` / `AuthEnv`. No `@nestjs/config` import anywhere in foundation.
+- **Apps (`apps/{service}`):**
+  - **Identity:** `{SVC}_CONFIG = Symbol('{SVC}_CONFIG')` in `apps/{svc}/src/{svc}.constants.ts` — one per service, alongside port Symbols.
+  - **Assembly:** `apps/{svc}/src/infrastructure/config/{svc}-config.provider.ts` binds `{SVC}_CONFIG` to `loadConfig({Svc}EnvSchema)` via `useValue` (`loadConfig` is schema-cache-idempotent — one eager call at module definition is safe).
+  - **Composition root:** `apps/{svc}/src/{svc}.module.ts` registers `{svc}ConfigProvider` + per-slice providers. Each slice `useFactory: (c: {Svc}Env) => ({ FIELD: c.FIELD }), inject: [{SVC}_CONFIG]` projects into the narrow foundation shape. Apps pay for only what they import — a service without Redis adds no `CACHE_CONFIG_PORT` slice.
+
+```typescript
+// apps/sender/src/sender.module.ts (slice for foundation CacheModule)
+{
+  provide: CACHE_CONFIG_PORT,
+  useFactory: (c: SenderEnv): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
+  inject: [SENDER_CONFIG],
+}
+```
+
+**Consumer injection rule (D-09 from Phase 999.11.1):**
+- ✅ `infrastructure/**` (controllers, adapters, clients, repositories) — `@Inject({SVC}_CONFIG) private readonly config: {Svc}Env`
+- ✅ Module factories (`useFactory`, `forRootAsync`) — composition root
+- ✅ `application/services/**` — services are the seam between env and business logic; orchestrate use-cases
+- 🚫 `application/use-cases/**` — receive env values as **method args** from parent Service (`execute(cmd, { timeout: this.config.OPERATION_TIMEOUT_MS })`), NOT via `@Inject`. Use-cases stay env-agnostic and reusable across contexts.
+- 🚫 `domain/**` — enforced by ESLint Override 8
+
+**Why not `@nestjs/config`:** removed in Phase 999.11.1. Three structural problems with the old pattern:
+1. `configService.get<T>(KEY)!` returns `T | undefined` — forces non-null assertions everywhere, bypasses Zod type guarantees
+2. `ConfigService` is global and was imported in foundation — breaks layer boundaries (Mechanism knowing about String-keyed lookup semantics)
+3. Dual path (module imports `AppConfigModule.forRoot(XxxEnvSchema)` AND apps expose `{Svc}Env` type) created naming confusion
+
+Per-service `{SVC}_CONFIG` Symbol + typed narrow foundation interfaces fix all three: type-safe (no non-null assertions), layer-clean (foundation sees narrow interface only), single-path (one Symbol, one provider, typed everywhere).
+
+**Reference:** Phase 999.11.1 (`.planning/phases/999.11.1-architecture-compliance-audit-and-fix/`) — all 6 services migrated atomically across 9 refactor commits + 1 docs commit; dual-mode smoke gate green.
 
 ### HTTP (current legacy, planned refactor)
 
