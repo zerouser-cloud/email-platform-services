@@ -548,13 +548,22 @@ Plans:
 
 ### Phase 999.11.2: infrastructure-tree-canonical-split (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Refactor `apps/{svc}/src/infrastructure/` across all 6 microservices into canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4 + Graca Explicit Architecture. Feature-slicing per direction (per aggregate / upstream / vendor / cross-cutting concern). Create HealthModule across all 6 services (D-08). Move {SVC}_CONFIG into bootstrap/config/ (D-10). Delete empty gateway.constants.ts (D-11a). Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping + .eslintrc.js Override 6/7/9 paths + infrastructure-client-layering skill. D-14 dual-mode smoke gate at phase end per 999.11.1 precedent. Behavior-preserving — no business logic, no tests. ~65 file moves + ~36 creates + 1 delete + 5 empty-dir cleanups.
+**Requirements**: D-01..D-17 (locked decisions in 999.11.2-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 999.11
-**Plans:** 0 plans
+**Plans:** 10 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 999.11.2 to break down)
+- [ ] 999.11.2-01-PLAN.md — Migrate auth service (template for plans 02-06; 1 aggregate, 1 proto, 0 cross-app clients; Commit 1)
+- [ ] 999.11.2-02-PLAN.md — Migrate audience service (2 aggregates, 1 gRPC upstream; first multi-sub persistence composer; Commit 2)
+- [ ] 999.11.2-03-PLAN.md — Migrate sender service (1 aggregate, 1 gRPC upstream, 1 HTTP vendor; three outbound composer categories; Commit 3)
+- [ ] 999.11.2-04-PLAN.md — Migrate parser service (1 aggregate, 1 gRPC upstream, 1 HTTP vendor, storage double-module split bucket+reports per DC-06; Commit 4)
+- [ ] 999.11.2-05-PLAN.md — Migrate notifier service (RMQ inbound, HTTP telegram, storage reports; classify external/messaging/storage anomalous dirs; Commit 5)
+- [ ] 999.11.2-06-PLAN.md — Migrate gateway service (5 gRPC upstreams, throttle, D-11a gateway.constants.ts delete; highest import-volume, done last; Commit 6)
+- [ ] 999.11.2-07-PLAN.md — Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping per RESEARCH §8 draft (D-15; Commit 7)
+- [ ] 999.11.2-08-PLAN.md — Update .eslintrc.js Override 6/7/9 paths per RESEARCH §9 draft (D-16; Commit 8)
+- [ ] 999.11.2-09-PLAN.md — Verify/refine infrastructure-client-layering skill §Config for bootstrap/config/ + flip VALIDATION.md D-01..D-13,D-15..D-17 rows green (D-17; Commit 9)
+- [ ] 999.11.2-10-PLAN.md — D-14 dual-mode smoke gate (native + isolated) + phase SUMMARY.md with 10 commit SHAs + nyquist_compliant flag flip (D-14; Commit 10)
 
 ### Phase 999.11.1: architecture-compliance-audit-and-fix (INSERTED)
 
