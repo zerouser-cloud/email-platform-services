@@ -1,9 +1,9 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AuthConfigModule } from './infrastructure/config';
-import { AuthController } from './infrastructure/controllers/grpc/auth.controller';
-import { HealthController } from './infrastructure/controllers/rest/health.controller';
-import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
+import { LoggingModule } from '@email-platform/foundation';
+import { AuthConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { AppPersistenceModule } from './infrastructure/outbound/persistence';
 // Services (inbound port adapters)
 import { LoginService } from './application/services/login.service';
 import { RefreshTokenService } from './application/services/refresh-token.service';
@@ -20,9 +20,8 @@ import { RevokeRefreshTokenUseCase } from './application/use-cases/revoke-refres
 import { HashPasswordUseCase } from './application/use-cases/hash-password.use-case';
 import { PersistUserUseCase } from './application/use-cases/persist-user.use-case';
 import { ListUsersUseCase } from './application/use-cases/list-users.use-case';
-// DI tokens
+// DI tokens (domain ports — D-11b: kept at root)
 import {
-  USER_REPOSITORY_PORT,
   LOGIN_PORT,
   REFRESH_TOKEN_PORT,
   VALIDATE_TOKEN_PORT,
@@ -36,15 +35,15 @@ import {
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
     AuthConfigModule.forRoot(),
-    PersistenceModule.forRootAsync(),
+    HealthModule,
     LoggingModule.forGrpcAsync('auth'),
+    AppPersistenceModule,
+    GrpcModule,
   ],
-  controllers: [AuthController, HealthController],
+  controllers: [],
   providers: [
-    // Zone 1: Outbound port → adapter
-    { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
-
-    // Zone 2: Inbound ports → services (D-02 per-feature)
+    // Zone 2: Inbound ports → services (D-02 per-feature).
+    // Outbound USER_REPOSITORY_PORT binding owned by UserModule (outbound/persistence/user).
     { provide: LOGIN_PORT, useClass: LoginService },
     { provide: REFRESH_TOKEN_PORT, useClass: RefreshTokenService },
     { provide: VALIDATE_TOKEN_PORT, useClass: ValidateTokenService },

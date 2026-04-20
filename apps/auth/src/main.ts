@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { SERVICE, loadConfig } from '@email-platform/config';
-import { AuthEnvSchema, type AuthEnv } from './infrastructure/config';
+import { AuthEnvSchema, type AuthEnv } from './infrastructure/bootstrap/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { AuthModule } from './auth.module';
 

@@ -1,4 +1,4 @@
-import { User } from '../../../domain/entities/user.entity';
+import { User } from '../../../../../domain/entities/user.entity';
 import type { users } from '../schema/users.schema';
 
 type UserRow = typeof users.$inferSelect;

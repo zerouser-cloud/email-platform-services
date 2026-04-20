@@ -1,26 +1,13 @@
-import { Global, Module, type DynamicModule, type Provider } from '@nestjs/common';
-import { loadConfig } from '@email-platform/config';
+import { Global, Module, type DynamicModule } from '@nestjs/common';
 import {
   LOGGING_CONFIG_PORT,
   PERSISTENCE_CONFIG_PORT,
   type LoggingConfig,
   type PersistenceConfig,
 } from '@email-platform/foundation';
-import { AuthEnvSchema, type AuthEnv } from './auth-env.schema';
-import { AUTH_CONFIG } from '../../auth.constants';
-
-/**
- * Auth config provider (Phase 999.11.1 D-08) — binds AUTH_CONFIG symbol
- * to the validated AuthEnv value. useValue (not useFactory): loadConfig
- * is cached by schema reference (see packages/config/src/config-loader.ts),
- * eager call at module-definition time is safe.
- *
- * Cast stays until Phase 999.1 (TopologySchema static refactor per PT-04).
- */
-export const authConfigProvider: Provider = {
-  provide: AUTH_CONFIG,
-  useValue: loadConfig(AuthEnvSchema) as AuthEnv,
-};
+import { authConfigProvider } from './auth-config.provider';
+import { AUTH_CONFIG } from './auth-config.constants';
+import type { AuthEnv } from './auth-env.schema';
 
 /**
  * Auth config module (Phase 999.11.1 D-10 fix, 2026-04-20) — @Global() so the
@@ -29,9 +16,8 @@ export const authConfigProvider: Provider = {
  * etc.) whose nested `forRootAsync({inject: [...]})` can't walk up to the root
  * module's providers.
  *
- * Without @Global, nestjs-pino fails at boot with
- * `UnknownDependenciesException: can't resolve Symbol(LOGGING_CONFIG_PORT)`.
- * See Plan 10 SUMMARY "Rule 3 — NestJS DI scope fix" for the root cause analysis.
+ * Moved to sibling file per Phase 999.11.2 D-10 (one-file-per-export convention).
+ * @Global() preserved per Phase 999.11.1 Plan 10 Rule 3 fix.
  */
 @Global()
 @Module({})
