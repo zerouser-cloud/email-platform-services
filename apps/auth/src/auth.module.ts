@@ -1,13 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import {
-  LoggingModule,
-  PersistenceModule,
-  LOGGING_CONFIG_PORT,
-  PERSISTENCE_CONFIG_PORT,
-  type LoggingConfig,
-  type PersistenceConfig,
-} from '@email-platform/foundation';
-import { authConfigProvider, type AuthEnv } from './infrastructure/config';
+import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
+import { AuthConfigModule } from './infrastructure/config';
 import { AuthController } from './infrastructure/controllers/grpc/auth.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
@@ -36,30 +29,18 @@ import {
   REVOKE_TOKEN_PORT,
   CREATE_USER_PORT,
   LIST_USERS_PORT,
-  AUTH_CONFIG,
 } from './auth.constants';
 
 @Module({
-  imports: [PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],
+  imports: [
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    AuthConfigModule.forRoot(),
+    PersistenceModule.forRootAsync(),
+    LoggingModule.forGrpcAsync('auth'),
+  ],
   controllers: [AuthController, HealthController],
   providers: [
-    authConfigProvider,
-
-    // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config slices.
-    {
-      provide: PERSISTENCE_CONFIG_PORT,
-      useFactory: (c: AuthEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
-      inject: [AUTH_CONFIG],
-    },
-    {
-      provide: LOGGING_CONFIG_PORT,
-      useFactory: (c: AuthEnv): LoggingConfig => ({
-        LOG_LEVEL: c.LOG_LEVEL,
-        LOG_FORMAT: c.LOG_FORMAT,
-      }),
-      inject: [AUTH_CONFIG],
-    },
-
     // Zone 1: Outbound port → adapter
     { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
 

@@ -1,15 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import {
-  LoggingModule,
-  PersistenceModule,
-  LOGGING_CONFIG_PORT,
-  PERSISTENCE_CONFIG_PORT,
-  GRPC_CLIENT_CONFIG_PORT,
-  type LoggingConfig,
-  type PersistenceConfig,
-  type GrpcClientConfig,
-} from '@email-platform/foundation';
-import { audienceConfigProvider, type AudienceEnv } from './infrastructure/config';
+import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
+import { AudienceConfigModule } from './infrastructure/config';
 import { AudienceController } from './infrastructure/controllers/grpc/audience.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
@@ -44,43 +35,19 @@ import {
   IMPORT_RECIPIENTS_PORT,
   MARK_AS_SENT_PORT,
   RESET_SEND_STATUS_PORT,
-  AUDIENCE_CONFIG,
 } from './audience.constants';
 
 @Module({
   imports: [
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    AudienceConfigModule.forRoot(),
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('audience'),
     ParserClientModule.forRoot(),
   ],
   controllers: [AudienceController, HealthController],
   providers: [
-    audienceConfigProvider,
-
-    // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config slices.
-    {
-      provide: PERSISTENCE_CONFIG_PORT,
-      useFactory: (c: AudienceEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
-      inject: [AUDIENCE_CONFIG],
-    },
-    {
-      provide: LOGGING_CONFIG_PORT,
-      useFactory: (c: AudienceEnv): LoggingConfig => ({
-        LOG_LEVEL: c.LOG_LEVEL,
-        LOG_FORMAT: c.LOG_FORMAT,
-      }),
-      inject: [AUDIENCE_CONFIG],
-    },
-    {
-      provide: GRPC_CLIENT_CONFIG_PORT,
-      useFactory: (c: AudienceEnv): GrpcClientConfig => ({
-        PROTO_DIR: c.PROTO_DIR,
-        GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
-        grpcUrls: { PARSER_GRPC_URL: c.PARSER_GRPC_URL },
-      }),
-      inject: [AUDIENCE_CONFIG],
-    },
-
     // Zone 1: Outbound ports → adapters (2 aggregates: Recipient + Group)
     { provide: RECIPIENT_REPOSITORY_PORT, useClass: PgRecipientRepository },
     { provide: GROUP_REPOSITORY_PORT, useClass: PgGroupRepository },

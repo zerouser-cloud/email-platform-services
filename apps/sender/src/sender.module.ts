@@ -1,18 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import {
-  LoggingModule,
-  PersistenceModule,
-  CacheModule,
-  LOGGING_CONFIG_PORT,
-  PERSISTENCE_CONFIG_PORT,
-  CACHE_CONFIG_PORT,
-  GRPC_CLIENT_CONFIG_PORT,
-  type LoggingConfig,
-  type PersistenceConfig,
-  type CacheConfig,
-  type GrpcClientConfig,
-} from '@email-platform/foundation';
-import { senderConfigProvider, type SenderEnv } from './infrastructure/config';
+import { LoggingModule, PersistenceModule, CacheModule } from '@email-platform/foundation';
+import { SenderConfigModule } from './infrastructure/config';
 import { SenderController } from './infrastructure/controllers/grpc/sender.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
@@ -52,11 +40,13 @@ import {
   LIST_MESSAGES_PORT,
   CREATE_MESSAGE_PORT,
   LIST_MACROS_PORT,
-  SENDER_CONFIG,
 } from './sender.constants';
 
 @Module({
   imports: [
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    SenderConfigModule.forRoot(),
     PersistenceModule.forRootAsync(),
     CacheModule.forRootAsync({ namespace: 'sender' }),
     LoggingModule.forGrpcAsync('sender'),
@@ -65,37 +55,6 @@ import {
   ],
   controllers: [SenderController, HealthController],
   providers: [
-    senderConfigProvider,
-
-    // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config slices.
-    {
-      provide: PERSISTENCE_CONFIG_PORT,
-      useFactory: (c: SenderEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
-      inject: [SENDER_CONFIG],
-    },
-    {
-      provide: LOGGING_CONFIG_PORT,
-      useFactory: (c: SenderEnv): LoggingConfig => ({
-        LOG_LEVEL: c.LOG_LEVEL,
-        LOG_FORMAT: c.LOG_FORMAT,
-      }),
-      inject: [SENDER_CONFIG],
-    },
-    {
-      provide: CACHE_CONFIG_PORT,
-      useFactory: (c: SenderEnv): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
-      inject: [SENDER_CONFIG],
-    },
-    {
-      provide: GRPC_CLIENT_CONFIG_PORT,
-      useFactory: (c: SenderEnv): GrpcClientConfig => ({
-        PROTO_DIR: c.PROTO_DIR,
-        GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
-        grpcUrls: { AUDIENCE_GRPC_URL: c.AUDIENCE_GRPC_URL },
-      }),
-      inject: [SENDER_CONFIG],
-    },
-
     // Zone 1: Outbound port → adapter
     { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },
 
