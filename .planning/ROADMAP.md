@@ -551,7 +551,7 @@ Plans:
 **Goal:** Полный архитектурный аудит 6 сервисов + packages/foundation на соответствие NestJS↔Hexagonal mapping (CLAUDE.md), twelve-factor skill'у, env-schema skill'у и domain purity — с немедленным исправлением найденных нарушений в рамках этой же фазы (audit-and-fix mode). Известные нарушения на момент вставки: (1) `gateway/src/health/health.controller.ts` + `notifier/src/health/health.controller.ts` в неправильном месте — должны быть в `infrastructure/controllers/rest/`; (2) три smoke-контроллера (`notifier/telegram-smoke`, `sender/cloudfn-smoke`, `parser/appstorespy-smoke`) в `src/test/` вместо `infrastructure/controllers/{grpc,rest}/`; (3) все 4 `apps/*/drizzle.config.ts` используют `process.env.DATABASE_URL!` напрямую — нарушение twelve-factor и env-schema, должно идти через Zod config. Scope расширяется в research: полная матрица controllers placement + все `process.env` usages вне `packages/config` и `main.ts` + domain purity + proto visibility + feature-модули. Должно закрыть архитектурный долг ДО начала canonical-alignment фаз (999.12–999.15). **Absorbed the original Phase 999.2 scope** — canonical per-service `{SVC}_CONFIG` Symbol pattern + `@nestjs/config` full replace landed here.
 **Requirements:** D-01..D-15 (locked decisions in 999.11.1-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 999.11
-**Plans:** 10/10 plans executed
+**Plans:** 10/10 plans complete
 
 Plans:
 - [x] 999.11.1-01-PLAN.md — Register {SVC}_CONFIG Symbols + providers in all 6 services (dormant, D-08)

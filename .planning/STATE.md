@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Completed 999.11.1-09-remove-nestjs-config-dep-PLAN.md
-last_updated: "2026-04-20T09:34:08.436Z"
+status: verifying
+stopped_at: "Completed 999.11.1-10-docs-update-smoke-gate-PLAN.md — Phase 999.11.1 architecturally complete, ready for /gsd:verify-work"
+last_updated: "2026-04-20T09:59:33.749Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
-  completed_phases: 18
+  completed_phases: 19
   total_plans: 83
-  completed_plans: 82
+  completed_plans: 83
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
 Plan: 10 of 10
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-20
 
 Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
@@ -113,6 +113,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P05 | 209s | 4 tasks | 9 files |
 | Phase 999.11.1 P06 | 2min 41s | 2 tasks | 4 files |
 | Phase 999.11.1 P09 | 330s | 4 tasks | 17 files |
+| Phase 999.11.1 P10 | 15min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -179,6 +180,8 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1]: Plan 05: per-app scope — each app includes only upstreams it consumes (gateway=5 URLs, sender/parser/audience=1 each, notifier+auth=none)
 - [Phase 999.11.1]: Plan 06: httpClientProvider generalised with envToken opt + generic TEnv — foundation HTTP factory is now service-agnostic; 3 vendor modules (telegram/appstorespy/cloudfn) cascade through NOTIFIER/PARSER/SENDER_CONFIG. D-10 Canonical Config Access Contract now covers complete foundation surface (cache/persistence/logging/storage/grpc/http).
 - [Phase 999.11.1]: Plan 09: Removed @nestjs/config entirely from workspace — deleted AppConfigModule (22 LoC), scrubbed 8 package.json files, regenerated pnpm-lock.yaml. {SVC}_CONFIG providers now the sole config path. Three VALIDATION rows flip green: D-09 acid (no @Inject in use-cases), D-11 inv1+2 (no imports + no deps), D-12 rechecked (no configService.get).
+- [Phase 999.11.1]: Plan 10 Rule 3 auto-fix: @Global() config modules per service resolve latent NestJS DI scope bug exposed by Plan 04 + Plan 09 combined changes. SKILL.md Config subsection now names @Global() as required. D-15 dual-mode smoke gate PASSED (native HTTP 200 @12s + isolated HTTP 200 @58s, both 5/5 upstreams up, 0 error/warn across 6 containers).
+- [Phase 999.11.1]: Phase 999.11.1 architecturally COMPLETE (10/10 plans). 18 BLOCKER resolved + 6 NON-BLOCKER documented; D-01..D-15 all green. Absorbed original Phase 999.2 scope. Ready for /gsd:verify-work 999.11.1.
 
 ### Pending Todos
 
@@ -204,6 +207,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T09:34:08.433Z
-Stopped at: Completed 999.11.1-09-remove-nestjs-config-dep-PLAN.md
+Last session: 2026-04-20T09:59:33.746Z
+Stopped at: Completed 999.11.1-10-docs-update-smoke-gate-PLAN.md — Phase 999.11.1 architecturally complete, ready for /gsd:verify-work
 Resume file: None
