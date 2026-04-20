@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { TelegramTypes } from '@email-platform/contracts';
-import { NotificationSenderPort } from '../../../application/ports/outbound/notification-sender.port';
-import { Notification } from '../../../domain/entities/notification.entity';
+import { NotificationSenderPort } from '../../../../application/ports/outbound/notification-sender.port';
+import { Notification } from '../../../../domain/entities/notification.entity';
 import { TelegramClient } from './telegram.client';
 import { TELEGRAM_CLIENT } from './telegram-client.constants';
 

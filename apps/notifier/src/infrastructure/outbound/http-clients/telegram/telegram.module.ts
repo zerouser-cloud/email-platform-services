@@ -2,8 +2,8 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { httpClientProvider } from '@email-platform/foundation';
 import { TelegramClient } from './telegram.client';
 import { TELEGRAM_CLIENT, TELEGRAM_ENV, TELEGRAM_LOG_CONTEXT } from './telegram-client.constants';
-import { NOTIFIER_CONFIG } from '../../../notifier.constants';
-import type { NotifierEnv } from '../../config';
+import { NOTIFIER_CONFIG } from '../../../bootstrap/config/notifier-config.constants';
+import type { NotifierEnv } from '../../../bootstrap/config';
 
 /**
  * TelegramClientModule — DynamicModule providing a single TelegramClient
