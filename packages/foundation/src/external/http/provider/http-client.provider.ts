@@ -5,14 +5,16 @@
  * http-smoke).
  *
  * The factory:
- *   1. Reads `baseUrl` via native `ConfigService.getOrThrow<string>()` (D-18)
- *      — or accepts a literal `baseUrlLiteral` for smoke/test clients.
+ *   1. Reads `baseUrl` via typed env slice indexed by `baseUrlEnvKey`
+ *      (Phase 999.11.1 D-10 — foundation is service-agnostic, apps provide a
+ *      narrow `{Svc}Env` slice via `envToken`). For smoke/test clients with
+ *      a constant target URL, `baseUrlLiteral` bypasses the env lookup.
  *   2. Constructs FRESH per-vendor collaborators (logger, normaliser, executor,
  *      retry, breaker) — per-vendor CB isolation preserved (D-08 / Phase 24).
  *   3. Assembles the `HttpClientDeps` param-bag.
- *   4. Delegates final construction to caller-supplied `build(deps + config)`
- *      callback — vendor code reads additional vendor-specific env vars
- *      (`config.getOrThrow<string>(VENDOR_ENV.API_KEY)`) inside `build`.
+ *   4. Delegates final construction to caller-supplied `build(deps + env)`
+ *      callback — vendor code reads additional vendor-specific env vars via
+ *      typed access (`deps.env[VENDOR_ENV.API_KEY]`) inside `build`.
  *
  * Manual-construction lifecycle note: `PinoHttpClientLoggerAdapter` is
  * instantiated directly here (not DI-resolved), so NestJS `onModuleInit`
@@ -28,7 +30,6 @@
  */
 
 import type { Provider } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ClsService } from 'nestjs-cls';
 
 import type { AbstractHttpClient } from '../client/abstract-http.client';
@@ -57,7 +58,15 @@ const DEFAULT_TIMEOUT_MS = 5_000;
 export interface HttpClientProviderOpts {
   readonly token: symbol;
   readonly logContext: string;
-  /** Env var name whose value becomes the client's baseUrl (resolved via ConfigService.getOrThrow). Mutually exclusive with `baseUrlLiteral`. */
+  /**
+   * DI token for the app's narrow env config (e.g. `NOTIFIER_CONFIG`). The
+   * factory injects this token to read `baseUrl` (and the `build` callback
+   * reads additional vendor fields) via typed index access on `TEnv`.
+   * Required — foundation is service-agnostic and never injects the
+   * global NestJS config service directly (Phase 999.11.1 D-10).
+   */
+  readonly envToken: symbol;
+  /** Env var name whose value becomes the client's baseUrl (looked up as `env[baseUrlEnvKey]`). Mutually exclusive with `baseUrlLiteral`. */
   readonly baseUrlEnvKey?: string;
   /** Literal baseUrl (used for smoke/test clients that point to a constant target URL). Mutually exclusive with `baseUrlEnvKey`. */
   readonly baseUrlLiteral?: string;
@@ -65,10 +74,10 @@ export interface HttpClientProviderOpts {
   readonly cb?: Partial<CbOptions>;
 }
 
-export function httpClientProvider<T extends AbstractHttpClient>(
-  opts: HttpClientProviderOpts,
-  build: (deps: HttpClientDeps & { config: ConfigService }) => T,
-): Provider {
+export function httpClientProvider<
+  T extends AbstractHttpClient,
+  TEnv extends Record<string, unknown> = Record<string, unknown>,
+>(opts: HttpClientProviderOpts, build: (deps: HttpClientDeps & { env: TEnv }) => T): Provider {
   // Developer-time guard — exactly one baseUrl source required.
   if (
     (!opts.baseUrlEnvKey && !opts.baseUrlLiteral) ||
@@ -79,8 +88,8 @@ export function httpClientProvider<T extends AbstractHttpClient>(
 
   return {
     provide: opts.token,
-    inject: [ConfigService, ClsService],
-    useFactory: (config: ConfigService, cls: ClsService): T => {
+    inject: [opts.envToken, ClsService],
+    useFactory: (env: TEnv, cls: ClsService): T => {
       const logger = new PinoHttpClientLoggerAdapter(cls, opts.logContext);
       const normalizer = new HttpErrorNormalizer([
         new TimeoutErrorMapper(),
@@ -107,7 +116,7 @@ export function httpClientProvider<T extends AbstractHttpClient>(
 
       const baseUrl = opts.baseUrlLiteral
         ? opts.baseUrlLiteral
-        : config.getOrThrow<string>(opts.baseUrlEnvKey as string);
+        : (env[opts.baseUrlEnvKey as string] as string);
 
       const deps: HttpClientDeps = {
         cls,
@@ -120,7 +129,7 @@ export function httpClientProvider<T extends AbstractHttpClient>(
         logContext: opts.logContext,
       };
 
-      return build({ ...deps, config });
+      return build({ ...deps, env });
     },
   };
 }
