@@ -1,12 +1,12 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { ParserConfigModule } from './infrastructure/config';
-import { ParserController } from './infrastructure/controllers/grpc/parser.controller';
-import { HealthController } from './infrastructure/controllers/rest/health.controller';
-import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
-import { AppStoreSpyClientModule } from './infrastructure/clients/appstorespy';
-import { NotifierClientModule } from './infrastructure/clients/notifier';
-import { StorageModule } from './infrastructure/storage';
+import { LoggingModule } from '@email-platform/foundation';
+import { ParserConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { AppPersistenceModule } from './infrastructure/outbound/persistence';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
+import { HttpClientsModule } from './infrastructure/outbound/http-clients';
+import { AppStorageModule } from './infrastructure/outbound/storage';
 // Services (inbound port adapters)
 import { CreateTaskService } from './application/services/create-task.service';
 import { ListTasksService } from './application/services/list-tasks.service';
@@ -19,9 +19,8 @@ import { ListParserTasksUseCase } from './application/use-cases/list-parser-task
 import { GetParserTaskUseCase } from './application/use-cases/get-parser-task.use-case';
 import { GetParserSettingsUseCase } from './application/use-cases/get-parser-settings.use-case';
 import { UpdateParserSettingsUseCase } from './application/use-cases/update-parser-settings.use-case';
-// DI tokens
+// DI tokens (inbound ports — outbound PARSER_TASK_REPOSITORY_PORT owned by ParserTaskModule per D-02)
 import {
-  PARSER_TASK_REPOSITORY_PORT,
   CREATE_TASK_PORT,
   LIST_TASKS_PORT,
   GET_TASK_PORT,
@@ -34,18 +33,19 @@ import {
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
     ParserConfigModule.forRoot(),
-    PersistenceModule.forRootAsync(),
-    StorageModule,
+    HealthModule,
     LoggingModule.forGrpcAsync('parser'),
-    AppStoreSpyClientModule.forRoot(),
-    NotifierClientModule.forRoot(),
+    AppPersistenceModule,
+    GrpcClientsModule,
+    HttpClientsModule,
+    AppStorageModule,
+    GrpcModule,
   ],
-  controllers: [ParserController, HealthController],
+  controllers: [],
   providers: [
-    // Zone 1: Outbound port → adapter
-    { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },
-
-    // Zone 2: Inbound ports → services (D-02 per-feature)
+    // Zone 2: Inbound ports → services (D-02 per-feature).
+    // Zone 1 (PARSER_TASK_REPOSITORY_PORT → PgParserTaskRepository) moved into
+    // ParserTaskModule per D-02 (per-aggregate sub-module ownership).
     { provide: CREATE_TASK_PORT, useClass: CreateTaskService },
     { provide: LIST_TASKS_PORT, useClass: ListTasksService },
     { provide: GET_TASK_PORT, useClass: GetTaskService },

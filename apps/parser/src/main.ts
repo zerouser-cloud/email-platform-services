@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { SERVICE, loadConfig } from '@email-platform/config';
-import { ParserEnvSchema, type ParserEnv } from './infrastructure/config';
+import { ParserEnvSchema, type ParserEnv } from './infrastructure/bootstrap/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { ParserModule } from './parser.module';
 

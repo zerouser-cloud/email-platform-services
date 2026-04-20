@@ -14,9 +14,6 @@ export const GET_TASK_PORT = Symbol('GetTaskPort');
 export const GET_SETTINGS_PORT = Symbol('GetSettingsPort');
 export const UPDATE_SETTINGS_PORT = Symbol('UpdateSettingsPort');
 
-// Canonical Config Access Contract (Phase 999.11.1 D-08) — per-service {SVC}_CONFIG Symbol.
-export const PARSER_CONFIG = Symbol('PARSER_CONFIG');
-
 // Pagination defaults applied at the proto->Command boundary when the client omits pagination.
 // Real pagination policy is deferred until business logic lands; these are conservative stubs.
 export const PAGINATION_DEFAULTS = {

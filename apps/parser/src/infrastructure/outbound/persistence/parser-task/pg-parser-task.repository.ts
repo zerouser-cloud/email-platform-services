@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '@email-platform/foundation';
-import type { ParserTaskRepositoryPort } from '../../application/ports/outbound/parser-task-repository.port';
-import type { ParserTask } from '../../domain/entities/parser-task.entity';
+import type { ParserTaskRepositoryPort } from '../../../../application/ports/outbound/parser-task-repository.port';
+import type { ParserTask } from '../../../../domain/entities/parser-task.entity';
 import { parserTasks } from './schema/parser-tasks.schema';
 import { ParserTaskMapper } from './mappers/parser-task.mapper';
 

@@ -1,5 +1,4 @@
-import { Global, Module, type DynamicModule, type Provider } from '@nestjs/common';
-import { loadConfig } from '@email-platform/config';
+import { Global, Module, type DynamicModule } from '@nestjs/common';
 import {
   LOGGING_CONFIG_PORT,
   PERSISTENCE_CONFIG_PORT,
@@ -12,27 +11,18 @@ import {
   type PublicStorageConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { ParserEnvSchema, type ParserEnv } from './parser-env.schema';
-import { PARSER_CONFIG } from '../../parser.constants';
-
-/**
- * Parser config provider (Phase 999.11.1 D-08) — binds PARSER_CONFIG symbol
- * to the validated ParserEnv value. useValue (not useFactory): loadConfig
- * is cached by schema reference (see packages/config/src/config-loader.ts),
- * eager call at module-definition time is safe.
- *
- * Cast stays until Phase 999.1 (TopologySchema static refactor per PT-04).
- */
-export const parserConfigProvider: Provider = {
-  provide: PARSER_CONFIG,
-  useValue: loadConfig(ParserEnvSchema) as ParserEnv,
-};
+import { PARSER_CONFIG } from './parser-config.constants';
+import { parserConfigProvider } from './parser-config.provider';
+import type { ParserEnv } from './parser-env.schema';
 
 /**
  * Parser config module (Phase 999.11.1 D-10 fix, 2026-04-20) — @Global() so the
  * PARSER_CONFIG + narrow `*_CONFIG_PORT` slice providers are visible to third-party
  * dynamic modules inside foundation. See Plan 10 SUMMARY "Rule 3 — NestJS DI scope
  * fix" for the root cause analysis.
+ *
+ * Phase 999.11.2 D-10: extracted into its own file (sibling of provider) per
+ * one-file-per-export convention established by Plan 01.
  */
 @Global()
 @Module({})
