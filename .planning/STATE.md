@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.1-05-foundation-grpc-narrow-config-cascade-PLAN.md
-last_updated: "2026-04-20T09:17:58.377Z"
+stopped_at: Completed 999.11.1-06-foundation-http-narrow-config-cascade-PLAN.md
+last_updated: "2026-04-20T09:24:51.706Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
   completed_phases: 18
   total_plans: 83
-  completed_plans: 80
+  completed_plans: 81
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
-Plan: 8 of 10
+Plan: 9 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -111,6 +111,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P08 | 1min14s | 1 tasks | 6 files |
 | Phase 999.11.1 P04 | 7min 26s | 4 tasks | 26 files |
 | Phase 999.11.1 P05 | 209s | 4 tasks | 9 files |
+| Phase 999.11.1 P06 | 2min 41s | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -175,6 +176,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1]: Plan 04: Foundation narrow-config (D-10) — 5 *_CONFIG_PORT Symbols + 5 narrow Config interfaces; IC-01/02/03/07/08 resolved;  casts gone; re-export over bespoke for zero-drift; STORAGE_CORE_CONFIG_PORT surfaced via external/storage barrel to avoid internal leak
 - [Phase 999.11.1]: Plan 05: grpcUrls as Record<string,string> keyed by SERVICE.{svc}.envKeys.GRPC_URL — multi-instance narrow-config shape for gRPC clients (apps project typed reads, foundation does O(1) key lookup)
 - [Phase 999.11.1]: Plan 05: per-app scope — each app includes only upstreams it consumes (gateway=5 URLs, sender/parser/audience=1 each, notifier+auth=none)
+- [Phase 999.11.1]: Plan 06: httpClientProvider generalised with envToken opt + generic TEnv — foundation HTTP factory is now service-agnostic; 3 vendor modules (telegram/appstorespy/cloudfn) cascade through NOTIFIER/PARSER/SENDER_CONFIG. D-10 Canonical Config Access Contract now covers complete foundation surface (cache/persistence/logging/storage/grpc/http).
 
 ### Pending Todos
 
@@ -200,6 +202,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T09:17:41.669Z
-Stopped at: Completed 999.11.1-05-foundation-grpc-narrow-config-cascade-PLAN.md
+Last session: 2026-04-20T09:24:51.703Z
+Stopped at: Completed 999.11.1-06-foundation-http-narrow-config-cascade-PLAN.md
 Resume file: None
