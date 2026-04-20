@@ -7,7 +7,6 @@ import { HealthController } from './infrastructure/controllers/rest/health.contr
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
 import { CloudFnClientModule } from './infrastructure/clients/cloud-functions';
 import { AudienceClientModule } from './infrastructure/clients/audience';
-import { CloudFnSmokeController } from './test/cloudfn-smoke.controller';
 // Services (inbound port adapters)
 import { ListCampaignsService } from './application/services/list-campaigns.service';
 import { GetCampaignService } from './application/services/get-campaign.service';
@@ -53,7 +52,7 @@ import {
     CloudFnClientModule.forRoot(),
     AudienceClientModule.forRoot(),
   ],
-  controllers: [SenderController, HealthController, CloudFnSmokeController],
+  controllers: [SenderController, HealthController],
   providers: [
     senderConfigProvider,
 

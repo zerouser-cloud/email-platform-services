@@ -8,7 +8,6 @@ import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-t
 import { AppStoreSpyClientModule } from './infrastructure/clients/appstorespy';
 import { NotifierClientModule } from './infrastructure/clients/notifier';
 import { StorageModule } from './infrastructure/storage';
-import { AppStoreSpySmokeController } from './test/appstorespy-smoke.controller';
 // Services (inbound port adapters)
 import { CreateTaskService } from './application/services/create-task.service';
 import { ListTasksService } from './application/services/list-tasks.service';
@@ -40,7 +39,7 @@ import {
     AppStoreSpyClientModule.forRoot(),
     NotifierClientModule.forRoot(),
   ],
-  controllers: [ParserController, HealthController, AppStoreSpySmokeController],
+  controllers: [ParserController, HealthController],
   providers: [
     parserConfigProvider,
 
