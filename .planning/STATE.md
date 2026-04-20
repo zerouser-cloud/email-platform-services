@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.1-08-delete-smoke-controllers-PLAN.md
-last_updated: "2026-04-20T08:57:20.325Z"
+stopped_at: Completed 999.11.1-04-foundation-narrow-config-cache-persistence-logging-storage-PLAN.md
+last_updated: "2026-04-20T09:09:37.815Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
   completed_phases: 18
   total_plans: 83
-  completed_plans: 78
+  completed_plans: 79
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
-Plan: 6 of 10
+Plan: 7 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -109,6 +109,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P07 | ~2min | 1 tasks | 4 files |
 | Phase 999.11.1 P03 | 159s | 2 tasks | 2 files |
 | Phase 999.11.1 P08 | 1min14s | 1 tasks | 6 files |
+| Phase 999.11.1 P04 | 7min 26s | 4 tasks | 26 files |
 
 ## Accumulated Context
 
@@ -170,6 +171,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1-07]: Workspace invariant sealed: zero process.env.X! patterns in apps/ (grep 0 matches); only legitimate process.env reads remaining are inside packages/config/src/config-loader.ts and 4 drizzle.config.ts DatabaseSchema.parse(process.env) CLI entry points
 - [Phase 999.11.1]: [Phase 999.11.1-03]: ThrottleModule relocated to infrastructure/throttle/ canonical path via git mv at 57% similarity (NH-03 feature submodule resolved). First end-to-end consumer of GATEWAY_CONFIG Symbol — Canonical Config Access Contract chain (gateway.constants.ts → gateway-config.provider.ts → providers[] → inject: [GATEWAY_CONFIG]) validated. 4 configService.get<number>('RATE_LIMIT_*')! callsites migrated to 4 typed config.RATE_LIMIT_* reads from GatewayEnv (IC-09 resolved, D-12 partial 4/14+). @nestjs/config import removed from throttle.module.ts (D-11 partial progress). THROTTLE_TIER 'as const' preserved verbatim (no-magic-values). 1 atomic commit c1672a0 (2 files, 9+/8- delta, rename+body-rewrite detected at 57%). D-14 gate green: lint 7/7 + build 10/10 (gateway cache miss executed clean). 0 deviations, 0 auto-fixes. Pattern proven for Plans 04-06 foundation narrow-config cascade + 3rd-party forRootAsync migration template established.
 - [Phase 999.11.1]: Plan 08: Atomic single-commit deletion of 3 smoke controllers (Telegram/CloudFn/AppStoreSpy) — HTTP clients preserved for Phase 999.15 CI post-deploy smoke; D-05 phase invariant fully green (zero controllers outside infrastructure/).
+- [Phase 999.11.1]: Plan 04: Foundation narrow-config (D-10) — 5 *_CONFIG_PORT Symbols + 5 narrow Config interfaces; IC-01/02/03/07/08 resolved;  casts gone; re-export over bespoke for zero-drift; STORAGE_CORE_CONFIG_PORT surfaced via external/storage barrel to avoid internal leak
 
 ### Pending Todos
 
@@ -195,6 +197,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T08:57:20.322Z
-Stopped at: Completed 999.11.1-08-delete-smoke-controllers-PLAN.md
+Last session: 2026-04-20T09:09:37.811Z
+Stopped at: Completed 999.11.1-04-foundation-narrow-config-cache-persistence-logging-storage-PLAN.md
 Resume file: None
