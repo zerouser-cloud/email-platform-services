@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { GATEWAY_CONFIG } from '../../gateway.constants';
+import type { GatewayEnv } from '../config';
 
 const THROTTLE_TIER = {
   BURST: 'burst',
@@ -11,18 +12,18 @@ const THROTTLE_TIER = {
 @Module({
   imports: [
     ThrottlerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
+      inject: [GATEWAY_CONFIG],
+      useFactory: (config: GatewayEnv) => ({
         throttlers: [
           {
             name: THROTTLE_TIER.BURST,
-            ttl: configService.get<number>('RATE_LIMIT_BURST_TTL')!,
-            limit: configService.get<number>('RATE_LIMIT_BURST_LIMIT')!,
+            ttl: config.RATE_LIMIT_BURST_TTL,
+            limit: config.RATE_LIMIT_BURST_LIMIT,
           },
           {
             name: THROTTLE_TIER.SUSTAINED,
-            ttl: configService.get<number>('RATE_LIMIT_SUSTAINED_TTL')!,
-            limit: configService.get<number>('RATE_LIMIT_SUSTAINED_LIMIT')!,
+            ttl: config.RATE_LIMIT_SUSTAINED_TTL,
+            limit: config.RATE_LIMIT_SUSTAINED_LIMIT,
           },
         ],
       }),

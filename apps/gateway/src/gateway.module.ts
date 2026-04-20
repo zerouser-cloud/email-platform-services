@@ -3,7 +3,7 @@ import { AppConfigModule } from '@email-platform/config';
 import { GatewayEnvSchema, gatewayConfigProvider } from './infrastructure/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { LoggingModule, GrpcToHttpExceptionFilter } from '@email-platform/foundation';
-import { ThrottleModule } from './throttle/throttle.module';
+import { ThrottleModule } from './infrastructure/throttle/throttle.module';
 import { GrpcClientsModule } from './infrastructure/clients/grpc-clients.module';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 
