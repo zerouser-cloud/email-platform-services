@@ -162,6 +162,18 @@ Per-service `{SVC}_CONFIG` Symbol + typed narrow foundation interfaces fix all t
 
 **Reference:** Phase 999.11.1 (`.planning/phases/999.11.1-architecture-compliance-audit-and-fix/`) — all 6 services migrated atomically across 9 refactor commits + 1 docs commit; dual-mode smoke gate green.
 
+#### Phase 999.11.2 refinement — canonical placement under `bootstrap/config/`
+
+After Phase 999.11.2 the config artifacts live under `infrastructure/bootstrap/config/` per the canonical `inbound/`/`outbound/`/`bootstrap/` direction-split tree (Cockburn primary/secondary adapters + Uncle Bob Ring 4 framework glue). The three bullets in "Apps" above refresh as follows:
+
+- **Identity:** `{SVC}_CONFIG = Symbol('{SVC}_CONFIG')` now lives in `apps/{svc}/src/infrastructure/bootstrap/config/{svc}-config.constants.ts` (was `apps/{svc}/src/{svc}.constants.ts`).
+- **Assembly:** the provider factory + the `@Global() {Svc}ConfigModule` + the Zod env schema + the `{SVC}_CONFIG` Symbol are co-located in one slice: `apps/{svc}/src/infrastructure/bootstrap/config/{svc}-config.{constants,module,provider}.ts` + `{svc}-env.schema.ts`. One file per export (D-10).
+- **Composition root import:** `import { {Svc}ConfigModule } from './infrastructure/bootstrap/config'` (was `'./infrastructure/config'`). The `{Svc}ConfigModule.forRoot()` still goes FIRST in the root `imports:[]` for the same reason — nested third-party `forRootAsync` modules need `@Global()` visibility at bootstrap time.
+
+**Gateway-specific (D-11a):** Gateway has NO root `gateway.constants.ts` post-999.11.2 — it was deleted after `GATEWAY_CONFIG` moved to `bootstrap/config/`. The other 5 services (auth, sender, parser, audience, notifier) keep their root `{svc}.constants.ts` for **cross-folder domain-port Symbols** (`LOGIN_PORT`, `CAMPAIGN_REPOSITORY_PORT`, ...) consumed by both `infrastructure/inbound/grpc/` controllers and `infrastructure/outbound/persistence/` repositories. Config lives entirely in `bootstrap/config/` — the root file is for domain ports only.
+
+**Reference phases:** 999.11.1 (Canonical Config Access Contract established — `{SVC}_CONFIG` Symbol + `@Global()` module + narrow foundation configs) and 999.11.2 (relocation into the canonical `bootstrap/config/` slice of the inbound/outbound/bootstrap direction-split tree).
+
 ### HTTP (current legacy, planned refactor)
 
 - **Catalog:** none — external APIs (Telegram, AppStoreSpy, CloudFn) have no service identity in catalog.
