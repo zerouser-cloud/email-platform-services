@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.2-04-migrate-parser-PLAN.md
-last_updated: "2026-04-20T13:57:48.475Z"
+stopped_at: Completed 999.11.2-05-migrate-notifier-PLAN.md
+last_updated: "2026-04-20T14:12:49.718Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
   completed_phases: 19
   total_plans: 93
-  completed_plans: 87
+  completed_plans: 88
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
-Plan: 5 of 10
+Plan: 6 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -118,6 +118,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P02 | 5min | 5 tasks | 30 files |
 | Phase 999.11.2 P03 | 5min6s | 6 tasks | 33 files |
 | Phase 999.11.2 P04 | 5min33s | 6 tasks | 42 files |
+| Phase 999.11.2 P05 | 583s | 6 tasks | 25 files |
 
 ## Accumulated Context
 
@@ -199,6 +200,14 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2]: D-PARSER-02: Four-composer milestone — parser exercises all four outbound composer categories in one plan (persistence + grpc-clients + http-clients + storage); composer layer kept even for single-sub per D-06 verbatim
 - [Phase 999.11.2]: D-PARSER-03: Storage double-module canonical split (DC-06 preserved): ParserStorageModule → BucketModule; inline SharedNamespaceModule.forNamespace({namespace:'reports'}) extracted into ReportsModule; AppStorageModule composer aggregates both
 - [Phase 999.11.2]: D-PARSER-04: Pitfall 3 net-cancel (second real-world proof) — appstorespy.module.ts PARSER_CONFIG import stays 3 .. through the double-move to bootstrap/config/parser-config.constants
+- [Phase 999.11.2]: D-NOTIFIER-01: First non-persistence service migrated — HealthModule imports only TerminusModule + AppStorageModule (no PersistenceModule); validates canonical 3-bin tree degrades cleanly without a database tie-in
+- [Phase 999.11.2]: D-NOTIFIER-02: RabbitMqHealthIndicator wired as class-based provider (not DI token) — mirrors pre-phase style since foundation exports it as a class; first service in phase to use this wiring
+- [Phase 999.11.2]: D-NOTIFIER-03: HANDLE_EVENT_PORT binding migrated from root notifier.module.ts to RmqModule (inbound composer) — cohesive with EventConsumer; first phase application of an inbound composer owning both adapter + inbound-port binding
+- [Phase 999.11.2]: D-NOTIFIER-04 (OQ-5 resolved): NOTIFICATION_SENDER_PORT → TelegramNotificationAdapter binding stays at composition root for forward flexibility; HttpClientsModule barrel re-exports adapter class
+- [Phase 999.11.2]: D-NOTIFIER-05 (OQ-2 resolved): AppStorageModule kept as single-sub composer (only ReportsModule) per D-06 verbatim — scale composer layer uniformly for additive future expansion
+- [Phase 999.11.2]: D-NOTIFIER-06: All 3 anomalous dirs classified — external/ (empty → DELETE), messaging/ → inbound/rmq/event.consumer.ts (rename + relocate), storage/ → outbound/storage/reports/reports.module.ts + AppStorageModule composer
+- [Phase 999.11.2]: D-NOTIFIER-07: Vestigial apps/notifier/src/health/ directory (empty since 999.11.1 Plan 02 relocated health.controller.ts) deleted atomically in this plan's commit — vestigial-dir cleanup as part of slice migration
+- [Phase 999.11.2]: D-NOTIFIER-08 (Pitfall 3): telegram.module.ts NOTIFIER_CONFIG + NotifierEnv imports rewritten to bootstrap/config path with preserved 3 .. depth count (source depth +1 + target depth -2 = pivot-with-preserved-count)
 
 ### Pending Todos
 
@@ -225,6 +234,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T13:57:48.472Z
-Stopped at: Completed 999.11.2-04-migrate-parser-PLAN.md
+Last session: 2026-04-20T14:12:19.449Z
+Stopped at: Completed 999.11.2-05-migrate-notifier-PLAN.md
 Resume file: None
