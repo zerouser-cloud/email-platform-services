@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.1-01-register-svc-config-symbols-PLAN.md
-last_updated: "2026-04-20T08:37:42.404Z"
+stopped_at: Completed 999.11.1-02-relocate-health-controllers-PLAN.md
+last_updated: "2026-04-20T08:42:15.363Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
   completed_phases: 18
   total_plans: 83
-  completed_plans: 74
+  completed_plans: 75
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
-Plan: 2 of 10
+Plan: 3 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -105,6 +105,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11 P03 | ~1m21s | 1 task | 2 files (1 modified + 1 deleted, 1 atomic commit — asymmetric scope) |
 | Phase 999.11 P04 | ~5min | 2 tasks (1 atomic commit + 1 D-07 dual-mode smoke gate) | 5 files in Commit 6 (2 proto + 2 regenerated + 1 controller, -782/+17 delta) |
 | Phase 999.11.1 P01 | 3min 28s | 3 tasks | 24 files |
+| Phase 999.11.1 P02 | 1min 34s | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -160,6 +161,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11-03]: Notifier backend storage-smoke controller deletion (asymmetric-scope single-commit plan) — 1 atomic commit f78d74e on feature/phase-20-config-decomposition (2 file ops: 1 modification + 1 deletion, -108/+1 line delta). CONTEXT.md D-02 bullet 2 assertion of notifier being a "полный структурный аналог parser'а" refuted empirically before edit via 4-probe filesystem battery: 0 files match *storage-smoke*/*run-private-smoke*/*run-public-smoke*/*cleanup-smoke* under apps/notifier/src/application/; 0 STORAGE_SMOKE tokens in notifier.constants.ts; 0 RunStorageSmokePort/CleanupStorageSmokePort references workspace-wide. RESEARCH.md Pitfall 2 anticipated this — notifier's storage-smoke logic lived entirely inside 107-line `apps/notifier/src/test/storage-smoke.controller.ts` with inline @GrpcMethod('NotifierService', 'RunStorageSmoke'|'CleanupStorageSmoke') handlers injecting SHARED_REPORTS/PUBLIC_BUCKET from foundation directly — no application layer existed for this concern. File deleted via `git rm`. `apps/notifier/src/notifier.module.ts` shrunk 42→40 lines: 1 import removed + controllers[] array reduced 3→2 entries (now `[HealthController, TelegramSmokeController]`). TelegramSmokeController (test/telegram-smoke.controller.ts) explicitly PRESERVED per D-03 — unrelated Telegram diagnostics concern. health.controller.ts + infrastructure/storage/storage.module.ts (binds SHARED_REPORTS for real non-smoke event handlers) + application/ + notifier.constants.ts all UNTOUCHED (git diff HEAD~1 HEAD confirms empty diff on these paths). notifier.proto UNTOUCHED (Plan 04). parser/ + gateway/ UNTOUCHED (prior plans complete). Per-commit gate D-06 green: pnpm lint 7/7 (0 errors, only pre-existing out-of-scope warnings in rabbitmq-event.subscriber.ts); pnpm build 10/10 (notifier cache miss, rebuilt clean). Path-scoped staging excluded unrelated promisify-grpc-client.ts modification + ~140 untracked .claude/* artifacts. Intermediate runtime state accepted per threat register T-999.11-03-01: between Commit 5 and Plan 04 Commit 6, NotifierService.RunStorageSmoke/CleanupStorageSmoke remain advertised in proto but no @GrpcMethod handler registered → direct invocation returns UNIMPLEMENTED; gateway no longer routes these (Plan 01); duration bounded by Plan 04 runtime minutes. 17/17 acceptance-criteria invariants PASS. 0 deviations, 0 auto-fixes, 0 retries, 0 architectural escalations. Plan 04 (proto edits + ts-proto regeneration + parser.controller.ts throwing-stub removal + D-07 dual-mode runtime smoke gate) unblocked — all three services' app-level code fully cleaned; only proto layer + final verification remain.
 - [Phase 999.11-04]: FINAL plan — proto smoke surface removed + contracts regenerated + parser.controller.ts stubs deleted, all in 1 atomic Commit 6 (fb23e24) on feature/phase-20-config-decomposition per D-04 Commit 6 definition + Pitfall 1 single-atomic-commit invariant. 5 files / -782 / +17 line delta. packages/contracts/proto/parser.proto 100→68 lines (ParserService 8→6 RPCs — removed RunStorageSmoke + CleanupStorageSmoke + 5 smoke message types StorageSmokeStepResult/StorageSmokeBucketResult/StorageSmokeResponse/CleanupSmokeRequest/CleanupSmokeResponse + section comment). packages/contracts/proto/notifier.proto 45→14 lines (NotifierService 3→1 RPC — HealthCheck only; service-level comment expanded from the old 2-liner to 5-line intentional-minimal-surface doc block citing grpc-health-check independent registration + foundation path packages/foundation/src/external/grpc/grpc-server.factory.ts, per RESEARCH.md Pitfall 3 hardening against future "cleanup" regressions). `pnpm generate:contracts` regenerated both generated/*.ts files cleanly via ts-proto + grpc-tools turbo pipeline: packages/contracts/src/generated/parser.ts 1030→687 lines; packages/contracts/src/generated/notifier.ts 418→80 lines; 0 surprise type drift. apps/parser/src/infrastructure/controllers/grpc/parser.controller.ts -19 lines: bridge comment block from Plan 02 + 2 throwing stubs (runStorageSmoke + cleanupStorageSmoke) deleted; controller now has exactly 6 async method impls matching 6 proto RPCs; `implements ParserProto.ParserServiceController` + `@ParserProto.ParserServiceControllerMethods()` bulk decorator preserved; tsc satisfied post-regen. D-06 per-commit static gate green twice: pre-commit (pnpm lint 7/7 exit 0 + pnpm build 10/10 exit 0, parser cache miss + foundation cache miss, rebuilt clean; 2 pre-existing rabbitmq-event.subscriber.ts warnings unchanged out-of-scope) + pre-D-07 re-check (full cache hit). D-07 dual-mode runtime smoke gate PASSED first try (non-negotiable gate per Pitfall 6; catches DI resolution regressions invisible to static build per runtime-smoke-verification ANTI-PATTERN 5). Native (pnpm start:native → http://localhost:3000/health/ready): HTTP 200 on probe attempt 2 of 36 (~10s boot after infra:up + turbo dev), response body saved to /tmp/999.11-native-ready.json showing `status: ok` + all 5 upstreams (auth/sender/parser/audience/notifier) `status: up`; jq assertions PASS (.status == "ok" + .info | to_entries | all(.value.status == "up")). Clean stop via pkill + pnpm stop:native; post-stop curl HTTP 000 (connection refused, expected). Isolated (pnpm start:isolated → http://localhost:4000/health/ready): HTTP 200 on probe attempt 10 of 60 (~50s boot incl. docker compose up --build rebuilding 6 containers), response body saved to /tmp/999.11-isolated-ready.json showing same structure — status ok + 5/5 upstreams up; docker ps shows 6/6 containers `Up (healthy)` (infra-gateway/auth/sender/parser/audience/notifier-1); container log scan (docker logs --since 2m per service, grep '"level":"error"|"level":"warn"') = 0 entries across all 6 containers. Clean stop via pnpm stop:isolated; all 6 app containers + 4 infra containers + 2 networks removed. Workspace-wide grep invariant (9 smoke symbols RunStorageSmoke|CleanupStorageSmoke|runStorageSmoke|cleanupStorageSmoke|StorageSmokeResponse|CleanupSmokeResponse|CleanupSmokeRequest|StorageSmokeBucketResult|StorageSmokeStepResult × apps/*/src/** + packages/contracts/proto/** + packages/contracts/src/generated/**) = 0 matches (residual dist/ artifacts stale, .gitignore'd, regenerate on next pnpm build). Security Invariants from RESEARCH.md §Security Domain all green: SI-1 (no @Controller('test') in gateway) + SI-2 (no @GrpcMethod('(Run|Cleanup)StorageSmoke') anywhere) + SI-3 (0 smoke rpc/message in proto). OQ-2 resolution enforced: D-07 ran as SEPARATE post-commit gate (not Commit 6 amendment); both modes passed first try, no follow-up needed. OQ-3 resolution: no empty-directory artifacts (Plan 04 produced no new empty dirs). Path-scoped staging excluded pre-existing promisify-grpc-client.ts modification + ~140 untracked .claude/* artifacts (same pattern as Plans 02/03). Phase 999.11 total = 6 atomic refactor commits per D-04 (3b111c2 + 7476702 + 226d877 + d5db160 + f78d74e + fb23e24), 0 deviations, 0 auto-fixes, 0 retries, 0 architectural escalations across all 4 plans. All 7 D-* decisions (D-01..D-07) realised; all 3 Open Questions resolved in-plan; all 6 Pitfalls pre-empted or mitigated. Phase 999.11 ARCHITECTURALLY COMPLETE — ready for /gsd:verify-work 999.11. Follow-up phases 999.12 (Redis alignment) / 999.13 (RabbitMQ abstraction) / 999.14 (S3 audit) / 999.15 (production health contract + CI post-deploy smoke) all unblocked.
 - [Phase 999.11.1-01]: Canonical Config Access Contract foundation landed atomically — all 6 services expose {SVC}_CONFIG Symbol + {svc}-config.provider.ts + providers[] entry; dual-path with AppConfigModule preserved for Commits 2-8 migration window. D-08/PT-12 realised. 0 deviations, 0 auto-fixes. 24 files in commit 97d0743.
+- [Phase 999.11.1]: [Phase 999.11.1-02]: 2 HealthController files relocated to canonical infrastructure/controllers/rest/ via git mv — gateway 84% similarity (5 imports re-anchored ../infrastructure/clients/* -> ../../clients/* per PT-14 depth change), notifier 100% (byte-identical, all imports already absolute from @email-platform/foundation). 2 root module import paths re-pointed. 1 atomic commit 6dc6279 per plan success_criteria (4 files, 14 line delta 7+/7-). D-14 gate green (lint 7/7 + build 10/10). D-05 invariant partial resolution: controllers outside infrastructure/ reduced 5→3 (only 3 smoke controllers remain, Plan 08 scope). Empty src/health/ directories auto-untracked per D-04 precedent. 0 deviations, 0 auto-fixes, 0 retries.
 
 ### Pending Todos
 
@@ -185,6 +187,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T08:37:42.402Z
-Stopped at: Completed 999.11.1-01-register-svc-config-symbols-PLAN.md
+Last session: 2026-04-20T08:42:15.360Z
+Stopped at: Completed 999.11.1-02-relocate-health-controllers-PLAN.md
 Resume file: None
