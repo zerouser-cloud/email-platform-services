@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.1-06-foundation-http-narrow-config-cascade-PLAN.md
-last_updated: "2026-04-20T09:24:51.706Z"
+stopped_at: Completed 999.11.1-09-remove-nestjs-config-dep-PLAN.md
+last_updated: "2026-04-20T09:34:08.436Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 34
   completed_phases: 18
   total_plans: 83
-  completed_plans: 81
+  completed_plans: 82
   percent: 100
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.1 (architecture-compliance-audit-and-fix) — EXECUTING
-Plan: 9 of 10
+Plan: 10 of 10
 Status: Ready to execute
 Last activity: 2026-04-20
 
@@ -112,6 +112,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.1 P04 | 7min 26s | 4 tasks | 26 files |
 | Phase 999.11.1 P05 | 209s | 4 tasks | 9 files |
 | Phase 999.11.1 P06 | 2min 41s | 2 tasks | 4 files |
+| Phase 999.11.1 P09 | 330s | 4 tasks | 17 files |
 
 ## Accumulated Context
 
@@ -177,6 +178,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.1]: Plan 05: grpcUrls as Record<string,string> keyed by SERVICE.{svc}.envKeys.GRPC_URL — multi-instance narrow-config shape for gRPC clients (apps project typed reads, foundation does O(1) key lookup)
 - [Phase 999.11.1]: Plan 05: per-app scope — each app includes only upstreams it consumes (gateway=5 URLs, sender/parser/audience=1 each, notifier+auth=none)
 - [Phase 999.11.1]: Plan 06: httpClientProvider generalised with envToken opt + generic TEnv — foundation HTTP factory is now service-agnostic; 3 vendor modules (telegram/appstorespy/cloudfn) cascade through NOTIFIER/PARSER/SENDER_CONFIG. D-10 Canonical Config Access Contract now covers complete foundation surface (cache/persistence/logging/storage/grpc/http).
+- [Phase 999.11.1]: Plan 09: Removed @nestjs/config entirely from workspace — deleted AppConfigModule (22 LoC), scrubbed 8 package.json files, regenerated pnpm-lock.yaml. {SVC}_CONFIG providers now the sole config path. Three VALIDATION rows flip green: D-09 acid (no @Inject in use-cases), D-11 inv1+2 (no imports + no deps), D-12 rechecked (no configService.get).
 
 ### Pending Todos
 
@@ -202,6 +204,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T09:24:51.703Z
-Stopped at: Completed 999.11.1-06-foundation-http-narrow-config-cascade-PLAN.md
+Last session: 2026-04-20T09:34:08.433Z
+Stopped at: Completed 999.11.1-09-remove-nestjs-config-dep-PLAN.md
 Resume file: None
