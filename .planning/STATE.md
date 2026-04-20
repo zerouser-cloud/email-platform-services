@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Completed 999.11.2-09-verify-skill-PLAN.md
-last_updated: "2026-04-20T14:46:21.013Z"
+status: verifying
+stopped_at: "Completed 999.11.2-10-dual-mode-smoke-PLAN.md — Phase 999.11.2 architecturally complete, ready for /gsd:verify-work"
+last_updated: "2026-04-20T15:14:23.073Z"
 last_activity: 2026-04-20
 progress:
   total_phases: 35
-  completed_phases: 19
+  completed_phases: 20
   total_plans: 93
-  completed_plans: 92
+  completed_plans: 93
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 999.11.2 (infrastructure-tree-canonical-split) — EXECUTING
 Plan: 10 of 10
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-20
 
 Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
@@ -123,6 +123,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P07 | 2min45s | 1 tasks | 1 files |
 | Phase 999.11.2 P08 | 2min | 1 tasks | 1 files |
 | Phase 999.11.2 P09 | 4min (244s) | 2 (combined 1 commit) tasks | 2 files |
+| Phase 999.11.2 P10 | 376s | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -223,6 +224,8 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2-09]: Skill refinement is append-only within its category — Config §now has 999.11.1 base subsection + 999.11.2 delta subsection; future tree shifts add dated subsections rather than rewriting the base
 - [Phase 999.11.2-09]: VALIDATION.md Automated Check commands corrected to match reality in the same commit that flips status — D-02 depth 5→6, D-09/D-10 inverse scoped to apps/*/src (excludes gitignored dist/); rejecting 'run fails technically, intent green' alternative keeps document executable
 - [Phase 999.11.2-09]: Gateway 2-bin infrastructure (bootstrap + outbound, no inbound) documented in both Plan 06 SUMMARY (D-GATEWAY-02) and VALIDATION.md D-01 Status cell — REST facade has no server-side proto controllers, HealthController lives in bootstrap/health/; empty inbound/ would be scope creep per CONTEXT deferred list
+- [Phase 999.11.2]: Plan 10 Rule 4: Option A inbound-adapter-owned DI scope — relocate port→service bindings from root {Svc}Module into GrpcModule/RmqModule (hexagonal D-02 cohesion, mirrors notifier HANDLE_EVENT_PORT pattern)
+- [Phase 999.11.2]: Plan 10: NOTIFICATION_SENDER_PORT relocated from NotifierModule root into RmqModule (against OQ-5 speculation; single consumer HandleEventUseCase lives in RMQ scope — YAGNI wins, reversible if future non-RMQ consumer appears)
 
 ### Pending Todos
 
@@ -249,6 +252,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-20T14:46:08.288Z
-Stopped at: Completed 999.11.2-09-verify-skill-PLAN.md
+Last session: 2026-04-20T15:14:23.070Z
+Stopped at: Completed 999.11.2-10-dual-mode-smoke-PLAN.md — Phase 999.11.2 architecturally complete, ready for /gsd:verify-work
 Resume file: None
