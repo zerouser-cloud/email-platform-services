@@ -1,5 +1,4 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
 import {
   LoggingModule,
   PersistenceModule,
@@ -8,7 +7,7 @@ import {
   type LoggingConfig,
   type PersistenceConfig,
 } from '@email-platform/foundation';
-import { AuthEnvSchema, authConfigProvider, type AuthEnv } from './infrastructure/config';
+import { authConfigProvider, type AuthEnv } from './infrastructure/config';
 import { AuthController } from './infrastructure/controllers/grpc/auth.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
@@ -41,11 +40,7 @@ import {
 } from './auth.constants';
 
 @Module({
-  imports: [
-    AppConfigModule.forRoot(AuthEnvSchema),
-    PersistenceModule.forRootAsync(),
-    LoggingModule.forGrpcAsync('auth'),
-  ],
+  imports: [PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],
   controllers: [AuthController, HealthController],
   providers: [
     authConfigProvider,

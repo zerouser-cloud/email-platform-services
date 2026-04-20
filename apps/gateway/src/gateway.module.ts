@@ -1,6 +1,5 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
-import { GatewayEnvSchema, gatewayConfigProvider } from './infrastructure/config';
+import { gatewayConfigProvider } from './infrastructure/config';
 import { TerminusModule } from '@nestjs/terminus';
 import {
   LoggingModule,
@@ -18,7 +17,6 @@ import type { GatewayEnv } from './infrastructure/config';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(GatewayEnvSchema),
     TerminusModule,
     LoggingModule.forHttpAsync('gateway'),
     ThrottleModule,

@@ -1,5 +1,4 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
 import {
   LoggingModule,
   PersistenceModule,
@@ -13,7 +12,7 @@ import {
   type CacheConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { SenderEnvSchema, senderConfigProvider, type SenderEnv } from './infrastructure/config';
+import { senderConfigProvider, type SenderEnv } from './infrastructure/config';
 import { SenderController } from './infrastructure/controllers/grpc/sender.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
@@ -58,7 +57,6 @@ import {
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(SenderEnvSchema),
     PersistenceModule.forRootAsync(),
     CacheModule.forRootAsync({ namespace: 'sender' }),
     LoggingModule.forGrpcAsync('sender'),

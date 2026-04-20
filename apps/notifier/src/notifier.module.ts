@@ -1,11 +1,6 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
-import { AppConfigModule } from '@email-platform/config';
-import {
-  NotifierEnvSchema,
-  notifierConfigProvider,
-  type NotifierEnv,
-} from './infrastructure/config';
+import { notifierConfigProvider, type NotifierEnv } from './infrastructure/config';
 import {
   LoggingModule,
   RabbitMqHealthIndicator,
@@ -28,7 +23,6 @@ import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT, NOTIFIER_CONFIG } from './
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(NotifierEnvSchema),
     TerminusModule,
     StorageModule,
     LoggingModule.forHttpAsync('notifier'),

@@ -1,5 +1,4 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
 import {
   LoggingModule,
   PersistenceModule,
@@ -14,7 +13,7 @@ import {
   type PublicStorageConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { ParserEnvSchema, parserConfigProvider, type ParserEnv } from './infrastructure/config';
+import { parserConfigProvider, type ParserEnv } from './infrastructure/config';
 import { ParserController } from './infrastructure/controllers/grpc/parser.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
@@ -46,7 +45,6 @@ import {
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(ParserEnvSchema),
     PersistenceModule.forRootAsync(),
     StorageModule,
     LoggingModule.forGrpcAsync('parser'),

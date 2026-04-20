@@ -3,7 +3,6 @@ export * from './schemas';
 export * from './compose';
 export * from './env-constants';
 export * from './env-schema';
-export * from './app-config.module';
 export * from './config-loader';
 export * from './catalog/types';
 export * from './catalog/define-service';

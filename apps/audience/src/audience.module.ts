@@ -1,5 +1,4 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
 import {
   LoggingModule,
   PersistenceModule,
@@ -10,11 +9,7 @@ import {
   type PersistenceConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import {
-  AudienceEnvSchema,
-  audienceConfigProvider,
-  type AudienceEnv,
-} from './infrastructure/config';
+import { audienceConfigProvider, type AudienceEnv } from './infrastructure/config';
 import { AudienceController } from './infrastructure/controllers/grpc/audience.controller';
 import { HealthController } from './infrastructure/controllers/rest/health.controller';
 import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
@@ -54,7 +49,6 @@ import {
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(AudienceEnvSchema),
     PersistenceModule.forRootAsync(),
     LoggingModule.forGrpcAsync('audience'),
     ParserClientModule.forRoot(),
