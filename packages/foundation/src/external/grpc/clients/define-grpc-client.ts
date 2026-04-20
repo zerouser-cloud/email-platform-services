@@ -1,12 +1,12 @@
 import type { DynamicModule, Provider, Type } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
 import { TerminusModule, HealthIndicatorService } from '@nestjs/terminus';
 import type { GrpcServiceDeclaration } from '@email-platform/config';
 import { resolveProtoPath } from '../proto-resolver';
 import { createDeadlineInterceptor } from '../../resilience/grpc-deadline.interceptor';
-import { GRPC_CLIENT_HEALTH } from './clients.constants';
+import { GRPC_CLIENT_CONFIG_PORT, GRPC_CLIENT_HEALTH } from './clients.constants';
+import type { GrpcClientConfig } from './grpc-client.interfaces';
 import { GrpcClientHealthIndicator } from './grpc-client-health.indicator';
 import { promisifyGrpcClient, type Promisified } from './promisify-grpc-client';
 
@@ -29,6 +29,8 @@ export interface GrpcClientBuildResult {
 }
 
 // CHANGED (D-09): removed `build` callback parameter; useFactory builds Promisified Proxy directly.
+// CHANGED (D-10 — Phase 999.11.1): inject GRPC_CLIENT_CONFIG_PORT (narrow GrpcClientConfig)
+// instead of ConfigService — apps own the slice projection from their {Svc}Env.
 export function defineGrpcClient<TRaw extends object>(
   opts: DefineGrpcClientOpts,
 ): GrpcClientBuildResult {
@@ -38,11 +40,11 @@ export function defineGrpcClient<TRaw extends object>(
 
   const facadeProvider: Provider = {
     provide: opts.clientToken,
-    inject: [grpcToken, ConfigService],
-    useFactory: (grpc: ClientGrpc, config: ConfigService): Promisified<TRaw> => {
+    inject: [grpcToken, GRPC_CLIENT_CONFIG_PORT],
+    useFactory: (grpc: ClientGrpc, config: GrpcClientConfig): Promisified<TRaw> => {
       const raw = grpc.getService<TRaw>(opts.service.grpc.serviceName);
       return promisifyGrpcClient(raw, {
-        defaultDeadlineMs: config.get<number>('GRPC_DEADLINE_MS')!,
+        defaultDeadlineMs: config.GRPC_DEADLINE_MS,
       });
     },
   };
@@ -60,18 +62,18 @@ export function defineGrpcClient<TRaw extends object>(
       ClientsModule.registerAsync([
         {
           name: grpcToken,
-          inject: [ConfigService],
-          useFactory: (config: ConfigService) => ({
+          inject: [GRPC_CLIENT_CONFIG_PORT],
+          useFactory: (config: GrpcClientConfig) => ({
             transport: Transport.GRPC,
             options: {
-              url: config.get<string>(opts.service.envKeys.GRPC_URL!)!,
+              url: config.grpcUrls[opts.service.envKeys.GRPC_URL],
               package: [opts.service.grpc.package, GRPC_CLIENT_HEALTH.PACKAGE],
               protoPath: [
-                resolveProtoPath(opts.service.grpc.package, config.get<string>('PROTO_DIR')!),
+                resolveProtoPath(opts.service.grpc.package, config.PROTO_DIR),
                 require.resolve('grpc-health-check/proto/health/v1/health.proto'),
               ],
               channelOptions: {
-                interceptors: [createDeadlineInterceptor(config.get<number>('GRPC_DEADLINE_MS')!)],
+                interceptors: [createDeadlineInterceptor(config.GRPC_DEADLINE_MS)],
               },
             },
           }),

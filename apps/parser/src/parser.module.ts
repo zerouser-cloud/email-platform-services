@@ -7,10 +7,12 @@ import {
   PERSISTENCE_CONFIG_PORT,
   STORAGE_CORE_CONFIG_PORT,
   PUBLIC_STORAGE_CONFIG_PORT,
+  GRPC_CLIENT_CONFIG_PORT,
   type LoggingConfig,
   type PersistenceConfig,
   type StorageCoreConfig,
   type PublicStorageConfig,
+  type GrpcClientConfig,
 } from '@email-platform/foundation';
 import { ParserEnvSchema, parserConfigProvider, type ParserEnv } from './infrastructure/config';
 import { ParserController } from './infrastructure/controllers/grpc/parser.controller';
@@ -86,6 +88,15 @@ import {
       useFactory: (c: ParserEnv): PublicStorageConfig => ({
         STORAGE_PUBLIC_URL: c.STORAGE_PUBLIC_URL,
         STORAGE_MAX_UPLOAD_BYTES: c.STORAGE_MAX_UPLOAD_BYTES,
+      }),
+      inject: [PARSER_CONFIG],
+    },
+    {
+      provide: GRPC_CLIENT_CONFIG_PORT,
+      useFactory: (c: ParserEnv): GrpcClientConfig => ({
+        PROTO_DIR: c.PROTO_DIR,
+        GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
+        grpcUrls: { NOTIFIER_GRPC_URL: c.NOTIFIER_GRPC_URL },
       }),
       inject: [PARSER_CONFIG],
     },

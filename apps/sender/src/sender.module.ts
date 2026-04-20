@@ -7,9 +7,11 @@ import {
   LOGGING_CONFIG_PORT,
   PERSISTENCE_CONFIG_PORT,
   CACHE_CONFIG_PORT,
+  GRPC_CLIENT_CONFIG_PORT,
   type LoggingConfig,
   type PersistenceConfig,
   type CacheConfig,
+  type GrpcClientConfig,
 } from '@email-platform/foundation';
 import { SenderEnvSchema, senderConfigProvider, type SenderEnv } from './infrastructure/config';
 import { SenderController } from './infrastructure/controllers/grpc/sender.controller';
@@ -84,6 +86,15 @@ import {
     {
       provide: CACHE_CONFIG_PORT,
       useFactory: (c: SenderEnv): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
+      inject: [SENDER_CONFIG],
+    },
+    {
+      provide: GRPC_CLIENT_CONFIG_PORT,
+      useFactory: (c: SenderEnv): GrpcClientConfig => ({
+        PROTO_DIR: c.PROTO_DIR,
+        GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
+        grpcUrls: { AUDIENCE_GRPC_URL: c.AUDIENCE_GRPC_URL },
+      }),
       inject: [SENDER_CONFIG],
     },
 

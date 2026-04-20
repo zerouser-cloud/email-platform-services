@@ -16,3 +16,7 @@ export const GRPC_CLIENT_HEALTH = {
   DOWN_MESSAGE: 'grpc health unreachable',
   OVERALL_SERVICE_KEY: '',
 } as const;
+
+// D-10 Canonical Config Access Contract — narrow gRPC client config injection token.
+// Apps provide a GrpcClientConfig slice via useFactory from their {SVC}_CONFIG.
+export const GRPC_CLIENT_CONFIG_PORT = Symbol('GRPC_CLIENT_CONFIG_PORT');

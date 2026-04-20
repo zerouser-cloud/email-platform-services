@@ -5,8 +5,10 @@ import {
   PersistenceModule,
   LOGGING_CONFIG_PORT,
   PERSISTENCE_CONFIG_PORT,
+  GRPC_CLIENT_CONFIG_PORT,
   type LoggingConfig,
   type PersistenceConfig,
+  type GrpcClientConfig,
 } from '@email-platform/foundation';
 import {
   AudienceEnvSchema,
@@ -72,6 +74,15 @@ import {
       useFactory: (c: AudienceEnv): LoggingConfig => ({
         LOG_LEVEL: c.LOG_LEVEL,
         LOG_FORMAT: c.LOG_FORMAT,
+      }),
+      inject: [AUDIENCE_CONFIG],
+    },
+    {
+      provide: GRPC_CLIENT_CONFIG_PORT,
+      useFactory: (c: AudienceEnv): GrpcClientConfig => ({
+        PROTO_DIR: c.PROTO_DIR,
+        GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
+        grpcUrls: { PARSER_GRPC_URL: c.PARSER_GRPC_URL },
       }),
       inject: [AUDIENCE_CONFIG],
     },
