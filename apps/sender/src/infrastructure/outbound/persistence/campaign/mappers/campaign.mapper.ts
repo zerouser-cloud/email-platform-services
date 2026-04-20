@@ -1,4 +1,4 @@
-import { Campaign } from '../../../domain/entities/campaign.entity';
+import { Campaign } from '../../../../../domain/entities/campaign.entity';
 import type { campaigns } from '../schema/campaigns.schema';
 
 type CampaignRow = typeof campaigns.$inferSelect;

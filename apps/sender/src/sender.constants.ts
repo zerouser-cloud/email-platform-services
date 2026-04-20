@@ -13,9 +13,6 @@ export const LIST_MESSAGES_PORT = Symbol('ListMessagesPort');
 export const CREATE_MESSAGE_PORT = Symbol('CreateMessagePort');
 export const LIST_MACROS_PORT = Symbol('ListMacrosPort');
 
-// Canonical Config Access Contract (Phase 999.11.1 D-08) — per-service {SVC}_CONFIG Symbol.
-export const SENDER_CONFIG = Symbol('SENDER_CONFIG');
-
 // Pagination defaults applied at the proto->Command boundary when the client omits pagination.
 // Real pagination policy is deferred until business logic lands; these are conservative stubs.
 export const PAGINATION_DEFAULTS = {

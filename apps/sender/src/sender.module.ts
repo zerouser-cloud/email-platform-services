@@ -1,11 +1,11 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { LoggingModule, PersistenceModule, CacheModule } from '@email-platform/foundation';
-import { SenderConfigModule } from './infrastructure/config';
-import { SenderController } from './infrastructure/controllers/grpc/sender.controller';
-import { HealthController } from './infrastructure/controllers/rest/health.controller';
-import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
-import { CloudFnClientModule } from './infrastructure/clients/cloud-functions';
-import { AudienceClientModule } from './infrastructure/clients/audience';
+import { LoggingModule } from '@email-platform/foundation';
+import { SenderConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { AppPersistenceModule } from './infrastructure/outbound/persistence';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
+import { HttpClientsModule } from './infrastructure/outbound/http-clients';
 // Services (inbound port adapters)
 import { ListCampaignsService } from './application/services/list-campaigns.service';
 import { GetCampaignService } from './application/services/get-campaign.service';
@@ -27,9 +27,8 @@ import { CreateRunnerUseCase } from './application/use-cases/create-runner.use-c
 import { ListMessagesUseCase } from './application/use-cases/list-messages.use-case';
 import { CreateMessageUseCase } from './application/use-cases/create-message.use-case';
 import { ListMacrosUseCase } from './application/use-cases/list-macros.use-case';
-// DI tokens
+// DI tokens (inbound ports — outbound CAMPAIGN_REPOSITORY_PORT owned by CampaignModule per D-02)
 import {
-  CAMPAIGN_REPOSITORY_PORT,
   LIST_CAMPAIGNS_PORT,
   GET_CAMPAIGN_PORT,
   CREATE_CAMPAIGN_PORT,
@@ -47,18 +46,18 @@ import {
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
     SenderConfigModule.forRoot(),
-    PersistenceModule.forRootAsync(),
-    CacheModule.forRootAsync({ namespace: 'sender' }),
+    HealthModule,
     LoggingModule.forGrpcAsync('sender'),
-    CloudFnClientModule.forRoot(),
-    AudienceClientModule.forRoot(),
+    AppPersistenceModule,
+    GrpcClientsModule,
+    HttpClientsModule,
+    GrpcModule,
   ],
-  controllers: [SenderController, HealthController],
+  controllers: [],
   providers: [
-    // Zone 1: Outbound port → adapter
-    { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },
-
-    // Zone 2: Inbound ports → services (D-02 per-feature)
+    // Zone 2: Inbound ports → services (D-02 per-feature).
+    // Zone 1 (CAMPAIGN_REPOSITORY_PORT → PgCampaignRepository) moved into
+    // CampaignModule per D-02 (per-aggregate sub-module ownership).
     { provide: LIST_CAMPAIGNS_PORT, useClass: ListCampaignsService },
     { provide: GET_CAMPAIGN_PORT, useClass: GetCampaignService },
     { provide: CREATE_CAMPAIGN_PORT, useClass: CreateCampaignService },

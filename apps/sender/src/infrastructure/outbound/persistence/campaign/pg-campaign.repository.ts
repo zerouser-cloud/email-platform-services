@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '@email-platform/foundation';
-import type { CampaignRepositoryPort } from '../../application/ports/outbound/campaign-repository.port';
-import type { Campaign } from '../../domain/entities/campaign.entity';
+import type { CampaignRepositoryPort } from '../../../../application/ports/outbound/campaign-repository.port';
+import type { Campaign } from '../../../../domain/entities/campaign.entity';
 import { campaigns } from './schema/campaigns.schema';
 import { CampaignMapper } from './mappers/campaign.mapper';
 
