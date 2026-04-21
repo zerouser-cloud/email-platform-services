@@ -318,13 +318,23 @@ Plans:
 
 ### Phase 999.1.9: config-layering-refactor-services-first-structure (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 999.1
-**Plans:** 0 plans
+**Goal:** Full config-system refactor per Three-Layer Rule — restructure `packages/config/src/` into `infra/` (shared building blocks) + `apps/{name}/` (per-service mirror of `/apps/{name}/`). Eliminate dynamic TopologySchema (static per-service spread), remove intersection-alias types (z.infer only), unify config access through DI (`app.get<XxxEnv>(XXX_CONFIG)` in main.ts), add HTTP↔gRPC server port symmetry (`{SVC}_GRPC_PORT` env var), move env parity check to CI. Resolves F-01 root finding (12× `as XxxEnv` casts).
+**Requirements**: D-01..D-23 from 999.1.9-CONTEXT.md (23 locked user decisions) + F-01 finding parent.
+**Depends on:** Phase 999.1, Phase 999.1.8
+**Plans:** 11 plans, wave-structured W1-W11 (strangler-fig incremental migration)
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.1.9 to break down)
+- [ ] 999.1.9-01-PLAN.md — W1: Package structure setup (infra/ + apps/ skeletons, 8 shared schemas moved, coexistence with legacy)
+- [ ] 999.1.9-02-PLAN.md — W2: Env vars addition — 5× `{SVC}_GRPC_PORT` in 4 env files (D-15) [infrastructure-guard gate]
+- [ ] 999.1.9-03-PLAN.md — W3: Audience canary migration + foundation factories (createConfigModule D-10, grpc-server.factory D-16) + dual-mode smoke [canary gate]
+- [ ] 999.1.9-04-PLAN.md — W4: Auth service migration (no peers)
+- [ ] 999.1.9-05-PLAN.md — W5: Sender service migration (peer: audience + CloudFn split D-21)
+- [ ] 999.1.9-06-PLAN.md — W6: Parser service migration (peer: notifier + AppStoreSpy split D-21)
+- [ ] 999.1.9-07-PLAN.md — W7: Gateway service migration (5 peers + refine preservation + HTTP-only bootstrap)
+- [ ] 999.1.9-08-PLAN.md — W8: Notifier service migration (no peers + Telegram split D-21)
+- [ ] 999.1.9-09-PLAN.md — W9: Cleanup — delete topology.ts + env-schema.ts + compose.ts + catalog/ + schemas/ (18 files, 2 dirs)
+- [ ] 999.1.9-10-PLAN.md — W10: Env-parity CI integration (schema-driven check + GHA job) [infrastructure-guard gate]
+- [ ] 999.1.9-11-PLAN.md — W11: Final verification (grep invariants + dual-mode smoke + nyquist flip) [phase gate]
 
 ### Phase 999.1.8: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED, renumbered from 999.1.1 — that slot reserved by Phase 999.1 SOLUTIONS.md for F-01 TopologySchema refactor; see §Sub-Phase Grouping Proposal)
 
