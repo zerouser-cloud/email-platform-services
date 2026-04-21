@@ -13,8 +13,21 @@ env:
   TURBO_SCM_BASE: origin/${{ github.base_ref }}
 
 jobs:
+  env-parity:
+    name: Env parity check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run env-parity script
+        run: bash scripts/check-env-parity.sh
+
   lint:
     name: Lint
+    needs: [env-parity]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +57,7 @@ jobs:
 
   typecheck:
     name: Typecheck
+    needs: [env-parity]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,6 +87,7 @@ jobs:
 
   build:
     name: Build
+    needs: [env-parity]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
