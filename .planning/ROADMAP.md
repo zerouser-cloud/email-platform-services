@@ -316,6 +316,16 @@ Plans:
 - [x] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
 - [x] 999.1-04-PLAN.md — Verification + summary + flip nyquist flag (VERIFICATION.md grep-proof table + SUMMARY.md + VALIDATION.md frontmatter flip)
 
+### Phase 999.1.1: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 999.1.1 to break down)
+
 ### Phase 999.2: Type-safe config access — ABSORBED INTO Phase 999.11.1 (2026-04-20)
 
 **Status:** ABSORBED. Original scope (eliminate `configService.get<T>()!` non-null assertions, type-safe config access per service) was folded into Phase 999.11.1 — architecture-compliance-audit-and-fix — per that phase's CONTEXT.md decision D-12 (rationale: same files, shared migration window, atomic commits preferable to a 2-phase split with coordination overhead).
