@@ -7,7 +7,7 @@ import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-p
 import { NotifierModule } from './notifier.module';
 
 async function bootstrap() {
-  const config = loadConfig<typeof NotifierEnvSchema, NotifierEnv>(NotifierEnvSchema);
+  const config = loadConfig(NotifierEnvSchema) as NotifierEnv;
   const app = await NestFactory.create(NotifierModule, { bufferLogs: true });
 
   app.useLogger(app.get(Logger));

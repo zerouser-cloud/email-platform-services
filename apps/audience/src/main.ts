@@ -7,7 +7,7 @@ import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-p
 import { AudienceModule } from './audience.module';
 
 async function bootstrap() {
-  const config = loadConfig<typeof AudienceEnvSchema, AudienceEnv>(AudienceEnvSchema);
+  const config = loadConfig(AudienceEnvSchema) as AudienceEnv;
   const app = await NestFactory.create(AudienceModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));

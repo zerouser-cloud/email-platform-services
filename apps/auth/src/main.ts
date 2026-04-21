@@ -7,7 +7,7 @@ import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-p
 import { AuthModule } from './auth.module';
 
 async function bootstrap() {
-  const config = loadConfig<typeof AuthEnvSchema, AuthEnv>(AuthEnvSchema);
+  const config = loadConfig(AuthEnvSchema) as AuthEnv;
   const app = await NestFactory.create(AuthModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));
