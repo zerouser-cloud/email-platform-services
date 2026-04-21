@@ -10,7 +10,7 @@ import { AppStorageModule } from './infrastructure/outbound/storage';
   imports: [
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
-    NotifierConfigModule.forRoot(),
+    NotifierConfigModule,
     HealthModule,
     LoggingModule.forHttpAsync('notifier'),
     HttpClientsModule,
