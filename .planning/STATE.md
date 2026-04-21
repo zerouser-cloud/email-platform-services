@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 5 of 11 (999.1.9-01..04 complete)
-Status: Executing Phase 999.1.9 — W4 auth migrated (1 Pitfall 2 escape hatch removed)
-Last activity: 2026-04-21 -- W4 auth per-app config migration complete
+Plan: 6 of 11 (999.1.9-01..05 complete)
+Status: Executing Phase 999.1.9 — W5 sender migrated (D-21 first application: CloudFnSchema split)
+Last activity: 2026-04-21 -- W5 sender per-app config migration + D-21 external-apis split
 
 Progress: [██████████] 100%
 
