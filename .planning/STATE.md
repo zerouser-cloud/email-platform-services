@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
-stopped_at: Phase 999.11.3 context gathered
-last_updated: "2026-04-21T06:16:13.648Z"
-last_activity: 2026-04-20
+status: executing
+stopped_at: Completed 999.11.3-01-PLAN.md
+last_updated: "2026-04-21T07:02:11.872Z"
+last_activity: 2026-04-21
 progress:
   total_phases: 36
   completed_phases: 20
-  total_plans: 93
-  completed_plans: 93
+  total_plans: 95
+  completed_plans: 94
   percent: 100
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.11.2 — infrastructure-tree-canonical-split
+**Current focus:** Phase 999.11.3 — nestjs-hexagonal-mapping-skill-refresh-for-inbound-outbound-bootstrap-tree
 
 ## Current Position
 
-Phase: 999.12
-Plan: Not started
-Status: Phase complete — ready for verification
-Last activity: 2026-04-20
+Phase: 999.11.3 (nestjs-hexagonal-mapping-skill-refresh-for-inbound-outbound-bootstrap-tree) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-21
 
 Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
 
@@ -124,6 +124,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P08 | 2min | 1 tasks | 1 files |
 | Phase 999.11.2 P09 | 4min (244s) | 2 (combined 1 commit) tasks | 2 files |
 | Phase 999.11.2 P10 | 376s | 2 tasks | 12 files |
+| Phase 999.11.3 P01 | 9min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -226,6 +227,10 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.2-09]: Gateway 2-bin infrastructure (bootstrap + outbound, no inbound) documented in both Plan 06 SUMMARY (D-GATEWAY-02) and VALIDATION.md D-01 Status cell — REST facade has no server-side proto controllers, HealthController lives in bootstrap/health/; empty inbound/ would be scope creep per CONTEXT deferred list
 - [Phase 999.11.2]: Plan 10 Rule 4: Option A inbound-adapter-owned DI scope — relocate port→service bindings from root {Svc}Module into GrpcModule/RmqModule (hexagonal D-02 cohesion, mirrors notifier HANDLE_EVENT_PORT pattern)
 - [Phase 999.11.2]: Plan 10: NOTIFICATION_SENDER_PORT relocated from NotifierModule root into RmqModule (against OQ-5 speculation; single consumer HandleEventUseCase lives in RMQ scope — YAGNI wins, reversible if future non-RMQ consumer appears)
+- [Phase 999.11.3]: Canonical Tree format = hybrid skeleton (auth 3-bin) + per-service variance bullets (Open Question 1 resolution)
+- [Phase 999.11.3]: LAYERS.md restructure = three H2 direction parents (Bootstrap/Inbound/Outbound) with feature-slicing subsections (Open Question 2 resolution)
+- [Phase 999.11.3]: Mappers day-one mandate softened: 'once a Drizzle row→entity translation exists; stub repositories may omit until real persistence lands' (Pitfall 3)
+- [Phase 999.11.3]: D-07 bidirectional cross-ref split: Plan 01 lands uni-directional half (SKILL.md → sibling); Plan 02 will land reciprocal bullet in infrastructure-client-layering/SKILL.md
 
 ### Pending Todos
 
@@ -253,6 +258,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-21T06:16:13.645Z
-Stopped at: Phase 999.11.3 context gathered
-Resume file: .planning/phases/999.11.3-nestjs-hexagonal-mapping-skill-refresh-for-inbound-outbound-bootstrap-tree/999.11.3-CONTEXT.md
+Last session: 2026-04-21T07:01:59.354Z
+Stopped at: Completed 999.11.3-01-PLAN.md
+Resume file: None
