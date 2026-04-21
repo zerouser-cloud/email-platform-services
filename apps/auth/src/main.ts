@@ -1,20 +1,20 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE } from '@email-platform/config';
-import { AuthEnvSchema, type AuthEnv } from './infrastructure/bootstrap/config';
-import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { SERVICE, type AuthEnv } from '@email-platform/config';
+import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { AUTH_CONFIG } from './infrastructure/bootstrap/config/auth-config.constants';
 import { AuthModule } from './auth.module';
 
 async function bootstrap() {
-  const config = loadConfig(AuthEnvSchema) as AuthEnv;
   const app = await NestFactory.create(AuthModule, { bufferLogs: true });
+  const config = app.get<AuthEnv>(AUTH_CONFIG);
 
   app.useLogger(await app.resolve(Logger));
   app.enableShutdownHooks();
 
   app.connectMicroservice(
-    createGrpcServerOptions(SERVICE.auth, SERVICE.auth.grpc.port, config.PROTO_DIR),
+    createGrpcServerOptions(SERVICE.auth, config.AUTH_GRPC_PORT, config.PROTO_DIR),
   );
 
   await app.startAllMicroservices();

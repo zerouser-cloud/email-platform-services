@@ -5,7 +5,7 @@ import {
   type LoggingConfig,
   type PersistenceConfig,
 } from '@email-platform/foundation';
-import { AuthEnvSchema, type AuthEnv } from './auth-env.schema';
+import { AuthEnvSchema } from '@email-platform/config';
 import { AUTH_CONFIG } from './auth-config.constants';
 
 /**
@@ -18,15 +18,12 @@ import { AUTH_CONFIG } from './auth-config.constants';
  *
  * Narrow ports: PERSISTENCE + LOGGING only — auth has no upstream gRPC dependencies (no GRPC_CLIENT).
  *
- * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
- * (`<typeof AuthEnvSchema, AuthEnv>`) as Pitfall 2 escape hatch for the
- * `composeSchemas(...)`-produced `ZodObject<MergeShapes<T>>` + intersection alias
- * combination (TS 5 + Zod 4 cannot resolve `z.infer` through the generic boundary
- * here). Goes away in W4 (auth migration) when the schema moves to native
- * `z.object({...})` spread in `packages/config/src/apps/auth/env.schema.ts` —
- * audience already uses the target single-generic form.
+ * Phase 999.1.9 W4: schema now imported from `@email-platform/config` (packages/config/src/apps/auth/)
+ * per D-07; generic args dropped per D-10; slice return-type annotations kept (Pitfall 2 mitigation).
+ * Target single-generic `createConfigModule({...})` form — removes one Pitfall 2 escape hatch
+ * (was legacy 2-generic `<typeof AuthEnvSchema, AuthEnv>` in W3-interim state).
  */
-export const AuthConfigModule = createConfigModule<typeof AuthEnvSchema, AuthEnv>({
+export const AuthConfigModule = createConfigModule({
   schema: AuthEnvSchema,
   token: AUTH_CONFIG,
   narrowPorts: [
