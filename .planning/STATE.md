@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: ready_to_plan
-stopped_at: Completed 999.1.8-06-PLAN.md
-last_updated: "2026-04-21T14:02:36.389Z"
+status: planning
+stopped_at: .planning/phases/999.1.9-config-layering-refactor-services-first-structure/999.1.9-CONTEXT.md
+last_updated: "2026-04-21T15:56:10.579Z"
 last_activity: 2026-04-21
 progress:
-  total_phases: 37
-  completed_phases: 24
+  total_phases: 38
+  completed_phases: 23
   total_plans: 105
   completed_plans: 106
-  percent: 65
+  percent: 100
 ---
 
 # Project State
@@ -297,8 +297,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-04-21T14:02:27.774Z
-Stopped at: Completed 999.1.8-06-PLAN.md
+Last session: Phase 999.1.9 context gathered — 23 locked decisions D-01..D-23. Scope: full refactor (A+B+C+D+E+F+G). Structure: apps/{name}/ mirrors /apps/{name}/. composition: explicit spreads. DI-only access. HTTP/gRPC port symmetry via new {SVC}_GRPC_PORT env. Migration: incremental per-service (audience canary). Ready for /gsd:plan-phase 999.1.9.
+Stopped at: .planning/phases/999.1.9-config-layering-refactor-services-first-structure/999.1.9-CONTEXT.md
 Resume file: None
 
 **Planned Phase:** 999.1.8 (config-mechanism-consolidation-and-process-env-elimination) — 6 plans — 2026-04-21T12:40:28.101Z
