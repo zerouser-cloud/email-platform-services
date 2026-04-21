@@ -1,7 +1,8 @@
-import { DatabaseSchema } from '@email-platform/config';
+import { DatabaseSchema, SERVICE } from '@email-platform/config';
+import { loadConfig } from '@email-platform/foundation';
 import { defineConfig } from 'drizzle-kit';
 
-const env = DatabaseSchema.parse(process.env);
+const env = loadConfig(DatabaseSchema);
 
 export default defineConfig({
   dialect: 'postgresql',
@@ -10,5 +11,5 @@ export default defineConfig({
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  schemaFilter: ['parser'],
+  schemaFilter: [SERVICE.parser.id],
 });

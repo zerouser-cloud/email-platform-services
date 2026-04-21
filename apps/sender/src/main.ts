@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE, loadConfig } from '@email-platform/config';
+import { SERVICE } from '@email-platform/config';
 import { SenderEnvSchema, type SenderEnv } from './infrastructure/bootstrap/config';
-import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
 import { SenderModule } from './sender.module';
 
 async function bootstrap() {
