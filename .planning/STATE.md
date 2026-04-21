@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 7 of 11 (999.1.9-01..06 complete)
-Status: Executing Phase 999.1.9 — W6 parser migrated (4/6 services done), W7 gateway next
-Last activity: 2026-04-21 -- W6 parser per-app config + AppStoreSpy D-21 split
+Plan: 8 of 11 (999.1.9-01..07 complete)
+Status: Executing Phase 999.1.9 — W7 gateway migrated (5/6 services done), W8 notifier last
+Last activity: 2026-04-21 -- W7 gateway HTTP-only bootstrap + 5 peer topology spread
 
 Progress: [██████████] 100%
 
