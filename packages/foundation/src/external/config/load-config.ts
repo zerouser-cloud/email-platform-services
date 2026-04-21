@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Module-level cache keyed by Zod schema reference identity.
  *
  * Contract: callers MUST pass the same module-level `const` schema reference
- * across invocations to hit the cache. Two distinct `composeSchemas(...)` calls
+ * across invocations to hit the cache. Two distinct `z.object({...})` calls
  * produce two distinct references and therefore two separate cache entries —
  * this is intentional and correct for the boot path (one schema per service).
  *

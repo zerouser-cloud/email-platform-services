@@ -9,16 +9,16 @@ import { SERVER } from '../constants';
 /**
  * Assemble gRPC microservice options from a service identity + env-driven port.
  *
- * Phase 999.1.9 D-16: `grpcPort` is now an explicit parameter (read from the
+ * Phase 999.1.9 D-16: `grpcPort` is an explicit parameter (read from the
  * service's `{SVC}_GRPC_PORT` env via its `{Svc}Env` type) rather than being
  * pulled from catalog metadata (the legacy `grpc.port` field on the service
- * declaration — removed per D-17). This makes HTTP↔gRPC server ports
+ * declaration — removed per D-17). This keeps HTTP↔gRPC server ports
  * symmetric: both come from env.
  *
- * Phase 999.1.9 W3 coexistence: `GrpcServiceIdentity` structurally accepts the
- * legacy `SERVICE.{svc}` entries (still declared via the legacy catalog
- * `defineService` that carries extra `port`/`displayName`/`envKeys` fields). TS
- * structural typing ignores the extra fields; runtime reads only `id` + `grpc`.
+ * Phase 999.1.9 W9: `GrpcServiceIdentity` is the canonical shape from
+ * `@email-platform/config` — 3 fields (`id`, `grpc`, `diToken`). Legacy
+ * `ServiceDeclaration` (with `port`/`displayName`/`envKeys`) was deleted in
+ * this wave; runtime still reads only `id` + `grpc.package`.
  */
 export function createGrpcServerOptions(
   service: GrpcServiceIdentity,

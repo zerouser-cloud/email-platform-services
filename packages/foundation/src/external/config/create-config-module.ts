@@ -9,21 +9,13 @@ import { loadConfig } from './load-config';
  *                      composed from per-app topology + peer topologies + infra blocks
  *                      per `@email-platform/config/apps/{name}/env.schema`).
  *
- * Phase 999.1.9 D-10: primary call pattern is single-generic
- * `createConfigModule<typeof XxxEnvSchema>({...})` — slice `env` is inferred
- * inline as `z.infer<TSchema>`. Call sites drop the legacy 2-generic form
- * `<typeof Schema, XxxEnv>`.
- *
- * A default-valued second type param `TEnv = z.infer<TSchema>` is retained as an
- * escape hatch for Pitfall 2 edge cases where TS struggles to resolve
- * `z.infer<TSchema>` through the generic boundary (observed for Zod 4 on
- * `composeSchemas`-produced `ZodObject<MergeShapes<T>>` schemas — the 5 legacy
- * per-service env.schemas awaiting W4-W8 migration). Consumers never pass it
- * explicitly post-migration; it defaults correctly for native `z.object({...})`
- * schemas (the target state per D-07). Scheduled for removal in W9 once all
- * env.schemas are the native-spread form.
+ * Phase 999.1.9 D-10 + W9 cleanup: single-generic call pattern
+ * `createConfigModule<typeof XxxEnvSchema>({...})` — the slice `env` is inferred
+ * inline as `z.infer<TSchema>`. The legacy 2-generic form (escape hatch for
+ * composeSchemas-produced ZodObject<MergeShapes<T>> schemas) was removed in W9
+ * after all 6 services converged on native `z.object({...})` env schemas.
  */
-export interface CreateConfigModuleOptions<TSchema extends z.ZodType, TEnv = z.infer<TSchema>> {
+export interface CreateConfigModuleOptions<TSchema extends z.ZodType> {
   /** Zod schema validating `process.env` and producing the env shape. */
   readonly schema: TSchema;
   /** Service-local symbol that resolves to the full env value via DI (e.g., `AUDIENCE_CONFIG`). */
@@ -36,7 +28,7 @@ export interface CreateConfigModuleOptions<TSchema extends z.ZodType, TEnv = z.i
    */
   readonly narrowPorts?: ReadonlyArray<{
     readonly port: symbol;
-    readonly slice: (env: TEnv) => unknown;
+    readonly slice: (env: z.infer<TSchema>) => unknown;
   }>;
 }
 
@@ -78,8 +70,8 @@ class ConfigModuleHolder {}
  * });
  * ```
  */
-export function createConfigModule<TSchema extends z.ZodType, TEnv = z.infer<TSchema>>(
-  opts: CreateConfigModuleOptions<TSchema, TEnv>,
+export function createConfigModule<TSchema extends z.ZodType>(
+  opts: CreateConfigModuleOptions<TSchema>,
 ): DynamicModule {
   const configProvider: Provider = {
     provide: opts.token,
@@ -89,7 +81,7 @@ export function createConfigModule<TSchema extends z.ZodType, TEnv = z.infer<TSc
   const narrowPortProviders: Provider[] = (opts.narrowPorts ?? []).map(({ port, slice }) => ({
     provide: port,
     inject: [opts.token],
-    useFactory: (env: TEnv) => slice(env),
+    useFactory: (env: z.infer<TSchema>) => slice(env),
   }));
 
   const exportedTokens: symbol[] = [opts.token, ...(opts.narrowPorts ?? []).map((p) => p.port)];

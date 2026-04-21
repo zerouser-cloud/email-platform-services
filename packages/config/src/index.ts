@@ -1,22 +1,19 @@
-// --- Legacy exports (preserved until Wave 9 cleanup) ---
-export * from './topology';
-export * from './schemas';
-export * from './compose';
+// packages/config/src/index.ts — target state after Phase 999.1.9 W9 cleanup.
+//
+// Layout:
+//   - `./service`        — SERVICE aggregator, defineService, identity types
+//   - `./env-constants`  — LOG_LEVEL / LOG_FORMAT const maps
+//   - `./infra`          — shared infrastructure schemas (Database, Redis, Rabbit, Storage,
+//                          Logging, Grpc, Cors, RateLimit) — used by per-app env.schemas +
+//                          4 drizzle.config.ts (DatabaseSchema)
+//   - `./apps/<svc>`     — per-service identity, topology, env, external-apis schemas
+//
+// Legacy layout (topology.ts / env-schema.ts / compose.ts / catalog/ / schemas/)
+// was deleted in W9; all consumers migrated to per-app barrels in W3-W8.
+
+export * from './service';
 export * from './env-constants';
-export * from './env-schema';
-export * from './catalog/types';
-export * from './catalog/define-service';
-export * from './catalog/services';
-
-// --- New identity types (Phase 999.1.9 W3 — additive, type-only) ---
-// W3 intentionally re-exports ONLY types from ./service (not the new `defineService`
-// function) to avoid collision with the legacy `defineService` re-export from
-// './catalog/define-service' above. Per-app `identity.config.ts` files import the new
-// factory via deep relative path (`../../service`) during W3-W8. W9 cleanup will remove
-// the legacy catalog and switch this to `export * from './service'`.
-export type { GrpcServiceIdentity, ServiceIdentity } from './service';
-
-// --- New per-app barrels (Phase 999.1.9 W1 — populated in W3-W8) ---
+export * from './infra';
 export * from './apps/audience';
 export * from './apps/auth';
 export * from './apps/sender';

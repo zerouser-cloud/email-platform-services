@@ -3,14 +3,23 @@
 // Canonical Identity layer per Three-Layer Rule (infrastructure-client-layering skill).
 // Moved from catalog/ per Phase 999.1.9 D-04; simplified per D-17 (no .port/.displayName/.envKeys).
 //
-// W3 coexistence note:
-// - This file exports the NEW `defineService` factory + identity types.
-// - The legacy `SERVICE` aggregator remains in `./catalog/services.ts` until W9 cleanup
-//   (it still carries .port/.displayName/.envKeys consumed by legacy topology.ts +
-//   4 legacy main.ts call-sites for `SERVICE.{svc}.grpc.port`).
-// - A new `SERVICE` aggregator composed from per-app identity.config.ts files is
-//   introduced in W9; in W3-W8 only per-app identities are individually consumable
-//   (e.g., `import { AUDIENCE } from '@email-platform/config/apps/audience'`).
+// Exposes:
+//   - `defineService` factory (overloaded: with grpc → GrpcServiceIdentity, without → ServiceIdentity)
+//   - `GrpcServiceIdentity` / `ServiceIdentity` structural contracts
+//   - `SERVICE` aggregator composed from the 6 per-app `identity.config.ts` files
+//   - `ServiceId` union (`'audience' | 'auth' | ...`)
+//
+// The `SERVICE` aggregator is the single runtime source of identity metadata for
+// consumers (gateway client-modules, service `main.ts` bootstrap, drizzle configs).
+// Per-service runtime values (ports, URLs) come from env via each service's
+// `{Svc}EnvSchema` — NOT from here.
+
+import { AUDIENCE } from './apps/audience/identity.config';
+import { AUTH } from './apps/auth/identity.config';
+import { SENDER } from './apps/sender/identity.config';
+import { PARSER } from './apps/parser/identity.config';
+import { GATEWAY } from './apps/gateway/identity.config';
+import { NOTIFIER } from './apps/notifier/identity.config';
 
 export interface GrpcServiceIdentity {
   readonly id: string;
@@ -53,3 +62,16 @@ export function defineService<const Id extends string>(
       : Symbol.for(`${upperId}_CLIENT`),
   };
 }
+
+// SERVICE aggregator — composed from per-app identity.config.ts (D-04 final step).
+// Consumers read SERVICE.{svc}.{id,grpc,diToken}; no port/displayName/envKeys per D-17.
+export const SERVICE = {
+  audience: AUDIENCE,
+  auth: AUTH,
+  sender: SENDER,
+  parser: PARSER,
+  gateway: GATEWAY,
+  notifier: NOTIFIER,
+} as const;
+
+export type ServiceId = keyof typeof SERVICE;
