@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 4 of 11 (999.1.9-01, 02, 03 complete)
-Status: Executing Phase 999.1.9 — W3 canary PASSED, W4-W8 fan-out unblocked
-Last activity: 2026-04-21 -- W3 canary audience migration + dual-mode smoke passed
+Plan: 5 of 11 (999.1.9-01..04 complete)
+Status: Executing Phase 999.1.9 — W4 auth migrated (1 Pitfall 2 escape hatch removed)
+Last activity: 2026-04-21 -- W4 auth per-app config migration complete
 
 Progress: [██████████] 100%
 
