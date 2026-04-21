@@ -5,11 +5,22 @@ import { loadConfig } from './load-config';
 /**
  * Options for assembling a per-service config module via the canonical factory.
  *
- * @typeParam TEnv - The service's full parsed env shape (e.g., `AudienceEnv`).
+ * @typeParam TSchema - The Zod schema type (typically a `ZodObject<MergeShapes<...>>`
+ *                      produced by `composeSchemas(...)` from `@email-platform/config`).
+ * @typeParam TEnv    - Inferred env shape, defaults to `z.infer<TSchema>`. Override
+ *                      explicitly when the Zod inference diverges from the aliased
+ *                      service env type (e.g., intersection alias `AudienceEnv`).
+ *
+ * Note on the `TSchema extends z.ZodType` shape (RESEARCH §7.5 Option 1, applied in
+ * Plan 05 Task 1 as a Rule 3 scope expansion): Zod 4's `z.ZodType<TEnv>` output-only
+ * generic is too wide for `composeSchemas(...)`-produced `ZodObject<MergeShapes<...>>`
+ * to assign into without a cast. Taking the raw `TSchema` on the signature and deriving
+ * `TEnv` via `z.infer<TSchema>` mirrors the canonical `loadConfig<T extends z.ZodType>`
+ * signature and removes the need for 6× app-side casts.
  */
-export interface CreateConfigModuleOptions<TEnv> {
+export interface CreateConfigModuleOptions<TSchema extends z.ZodType, TEnv = z.infer<TSchema>> {
   /** Zod schema validating `process.env` and producing the TEnv shape. */
-  readonly schema: z.ZodType<TEnv>;
+  readonly schema: TSchema;
   /** Service-local symbol that resolves to the full TEnv value via DI (e.g., `AUDIENCE_CONFIG`). */
   readonly token: symbol;
   /**
@@ -47,13 +58,17 @@ class ConfigModuleHolder {}
  * `forRootAsync({inject: [...]})` dynamic modules (LoggingModule, ClientsModule,
  * TerminusModule) that cannot walk up to root providers otherwise.
  *
- * @typeParam TEnv - The service's full parsed env shape.
+ * @typeParam TSchema - Zod schema type, inferred from the `schema` option.
+ * @typeParam TEnv    - Env shape; defaults to `z.infer<TSchema>`. Pass explicitly
+ *                      (`createConfigModule<typeof Schema, AliasEnv>`) when the
+ *                      consumer's aliased service env type diverges from raw Zod
+ *                      inference (e.g., intersection-based `AudienceEnv`).
  * @param opts - schema + token + optional narrowPorts.
  * @returns DynamicModule ready to be imported from the service's root composition.
  *
  * @example
  * ```typescript
- * export const AudienceConfigModule = createConfigModule<AudienceEnv>({
+ * export const AudienceConfigModule = createConfigModule({
  *   schema: AudienceEnvSchema,
  *   token: AUDIENCE_CONFIG,
  *   narrowPorts: [
@@ -62,7 +77,9 @@ class ConfigModuleHolder {}
  * });
  * ```
  */
-export function createConfigModule<TEnv>(opts: CreateConfigModuleOptions<TEnv>): DynamicModule {
+export function createConfigModule<TSchema extends z.ZodType, TEnv = z.infer<TSchema>>(
+  opts: CreateConfigModuleOptions<TSchema, TEnv>,
+): DynamicModule {
   const configProvider: Provider = {
     provide: opts.token,
     useValue: loadConfig(opts.schema),
