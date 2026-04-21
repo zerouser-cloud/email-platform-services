@@ -308,12 +308,12 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 **Goal:** Провести **полный audit** системы конфигов проекта с трассировкой usage по всей кодовой базе — не только где конфиги объявляются, но и где/как используются, куда проистекают, какие архитектурные инварианты нарушаются. **Фаза docs-only** — никакого кода не трогаем. Deliverables: **`999.1-AUDIT.md`** (inventory + categorized findings по 5 слоям) + **`999.1-SOLUTIONS.md`** (2-4 варианта фикса per finding с trade-offs и recommended pick). После завершения — user review checkpoint вне фазы: по каждому approved solution создаётся своя sub-phase (999.1.1, 999.1.2, ...) через `/gsd:insert-phase`. Audit scope: **(Layer 1 Definition & Loading)** packages/config/*, apps/*/bootstrap/config/*, drizzle.config.ts, foundation narrow-config; **(Layer 2 Usage tracing)** все `@Inject({SVC}_CONFIG)` callsites, narrow config port consumers, SERVICE catalog reads, main.ts bootstrap reads, CLI/scripts; **(Layer 3 Violations)** direct `process.env` outside legal zones, hardcoded magic values that should be config, non-null assertions, type casts на config surface; **(Layer 4 Propagation)** app→foundation slice factory boundaries, cross-service via catalog, RMQ inbound, documentation drift (CLAUDE.md + infrastructure-client-layering SKILL + env-schema SKILL + twelve-factor SKILL); **(Layer 5 Missing configs)** env-значения упоминаемые но не в схеме, .env.example vs фактическое usage, infrastructure config (docker-compose, Coolify, CI) vs app config coherence. Принцип фазы: verify-against-reality — каждое finding'а бэкапится grep/Read выдачей, чтобы не было спекуляций о текущем состоянии. Precedent для audit-only phase: Phase 999.11.3 (docs-only skill refresh).
 **Requirements:** D-01..D-20 (locked decisions in 999.1-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; docs-only audit phase)
 **Depends on:** Phase 999.11.3 (latest config-related architectural state — {SVC}_CONFIG Symbol contract from 999.11.1 D-08, bootstrap/config placement from 999.11.2, refreshed skill from 999.11.3 — audit measures against this baseline)
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 999.1-01-PLAN.md — Lock canonical config system design (DESIGN.md: 7-level taxonomy + 29 invariants + cross-ref matrix)
 - [x] 999.1-02-PLAN.md — Audit config system against canonical design (AUDIT.md: 5-layer findings catalog with F-NN template)
-- [ ] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
+- [x] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
 - [ ] 999.1-04-PLAN.md — Verification + summary + flip nyquist flag (VERIFICATION.md grep-proof table + SUMMARY.md + VALIDATION.md frontmatter flip)
 
 ### Phase 999.2: Type-safe config access — ABSORBED INTO Phase 999.11.1 (2026-04-20)
