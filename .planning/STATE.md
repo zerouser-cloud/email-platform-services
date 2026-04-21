@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: verifying
-stopped_at: Completed 999.1-04-PLAN.md (VERIFICATION.md + SUMMARY.md + VALIDATION flip — Phase 999.1 architecturally complete)
-last_updated: "2026-04-21T10:20:01.952Z"
+stopped_at: "Phase 999.1 marked complete prematurely — audit incomplete (F-15 CLI process.env + F-16 Identity/Mechanism split for config). User agreed: undo close, extend Phase 999.1 via Plan 05, re-complete. Pending user decisions: (1) git reset --hard 358ae25 vs git revert; (2) /gsd:plan-phase vs manual Plan 05 creation. Full handoff in resume-file."
+last_updated: "2026-04-21T10:43:29.664Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 36
@@ -274,6 +274,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-21T10:14:41.095Z
-Stopped at: Completed 999.1-04-PLAN.md (VERIFICATION.md + SUMMARY.md + VALIDATION flip — Phase 999.1 architecturally complete)
-Resume file: None
+Last session: 2026-04-21T10:43:29.660Z
+Stopped at: Phase 999.1 marked complete prematurely — audit incomplete (F-15 CLI process.env + F-16 Identity/Mechanism split for config). User agreed: undo close, extend Phase 999.1 via Plan 05, re-complete. Pending user decisions: (1) git reset --hard 358ae25 vs git revert; (2) /gsd:plan-phase vs manual Plan 05 creation. Full handoff in resume-file.
+Resume file: .planning/phases/999.1-config-system-audit/999.1-HANDOFF.md
