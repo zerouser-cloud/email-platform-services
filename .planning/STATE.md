@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
-stopped_at: Phase 999.1 context gathered (Config System Audit — research/levels/DESIGN reframe)
-last_updated: "2026-04-21T08:33:50.063Z"
+status: executing
+stopped_at: Completed 999.1-01-PLAN.md (canonical config system DESIGN.md locked)
+last_updated: "2026-04-21T09:34:11.021Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 36
   completed_phases: 21
-  total_plans: 95
-  completed_plans: 95
+  total_plans: 99
+  completed_plans: 96
   percent: 100
 ---
 
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.11.3 — nestjs-hexagonal-mapping-skill-refresh-for-inbound-outbound-bootstrap-tree
+**Current focus:** Phase 999.1 — config-system-audit
 
 ## Current Position
 
-Phase: 999.12
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 999.1 (config-system-audit) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-04-21
 
 Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
@@ -126,6 +126,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P10 | 376s | 2 tasks | 12 files |
 | Phase 999.11.3 P01 | 9min | 2 tasks | 2 files |
 | Phase 999.11.3 P02 | 12min | 2 tasks | 7 files |
+| Phase 999.1 P01 | 12min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -237,6 +238,8 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.3]: Pitfall 5 resolution: sibling skill had ZERO mentions pre-Plan-02; 1-line §See Also append completes D-07 bidirectional cross-ref (Plan 02)
 - [Phase 999.11.3]: VERIFICATION.md as phase-exit grep-proof artefact (D-03/D-04): 19 automated + 2 manual rows with commit-hash evidence; invariants OUTSIDE skill bodies to avoid next-tree-shift maintenance (Plan 02)
 - [Phase 999.11.3]: Open Question 4 resolution: nyquist_compliant false→true + VERIFICATION.md + VALIDATION.md sign-off + sibling skill insert all ship in SAME atomic Plan 02 commit 026592e
+- [Phase 999.1]: Locked 8-section config level taxonomy (Level 0..Level 7 inclusive) per RESEARCH §2 + D-12 — preserves researcher-owned taxonomy over plan's off-by-one '7 levels' arithmetic (Rule 1 deviation)
+- [Phase 999.1]: DESIGN.md delivers 29 formalised architectural invariants (I-0.1..I-7.4) with cross-ref matrix (invariant ↔ level ↔ enforcing skill ↔ ESLint ↔ audit layer) for Plans 02-04 consumption
 
 ### Pending Todos
 
@@ -264,6 +267,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-21T08:33:50.053Z
-Stopped at: Phase 999.1 context gathered (Config System Audit — research/levels/DESIGN reframe)
-Resume file: .planning/phases/999.1-config-system-audit/999.1-CONTEXT.md
+Last session: 2026-04-21T09:34:11.018Z
+Stopped at: Completed 999.1-01-PLAN.md (canonical config system DESIGN.md locked)
+Resume file: None
