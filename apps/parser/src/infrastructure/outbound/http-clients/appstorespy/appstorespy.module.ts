@@ -7,7 +7,7 @@ import {
   APPSTORESPY_LOG_CONTEXT,
 } from './appstorespy-client.constants';
 import { PARSER_CONFIG } from '../../../bootstrap/config/parser-config.constants';
-import type { ParserEnv } from '../../../bootstrap/config';
+import type { ParserEnv } from '@email-platform/config';
 
 /**
  * Phase 999.11.1 Plan 06: consumes narrow `ParserEnv` slice via

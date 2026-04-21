@@ -11,7 +11,7 @@ import {
   type PublicStorageConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { ParserEnvSchema, type ParserEnv } from './parser-env.schema';
+import { ParserEnvSchema } from '@email-platform/config';
 import { PARSER_CONFIG } from './parser-config.constants';
 
 /**
@@ -25,13 +25,14 @@ import { PARSER_CONFIG } from './parser-config.constants';
  * Narrow ports: PERSISTENCE + LOGGING + STORAGE_CORE + PUBLIC_STORAGE + GRPC_CLIENT (1 upstream URL:
  * NOTIFIER_GRPC_URL). Parser is the highest-narrow-port-count service in the platform.
  *
- * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
- * (`<typeof ParserEnvSchema, ParserEnv>`) as Pitfall 2 escape hatch for the
- * `composeSchemas(...)`-produced schema + intersection alias combination.
- * Goes away in W6 (parser migration) when the schema moves to native
- * `z.object({...})` spread in `packages/config/src/apps/parser/env.schema.ts`.
+ * Phase 999.1.9 W6: schema now imported from `@email-platform/config` (packages/config/src/apps/parser/)
+ * per D-07; generic args dropped per D-10; slice return-type annotations kept (Pitfall 2 mitigation).
+ * Target single-generic `createConfigModule({...})` form — removes one Pitfall 2 escape hatch
+ * (was legacy 2-generic `<typeof ParserEnvSchema, ParserEnv>` in W3-interim state). Native
+ * `z.object({...Shape})` spread in the new schema resolves `z.infer` through the generic boundary
+ * cleanly (audience W3 + auth W4 + sender W5 pattern extended here to the highest-narrow-port shape).
  */
-export const ParserConfigModule = createConfigModule<typeof ParserEnvSchema, ParserEnv>({
+export const ParserConfigModule = createConfigModule({
   schema: ParserEnvSchema,
   token: PARSER_CONFIG,
   narrowPorts: [

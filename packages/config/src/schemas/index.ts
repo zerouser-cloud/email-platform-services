@@ -9,13 +9,10 @@ export { RateLimitSchema, type RateLimitConfig } from './rate-limit';
 // Phase 999.1.9 W5 (D-21): `CloudFnSchema` / `CloudFnConfig` are now canonically
 // exported from `packages/config/src/apps/sender/external-apis.schema.ts`
 // (per-service split). They are intentionally NOT re-exported here to avoid
-// root-barrel ambiguity with `./apps/sender` (TS2308). The underlying legacy
-// file `./external-apis.ts` is kept intact during coexistence — consumers of
-// Telegram/AppStoreSpy still use this barrel (migrated in W6/W8).
-// Full legacy file removed in W9 cleanup.
-export {
-  TelegramSchema,
-  type TelegramConfig,
-  AppStoreSpySchema,
-  type AppStoreSpyConfig,
-} from './external-apis';
+// root-barrel ambiguity with `./apps/sender` (TS2308).
+// Phase 999.1.9 W6 (D-21): `AppStoreSpySchema` / `AppStoreSpyConfig` likewise
+// relocated to `packages/config/src/apps/parser/external-apis.schema.ts` and
+// pruned from this barrel for the same reason. The underlying legacy file
+// `./external-apis.ts` is kept intact during coexistence — Telegram remains
+// here (migrated in W8). Full legacy file removed in W9 cleanup.
+export { TelegramSchema, type TelegramConfig } from './external-apis';

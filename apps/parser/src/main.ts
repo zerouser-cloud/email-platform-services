@@ -1,20 +1,20 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE } from '@email-platform/config';
-import { ParserEnvSchema, type ParserEnv } from './infrastructure/bootstrap/config';
-import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { SERVICE, type ParserEnv } from '@email-platform/config';
+import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { PARSER_CONFIG } from './infrastructure/bootstrap/config/parser-config.constants';
 import { ParserModule } from './parser.module';
 
 async function bootstrap() {
-  const config = loadConfig(ParserEnvSchema) as ParserEnv;
   const app = await NestFactory.create(ParserModule, { bufferLogs: true });
+  const config = app.get<ParserEnv>(PARSER_CONFIG);
 
   app.useLogger(await app.resolve(Logger));
   app.enableShutdownHooks();
 
   app.connectMicroservice(
-    createGrpcServerOptions(SERVICE.parser, SERVICE.parser.grpc.port, config.PROTO_DIR),
+    createGrpcServerOptions(SERVICE.parser, config.PARSER_GRPC_PORT, config.PROTO_DIR),
   );
 
   await app.startAllMicroservices();
