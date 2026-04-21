@@ -1,6 +1,6 @@
 # Do / Don't
 
-Nine anti-patterns common in a NestJS + Hexagonal codebase, with the right form, the rationale, and how to detect each mechanically. Detection column uses file-structure checks, compile errors, ESLint overrides (added by Phase 999.10 Plan 06), or grep.
+Ten anti-patterns common in a NestJS + Hexagonal codebase, with the right form, the rationale, and how to detect each mechanically. Detection column uses file-structure checks, compile errors, ESLint overrides (added by Phase 999.10 Plan 06; paths refreshed in 999.11.2 Plan 08), or grep. Canonical paths use the inbound/outbound/bootstrap direction split established in Phase 999.11.2.
 
 ---
 
@@ -18,7 +18,7 @@ export class AuthGrpcServer implements AuthProto.AuthServiceController { ... }
 export class AuthController implements AuthProto.AuthServiceController { ... }
 ```
 
-**Why:** D-07 — single transport-agnostic naming convention. Transport is visible via the decorator (`@AuthServiceControllerMethods()`) and the file path (`controllers/grpc/` vs `controllers/rest/`). Class name staying clean keeps a HealthController at `controllers/rest/` and an AuthController at `controllers/grpc/` symmetric.
+**Why:** D-07 — single transport-agnostic naming convention. Transport is visible via the decorator (`@AuthServiceControllerMethods()`) and the file path (`inbound/grpc/` for gRPC controllers, `bootstrap/health/` for the REST HealthController). Class name staying clean keeps a HealthController at `bootstrap/health/` and an AuthController at `inbound/grpc/` symmetric on their class names while the directory signals the transport + Ring.
 
 **Detected by:** code review; `grep -r "class [A-Za-z]*GrpcServer" apps/` must return empty after Phase 999.10.
 
@@ -174,7 +174,7 @@ export class LoginService implements LoginPort {
 **Do:**
 
 ```ts
-// apps/auth/src/infrastructure/controllers/grpc/auth.controller.ts
+// apps/auth/src/infrastructure/inbound/grpc/auth.controller.ts
 async login(req: AuthProto.LoginRequest): Promise<AuthProto.TokenPair> {
   const cmd = new LoginCommand(req.email, req.password);   // boundary mapping here
   const result = await this.loginPort.execute(cmd);
@@ -186,7 +186,7 @@ async login(req: AuthProto.LoginRequest): Promise<AuthProto.TokenPair> {
 export class LoginService implements LoginPort { ... }
 ```
 
-**Why:** D-04 — transport boundary at the controller. Proto types are a transport concern; they must not leak past `infrastructure/controllers/grpc/`.
+**Why:** D-04 — transport boundary at the controller. Proto types are a transport concern; they must not leak past `infrastructure/inbound/grpc/`.
 
 **Detected by:** ESLint Override 9 (forbids `@email-platform/contracts` imports in `apps/*/src/application/**`).
 
@@ -212,14 +212,21 @@ apps/auth/src/
 ├── application/
 ├── domain/
 └── infrastructure/
-    └── controllers/
-        └── rest/
-            └── health.controller.ts
+    ├── bootstrap/
+    │   └── health/
+    │       └── health.controller.ts
+    ├── inbound/
+    │   └── grpc/
+    │       └── auth.controller.ts
+    └── outbound/
 ```
 
-**Why:** D-10 — hexagonal layout; transport location signals transport kind. REST endpoints go in `infrastructure/controllers/rest/`, gRPC endpoints in `infrastructure/controllers/grpc/`. A `src/health/` outlier breaks symmetry and obscures where to add a second REST endpoint.
+**Why:** D-10 (hexagonal layout) + D-08 from Phase 999.11.2 (bootstrap sub-bin). Health is Ring-4 framework glue (composition-root concern), not a business-feature inbound adapter — it reports process liveness/readiness to the orchestrator and shares its DI wiring with Terminus + the infra-health indicators. Placing it under `bootstrap/health/` keeps `inbound/rest/` reserved for future feature-REST endpoints (gateway auth-login, campaigns API) without mixing the two concerns. Before 999.11.2 HealthController lived in `controllers/rest/` (4 services) or the anti-pattern `src/health/` (gateway, notifier) — now uniformly in `bootstrap/health/` across all 6 services.
 
-**Detected by:** `find apps/{auth,sender,parser,audience} -path "*/src/health" -type d` must return empty.
+**Detected by:**
+- `find apps/{auth,sender,parser,audience,gateway,notifier} -path "*/src/health" -type d` must return empty.
+- `find apps -path "*/infrastructure/bootstrap/health/health.controller.ts" | wc -l` must return `6` (all services).
+- `find apps -path "*/infrastructure/inbound/rest/health.controller.ts" | wc -l` must return `0` (D-04 from 999.11.2).
 
 ---
 
@@ -236,17 +243,23 @@ apps/auth/src/infrastructure/persistence/
 **Do:**
 
 ```
-apps/auth/src/infrastructure/persistence/
-├── pg-user.repository.ts
-├── mappers/
-│   └── user.mapper.ts
-└── schema/
-    └── users.schema.ts
+apps/auth/src/infrastructure/outbound/persistence/
+├── persistence.module.ts                           ← category composer (imports per-aggregate modules)
+└── user/                                           ← one folder per aggregate (D-02 from 999.11.2)
+    ├── user.module.ts                              ← per-aggregate DynamicModule (binds USER_REPOSITORY_PORT)
+    ├── pg-user.repository.ts
+    ├── mappers/
+    │   └── user.mapper.ts
+    └── schema/
+        └── users.schema.ts
 ```
 
-**Why:** D-21 — predictable subfolder structure. Scales to multi-entity services. Every service follows the same `persistence/{repositories, mappers/, schema/}` tri-split regardless of mapper count today.
+**Why:** D-21 (predictable subfolder structure) + D-02 from Phase 999.11.2 (per-aggregate feature slicing). Every aggregate in a service gets its own slice with the `{aggregate}.module.ts` + `pg-{aggregate}.repository.ts` + `mappers/{aggregate}.mapper.ts` + `schema/{aggregates}.schema.ts` shape. Scales to multi-aggregate services naturally (see `apps/audience/src/infrastructure/outbound/persistence/{group,recipient}/` for the 2-aggregate case). Stub repositories without a real Drizzle translation may omit `mappers/` until real persistence lands (see `apps/audience/src/infrastructure/outbound/persistence/group/` — stub repo, no `mappers/` yet — as the canonical stub shape).
 
-**Detected by:** `find apps/*/src/infrastructure/persistence -maxdepth 1 -name "*.mapper.ts"` must return empty (mappers must be one level deeper, in `mappers/`).
+**Detected by:**
+- `find apps/*/src/infrastructure/outbound/persistence -maxdepth 2 -name "*.mapper.ts"` must return empty (mappers must live one level deeper, in `{aggregate}/mappers/`, not directly under `outbound/persistence/` or under `outbound/persistence/{aggregate}/`).
+- `find apps -path '*/outbound/persistence/*/pg-*.repository.ts' | wc -l` matches aggregate count (5 aggregates total across 4 services — auth/user, sender/campaign, parser/parser-task, audience/group + audience/recipient).
+- Legacy flat layout check: `find apps/*/src -type d -name persistence -not -path '*/outbound/*'` must return empty (pre-999.11.2 `infrastructure/persistence/` without the `outbound/` parent is gone).
 
 ---
 
@@ -269,24 +282,38 @@ export class LoginModule {}
 **Do:**
 
 ```ts
-// apps/auth/src/auth.module.ts — one flat module per bounded context
+// apps/auth/src/auth.module.ts — one flat composition root per bounded context
 @Module({
-  imports: [AppConfigModule.forRoot(AuthEnvSchema), PersistenceModule.forRootAsync(), LoggingModule.forGrpcAsync('auth')],
-  controllers: [AuthController, HealthController],
+  imports: [
+    AuthConfigModule.forRoot(),           // bootstrap/config/ — FIRST per 999.11.1 Canonical Config Access Contract
+    HealthModule,                         // bootstrap/health/
+    LoggingModule.forGrpcAsync('auth'),   // foundation
+    PersistenceModule,                    // outbound/persistence/ composer — imports per-aggregate modules
+    GrpcModule,                           // inbound/grpc/ — declares AuthController, binds inbound-port Symbols
+  ],
   providers: [
+    // Zone 1: outbound domain-port bindings (may live in PersistenceModule instead)
     { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
+    // Zone 2: inbound domain-port bindings (may live in GrpcModule instead)
     { provide: LOGIN_PORT,    useClass: LoginService },
     { provide: REGISTER_PORT, useClass: RegisterService },
+    // Zone 3: atomic use-case providers (plain class references)
     VerifyCredentialsUseCase,
     IssueTokenPairUseCase,
   ],
+  // controllers: []  ← empty; controllers live inside GrpcModule per 999.11.2 Plan 10 Option A
 })
 export class AuthModule {}
 ```
 
-**Why:** D-11 — one module per bounded context. Submodules are reserved for shared infrastructure from foundation (`PersistenceModule`, `LoggingModule`, `AppConfigModule`). Feature submodules add nesting with no architectural benefit — the bounded context is already the `apps/{svc}/` directory.
+**Why:** D-11 — one flat module per bounded context. Submodules are reserved for category composers (feature-slicing machinery introduced in 999.11.2: `GrpcModule`, `PersistenceModule`, `GrpcClientsModule`, `HttpClientsModule`, `StorageModule`, `RmqModule`) and for shared infrastructure from foundation. Feature-business submodules (`LoginModule`, `RegisterModule`) add nesting with no architectural benefit — the bounded context is already the `apps/{svc}/` directory.
 
-**Detected by:** `find apps/{auth,sender,parser,audience}/src -name "*.module.ts"` should return exactly one file per service (plus whatever foundation compat shims exist in `infrastructure/clients/`).
+**Gateway exception (D-11a, Phase 999.11.2):** Gateway has NO root `apps/gateway/src/gateway.constants.ts` — the file was deleted after `GATEWAY_CONFIG` moved to `bootstrap/config/` and no cross-folder domain-port Symbols remained (gateway is a REST facade forwarding via outbound gRPC; it has no application ports today). References in this skill to `{svc}.constants.ts` therefore read as "all services except gateway."
+
+**Detected by:**
+- `find apps/{auth,sender,parser,audience,notifier}/src -maxdepth 2 -name "*.module.ts"` lists only the root `{svc}.module.ts` — category composer modules live deeper under `infrastructure/{inbound,outbound,bootstrap}/` sub-bins.
+- `find apps/gateway/src -maxdepth 2 -name "*.module.ts"` lists only `gateway.module.ts` (gateway has no `inbound/` composer per D-GATEWAY-02).
+- Legacy feature-submodule check: `find apps/*/src -maxdepth 2 -type d \( -name login -o -name register -o -name refresh-token \)` must return empty (no `LoginModule`-shaped feature submodules).
 
 ---
 
@@ -311,7 +338,7 @@ export class AuthModule {}
 **Detected by:** code review; grep invariant:
 
 ```bash
-grep -rE "private readonly \w+Port: \w+Port" apps/*/src/infrastructure/controllers/grpc/
+grep -rE "private readonly \w+Port: \w+Port" apps/*/src/infrastructure/inbound/grpc/
 ```
 
 Returns empty after Phase 999.10.1 — any match is a regression.

@@ -299,3 +299,4 @@ When the answer is unclear, follow the decision tree top-to-bottom. If the new i
 - `.planning/phases/999.7.1-grpc-client-tokens-refactor-generate-inside-definegrpcclient/` — reference: token derivation pattern
 - `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — reference: composition over inheritance for client facades (GrpcCaller helper + plain-class AuthClient)
 - `.planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/` — reference: `Promisified<T>` Proxy in foundation eliminates per-method wrapper classes (8 `*.client.ts` deleted; consumer injects raw proto interface directly via `@Inject(SERVICE.xxx.diToken)`)
+- `.agents/skills/nestjs-hexagonal-mapping/SKILL.md` — server-side counterpart. Places Controller / Service / UseCase / Port / Adapter / Domain inside `apps/{svc}/src/` for server-side inbound/outbound/bootstrap adapters. References: Phase 999.10, 999.10.1, 999.11.2.

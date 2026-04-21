@@ -9,7 +9,7 @@ All snippets derived from Phase 999.10 auth pilot (Plan 02). Method bodies stay 
 `LoginService` composes two atomic use cases: `VerifyCredentialsUseCase` and `IssueTokenPairUseCase`. This is the multi-use-case variant per D-23 — when the use case audit concludes that one RPC decomposes into N atomic steps.
 
 ```typescript
-// 1. Controller (apps/auth/src/infrastructure/controllers/grpc/auth.controller.ts)
+// 1. Controller (apps/auth/src/infrastructure/inbound/grpc/auth.controller.ts)
 @Controller()
 @AuthProto.AuthServiceControllerMethods()
 export class AuthController implements AuthProto.AuthServiceController {

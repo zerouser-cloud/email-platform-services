@@ -27,7 +27,7 @@ The last three rows (Value Object, Domain Service, Domain Event) are **optional 
 
 ## Class Name Rules
 
-- **Controller:** no transport suffix. `AuthController`, not `AuthGrpcServer` or `AuthGrpcController`. Transport is visible via the file path (`controllers/grpc/` vs `controllers/rest/`) and the decorator (`@XxxServiceControllerMethods()` or `@Controller('health')`).
+- **Controller:** no transport suffix. `AuthController`, not `AuthGrpcServer` or `AuthGrpcController`. Transport is visible via the file path (`infrastructure/inbound/grpc/` for gRPC controllers, `infrastructure/bootstrap/health/` for the REST HealthController) and the decorator (`@XxxServiceControllerMethods()` or `@Controller('health')`).
 - **Service:** always ends with `Service`. Application services live in `application/services/`. Domain services live in `domain/services/` and typically end with their purpose (`PasswordHasher`), but may end with `Service` if that reads better.
 - **Use Case:** always ends with `UseCase`. File stem is `{operation}.use-case.ts` in kebab-case.
 - **Port:** always an interface (never a class). Always ends with `Port`. Inbound ports named after the feature (`LoginPort`, `RegisterPort`); outbound ports named after the dependency (`UserRepositoryPort`, `EmailSenderPort`).
@@ -118,7 +118,7 @@ The rule: put the architectural marker where it carries information (type + toke
 **Example A — Controller collision case (audience)**
 
 ```typescript
-// apps/audience/src/infrastructure/controllers/grpc/audience.controller.ts
+// apps/audience/src/infrastructure/inbound/grpc/audience.controller.ts
 @Controller()
 @AudienceProto.AudienceServiceControllerMethods()
 export class AudienceController implements AudienceProto.AudienceServiceController {
@@ -215,8 +215,8 @@ This extends D-18 (currently Repository-only) to include `Sender` when notifier 
 ## Folder↔Convention Rules
 
 - **Hexagonal layout, not NestJS flat layout (D-08).** There are no root `src/controllers/`, `src/services/`, `src/dto/`, `src/entities/` folders. They are absorbed into `infrastructure/`, `application/`, `domain/` per the canonical tree in `LAYERS.md`.
-- **Transport explicit in path (D-09).** `infrastructure/controllers/grpc/` vs `infrastructure/controllers/rest/`. Adding a REST endpoint to a gRPC service goes into `rest/` next to the health controller.
-- **Health always REST (D-10).** `infrastructure/controllers/rest/health.controller.ts`, never `src/health/health.controller.ts`.
-- **One module per bounded context (D-11).** One `{svc}.module.ts` per service, flat. No `LoginModule` / `RegisterModule` feature submodules. Submodules are reserved for shared infrastructure from foundation (`PersistenceModule`, `LoggingModule`, `AppConfigModule`).
-- **Mappers in a subfolder (D-21).** `infrastructure/persistence/mappers/` — always, from day one, even if only one mapper exists today. Scales predictably.
-- **Per-service DI tokens (no cross-service sharing).** `apps/{svc}/src/{svc}.constants.ts` owns every Symbol used inside that bounded context. Two services never share a token file.
+- **Transport + direction explicit in path (D-09 + 999.11.2 D-01).** `infrastructure/inbound/grpc/` for server-side gRPC controllers; `infrastructure/inbound/rmq/` for RabbitMQ consumers; `infrastructure/inbound/rest/{feature}/` reserved for future feature-REST endpoints. Adding a REST business feature to an existing service creates `inbound/rest/{feature}/`; HealthController stays in `bootstrap/health/` (see next rule).
+- **Health in bootstrap (999.11.2 D-08).** `infrastructure/bootstrap/health/health.controller.ts`, never `src/health/health.controller.ts` and never `infrastructure/inbound/rest/health.controller.ts`. Health is Ring-4 framework glue — it lives with the other composition-root artifacts (`bootstrap/config/`, `bootstrap/throttle/`), not with business-feature inbound adapters.
+- **One flat module per bounded context (D-11).** One `{svc}.module.ts` per service, flat. No `LoginModule` / `RegisterModule` feature submodules. Submodules are reserved for category composers introduced in 999.11.2 (`GrpcModule` inside `inbound/grpc/`, `PersistenceModule` inside `outbound/persistence/`, `GrpcClientsModule` inside `outbound/grpc-clients/`, `HttpClientsModule` inside `outbound/http-clients/`, `StorageModule` inside `outbound/storage/`, `RmqModule` inside `inbound/rmq/`) and for shared infrastructure from foundation (`LoggingModule`, foundation `PersistenceModule`).
+- **Mappers in a subfolder when a Drizzle row→entity translation exists (D-21, refined in 999.11.2).** `infrastructure/outbound/persistence/{aggregate}/mappers/{aggregate}.mapper.ts` is the canonical location once real persistence lands. Stub repositories without a real Drizzle translation may omit `mappers/` until the translation exists (see `apps/audience/src/infrastructure/outbound/persistence/group/` — stub repo without `mappers/` — as the canonical stub shape). Once a mapper is introduced, it lives in `mappers/` from day one of that aggregate's real-persistence phase.
+- **Per-service DI tokens (no cross-service sharing).** `apps/{svc}/src/{svc}.constants.ts` owns every cross-folder domain-port Symbol used inside that bounded context (5 services: auth, sender, parser, audience, notifier). **Gateway exception (D-11a, 999.11.2):** gateway has NO root `gateway.constants.ts` — the file was deleted after `GATEWAY_CONFIG` moved to `infrastructure/bootstrap/config/` and no domain-port Symbols remained. Two services never share a token file.
