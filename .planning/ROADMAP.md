@@ -318,13 +318,18 @@ Plans:
 
 ### Phase 999.1.8: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED, renumbered from 999.1.1 — that slot reserved by Phase 999.1 SOLUTIONS.md for F-01 TopologySchema refactor; see §Sub-Phase Grouping Proposal)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Close the 2 gaps discovered post-Phase-999.1-close (F-15 blocker CLI `process.env` reads in 4× drizzle.config.ts + F-16 major Identity/Mechanism split broken for config — `loadConfig` + `composeSchemas` in `packages/config/` with apps hand-rolling `@Global() {Svc}ConfigModule.forRoot()`) by inline-amending 999.1 audit artefacts (16 findings / 30 invariants including reworded I-0.1 + new I-3.5), relocating `loadConfig` to `packages/foundation/src/external/config/`, introducing foundation-owned `createConfigModule<TEnv>({schema, token, narrowPorts})` factory symmetric to gRPC `defineGrpcClient`, migrating 4× drizzle.config CLI files + 6× apps bootstrap/config modules to the factory, and passing the non-negotiable dual-mode runtime smoke gate per `runtime-smoke-verification` skill.
+**Requirements**: F-15, F-16, I-0.1 (reworded), I-3.5 (new) — derived from Phase 999.1 post-close HANDOFF.md + 999.1.8-CONTEXT.md (23 locked decisions D-01..D-23).
 **Depends on:** Phase 999.1. **Note:** this phase is foundational — completion may reshape scope of the originally-planned 999.1.1..999.1.7 sub-phases because F-15/F-16 resolve the Identity/Mechanism split for config, after which some sibling sub-phases (esp. 999.1.2 HTTP narrow-port symmetry) may simplify or absorb into the new factory pattern.
-**Plans:** 0 plans
+**Plans:** 6 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.1.8 to break down)
+- [ ] 999.1.8-01-PLAN.md — Re-audit Phase 999.1: inline amend AUDIT/SOLUTIONS/DESIGN/SUMMARY/VERIFICATION (add F-15 + F-16 findings, reword I-0.1 without CLI exception, add I-3.5 foundation owns config DI factory, 29 → 30 invariants) + flip 999.1-VALIDATION.md to in_progress.
+- [ ] 999.1.8-02-PLAN.md — Research (NO-OP — research already captured in 999.1.8-RESEARCH.md; metadata-only placeholder for plan numbering).
+- [ ] 999.1.8-03-PLAN.md — Foundation side: create `packages/foundation/src/external/config/{load-config.ts, create-config-module.ts, index.ts}`, amend `external/index.ts` barrel, add zod runtime dep to foundation package.json (consumer-first D-04 — add without removing config side).
+- [ ] 999.1.8-04-PLAN.md — Consumer switchover: migrate 4× `apps/*/drizzle.config.ts` and 6× `apps/*/src/main.ts` to import `loadConfig` from `@email-platform/foundation`; delete `packages/config/src/config-loader.ts` + remove its barrel re-export (atomic commit, 12 files).
+- [ ] 999.1.8-05-PLAN.md — Apps migration: 6× services rewrite `{svc}-config.module.ts` to `createConfigModule<{Svc}Env>({...})` factory call, delete `{svc}-config.provider.ts` × 6, update `{svc}.module.ts` × 6 to import module as const (no `.forRoot()`), remove 6× barrel provider re-export lines (6 per-service atomic commits per D-21 template).
+- [ ] 999.1.8-06-PLAN.md — Verify phase gate: D-18 grep invariants (8/8), dual-mode runtime smoke (native + isolated) per `runtime-smoke-verification` skill, fill 999.1-VERIFICATION.md Observed cells, `/gsd:verify-work` on both 999.1 (re-verify) + 999.1.8, reflip 999.1-VALIDATION.md frontmatter back to complete + nyquist_compliant: true.
 
 ### Phase 999.2: Type-safe config access — ABSORBED INTO Phase 999.11.1 (2026-04-20)
 
