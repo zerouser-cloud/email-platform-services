@@ -316,6 +316,16 @@ Plans:
 - [x] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
 - [x] 999.1-04-PLAN.md — Verification + summary + flip nyquist flag (VERIFICATION.md grep-proof table + SUMMARY.md + VALIDATION.md frontmatter flip)
 
+### Phase 999.1.9: config-layering-refactor-services-first-structure (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 999.1.9 to break down)
+
 ### Phase 999.1.8: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED, renumbered from 999.1.1 — that slot reserved by Phase 999.1 SOLUTIONS.md for F-01 TopologySchema refactor; see §Sub-Phase Grouping Proposal)
 
 **Goal:** Close the 2 gaps discovered post-Phase-999.1-close (F-15 blocker CLI `process.env` reads in 4× drizzle.config.ts + F-16 major Identity/Mechanism split broken for config — `loadConfig` + `composeSchemas` in `packages/config/` with apps hand-rolling `@Global() {Svc}ConfigModule.forRoot()`) by inline-amending 999.1 audit artefacts (16 findings / 30 invariants including reworded I-0.1 + new I-3.5), relocating `loadConfig` to `packages/foundation/src/external/config/`, introducing foundation-owned `createConfigModule<TEnv>({schema, token, narrowPorts})` factory symmetric to gRPC `defineGrpcClient`, migrating 4× drizzle.config CLI files + 6× apps bootstrap/config modules to the factory, and passing the non-negotiable dual-mode runtime smoke gate per `runtime-smoke-verification` skill.
