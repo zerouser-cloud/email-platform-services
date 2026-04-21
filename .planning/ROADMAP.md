@@ -549,12 +549,13 @@ Plans:
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
 **Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
-**Requirements**: TBD (будут закреплены как D-01..D-N в 999.11.3-CONTEXT.md во время discuss-phase)
+**Requirements**: D-01..D-08 (locked decisions in 999.11.3-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11.2 (канонический tree landed) + Phase 999.11.1 D-08 (bootstrap/config slice shape)
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 999.11.3 to break down)
+- [ ] 999.11.3-01-PLAN.md — Refresh core skill surface: SKILL.md + LAYERS.md with canonical inbound/outbound/bootstrap paths, full §Canonical Tree rewrite, 3 new parent sections (§Bootstrap, §Inbound, §Outbound), gateway D-11a exception documented (Wave 1, atomic commit)
+- [ ] 999.11.3-02-PLAN.md — Refresh 5 references/*.md + bidirectional cross-ref with infrastructure-client-layering + write 999.11.3-VERIFICATION.md + flip VALIDATION.md nyquist_compliant flag (Wave 2, atomic commit)
 
 ### Phase 999.11.2: infrastructure-tree-canonical-split (INSERTED)
 
