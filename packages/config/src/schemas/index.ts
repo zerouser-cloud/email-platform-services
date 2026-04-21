@@ -12,7 +12,9 @@ export { RateLimitSchema, type RateLimitConfig } from './rate-limit';
 // root-barrel ambiguity with `./apps/sender` (TS2308).
 // Phase 999.1.9 W6 (D-21): `AppStoreSpySchema` / `AppStoreSpyConfig` likewise
 // relocated to `packages/config/src/apps/parser/external-apis.schema.ts` and
-// pruned from this barrel for the same reason. The underlying legacy file
-// `./external-apis.ts` is kept intact during coexistence — Telegram remains
-// here (migrated in W8). Full legacy file removed in W9 cleanup.
-export { TelegramSchema, type TelegramConfig } from './external-apis';
+// pruned from this barrel for the same reason.
+// Phase 999.1.9 W8 (D-21): `TelegramSchema` / `TelegramConfig` likewise
+// relocated to `packages/config/src/apps/notifier/external-apis.schema.ts`.
+// D-21 fan-out COMPLETE — all 3 external-API schemas now split per-service.
+// The underlying legacy file `./external-apis.ts` now has NO re-exports from
+// this root barrel; full legacy file removed in W9 cleanup.

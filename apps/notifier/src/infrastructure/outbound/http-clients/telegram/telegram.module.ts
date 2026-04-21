@@ -3,7 +3,7 @@ import { httpClientProvider } from '@email-platform/foundation';
 import { TelegramClient } from './telegram.client';
 import { TELEGRAM_CLIENT, TELEGRAM_ENV, TELEGRAM_LOG_CONTEXT } from './telegram-client.constants';
 import { NOTIFIER_CONFIG } from '../../../bootstrap/config/notifier-config.constants';
-import type { NotifierEnv } from '../../../bootstrap/config';
+import type { NotifierEnv } from '@email-platform/config';
 
 /**
  * TelegramClientModule — DynamicModule providing a single TelegramClient

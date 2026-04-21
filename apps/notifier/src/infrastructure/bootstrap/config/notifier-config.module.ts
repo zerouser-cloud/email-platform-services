@@ -7,7 +7,7 @@ import {
   type StorageCoreConfig,
   type PublicStorageConfig,
 } from '@email-platform/foundation';
-import { NotifierEnvSchema, type NotifierEnv } from './notifier-env.schema';
+import { NotifierEnvSchema } from '@email-platform/config';
 import { NOTIFIER_CONFIG } from './notifier-config.constants';
 
 /**
@@ -21,17 +21,14 @@ import { NOTIFIER_CONFIG } from './notifier-config.constants';
  * Narrow ports: LOGGING + STORAGE_CORE + PUBLIC_STORAGE (no PERSISTENCE — notifier is a pure RMQ
  * consumer with no database; no GRPC_CLIENT — notifier has no upstream gRPC dependencies).
  *
- * Phase 999.1.9 W3 D-10 exception: notifier retains the legacy 2-generic form
- * (`<typeof NotifierEnvSchema, NotifierEnv>`) as a Pitfall 2 escape hatch. The
- * `composeSchemas(...)`-produced `z.ZodObject<MergeShapes<...>>` schema combined with
- * the 6-way intersection alias `NotifierEnv` causes TS to resolve the default
- * `TEnv = z.infer<TSchema>` to `unknown` at this particular call site (not
- * reproducible for auth/sender/parser/gateway which also use composeSchemas).
- * Passing `NotifierEnv` explicitly restores proper slice-input typing. This
- * annotation goes away in W5 (notifier migration) when the schema moves to
- * native `z.object({...})` spread in `packages/config/src/apps/notifier/env.schema.ts`.
+ * Phase 999.1.9 W8: schema now imported from `@email-platform/config` (packages/config/src/apps/notifier/)
+ * per D-07; generic args dropped per D-10; slice return-type annotations kept (Pitfall 2 mitigation).
+ * Target single-generic `createConfigModule({...})` form — removes the LAST legacy Pitfall 2 escape
+ * hatch (was 2-generic `<typeof NotifierEnvSchema, NotifierEnv>` through W3-W7 coexistence). Native
+ * `z.object({...Shape})` spread in the new schema resolves `z.infer` through the generic boundary
+ * cleanly — W8 completes the single-generic universality proof across all 6 services.
  */
-export const NotifierConfigModule = createConfigModule<typeof NotifierEnvSchema, NotifierEnv>({
+export const NotifierConfigModule = createConfigModule({
   schema: NotifierEnvSchema,
   token: NOTIFIER_CONFIG,
   narrowPorts: [
