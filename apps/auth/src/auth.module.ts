@@ -8,7 +8,7 @@ import { GrpcModule } from './infrastructure/inbound/grpc';
   imports: [
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
-    AuthConfigModule.forRoot(),
+    AuthConfigModule,
     HealthModule,
     LoggingModule.forGrpcAsync('auth'),
     // GrpcModule owns inbound port → service bindings + use-cases + outbound
