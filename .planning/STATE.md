@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 10 of 11 (999.1.9-01..09 complete — legacy cleanup done)
-Status: Executing Phase 999.1.9 — W9 cleanup done, W10 env-parity CI next
-Last activity: 2026-04-21 -- W9 legacy cleanup (18 files, 2 dirs deleted; target barrel live)
+Plan: 11 of 11 (999.1.9-01..10 complete — env-parity CI live)
+Status: Executing Phase 999.1.9 — W10 done, W11 final verification (phase gate)
+Last activity: 2026-04-21 -- W10 env-parity CI integration (schema-driven check + GHA env-parity job)
 
 Progress: [██████████] 100%
 

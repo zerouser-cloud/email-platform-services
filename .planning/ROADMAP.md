@@ -333,7 +333,7 @@ Plans:
 - [x] 999.1.9-07-PLAN.md — W7: Gateway service migration (5 peers + refine preservation + HTTP-only bootstrap)
 - [x] 999.1.9-08-PLAN.md — W8: Notifier service migration (no peers + Telegram split D-21)
 - [x] 999.1.9-09-PLAN.md — W9: Cleanup — delete topology.ts + env-schema.ts + compose.ts + catalog/ + schemas/ (18 files, 2 dirs)
-- [ ] 999.1.9-10-PLAN.md — W10: Env-parity CI integration (schema-driven check + GHA job) [infrastructure-guard gate]
+- [x] 999.1.9-10-PLAN.md — W10: Env-parity CI integration (schema-driven check + GHA job) [infrastructure-guard gate]
 - [ ] 999.1.9-11-PLAN.md — W11: Final verification (grep invariants + dual-mode smoke + nyquist flip) [phase gate]
 
 ### Phase 999.1.8: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED, renumbered from 999.1.1 — that slot reserved by Phase 999.1 SOLUTIONS.md for F-01 TopologySchema refactor; see §Sub-Phase Grouping Proposal)
