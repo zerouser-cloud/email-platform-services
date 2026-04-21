@@ -331,7 +331,7 @@ Plans:
 - [x] 999.1.9-05-PLAN.md — W5: Sender service migration (peer: audience + CloudFn split D-21)
 - [x] 999.1.9-06-PLAN.md — W6: Parser service migration (peer: notifier + AppStoreSpy split D-21)
 - [x] 999.1.9-07-PLAN.md — W7: Gateway service migration (5 peers + refine preservation + HTTP-only bootstrap)
-- [ ] 999.1.9-08-PLAN.md — W8: Notifier service migration (no peers + Telegram split D-21)
+- [x] 999.1.9-08-PLAN.md — W8: Notifier service migration (no peers + Telegram split D-21)
 - [ ] 999.1.9-09-PLAN.md — W9: Cleanup — delete topology.ts + env-schema.ts + compose.ts + catalog/ + schemas/ (18 files, 2 dirs)
 - [ ] 999.1.9-10-PLAN.md — W10: Env-parity CI integration (schema-driven check + GHA job) [infrastructure-guard gate]
 - [ ] 999.1.9-11-PLAN.md — W11: Final verification (grep invariants + dual-mode smoke + nyquist flip) [phase gate]

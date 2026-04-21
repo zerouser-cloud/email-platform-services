@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 8 of 11 (999.1.9-01..07 complete)
-Status: Executing Phase 999.1.9 — W7 gateway migrated (5/6 services done), W8 notifier last
-Last activity: 2026-04-21 -- W7 gateway HTTP-only bootstrap + 5 peer topology spread
+Plan: 9 of 11 (999.1.9-01..08 complete — ALL 6 services migrated)
+Status: Executing Phase 999.1.9 — W3-W8 fan-out complete, W9 cleanup next
+Last activity: 2026-04-21 -- W8 notifier migration + D-21 TelegramSchema split (ALL escape hatches closed)
 
 Progress: [██████████] 100%
 
