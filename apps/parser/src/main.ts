@@ -7,7 +7,7 @@ import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-p
 import { ParserModule } from './parser.module';
 
 async function bootstrap() {
-  const config = loadConfig(ParserEnvSchema) as ParserEnv;
+  const config = loadConfig<typeof ParserEnvSchema, ParserEnv>(ParserEnvSchema);
   const app = await NestFactory.create(ParserModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));

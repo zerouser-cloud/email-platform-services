@@ -14,7 +14,7 @@ import {
 import { GatewayModule } from './gateway.module';
 
 async function bootstrap() {
-  const config = loadConfig(GatewayEnvSchema) as GatewayEnv;
+  const config = loadConfig<typeof GatewayEnvSchema, GatewayEnv>(GatewayEnvSchema);
   const app = await NestFactory.create(GatewayModule, { bufferLogs: true });
 
   app.useLogger(app.get(Logger));

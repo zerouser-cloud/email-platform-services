@@ -7,7 +7,7 @@ import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-p
 import { SenderModule } from './sender.module';
 
 async function bootstrap() {
-  const config = loadConfig(SenderEnvSchema) as SenderEnv;
+  const config = loadConfig<typeof SenderEnvSchema, SenderEnv>(SenderEnvSchema);
   const app = await NestFactory.create(SenderModule, { bufferLogs: true });
 
   app.useLogger(await app.resolve(Logger));
