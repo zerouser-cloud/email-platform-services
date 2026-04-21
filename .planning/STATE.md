@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Completed 999.1.8-05-PLAN.md
-last_updated: "2026-04-21T13:42:40.750Z"
+status: verifying
+stopped_at: Completed 999.1.8-06-PLAN.md
+last_updated: "2026-04-21T14:02:36.389Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 37
-  completed_phases: 22
+  completed_phases: 23
   total_plans: 105
-  completed_plans: 105
+  completed_plans: 106
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 999.1.8 (config-mechanism-consolidation-and-process-env-elimination-r) — EXECUTING
 Plan: 6 of 6
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-21
 
 Progress: [██████████] 100%
@@ -135,6 +135,7 @@ Progress: [██████████] 100%
 | Phase 999.1.8 P03 | 3min | 5 tasks tasks | 6 files files |
 | Phase 999.1.8 P04 | 4min 43sec | 4 tasks | 18 files |
 | Phase 999.1.8 P05 | ~8min 45sec | 7 tasks | 25 files |
+| Phase 999.1.8 P06 | 100min | 7 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -263,6 +264,9 @@ Progress: [██████████] 100%
 - Gateway main.ts foundation import auto-split to multi-line by prettier; verification adjusted to multi-line awareness
 - Plan 05 Rule 3: widened createConfigModule factory signature to <TSchema extends z.ZodType, TEnv = z.infer<TSchema>> per RESEARCH §7.5 Option 1 — app-side call-sites supply explicit <typeof Schema, AliasEnv> two-generic form
 - Plan 05: 6 per-service atomic commits + 1 foundation-fix commit = 7 total, net -187 LOC, F-16 fully closed, I-3.5 fully closed
+- Phase 999.1.8 closed — dual-mode runtime smoke green, 999.1-VERIFICATION.md populated, 999.1-VALIDATION.md reflipped (Plan 06)
+- D-18 invariants measured via ripgrep (gsd-verifier canonical tool) — bash grep inside sandbox unreliable on some project files (Plan 06)
+- /gsd:verify-work 999.1 and /gsd:verify-work 999.1.8 slash-commands deferred to user — executor cannot invoke slash commands (Plan 06)
 
 ### Pending Todos
 
@@ -291,8 +295,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-04-21T13:42:40.743Z
-Stopped at: Completed 999.1.8-05-PLAN.md
+Last session: 2026-04-21T14:02:27.774Z
+Stopped at: Completed 999.1.8-06-PLAN.md
 Resume file: None
 
 **Planned Phase:** 999.1.8 (config-mechanism-consolidation-and-process-env-elimination) — 6 plans — 2026-04-21T12:40:28.101Z
