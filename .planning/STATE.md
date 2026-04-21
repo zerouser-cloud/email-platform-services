@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 9 of 11 (999.1.9-01..08 complete — ALL 6 services migrated)
-Status: Executing Phase 999.1.9 — W3-W8 fan-out complete, W9 cleanup next
-Last activity: 2026-04-21 -- W8 notifier migration + D-21 TelegramSchema split (ALL escape hatches closed)
+Plan: 10 of 11 (999.1.9-01..09 complete — legacy cleanup done)
+Status: Executing Phase 999.1.9 — W9 cleanup done, W10 env-parity CI next
+Last activity: 2026-04-21 -- W9 legacy cleanup (18 files, 2 dirs deleted; target barrel live)
 
 Progress: [██████████] 100%
 
