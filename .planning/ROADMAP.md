@@ -324,7 +324,7 @@ Plans:
 **Plans:** 11 plans, wave-structured W1-W11 (strangler-fig incremental migration)
 
 Plans:
-- [ ] 999.1.9-01-PLAN.md — W1: Package structure setup (infra/ + apps/ skeletons, 8 shared schemas moved, coexistence with legacy)
+- [x] 999.1.9-01-PLAN.md — W1: Package structure setup (infra/ + apps/ skeletons, 8 shared schemas moved, coexistence with legacy)
 - [ ] 999.1.9-02-PLAN.md — W2: Env vars addition — 5× `{SVC}_GRPC_PORT` in 4 env files (D-15) [infrastructure-guard gate]
 - [ ] 999.1.9-03-PLAN.md — W3: Audience canary migration + foundation factories (createConfigModule D-10, grpc-server.factory D-16) + dual-mode smoke [canary gate]
 - [ ] 999.1.9-04-PLAN.md — W4: Auth service migration (no peers)
