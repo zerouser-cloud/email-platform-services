@@ -321,7 +321,7 @@ Plans:
 **Goal:** Full config-system refactor per Three-Layer Rule — restructure `packages/config/src/` into `infra/` (shared building blocks) + `apps/{name}/` (per-service mirror of `/apps/{name}/`). Eliminate dynamic TopologySchema (static per-service spread), remove intersection-alias types (z.infer only), unify config access through DI (`app.get<XxxEnv>(XXX_CONFIG)` in main.ts), add HTTP↔gRPC server port symmetry (`{SVC}_GRPC_PORT` env var), move env parity check to CI. Resolves F-01 root finding (12× `as XxxEnv` casts).
 **Requirements**: D-01..D-23 from 999.1.9-CONTEXT.md (23 locked user decisions) + F-01 finding parent.
 **Depends on:** Phase 999.1, Phase 999.1.8
-**Plans:** 11 plans, wave-structured W1-W11 (strangler-fig incremental migration)
+**Plans:** 11/11 plans complete
 
 Plans:
 - [x] 999.1.9-01-PLAN.md — W1: Package structure setup (infra/ + apps/ skeletons, 8 shared schemas moved, coexistence with legacy)
