@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.1.8-02-PLAN.md
-last_updated: "2026-04-21T13:12:48.025Z"
+stopped_at: Completed 999.1.8-03-PLAN.md
+last_updated: "2026-04-21T13:20:07.830Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 37
   completed_phases: 22
   total_plans: 105
-  completed_plans: 102
-  percent: 97
+  completed_plans: 103
+  percent: 98
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.8 (config-mechanism-consolidation-and-process-env-elimination-r) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-04-21
 
-Progress: [██████████] 97%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
@@ -132,6 +132,7 @@ Progress: [██████████] 97%
 | Phase 999.1 P04 | ~8min | 3 tasks | 3 files |
 | Phase 999.1.8 P01 | ~15min | 5 tasks | 6 files |
 | Phase 999.1.8 P02 | <1min | 1 tasks | 0 files |
+| Phase 999.1.8 P03 | 3min | 5 tasks tasks | 6 files files |
 
 ## Accumulated Context
 
@@ -253,6 +254,9 @@ Progress: [██████████] 97%
 - Phase 999.1.8 Plan 01 — I-3.5 locks foundation-owned createConfigModule({schema, token, narrowPorts}) factory symmetric to gRPC defineGrpcClient
 - Phase 999.1.8 Plan 01 — Phase 999.1 artefacts amended inline (CONTEXT D-01); 16 F-NN / 30 invariants; VALIDATION.md reflipped (nyquist_compliant: false, status: in_progress) until Plan 07 re-verify
 - [Phase 999.1.8-02]: Placeholder plan confirms 999.1.8-RESEARCH.md (134 KB / 27 sections / 8 numbered §) was produced by gsd-phase-researcher BEFORE this PLAN set was generated; no-op plan with skipped:true frontmatter + has_summary pointer at RESEARCH.md preserves sequential plan numbering without duplicating research output. Option B dual-import for drizzle.config LOCKED per §3. Design-lock inputs I-0.1 (reworded) + I-3.5 (new) from Plan 01 available to Plans 04/05/06.
+- Plan 999.1.8-03: loadConfig verbatim-relocated to foundation (zero deviations — preserves cache-by-schema-reference)
+- Plan 999.1.8-03: createConfigModule<TEnv> factory lives in packages/foundation/src/external/config/; returns DynamicModule with global: true + @Global() anchor class (belt-and-suspenders for nested forRootAsync resolution)
+- Plan 999.1.8-03: zod pinned to ^4.3.6 on @email-platform/foundation — matches @email-platform/config exactly (prevents Map<z.ZodType> cache breakage from workspace version split)
 
 ### Pending Todos
 
@@ -281,8 +285,8 @@ Progress: [██████████] 97%
 
 ## Session Continuity
 
-Last session: 2026-04-21T13:12:48.019Z
-Stopped at: Completed 999.1.8-02-PLAN.md
+Last session: 2026-04-21T13:20:07.824Z
+Stopped at: Completed 999.1.8-03-PLAN.md
 Resume file: None
 
 **Planned Phase:** 999.1.8 (config-mechanism-consolidation-and-process-env-elimination) — 6 plans — 2026-04-21T12:40:28.101Z
