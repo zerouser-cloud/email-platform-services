@@ -329,7 +329,7 @@ Plans:
 - [x] 999.1.9-03-PLAN.md — W3: Audience canary migration + foundation factories (createConfigModule D-10, grpc-server.factory D-16) + dual-mode smoke [canary gate]
 - [x] 999.1.9-04-PLAN.md — W4: Auth service migration (no peers)
 - [x] 999.1.9-05-PLAN.md — W5: Sender service migration (peer: audience + CloudFn split D-21)
-- [ ] 999.1.9-06-PLAN.md — W6: Parser service migration (peer: notifier + AppStoreSpy split D-21)
+- [x] 999.1.9-06-PLAN.md — W6: Parser service migration (peer: notifier + AppStoreSpy split D-21)
 - [ ] 999.1.9-07-PLAN.md — W7: Gateway service migration (5 peers + refine preservation + HTTP-only bootstrap)
 - [ ] 999.1.9-08-PLAN.md — W8: Notifier service migration (no peers + Telegram split D-21)
 - [ ] 999.1.9-09-PLAN.md — W9: Cleanup — delete topology.ts + env-schema.ts + compose.ts + catalog/ + schemas/ (18 files, 2 dirs)
