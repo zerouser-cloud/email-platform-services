@@ -9,7 +9,7 @@ import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
   imports: [
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
-    GatewayConfigModule.forRoot(),
+    GatewayConfigModule,
     HealthModule,
     ThrottleModule,
     LoggingModule.forHttpAsync('gateway'),
