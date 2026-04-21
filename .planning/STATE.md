@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
-stopped_at: "Phase 999.1.8 context gathered — 4 gray areas decided (inline amend 999.1 + loadConfig to foundation + factory function API + inline slices). Ready for /gsd:research-phase 999.1.8."
-last_updated: "2026-04-21T12:40:28.106Z"
+status: executing
+stopped_at: Completed Phase 999.1.8 Plan 01 (re-audit Phase 999.1 artefacts — F-15 + F-16 added, I-0.1 reworded, I-3.5 added)
+last_updated: "2026-04-21T13:09:44.291Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 37
   completed_phases: 22
   total_plans: 105
-  completed_plans: 100
-  percent: 95
+  completed_plans: 101
+  percent: 96
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.1 — config-system-audit
+**Current focus:** Phase 999.1.8 — config-mechanism-consolidation-and-process-env-elimination-r
 
 ## Current Position
 
-Phase: 999.2
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 999.1.8 (config-mechanism-consolidation-and-process-env-elimination-r) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
 Last activity: 2026-04-21
 
-Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -130,6 +130,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.1 P02 | ~5min | 2 tasks | 1 files |
 | Phase 999.1 P03 | ~8min | 2 tasks | 1 files |
 | Phase 999.1 P04 | ~8min | 3 tasks | 3 files |
+| Phase 999.1.8 P01 | ~15min | 5 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -247,6 +248,9 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.1]: Plan 03 authored 999.1-SOLUTIONS.md — 14 F-NN sections, 42 variants, 7 sub-phase groupings, Backlog Impact matrix flagging 999.1 TopologySchema / 999.4 / 999.5
 - [Phase 999.1]: Phase 999.1 config-system-audit ARCHITECTURALLY COMPLETE — 4/4 plans, 5 core deliverables + SUMMARY + VALIDATION landed; 14 F-NN findings catalogued across 5 layers (2 blocker / 6 major / 6 minor) with 42 SOLUTIONS variants; VERIFICATION grep-proof table 63 rows (37 ✅ / 26 ⚠️ drift-as-F-NN / 0 ❌); ready for /gsd:verify-work 999.1 and user D-14 post-phase action (/gsd:insert-phase per approved F-NN)
 - [Phase 999.1]: Canonical Config System Design (999.1-DESIGN.md) locks 8-section level taxonomy (Level 0 process.env OS boundary through Level 7 infra artefacts per RESEARCH §2 D-12) and 29 architectural invariants (I-0.1..I-7.4); future infra phases (999.12 Redis / 999.13 RabbitMQ / 999.14 S3 audit / external-API HTTP narrow-port migrations) cross-reference this doc — DESIGN.md → skill promotion deferred per CONTEXT.md
+- Phase 999.1.8 Plan 01 — I-0.1 retires 5-site carve-out; canonical boundary = foundation/src/external/config/load-config.ts
+- Phase 999.1.8 Plan 01 — I-3.5 locks foundation-owned createConfigModule({schema, token, narrowPorts}) factory symmetric to gRPC defineGrpcClient
+- Phase 999.1.8 Plan 01 — Phase 999.1 artefacts amended inline (CONTEXT D-01); 16 F-NN / 30 invariants; VALIDATION.md reflipped (nyquist_compliant: false, status: in_progress) until Plan 07 re-verify
 
 ### Pending Todos
 
@@ -275,8 +279,8 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 999.1.8 context gathered — 4 gray areas decided (inline amend 999.1 + loadConfig to foundation + factory function API + inline slices). Ready for /gsd:research-phase 999.1.8.
-Resume file: --resume-file
+Last session: 2026-04-21T13:09:44.285Z
+Stopped at: Completed Phase 999.1.8 Plan 01 (re-audit Phase 999.1 artefacts — F-15 + F-16 added, I-0.1 reworded, I-3.5 added)
+Resume file: None
 
 **Planned Phase:** 999.1.8 (config-mechanism-consolidation-and-process-env-elimination) — 6 plans — 2026-04-21T12:40:28.101Z
