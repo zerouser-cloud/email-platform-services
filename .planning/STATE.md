@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 3 of 11 (999.1.9-01, 02 complete)
-Status: Executing Phase 999.1.9 — W1-W2 done, W3 canary next
-Last activity: 2026-04-21 -- W2 ({SVC}_GRPC_PORT env vars) complete
+Plan: 4 of 11 (999.1.9-01, 02, 03 complete)
+Status: Executing Phase 999.1.9 — W3 canary PASSED, W4-W8 fan-out unblocked
+Last activity: 2026-04-21 -- W3 canary audience migration + dual-mode smoke passed
 
 Progress: [██████████] 100%
 
