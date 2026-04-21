@@ -10,7 +10,7 @@ import { HttpClientsModule } from './infrastructure/outbound/http-clients';
   imports: [
     // @Global() config module — MUST precede any foundation module that uses
     // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
-    SenderConfigModule.forRoot(),
+    SenderConfigModule,
     HealthModule,
     LoggingModule.forGrpcAsync('sender'),
     GrpcClientsModule,
