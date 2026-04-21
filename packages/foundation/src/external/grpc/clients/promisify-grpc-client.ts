@@ -40,10 +40,7 @@ export interface PromisifyOpts {
  * Channel binding: `grpc.getService(name)` inside useFactory creates the gRPC channel
  * synchronously and caches it. No network I/O until first RPC method call.
  */
-export function promisifyGrpcClient<T extends object>(
-  raw: T,
-  opts: PromisifyOpts,
-): Promisified<T> {
+export function promisifyGrpcClient<T extends object>(raw: T, opts: PromisifyOpts): Promisified<T> {
   // ClientGrpc.getService(name) returns a plain object with own keys equal to RPC method
   // names — verified in @nestjs/microservices/client/client-grpc.js:38-50.
   const rpcMethods = new Set(Object.keys(raw));

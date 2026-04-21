@@ -2,7 +2,7 @@ import type { DynamicModule, Provider, Type } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { TerminusModule, HealthIndicatorService } from '@nestjs/terminus';
-import type { GrpcServiceDeclaration } from '@email-platform/config';
+import type { GrpcServiceIdentity } from '@email-platform/config';
 import { resolveProtoPath } from '../proto-resolver';
 import { createDeadlineInterceptor } from '../../resilience/grpc-deadline.interceptor';
 import { GRPC_CLIENT_CONFIG_PORT, GRPC_CLIENT_HEALTH } from './clients.constants';
@@ -16,7 +16,7 @@ const TOKEN_SUFFIX = {
 } as const;
 
 export interface DefineGrpcClientOpts {
-  readonly service: GrpcServiceDeclaration;
+  readonly service: GrpcServiceIdentity;
   readonly clientToken: symbol;
 }
 
@@ -66,7 +66,7 @@ export function defineGrpcClient<TRaw extends object>(
           useFactory: (config: GrpcClientConfig) => ({
             transport: Transport.GRPC,
             options: {
-              url: config.grpcUrls[opts.service.envKeys.GRPC_URL],
+              url: config.grpcUrls[`${opts.service.id.toUpperCase()}_GRPC_URL`],
               package: [opts.service.grpc.package, GRPC_CLIENT_HEALTH.PACKAGE],
               protoPath: [
                 resolveProtoPath(opts.service.grpc.package, config.PROTO_DIR),

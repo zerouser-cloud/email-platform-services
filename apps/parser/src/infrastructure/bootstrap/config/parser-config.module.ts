@@ -24,6 +24,12 @@ import { PARSER_CONFIG } from './parser-config.constants';
  *
  * Narrow ports: PERSISTENCE + LOGGING + STORAGE_CORE + PUBLIC_STORAGE + GRPC_CLIENT (1 upstream URL:
  * NOTIFIER_GRPC_URL). Parser is the highest-narrow-port-count service in the platform.
+ *
+ * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
+ * (`<typeof ParserEnvSchema, ParserEnv>`) as Pitfall 2 escape hatch for the
+ * `composeSchemas(...)`-produced schema + intersection alias combination.
+ * Goes away in W6 (parser migration) when the schema moves to native
+ * `z.object({...})` spread in `packages/config/src/apps/parser/env.schema.ts`.
  */
 export const ParserConfigModule = createConfigModule<typeof ParserEnvSchema, ParserEnv>({
   schema: ParserEnvSchema,

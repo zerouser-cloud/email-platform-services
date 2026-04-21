@@ -17,6 +17,14 @@ import { AUTH_CONFIG } from './auth-config.constants';
  * ports visible at root scope).
  *
  * Narrow ports: PERSISTENCE + LOGGING only — auth has no upstream gRPC dependencies (no GRPC_CLIENT).
+ *
+ * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
+ * (`<typeof AuthEnvSchema, AuthEnv>`) as Pitfall 2 escape hatch for the
+ * `composeSchemas(...)`-produced `ZodObject<MergeShapes<T>>` + intersection alias
+ * combination (TS 5 + Zod 4 cannot resolve `z.infer` through the generic boundary
+ * here). Goes away in W4 (auth migration) when the schema moves to native
+ * `z.object({...})` spread in `packages/config/src/apps/auth/env.schema.ts` —
+ * audience already uses the target single-generic form.
  */
 export const AuthConfigModule = createConfigModule<typeof AuthEnvSchema, AuthEnv>({
   schema: AuthEnvSchema,

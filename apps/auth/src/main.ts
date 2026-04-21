@@ -13,7 +13,9 @@ async function bootstrap() {
   app.useLogger(await app.resolve(Logger));
   app.enableShutdownHooks();
 
-  app.connectMicroservice(createGrpcServerOptions(SERVICE.auth, config.PROTO_DIR));
+  app.connectMicroservice(
+    createGrpcServerOptions(SERVICE.auth, SERVICE.auth.grpc.port, config.PROTO_DIR),
+  );
 
   await app.startAllMicroservices();
   await app.listen(config.AUTH_PORT, SERVER.DEFAULT_HOST);

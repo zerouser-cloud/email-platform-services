@@ -7,7 +7,7 @@ import {
   type PersistenceConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { AudienceEnvSchema, type AudienceEnv } from './audience-env.schema';
+import { AudienceEnvSchema } from '@email-platform/config';
 import { AUDIENCE_CONFIG } from './audience-config.constants';
 
 /**
@@ -19,8 +19,11 @@ import { AUDIENCE_CONFIG } from './audience-config.constants';
  * ports visible at root scope).
  *
  * Narrow ports declared inline per CONTEXT D-13 (each service owns its variance).
+ *
+ * Phase 999.1.9 W3: schema now imported from `@email-platform/config` (packages/config/src/apps/audience/)
+ * per D-07; generic args dropped per D-10; slice return-type annotations kept (Pitfall 2 mitigation).
  */
-export const AudienceConfigModule = createConfigModule<typeof AudienceEnvSchema, AudienceEnv>({
+export const AudienceConfigModule = createConfigModule({
   schema: AudienceEnvSchema,
   token: AUDIENCE_CONFIG,
   narrowPorts: [

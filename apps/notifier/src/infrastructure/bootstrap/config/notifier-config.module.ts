@@ -20,6 +20,16 @@ import { NOTIFIER_CONFIG } from './notifier-config.constants';
  *
  * Narrow ports: LOGGING + STORAGE_CORE + PUBLIC_STORAGE (no PERSISTENCE — notifier is a pure RMQ
  * consumer with no database; no GRPC_CLIENT — notifier has no upstream gRPC dependencies).
+ *
+ * Phase 999.1.9 W3 D-10 exception: notifier retains the legacy 2-generic form
+ * (`<typeof NotifierEnvSchema, NotifierEnv>`) as a Pitfall 2 escape hatch. The
+ * `composeSchemas(...)`-produced `z.ZodObject<MergeShapes<...>>` schema combined with
+ * the 6-way intersection alias `NotifierEnv` causes TS to resolve the default
+ * `TEnv = z.infer<TSchema>` to `unknown` at this particular call site (not
+ * reproducible for auth/sender/parser/gateway which also use composeSchemas).
+ * Passing `NotifierEnv` explicitly restores proper slice-input typing. This
+ * annotation goes away in W5 (notifier migration) when the schema moves to
+ * native `z.object({...})` spread in `packages/config/src/apps/notifier/env.schema.ts`.
  */
 export const NotifierConfigModule = createConfigModule<typeof NotifierEnvSchema, NotifierEnv>({
   schema: NotifierEnvSchema,

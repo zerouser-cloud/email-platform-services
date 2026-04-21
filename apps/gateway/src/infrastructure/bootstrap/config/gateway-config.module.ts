@@ -18,6 +18,12 @@ import { GATEWAY_CONFIG } from './gateway-config.constants';
  *
  * Narrow ports: LOGGING + GRPC_CLIENT (5 upstream URLs: AUTH / SENDER / PARSER / AUDIENCE / NOTIFIER).
  * No PERSISTENCE — gateway has no database.
+ *
+ * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
+ * (`<typeof GatewayEnvSchema, GatewayEnv>`) as Pitfall 2 escape hatch. Gateway's
+ * `.refine(...)` wrapper on top of `composeSchemas(...)` makes this especially
+ * fragile for TS inference. Goes away in W8 (gateway migration) when the schema
+ * moves to native `z.object({...})` spread in `packages/config/src/apps/gateway/env.schema.ts`.
  */
 export const GatewayConfigModule = createConfigModule<typeof GatewayEnvSchema, GatewayEnv>({
   schema: GatewayEnvSchema,

@@ -22,6 +22,12 @@ import { SENDER_CONFIG } from './sender-config.constants';
  *
  * Narrow ports: PERSISTENCE + LOGGING + CACHE (REDIS_URL) + GRPC_CLIENT (1 upstream URL:
  * AUDIENCE_GRPC_URL). Sender is the only service that currently binds CACHE_CONFIG_PORT.
+ *
+ * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
+ * (`<typeof SenderEnvSchema, SenderEnv>`) as Pitfall 2 escape hatch for the
+ * `composeSchemas(...)`-produced schema + intersection alias combination.
+ * Goes away in W7 (sender migration) when the schema moves to native
+ * `z.object({...})` spread in `packages/config/src/apps/sender/env.schema.ts`.
  */
 export const SenderConfigModule = createConfigModule<typeof SenderEnvSchema, SenderEnv>({
   schema: SenderEnvSchema,

@@ -5,28 +5,33 @@ import { loadConfig } from './load-config';
 /**
  * Options for assembling a per-service config module via the canonical factory.
  *
- * @typeParam TSchema - The Zod schema type (typically a `ZodObject<MergeShapes<...>>`
- *                      produced by `composeSchemas(...)` from `@email-platform/config`).
- * @typeParam TEnv    - Inferred env shape, defaults to `z.infer<TSchema>`. Override
- *                      explicitly when the Zod inference diverges from the aliased
- *                      service env type (e.g., intersection alias `AudienceEnv`).
+ * @typeParam TSchema - The Zod schema type (typically a native `z.object({...})` spread
+ *                      composed from per-app topology + peer topologies + infra blocks
+ *                      per `@email-platform/config/apps/{name}/env.schema`).
  *
- * Note on the `TSchema extends z.ZodType` shape (RESEARCH §7.5 Option 1, applied in
- * Plan 05 Task 1 as a Rule 3 scope expansion): Zod 4's `z.ZodType<TEnv>` output-only
- * generic is too wide for `composeSchemas(...)`-produced `ZodObject<MergeShapes<...>>`
- * to assign into without a cast. Taking the raw `TSchema` on the signature and deriving
- * `TEnv` via `z.infer<TSchema>` mirrors the canonical `loadConfig<T extends z.ZodType>`
- * signature and removes the need for 6× app-side casts.
+ * Phase 999.1.9 D-10: primary call pattern is single-generic
+ * `createConfigModule<typeof XxxEnvSchema>({...})` — slice `env` is inferred
+ * inline as `z.infer<TSchema>`. Call sites drop the legacy 2-generic form
+ * `<typeof Schema, XxxEnv>`.
+ *
+ * A default-valued second type param `TEnv = z.infer<TSchema>` is retained as an
+ * escape hatch for Pitfall 2 edge cases where TS struggles to resolve
+ * `z.infer<TSchema>` through the generic boundary (observed for Zod 4 on
+ * `composeSchemas`-produced `ZodObject<MergeShapes<T>>` schemas — the 5 legacy
+ * per-service env.schemas awaiting W4-W8 migration). Consumers never pass it
+ * explicitly post-migration; it defaults correctly for native `z.object({...})`
+ * schemas (the target state per D-07). Scheduled for removal in W9 once all
+ * env.schemas are the native-spread form.
  */
 export interface CreateConfigModuleOptions<TSchema extends z.ZodType, TEnv = z.infer<TSchema>> {
-  /** Zod schema validating `process.env` and producing the TEnv shape. */
+  /** Zod schema validating `process.env` and producing the env shape. */
   readonly schema: TSchema;
-  /** Service-local symbol that resolves to the full TEnv value via DI (e.g., `AUDIENCE_CONFIG`). */
+  /** Service-local symbol that resolves to the full env value via DI (e.g., `AUDIENCE_CONFIG`). */
   readonly token: symbol;
   /**
    * Optional narrow-port slice declarations. Each entry binds a foundation-owned
-   * narrow-port symbol (e.g., `PERSISTENCE_CONFIG_PORT`) to a projection of TEnv.
-   * Consumers inject the narrow port instead of the full TEnv — preserves
+   * narrow-port symbol (e.g., `PERSISTENCE_CONFIG_PORT`) to a projection of the env.
+   * Consumers inject the narrow port instead of the full env — preserves
    * least-privilege per 999.11.1 D-09.
    */
   readonly narrowPorts?: ReadonlyArray<{
@@ -59,10 +64,6 @@ class ConfigModuleHolder {}
  * TerminusModule) that cannot walk up to root providers otherwise.
  *
  * @typeParam TSchema - Zod schema type, inferred from the `schema` option.
- * @typeParam TEnv    - Env shape; defaults to `z.infer<TSchema>`. Pass explicitly
- *                      (`createConfigModule<typeof Schema, AliasEnv>`) when the
- *                      consumer's aliased service env type diverges from raw Zod
- *                      inference (e.g., intersection-based `AudienceEnv`).
  * @param opts - schema + token + optional narrowPorts.
  * @returns DynamicModule ready to be imported from the service's root composition.
  *
