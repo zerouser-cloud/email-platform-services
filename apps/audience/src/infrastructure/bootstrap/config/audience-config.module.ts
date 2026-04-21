@@ -1,5 +1,5 @@
-import { Global, Module, type DynamicModule } from '@nestjs/common';
 import {
+  createConfigModule,
   LOGGING_CONFIG_PORT,
   PERSISTENCE_CONFIG_PORT,
   GRPC_CLIENT_CONFIG_PORT,
@@ -7,57 +7,41 @@ import {
   type PersistenceConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { audienceConfigProvider } from './audience-config.provider';
+import { AudienceEnvSchema, type AudienceEnv } from './audience-env.schema';
 import { AUDIENCE_CONFIG } from './audience-config.constants';
-import type { AudienceEnv } from './audience-env.schema';
 
 /**
- * Audience config module (Phase 999.11.1 D-10 fix, 2026-04-20) — @Global() so the
- * AUDIENCE_CONFIG + narrow `*_CONFIG_PORT` slice providers are visible to third-party
- * dynamic modules inside foundation (`LoggingModule` → `PinoLoggerModule.forRootAsync`,
- * `defineGrpcClient` → `ClientsModule.registerAsync`, etc.) whose nested
- * `forRootAsync({inject: [...]})` can't walk up to the root module's providers.
+ * Audience config module — factory-composed per Phase 999.1.8 (I-3.5).
  *
- * Moved to sibling file per Phase 999.11.2 D-10 (one-file-per-export convention).
- * @Global() preserved per Phase 999.11.1 Plan 10 Rule 3 fix.
+ * Replaces the previous hand-rolled `@Global() @Module({}) class` + `static forRoot(): DynamicModule { ... }`
+ * pattern. The factory internally marks the returned module `global: true` (preserves the 999.11.1
+ * Plan 10 Rule 3 fix — nested `forRootAsync({inject: [*_CONFIG_PORT]})` dynamic modules need narrow
+ * ports visible at root scope).
+ *
+ * Narrow ports declared inline per CONTEXT D-13 (each service owns its variance).
  */
-@Global()
-@Module({})
-export class AudienceConfigModule {
-  static forRoot(): DynamicModule {
-    return {
-      module: AudienceConfigModule,
-      providers: [
-        audienceConfigProvider,
-        {
-          provide: PERSISTENCE_CONFIG_PORT,
-          useFactory: (c: AudienceEnv): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
-          inject: [AUDIENCE_CONFIG],
-        },
-        {
-          provide: LOGGING_CONFIG_PORT,
-          useFactory: (c: AudienceEnv): LoggingConfig => ({
-            LOG_LEVEL: c.LOG_LEVEL,
-            LOG_FORMAT: c.LOG_FORMAT,
-          }),
-          inject: [AUDIENCE_CONFIG],
-        },
-        {
-          provide: GRPC_CLIENT_CONFIG_PORT,
-          useFactory: (c: AudienceEnv): GrpcClientConfig => ({
-            PROTO_DIR: c.PROTO_DIR,
-            GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
-            grpcUrls: { PARSER_GRPC_URL: c.PARSER_GRPC_URL },
-          }),
-          inject: [AUDIENCE_CONFIG],
-        },
-      ],
-      exports: [
-        AUDIENCE_CONFIG,
-        PERSISTENCE_CONFIG_PORT,
-        LOGGING_CONFIG_PORT,
-        GRPC_CLIENT_CONFIG_PORT,
-      ],
-    };
-  }
-}
+export const AudienceConfigModule = createConfigModule<typeof AudienceEnvSchema, AudienceEnv>({
+  schema: AudienceEnvSchema,
+  token: AUDIENCE_CONFIG,
+  narrowPorts: [
+    {
+      port: PERSISTENCE_CONFIG_PORT,
+      slice: (c): PersistenceConfig => ({ DATABASE_URL: c.DATABASE_URL }),
+    },
+    {
+      port: LOGGING_CONFIG_PORT,
+      slice: (c): LoggingConfig => ({
+        LOG_LEVEL: c.LOG_LEVEL,
+        LOG_FORMAT: c.LOG_FORMAT,
+      }),
+    },
+    {
+      port: GRPC_CLIENT_CONFIG_PORT,
+      slice: (c): GrpcClientConfig => ({
+        PROTO_DIR: c.PROTO_DIR,
+        GRPC_DEADLINE_MS: c.GRPC_DEADLINE_MS,
+        grpcUrls: { PARSER_GRPC_URL: c.PARSER_GRPC_URL },
+      }),
+    },
+  ],
+});
