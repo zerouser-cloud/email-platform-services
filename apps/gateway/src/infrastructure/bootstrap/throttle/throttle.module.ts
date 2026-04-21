@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { GATEWAY_CONFIG } from '../config/gateway-config.constants';
-import type { GatewayEnv } from '../config';
+import type { GatewayEnv } from '@email-platform/config';
 import { THROTTLE_TIER } from './throttle.constants';
 
 @Module({

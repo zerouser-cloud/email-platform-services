@@ -5,7 +5,7 @@ import {
   type LoggingConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { GatewayEnvSchema, type GatewayEnv } from './gateway-env.schema';
+import { GatewayEnvSchema } from '@email-platform/config';
 import { GATEWAY_CONFIG } from './gateway-config.constants';
 
 /**
@@ -19,13 +19,15 @@ import { GATEWAY_CONFIG } from './gateway-config.constants';
  * Narrow ports: LOGGING + GRPC_CLIENT (5 upstream URLs: AUTH / SENDER / PARSER / AUDIENCE / NOTIFIER).
  * No PERSISTENCE — gateway has no database.
  *
- * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
- * (`<typeof GatewayEnvSchema, GatewayEnv>`) as Pitfall 2 escape hatch. Gateway's
- * `.refine(...)` wrapper on top of `composeSchemas(...)` makes this especially
- * fragile for TS inference. Goes away in W8 (gateway migration) when the schema
- * moves to native `z.object({...})` spread in `packages/config/src/apps/gateway/env.schema.ts`.
+ * Phase 999.1.9 W7: schema now imported from `@email-platform/config` (packages/config/src/apps/gateway/)
+ * per D-07; generic args dropped per D-10; slice return-type annotations kept (Pitfall 2 mitigation).
+ * Target single-generic `createConfigModule({...})` form — removes one Pitfall 2 escape hatch
+ * (was legacy 2-generic `<typeof GatewayEnvSchema, GatewayEnv>` in W3-W6 interim state). Gateway's
+ * `.refine(...)` wrapper on top of the native `z.object({...})` spread in the new schema resolves
+ * `z.infer` through the generic boundary cleanly (audience W3 + auth W4 + sender W5 + parser W6
+ * pattern extended here to the special HTTP-only, 5-peer, refine-guarded shape).
  */
-export const GatewayConfigModule = createConfigModule<typeof GatewayEnvSchema, GatewayEnv>({
+export const GatewayConfigModule = createConfigModule({
   schema: GatewayEnvSchema,
   token: GATEWAY_CONFIG,
   narrowPorts: [
