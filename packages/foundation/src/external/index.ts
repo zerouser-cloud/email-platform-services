@@ -18,6 +18,7 @@ export * from './health/health-constants';
 export * from './cache';
 export * from './storage';
 export * from './http';
+export * from './config';
 export * from './health/indicators/rabbitmq.health';
 export * from './resilience/grpc-deadline.interceptor';
 // Disambiguate RETRY_DEFAULTS collision: http/ barrel re-exports its own

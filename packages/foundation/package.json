@@ -31,7 +31,8 @@
         "opossum": "^9.0.0",
         "pg": "^8.20.0",
         "pino": "^10.3.1",
-        "pino-http": "^11.0.0"
+        "pino-http": "^11.0.0",
+        "zod": "^4.3.6"
     },
     "peerDependencies": {
         "@nestjs/common": "^11.0.1",
