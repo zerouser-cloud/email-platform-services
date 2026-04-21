@@ -316,15 +316,15 @@ Plans:
 - [x] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
 - [x] 999.1-04-PLAN.md — Verification + summary + flip nyquist flag (VERIFICATION.md grep-proof table + SUMMARY.md + VALIDATION.md frontmatter flip)
 
-### Phase 999.1.1: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED)
+### Phase 999.1.8: config-mechanism-consolidation-and-process-env-elimination — re-audit Phase 999.1 gaps (F-15 CLI process.env, F-16 Identity/Mechanism split broken for config), research foundation/config factory shape symmetric to gRPC, amend DESIGN invariants (I-0.1 no CLI exception, new I-3.5 foundation owns config DI factory), implement loadConfig reloc + createConfigModule factory + migrate 4× drizzle.config + 6 apps (INSERTED, renumbered from 999.1.1 — that slot reserved by Phase 999.1 SOLUTIONS.md for F-01 TopologySchema refactor; see §Sub-Phase Grouping Proposal)
 
 **Goal:** [Urgent work - to be planned]
 **Requirements**: TBD
-**Depends on:** Phase 999.1
+**Depends on:** Phase 999.1. **Note:** this phase is foundational — completion may reshape scope of the originally-planned 999.1.1..999.1.7 sub-phases because F-15/F-16 resolve the Identity/Mechanism split for config, after which some sibling sub-phases (esp. 999.1.2 HTTP narrow-port symmetry) may simplify or absorb into the new factory pattern.
 **Plans:** 0 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.1.1 to break down)
+- [ ] TBD (run /gsd-plan-phase 999.1.8 to break down)
 
 ### Phase 999.2: Type-safe config access — ABSORBED INTO Phase 999.11.1 (2026-04-20)
 
