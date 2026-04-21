@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.1.8-04-PLAN.md
-last_updated: "2026-04-21T13:28:23.121Z"
+stopped_at: Completed 999.1.8-05-PLAN.md
+last_updated: "2026-04-21T13:42:40.750Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 37
   completed_phases: 22
   total_plans: 105
-  completed_plans: 104
-  percent: 99
+  completed_plans: 105
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.1.8 (config-mechanism-consolidation-and-process-env-elimination-r) — EXECUTING
-Plan: 5 of 6
+Plan: 6 of 6
 Status: Ready to execute
 Last activity: 2026-04-21
 
-Progress: [██████████] 99%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -134,6 +134,7 @@ Progress: [██████████] 99%
 | Phase 999.1.8 P02 | <1min | 1 tasks | 0 files |
 | Phase 999.1.8 P03 | 3min | 5 tasks tasks | 6 files files |
 | Phase 999.1.8 P04 | 4min 43sec | 4 tasks | 18 files |
+| Phase 999.1.8 P05 | ~8min 45sec | 7 tasks | 25 files |
 
 ## Accumulated Context
 
@@ -260,6 +261,8 @@ Progress: [██████████] 99%
 - Plan 999.1.8-03: zod pinned to ^4.3.6 on @email-platform/foundation — matches @email-platform/config exactly (prevents Map<z.ZodType> cache breakage from workspace version split)
 - Rule 3 deviation — 6× *-config.provider.ts added to atomic commit to prevent broken-build state (plan enumerated 12 files, actual = 18)
 - Gateway main.ts foundation import auto-split to multi-line by prettier; verification adjusted to multi-line awareness
+- Plan 05 Rule 3: widened createConfigModule factory signature to <TSchema extends z.ZodType, TEnv = z.infer<TSchema>> per RESEARCH §7.5 Option 1 — app-side call-sites supply explicit <typeof Schema, AliasEnv> two-generic form
+- Plan 05: 6 per-service atomic commits + 1 foundation-fix commit = 7 total, net -187 LOC, F-16 fully closed, I-3.5 fully closed
 
 ### Pending Todos
 
@@ -288,8 +291,8 @@ Progress: [██████████] 99%
 
 ## Session Continuity
 
-Last session: 2026-04-21T13:28:23.116Z
-Stopped at: Completed 999.1.8-04-PLAN.md
+Last session: 2026-04-21T13:42:40.743Z
+Stopped at: Completed 999.1.8-05-PLAN.md
 Resume file: None
 
 **Planned Phase:** 999.1.8 (config-mechanism-consolidation-and-process-env-elimination) — 6 plans — 2026-04-21T12:40:28.101Z
