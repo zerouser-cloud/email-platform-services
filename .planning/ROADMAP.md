@@ -551,7 +551,7 @@ Plans:
 **Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
 **Requirements**: D-01..D-08 (locked decisions in 999.11.3-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11.2 (канонический tree landed) + Phase 999.11.1 D-08 (bootstrap/config slice shape)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 999.11.3-01-PLAN.md — Refresh core skill surface: SKILL.md + LAYERS.md with canonical inbound/outbound/bootstrap paths, full §Canonical Tree rewrite, 3 new parent sections (§Bootstrap, §Inbound, §Outbound), gateway D-11a exception documented (Wave 1, atomic commit)

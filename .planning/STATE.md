@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Completed 999.11.3-01-PLAN.md
-last_updated: "2026-04-21T07:02:11.872Z"
+status: verifying
+stopped_at: "Completed 999.11.3-02-PLAN.md (Phase 999.11.3 architecturally complete — ready for /gsd:verify-work)"
+last_updated: "2026-04-21T07:20:30.177Z"
 last_activity: 2026-04-21
 progress:
   total_phases: 36
-  completed_phases: 20
+  completed_phases: 21
   total_plans: 95
-  completed_plans: 94
+  completed_plans: 95
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 999.11.3 (nestjs-hexagonal-mapping-skill-refresh-for-inbound-outbound-bootstrap-tree) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-21
 
 Progress: [██████████] 100% phase (4/4 plans), [==============================] 100% overall
@@ -125,6 +125,7 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 | Phase 999.11.2 P09 | 4min (244s) | 2 (combined 1 commit) tasks | 2 files |
 | Phase 999.11.2 P10 | 376s | 2 tasks | 12 files |
 | Phase 999.11.3 P01 | 9min | 2 tasks | 2 files |
+| Phase 999.11.3 P02 | 12min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -231,6 +232,11 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 - [Phase 999.11.3]: LAYERS.md restructure = three H2 direction parents (Bootstrap/Inbound/Outbound) with feature-slicing subsections (Open Question 2 resolution)
 - [Phase 999.11.3]: Mappers day-one mandate softened: 'once a Drizzle row→entity translation exists; stub repositories may omit until real persistence lands' (Pitfall 3)
 - [Phase 999.11.3]: D-07 bidirectional cross-ref split: Plan 01 lands uni-directional half (SKILL.md → sibling); Plan 02 will land reciprocal bullet in infrastructure-client-layering/SKILL.md
+- [Phase 999.11.3]: Pitfall 1 per-occurrence treatment: DO-DONT.md Don't-blocks preserve pre-999.11.2 bad-state paths; only Do-blocks + Detection-by refreshed (Plan 02)
+- [Phase 999.11.3]: Pitfall 4 zero-diff treatment: CALL-FLOW.md verified-untouched (uses role labels, not paths) — excluded from commit staging (Plan 02)
+- [Phase 999.11.3]: Pitfall 5 resolution: sibling skill had ZERO mentions pre-Plan-02; 1-line §See Also append completes D-07 bidirectional cross-ref (Plan 02)
+- [Phase 999.11.3]: VERIFICATION.md as phase-exit grep-proof artefact (D-03/D-04): 19 automated + 2 manual rows with commit-hash evidence; invariants OUTSIDE skill bodies to avoid next-tree-shift maintenance (Plan 02)
+- [Phase 999.11.3]: Open Question 4 resolution: nyquist_compliant false→true + VERIFICATION.md + VALIDATION.md sign-off + sibling skill insert all ship in SAME atomic Plan 02 commit 026592e
 
 ### Pending Todos
 
@@ -258,6 +264,6 @@ Progress: [██████████] 100% phase (4/4 plans), [============
 
 ## Session Continuity
 
-Last session: 2026-04-21T07:01:59.354Z
-Stopped at: Completed 999.11.3-01-PLAN.md
+Last session: 2026-04-21T07:20:12.475Z
+Stopped at: Completed 999.11.3-02-PLAN.md (Phase 999.11.3 architecturally complete — ready for /gsd:verify-work)
 Resume file: None
