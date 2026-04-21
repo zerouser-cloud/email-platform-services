@@ -1,20 +1,20 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE } from '@email-platform/config';
-import { SenderEnvSchema, type SenderEnv } from './infrastructure/bootstrap/config';
-import { loadConfig, createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { SERVICE, type SenderEnv } from '@email-platform/config';
+import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { SENDER_CONFIG } from './infrastructure/bootstrap/config/sender-config.constants';
 import { SenderModule } from './sender.module';
 
 async function bootstrap() {
-  const config = loadConfig(SenderEnvSchema) as SenderEnv;
   const app = await NestFactory.create(SenderModule, { bufferLogs: true });
+  const config = app.get<SenderEnv>(SENDER_CONFIG);
 
   app.useLogger(await app.resolve(Logger));
   app.enableShutdownHooks();
 
   app.connectMicroservice(
-    createGrpcServerOptions(SERVICE.sender, SERVICE.sender.grpc.port, config.PROTO_DIR),
+    createGrpcServerOptions(SERVICE.sender, config.SENDER_GRPC_PORT, config.PROTO_DIR),
   );
 
   await app.startAllMicroservices();

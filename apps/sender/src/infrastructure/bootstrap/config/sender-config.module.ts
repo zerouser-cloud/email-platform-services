@@ -9,7 +9,7 @@ import {
   type CacheConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
-import { SenderEnvSchema, type SenderEnv } from './sender-env.schema';
+import { SenderEnvSchema } from '@email-platform/config';
 import { SENDER_CONFIG } from './sender-config.constants';
 
 /**
@@ -23,13 +23,14 @@ import { SENDER_CONFIG } from './sender-config.constants';
  * Narrow ports: PERSISTENCE + LOGGING + CACHE (REDIS_URL) + GRPC_CLIENT (1 upstream URL:
  * AUDIENCE_GRPC_URL). Sender is the only service that currently binds CACHE_CONFIG_PORT.
  *
- * Phase 999.1.9 W3 D-10 transition: retains legacy 2-generic form
- * (`<typeof SenderEnvSchema, SenderEnv>`) as Pitfall 2 escape hatch for the
- * `composeSchemas(...)`-produced schema + intersection alias combination.
- * Goes away in W7 (sender migration) when the schema moves to native
- * `z.object({...})` spread in `packages/config/src/apps/sender/env.schema.ts`.
+ * Phase 999.1.9 W5: schema now imported from `@email-platform/config` (packages/config/src/apps/sender/)
+ * per D-07; generic args dropped per D-10; slice return-type annotations kept (Pitfall 2 mitigation).
+ * Target single-generic `createConfigModule({...})` form — removes one Pitfall 2 escape hatch
+ * (was legacy 2-generic `<typeof SenderEnvSchema, SenderEnv>` in W3-interim state). Native
+ * `z.object({...Shape})` spread in the new schema resolves `z.infer` through the generic boundary
+ * cleanly (audience W3 + auth W4 pattern extended here with peer + external-apis specifics).
  */
-export const SenderConfigModule = createConfigModule<typeof SenderEnvSchema, SenderEnv>({
+export const SenderConfigModule = createConfigModule({
   schema: SenderEnvSchema,
   token: SENDER_CONFIG,
   narrowPorts: [

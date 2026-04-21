@@ -3,7 +3,7 @@ import { httpClientProvider } from '@email-platform/foundation';
 import { CloudFnClient } from './cloudfn.client';
 import { CLOUDFN_CLIENT, CLOUDFN_ENV, CLOUDFN_LOG_CONTEXT } from './cloudfn-client.constants';
 import { SENDER_CONFIG } from '../../../bootstrap/config/sender-config.constants';
-import type { SenderEnv } from '../../../bootstrap/config';
+import type { SenderEnv } from '@email-platform/config';
 
 /**
  * Phase 999.11.1 Plan 06: consumes narrow `SenderEnv` slice via
