@@ -303,14 +303,14 @@ Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any or
 
 ## Backlog
 
-### Phase 999.1: TopologySchema Static Refactor — Single Source of Truth (BACKLOG)
+### Phase 999.1: Config System Audit (audit-only phase) (BACKLOG)
 
-**Goal:** Сделать TopologySchema статической, перевернуть зависимость: схема — источник истины, каталог SERVICE выводится из неё. Это позволит z.infer работать для всех composed schemas и убрать ручные типы через `&` во всех per-service env schemas. Вариант 2: единый источник истины в схеме. Также убрать `as XxxEnv` касты в loadConfig() вызовах во всех 6 main.ts — сейчас касты необходимы из-за динамического TopologySchema, после рефакторинга z.infer выведет точные типы автоматически.
-**Requirements:** TBD
-**Plans:** 2/3 plans executed
+**Goal:** Провести **полный audit** системы конфигов проекта с трассировкой usage по всей кодовой базе — не только где конфиги объявляются, но и где/как используются, куда проистекают, какие архитектурные инварианты нарушаются. **Фаза docs-only** — никакого кода не трогаем. Deliverables: **`999.1-AUDIT.md`** (inventory + categorized findings по 5 слоям) + **`999.1-SOLUTIONS.md`** (2-4 варианта фикса per finding с trade-offs и recommended pick). После завершения — user review checkpoint вне фазы: по каждому approved solution создаётся своя sub-phase (999.1.1, 999.1.2, ...) через `/gsd:insert-phase`. Audit scope: **(Layer 1 Definition & Loading)** packages/config/*, apps/*/bootstrap/config/*, drizzle.config.ts, foundation narrow-config; **(Layer 2 Usage tracing)** все `@Inject({SVC}_CONFIG)` callsites, narrow config port consumers, SERVICE catalog reads, main.ts bootstrap reads, CLI/scripts; **(Layer 3 Violations)** direct `process.env` outside legal zones, hardcoded magic values that should be config, non-null assertions, type casts на config surface; **(Layer 4 Propagation)** app→foundation slice factory boundaries, cross-service via catalog, RMQ inbound, documentation drift (CLAUDE.md + infrastructure-client-layering SKILL + env-schema SKILL + twelve-factor SKILL); **(Layer 5 Missing configs)** env-значения упоминаемые но не в схеме, .env.example vs фактическое usage, infrastructure config (docker-compose, Coolify, CI) vs app config coherence. Принцип фазы: verify-against-reality — каждое finding'а бэкапится grep/Read выдачей, чтобы не было спекуляций о текущем состоянии. Precedent для audit-only phase: Phase 999.11.3 (docs-only skill refresh).
+**Requirements:** TBD (будут закреплены как D-01..D-N в 999.1-CONTEXT.md во время discuss-phase — scope audit, методология findings, формат SOLUTIONS.md, решение по checkpoint механике)
+**Plans:** 0 plans
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.2: Type-safe config access — ABSORBED INTO Phase 999.11.1 (2026-04-20)
 
