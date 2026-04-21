@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.1.9 (config-layering-refactor-services-first-structure) — EXECUTING
-Plan: 11 of 11 (999.1.9-01..10 complete — env-parity CI live)
-Status: Executing Phase 999.1.9 — W10 done, W11 final verification (phase gate)
-Last activity: 2026-04-21 -- W10 env-parity CI integration (schema-driven check + GHA env-parity job)
+Phase: 999.1.9 (config-layering-refactor-services-first-structure) — W11 PASSED, phase-verifier next
+Plan: 11 of 11 complete (all 11 plans done; nyquist_compliant: true)
+Status: Phase 999.1.9 execution complete — pending phase-level verifier + ROADMAP close
+Last activity: 2026-04-21 -- W11 final verification (all 12 grep invariants green, dual-mode smoke green, nyquist flipped)
 
 Progress: [██████████] 100%
 
