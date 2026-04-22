@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: planning
-stopped_at: Phase 999.11.4 context gathered
-last_updated: "2026-04-22T11:17:22.548Z"
-last_activity: 2026-04-21
+status: executing
+stopped_at: Completed 999.11.4-00-PLAN.md (phase-decision index build)
+last_updated: "2026-04-22T11:39:58.654Z"
+last_activity: 2026-04-22
 progress:
   total_phases: 39
   completed_phases: 24
   total_plans: 121
-  completed_plans: 117
-  percent: 97
+  completed_plans: 118
+  percent: 98
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.1.9 — config-layering-refactor-services-first-structure
+**Current focus:** Phase 999.11.4 — architecture-skill-vs-code-audit
 
 ## Current Position
 
-Phase: 999.2
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-21
+Phase: 999.11.4 (architecture-skill-vs-code-audit) — EXECUTING
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-04-22
 
-Progress: [██████████] 100%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
@@ -138,6 +138,7 @@ Progress: [██████████] 100%
 | Phase 999.1.8 P04 | 4min 43sec | 4 tasks | 18 files |
 | Phase 999.1.8 P05 | ~8min 45sec | 7 tasks | 25 files |
 | Phase 999.1.8 P06 | 100min | 7 tasks | 2 files |
+| Phase 999.11.4 P00 | 45min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -269,6 +270,9 @@ Progress: [██████████] 100%
 - Phase 999.1.8 closed — dual-mode runtime smoke green, 999.1-VERIFICATION.md populated, 999.1-VALIDATION.md reflipped (Plan 06)
 - D-18 invariants measured via ripgrep (gsd-verifier canonical tool) — bash grep inside sandbox unreliable on some project files (Plan 06)
 - /gsd:verify-work 999.1 and /gsd:verify-work 999.1.8 slash-commands deferred to user — executor cannot invoke slash commands (Plan 06)
+- 999.11.4 Plan 00: Chose MD-table format for phase-decision index (D-05 Claude's Discretion) — project markdown convention consistency
+- 999.11.4 Plan 00: Added env-schema as 14th topic-area alongside config — semantically distinct (Zod/schemas vs DI/loader)
+- 999.11.4 Plan 00: Only 2 skills (nestjs-hexagonal-mapping, infrastructure-client-layering) cite phase D-XXs — other 9 AUTHORITATIVE skills cite zero, as expected for universal rules
 
 ### Pending Todos
 
@@ -299,8 +303,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 999.11.4 context gathered
-Resume file: --resume-file
+Last session: 2026-04-22T11:39:58.648Z
+Stopped at: Completed 999.11.4-00-PLAN.md (phase-decision index build)
+Resume file: None
 
 **Planned Phase:** 999.11.4 (architecture-skill-vs-code-audit) — 5 plans — 2026-04-22T11:17:22.543Z
