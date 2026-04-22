@@ -587,13 +587,17 @@ Plans:
 
 ### Phase 999.11.4: architecture-skill-vs-code audit (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Audit all 10 working project skills against current code state via Heavy verify-against-reality methodology with Directional Authority Taxonomy (AUTH/DESC/HYBRID), producing 999.11.4-AUDIT.md (per-skill sections + summary table) and 999.11.4-SOLUTIONS.md (1-3 ranked remediation options per finding) for user-approved sub-phase creation outside this phase.
+**Requirements**: SPEC R1-R7 (locked in 999.11.4-SPEC.md — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.11.4 to break down)
+- [ ] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/*/{phase}-CONTEXT.md and *-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1)
+- [ ] 999.11.4-01-PLAN.md — AUTH batch: 6 parallel sub-agents audit no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns via grep-against-rules methodology; 7 atomic commits (1 scaffold + 6 per-skill); Wave 2
+- [ ] 999.11.4-02-PLAN.md — DESC batch: 2 parallel sub-agents audit nestjs-hexagonal-mapping, infrastructure-client-layering via skill-vs-phase-decisions methodology using PHASE-DECISIONS-INDEX; 3 atomic commits (2 per-skill + 1 SUMMARY); Wave 3
+- [ ] 999.11.4-03-PLAN.md — HYBRID batch: 3 parallel sub-agents audit runtime-smoke-verification, composition-over-inheritance, clean-ddd-hexagonal via per-section combo methodology (AUTH-section + DESC-section); 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 (sequenced after Plan 02 due to AUDIT.md file overlap)
+- [ ] 999.11.4-04-PLAN.md — Synthesis: AUDIT.md finalisation (Orphan + Reclassification + Skipped sections + summary totals) + SOLUTIONS.md authoring (1-3 ranked variants per finding per Phase 999.1 precedent) + phase SUMMARY.md handoff doc; 4 atomic commits; Wave 5
 
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
