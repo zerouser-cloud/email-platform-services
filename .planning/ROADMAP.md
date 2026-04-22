@@ -585,6 +585,16 @@ Plans:
 - [x] 999.11-03-PLAN.md — Notifier backend smoke deletion (1 atomic commit f78d74e: 2 file changes — 1 edit + 1 delete; asymmetric scope confirmed empirically pre-edit — no hexagonal slice existed to remove per RESEARCH.md Pitfall 2; StorageSmokeController + @GrpcMethod handlers for NotifierService.RunStorageSmoke/CleanupStorageSmoke gone from runtime; TelegramSmokeController preserved per D-03; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10)
 - [x] 999.11-04-PLAN.md — Proto edits + ts-proto regeneration + parser.controller.ts stub removal (1 atomic commit fb23e24: 5 file changes — 2 proto edits + 2 regenerated .ts + 1 controller stub removal; -782/+17 line delta; parser.proto 100→68 lines with 6 RPCs; notifier.proto 45→14 lines with HealthCheck-only per Pitfall 3; generated/parser.ts 1030→687; generated/notifier.ts 418→80; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10) + D-07 dual-mode runtime smoke gate PASSED first try (native HTTP 200 @~10s boot + isolated HTTP 200 @~50s boot, both with 5/5 upstreams up + 0 error/warn across 6 isolated containers). Workspace-wide grep for 9 smoke symbols = 0 matches. Security Invariants SI-1/SI-2/SI-3 all green. Phase 999.11 total = 6 atomic refactor commits per D-04; 0 deviations, 0 auto-fixes, 0 escalations.
 
+### Phase 999.11.4: architecture-skill-vs-code audit (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.11
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 999.11.4 to break down)
+
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
 **Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
