@@ -6,6 +6,10 @@ export const PUBLIC_HEALTH_KEY = 's3:public';
 // Phase 22.4: shared namespaced bindings over the single `public` bucket.
 export const SHARED_REPORTS = Symbol('SHARED_REPORTS');
 
+// Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config port.
+// App-owned useFactory projects {SVC}_CONFIG into PublicStorageConfig shape.
+export const PUBLIC_STORAGE_CONFIG_PORT = Symbol('PUBLIC_STORAGE_CONFIG_PORT');
+
 export const PUBLIC_URL = {
   PATH_SEPARATOR: '/',
 } as const;

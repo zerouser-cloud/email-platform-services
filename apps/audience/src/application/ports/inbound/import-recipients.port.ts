@@ -1,7 +1,11 @@
+import type { ImportRecipientsCommand } from '../../commands/import-recipients.command';
+
 export interface ImportRecipientsPort {
-  execute(groupId: string): Promise<ImportRecipientsResult>;
+  execute(cmd: ImportRecipientsCommand): Promise<ImportRecipientsResult>;
 }
 
 export interface ImportRecipientsResult {
-  importedCount: number;
+  readonly imported: number;
+  readonly duplicates: number;
+  readonly total: number;
 }

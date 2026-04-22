@@ -26,3 +26,10 @@ export type { StorageHealthIndicator } from '../../internal/storage';
 // ESLint-forbidden from importing from `@email-platform/foundation/internal`.
 // Re-exported here as type-only so the public barrel exposes only the contract.
 export type { PrivateStoragePort } from '../../internal/storage';
+
+// Phase 999.11.1 D-10: expose STORAGE_CORE_CONFIG_PORT + StorageCoreConfig so app
+// modules can bind their per-service narrow-config slice via useFactory without
+// importing from `@email-platform/foundation/internal`. The Symbol is a runtime
+// value (non-type re-export); StorageCoreConfig is a shape-only type.
+export { STORAGE_CORE_CONFIG_PORT } from '../../internal/storage';
+export type { StorageCoreConfig } from '../../internal/storage';

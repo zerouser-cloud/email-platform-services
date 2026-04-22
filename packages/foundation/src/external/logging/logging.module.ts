@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import { Module, DynamicModule } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { ClsModule } from 'nestjs-cls';
 import type { ExecutionContext } from '@nestjs/common';
@@ -9,6 +8,8 @@ import type { Request } from 'express';
 import type { Metadata } from '@grpc/grpc-js';
 import type { LogFormat, LogLevel } from '@email-platform/config';
 import { HEADER, CONTEXT_TYPE } from '../constants';
+import { LOGGING_CONFIG_PORT } from './logging.constants';
+import type { LoggingConfig } from './logging.interfaces';
 import { GrpcCorrelationInterceptor } from './correlation.interceptor';
 import { GrpcLoggingInterceptor } from './grpc-logging.interceptor';
 import { HttpTimingInterceptor } from './http-timing.interceptor';
@@ -120,10 +121,10 @@ export class LoggingModule {
           },
         }),
         PinoLoggerModule.forRootAsync({
-          inject: [ConfigService],
-          useFactory: (configService: ConfigService) => {
-            const logLevel = configService.get<string>('LOG_LEVEL') as LogLevel;
-            const logFormat = configService.get<string>('LOG_FORMAT') as LogFormat;
+          inject: [LOGGING_CONFIG_PORT],
+          useFactory: (config: LoggingConfig) => {
+            const logLevel = config.LOG_LEVEL;
+            const logFormat = config.LOG_FORMAT;
             return {
               pinoHttp: {
                 level: logLevel,
@@ -178,10 +179,10 @@ export class LoggingModule {
           },
         }),
         PinoLoggerModule.forRootAsync({
-          inject: [ConfigService],
-          useFactory: (configService: ConfigService) => {
-            const logLevel = configService.get<string>('LOG_LEVEL') as LogLevel;
-            const logFormat = configService.get<string>('LOG_FORMAT') as LogFormat;
+          inject: [LOGGING_CONFIG_PORT],
+          useFactory: (config: LoggingConfig) => {
+            const logLevel = config.LOG_LEVEL;
+            const logFormat = config.LOG_FORMAT;
             return {
               pinoHttp: {
                 level: logLevel,

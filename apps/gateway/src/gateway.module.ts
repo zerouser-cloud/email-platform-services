@@ -1,23 +1,21 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
-import { GatewayEnvSchema } from './infrastructure/config';
-import { TerminusModule } from '@nestjs/terminus';
 import { LoggingModule, GrpcToHttpExceptionFilter } from '@email-platform/foundation';
-import { ThrottleModule } from './throttle/throttle.module';
-import { GrpcClientsModule } from './infrastructure/clients/grpc-clients.module';
-import { HealthController } from './health/health.controller';
-import { SmokeTestModule } from './test/smoke-test.module';
+import { GatewayConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { ThrottleModule } from './infrastructure/bootstrap/throttle';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(GatewayEnvSchema),
-    TerminusModule,
-    LoggingModule.forHttpAsync('gateway'),
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    GatewayConfigModule,
+    HealthModule,
     ThrottleModule,
+    LoggingModule.forHttpAsync('gateway'),
     GrpcClientsModule,
-    SmokeTestModule,
   ],
-  controllers: [HealthController],
+  controllers: [],
   providers: [GrpcToHttpExceptionFilter],
 })
 export class GatewayModule implements OnModuleDestroy {
