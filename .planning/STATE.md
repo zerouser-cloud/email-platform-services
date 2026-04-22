@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.4-01-PLAN.md (AUTH batch audit)
-last_updated: "2026-04-22T11:52:22.172Z"
+stopped_at: Completed 999.11.4-02-PLAN.md (DESC batch — 2 skills, 4 findings)
+last_updated: "2026-04-22T12:05:45.043Z"
 last_activity: 2026-04-22
 progress:
   total_phases: 39
   completed_phases: 24
   total_plans: 121
-  completed_plans: 119
-  percent: 98
+  completed_plans: 120
+  percent: 99
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.4 (architecture-skill-vs-code-audit) — EXECUTING
-Plan: 3 of 5
+Plan: 4 of 5
 Status: Ready to execute
 Last activity: 2026-04-22
 
-Progress: [██████████] 98%
+Progress: [██████████] 99%
 
 ## Performance Metrics
 
@@ -140,6 +140,7 @@ Progress: [██████████] 98%
 | Phase 999.1.8 P06 | 100min | 7 tasks | 2 files |
 | Phase 999.11.4 P00 | 45min | 3 tasks | 2 files |
 | Phase 999.11.4 P01 | 9min | 3 tasks | 2 files |
+| Phase 999.11.4 P02 | 40min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -275,6 +276,7 @@ Progress: [██████████] 98%
 - 999.11.4 Plan 00: Added env-schema as 14th topic-area alongside config — semantically distinct (Zod/schemas vs DI/loader)
 - 999.11.4 Plan 00: Only 2 skills (nestjs-hexagonal-mapping, infrastructure-client-layering) cite phase D-XXs — other 9 AUTHORITATIVE skills cite zero, as expected for universal rules
 - Phase 999.11.4 Plan 01 (AUTH batch audit): 4 findings catalogued across 6 AUTHORITATIVE skills; 2 fix-code (nmv-F-01 inline status strings, nmv-F-02 RETRY_DEFAULTS lower-case fields) + 2 refresh-skill (ig-F-01 Garage vs MinIO Standard Ports, ig-F-02 missing Notifier gRPC 50055 + service HTTP ports); 4 skills aligned (tf/es/gfg/bp)
+- Plan 02 (DESC batch) — 4 findings across 2 skills (nhm-F-03..04 + icl-F-01..02), all refresh-skill remediation; paired findings share 999.1.8/999.1.9 config-factory root cause; audit-only invariant holds
 
 ### Pending Todos
 
@@ -305,8 +307,8 @@ Progress: [██████████] 98%
 
 ## Session Continuity
 
-Last session: 2026-04-22T11:52:22.167Z
-Stopped at: Completed 999.11.4-01-PLAN.md (AUTH batch audit)
+Last session: 2026-04-22T12:05:45.038Z
+Stopped at: Completed 999.11.4-02-PLAN.md (DESC batch — 2 skills, 4 findings)
 Resume file: None
 
 **Planned Phase:** 999.11.4 (architecture-skill-vs-code-audit) — 5 plans — 2026-04-22T11:17:22.543Z
