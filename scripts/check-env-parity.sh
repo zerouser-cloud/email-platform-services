@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Phase 24.1 Wave 0 — env-file key parity check.
 # See .planning/phases/24.1-.../24.1-VALIDATION.md § HARD-07.
+#
+# Extended: direct `.env ⇄ .env.example` parity check. Previously native env
+# was only covered transitively (.env ⇄ .env.docker ⇄ .env.docker.example,
+# plus schemas ⇄ .env.example). The direct pair closes the gap where a
+# developer could edit `.env` or `.env.example` in isolation without CI
+# catching the drift against each other.
 set -euo pipefail
 
 RED='\033[0;31m'
@@ -49,6 +55,7 @@ compare() {
 
 compare .env .env.docker
 compare .env.docker .env.docker.example
+compare .env .env.example
 
 # =============================================================================
 # Schema-driven parity (added Phase 999.1.9 W10 per D-19)
