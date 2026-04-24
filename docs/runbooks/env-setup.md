@@ -32,7 +32,7 @@ Four environments, three file roles, one set of env keys.
 | `.env.docker.example`      | YES      | Canonical template for `.env.docker`. Variant B — hostnames + dev passwords pre-filled, only the 5 real secrets as `replace-me-*`. |
 | `.env.docker`              | NO       | Local docker-isolated runtime values (service-name hostnames, real/test secrets). Per-machine.  |
 | `.gitignore:17`            | YES      | Blocks `.env.docker` from accidental tracking.                                                  |
-| `scripts/check-env-parity.sh` | YES   | Compares UPPER_SNAKE_CASE key-sets of `.env`, `.env.docker`, `.env.docker.example`. Exit 1 on drift. |
+| `scripts/check-env-parity.sh` | YES   | Compares UPPER_SNAKE_CASE key-sets of `.env`, `.env.example`, `.env.docker`, `.env.docker.example` (pairs: `.env ⇄ .env.docker`, `.env.docker ⇄ .env.docker.example`, `.env ⇄ .env.example`). Exit 1 on drift. |
 | `scripts/check-no-bang.sh` | YES      | Audits the HTTP surface for `config.get<T>(KEY)!` non-null assertions. Exit 1 on violation.     |
 
 ---
@@ -53,7 +53,7 @@ When adding or renaming an env var, update **all** of the following in the same 
 bash scripts/check-env-parity.sh
 ```
 
-PASS across `.env` vs `.env.docker` and `.env.docker` vs `.env.docker.example`. Exit 1 on drift, prints keys unique to each file.
+PASS across `.env` vs `.env.docker`, `.env.docker` vs `.env.docker.example`, and `.env` vs `.env.example`. Exit 1 on drift, prints keys unique to each file.
 
 A key present in one file but missing in another is config drift — it will silently diverge across environments and eventually break boot on one of them. Treat any drift warning as a blocking defect.
 
