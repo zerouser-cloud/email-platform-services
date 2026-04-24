@@ -590,14 +590,14 @@ Plans:
 **Goal:** Audit all 10 working project skills against current code state via Heavy verify-against-reality methodology with Directional Authority Taxonomy (AUTH/DESC/HYBRID), producing 999.11.4-AUDIT.md (per-skill sections + summary table) and 999.11.4-SOLUTIONS.md (1-3 ranked remediation options per finding) for user-approved sub-phase creation outside this phase.
 **Requirements**: SPEC R1-R7 (locked in 999.11.4-SPEC.md — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11
-**Plans:** 5 plans
+**Plans:** 6/5 plans complete
 
 Plans:
 - [x] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/*/{phase}-CONTEXT.md and *-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1) ✅ 2026-04-22 (419 decisions across 22 phases + 227 orphans)
 - [x] 999.11.4-01-PLAN.md — AUTH batch: 6 parallel sub-agents audit no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns via grep-against-rules methodology; 7 atomic commits (1 scaffold + 6 per-skill); Wave 2 ✅ 2026-04-22 (4 findings: 2 nmv + 2 ig; 4 skills aligned)
 - [x] 999.11.4-02-PLAN.md — DESC batch: 2 parallel sub-agents audit nestjs-hexagonal-mapping, infrastructure-client-layering via skill-vs-phase-decisions methodology using PHASE-DECISIONS-INDEX; 3 atomic commits (2 per-skill + 1 SUMMARY); Wave 3 ✅ 2026-04-22 (4 findings: nhm-F-03..04 + icl-F-01..02, all refresh-skill, 13 sanctioned D-XX xref, 0 ad-hoc drift)
 - [x] 999.11.4-03-PLAN.md — HYBRID batch: 3 skills audited (rsv + coi + cdh) via per-section combo methodology; 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 ✅ 2026-04-22 (8 findings: 2 rsv + 3 coi + 3 cdh, all DESC-section, 29 sanctioned D-XX xref + 1 ad-hoc drift; sequential-fallback Rule 3 deviation — Task tool unavailable in context, identical output contract preserved)
-- [ ] 999.11.4-04-PLAN.md — Synthesis: AUDIT.md finalisation (Orphan + Reclassification + Skipped sections + summary totals) + SOLUTIONS.md authoring (1-3 ranked variants per finding per Phase 999.1 precedent) + phase SUMMARY.md handoff doc; 4 atomic commits; Wave 5
+- [x] 999.11.4-04-PLAN.md — Synthesis: AUDIT.md finalisation (Orphan + Reclassification + Skipped sections + summary totals) + SOLUTIONS.md authoring (1-3 ranked variants per finding per Phase 999.1 precedent) + phase SUMMARY.md handoff doc; 4 atomic commits; Wave 5
 
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
