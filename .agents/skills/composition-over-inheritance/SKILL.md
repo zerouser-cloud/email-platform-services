@@ -1,16 +1,24 @@
 ---
 name: composition-over-inheritance
-description: Prefer composition (has-a) over inheritance (is-a) for runtime behavior. Codebase-wide rule across apps/ and packages/ — all layers (domain, application, infrastructure, packages). Triggers on inheritance, extends, base class, abstract class, superclass, parent class, is-a, has-a, class hierarchy, polymorphism via inheritance, inherit behavior, shared base, DRY via inheritance. Apply whenever creating or refactoring any class — before writing `extends`, check this skill. Narrow runtime exceptions for Error subclasses, NestJS framework-required bases, Node.js stdlib bases; type-system `extends` (generic constraints, interface-extends-interface, conditional types) is fully exempt. Reference implementation: Phase 999.7.2 (gRPC client composition refactor).
+description: Prefer composition (has-a) over inheritance (is-a) for runtime behavior. Codebase-wide rule across apps/ and packages/ — all layers (domain, application, infrastructure, packages). Triggers on inheritance, extends, base class, abstract class, superclass, parent class, is-a, has-a, class hierarchy, polymorphism via inheritance, inherit behavior, shared base, DRY via inheritance. Apply whenever creating or refactoring any class — before writing `extends`, check this skill. Narrow runtime exceptions for Error subclasses, NestJS framework-required bases, Node.js stdlib bases; type-system `extends` (generic constraints, interface-extends-interface, conditional types) is fully exempt. Reference phases (for historical context and worked examples): `.planning/phases/999.7.2-*/` (the initial composition refactor — introduces an injected helper) and `.planning/phases/999.7.3-*/` (the wrapper-class elimination — introduces a generic promisified proxy).
 ---
 
 # Composition over Inheritance — Prefer `has-a` / `uses-a` over `is-a`
 
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for preferring composition over inheritance. It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
 Runtime behavior composition should be achieved by INJECTING collaborators, not by extending an abstract base class. Inheritance is a smell requiring explicit justification — only 4 narrow exception categories are allowed across the entire codebase. This skill is codebase-wide (apps + packages, all layers). It is the universal form of the gRPC-specific rule in `infrastructure-client-layering`.
 
-**Reference implementations:**
+**Reference phases** (planning directory prefixes, stable per D-8 "top-level workspace paths"):
 
-- `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — first canonical example: the 8 gRPC client facades migrated from `extends AbstractGrpcClient<T>` to plain classes receiving an injected `GrpcCaller` helper via the constructor.
-- `.planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/` — second canonical example: per-method wrapper classes eliminated entirely via a generic `Promisified<T>` Proxy in foundation. Wrapper classes are another form of over-engineering, kindred to inheritance — both create abstractions whose only value is mechanical intermediation. Replace with a single generic primitive in foundation; consumer apps inject the raw protocol interface directly.
+- `.planning/phases/999.7.2-*/` — the initial composition refactor: gRPC client facades migrated from inheritance to composition by injecting a helper that owns the call mechanism.
+- `.planning/phases/999.7.3-*/` — the wrapper-class elimination: per-method wrapper classes replaced by a generic promisified-proxy primitive in foundation. Wrapper classes are another form of over-engineering kindred to inheritance — both create abstractions whose only value is mechanical intermediation. Replace with a single generic primitive; consumer apps inject the raw protocol interface directly.
+
+Open those phase directories for the canonical project-specific reference implementations.
 
 ## Rule
 
@@ -26,17 +34,17 @@ These are type-system mechanisms with no runtime inheritance — fully exempt.
 
 **Allowed (narrow runtime exceptions, documented):**
 
-1. **`extends Error` / typed exception hierarchy** — only idiomatic way to create a typed exception in TypeScript/JS. `instanceof` discrimination is load-bearing for error handling; `cause` / discriminated unions do NOT replace it. Example: `class GrpcException extends RpcException`, `class HttpError extends HttpClientError`, `class StorageUploadTooLargeError extends Error`.
+1. **`extends Error` / typed exception hierarchy** — only idiomatic way to create a typed exception in TypeScript/JS. `instanceof` discrimination is load-bearing for error handling; `cause` / discriminated unions do NOT replace it.
 
-2. **`extends <framework-required base>`** — NestJS / other frameworks use reflection or metadata to discover subclasses. Framework requirement, not a design choice. Examples: `BaseRpcExceptionFilter` (NestJS), `HealthIndicator` (`@nestjs/terminus`), `PipeTransform`, `NestInterceptor`, `ExceptionFilter`, `RpcException`. Keep the subclass THIN — delegate real work to injected collaborators.
+2. **`extends <framework-required base>`** — NestJS / other frameworks use reflection or metadata to discover subclasses. Framework requirement, not a design choice. Common examples from NestJS / `@nestjs/terminus`: `BaseRpcExceptionFilter`, `HealthIndicator`, `PipeTransform`, `NestInterceptor`, `ExceptionFilter`, `RpcException`. Keep the subclass THIN — delegate real work to injected collaborators.
 
 3. **`extends <Node.js stdlib base>`** — stdlib contracts require subclassing. Examples: `stream.Transform` (must override `_transform`), `EventEmitter` (may subclass for custom events), `Readable`, `Writable`. No composition alternative preserves the stdlib semantics.
 
-4. **[Prospective] `extends <DDD tactical-pattern base>`** — if the project adopts canonical DDD tactical patterns in the future (`AggregateRoot`, `Entity`, `ValueObject`), those base classes become a documented exception. Currently NOT applicable — no such bases exist yet. Listed prospectively.
+4. **[Prospective] `extends <DDD tactical-pattern base>`** — if the project adopts canonical DDD tactical patterns in the future (`AggregateRoot`, `Entity`, `ValueObject`), those base classes become a documented exception. Listed prospectively; this is a future exception, not a present one.
 
 ```typescript
 // ALLOWED — typed exception (exception category 1)
-class GrpcException extends RpcException {
+class FooException extends RpcException {
   constructor(code: status, message: string, public readonly details?: Record<string, unknown>) {
     super({ code, message });
   }
@@ -44,7 +52,7 @@ class GrpcException extends RpcException {
 
 // ALLOWED — framework-required base (exception category 2)
 @Catch()
-export class AllRpcExceptionsFilter extends BaseRpcExceptionFilter {
+export class FooExceptionsFilter extends BaseRpcExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): Observable<never> {
     // NestJS discovers this via reflection — subclass is required
     return super.catch(exception, host);
@@ -52,7 +60,7 @@ export class AllRpcExceptionsFilter extends BaseRpcExceptionFilter {
 }
 
 // ALLOWED — stdlib base (exception category 3)
-export class SizeCountingTransform extends Transform {
+export class BazCountingTransform extends Transform {
   constructor(private readonly limit: number) { super(); }
   _transform(chunk: Buffer, _enc: BufferEncoding, cb: TransformCallback): void {
     // stdlib contract — subclass must override _transform
@@ -62,23 +70,15 @@ export class SizeCountingTransform extends Transform {
 }
 
 // ALLOWED — type-system generic constraint (not runtime inheritance)
-function httpClientProvider<T extends AbstractHttpClient>(opts: Opts<T>): Provider {
+function fooProvider<T extends HelperBase>(opts: Opts<T>): Provider {
   // TypeScript-only — no runtime class hierarchy established
 }
 
 // PROHIBITED — runtime behavior composition via inheritance
-export class AuthClient extends AbstractGrpcClient<AuthProto.AuthServiceClient> {
-  // Hidden state (this.raw, this.call, this.buildMetadata) comes from base.
-  // Replace with composition: inject a GrpcCaller helper via constructor.
+export class FooClient extends FooClientBase<FooProto.FooServiceClient> {
+  // Hidden state (this.raw, this.call, this.meta) comes from base.
+  // Replace with composition: inject a helper via constructor.
 }
-
-// PROHIBITED — "DRY via inheritance" on business/domain classes
-class BaseService {
-  protected log(msg: string) { this.logger.info(msg); }
-}
-class UserService extends BaseService { /* "gets logging for free" */ }
-class OrderService extends BaseService { /* "gets logging for free" */ }
-// Replace: inject a Logger into each service explicitly.
 ```
 
 ## Why This Rule Exists
@@ -89,7 +89,7 @@ Inheritance looks cheap — one `extends` keyword — but it imposes costs that 
 - **Tight coupling.** Changes to the base class ripple into every subclass. "One small refactor" becomes N subclass breakages. Composition localizes change to a single helper.
 - **Single inheritance.** TypeScript allows one superclass. When a class needs two cross-cutting behaviors (logging + retry, caching + tracing), inheritance forces either a deeper hierarchy or a god-base class. Composition stacks arbitrarily.
 - **Test friction.** Mocking an inherited base requires subclassing the mock or rewiring DI. Mocking an injected helper is a one-line substitution with structural typing.
-- **Semantic misuse.** "Is-a" rarely holds: `AuthClient is-a AbstractGrpcClient` is false — AuthClient USES a gRPC calling mechanism; it is not a species of it. Composition (`has-a GrpcCaller`) says what is true.
+- **Semantic misuse.** "Is-a" rarely holds: a fictional `FooClient is-a FooClientBase` is false — `FooClient` USES a calling mechanism; it is not a species of it. Composition (`has-a helper`) says what is true.
 
 ## Decision Tree — Does This `extends` Survive?
 
@@ -132,64 +132,62 @@ About to write `class Foo extends Bar`?
 
 - **`apps/{service}/src/domain/**`** — pure business logic. Composition by default: entities hold value objects, aggregates delegate to domain services. No framework concerns, no abstract bases. If/when the project adopts canonical DDD tactical patterns, a thin `Entity` base may become exception category 4 — document it when adopted, not before.
 - **`apps/{service}/src/application/**`** — use cases and ports. Ports are TypeScript interfaces, not classes — interface-extends-interface is fully exempt. Use cases are plain classes receiving their dependencies via constructor; they never extend a `BaseUseCase`.
-- **`apps/{service}/src/infrastructure/**`** — adapters and clients. Composition via injected helpers is the norm. Canonical example: the 8 gRPC clients post-Phase-999.7.2 compose `GrpcCaller` instead of extending `AbstractGrpcClient`. The 4 HTTP clients still extend `AbstractHttpClient` — flagged as refactor-candidates for a future phase.
+- **`apps/{service}/src/infrastructure/**`** — adapters and clients. Composition via injected helpers is the norm (per the `999.7.x` reference phases above). Some adapter clients may still extend a foundation abstract base pending migration. For the current inheritance inventory, run `grep -rn 'extends ' apps/ packages/ --include='*.ts' | grep -v node_modules` and walk each hit through the Decision Tree; legitimate hits map to exception categories 1-4, the rest are refactor-candidates.
 - **`packages/foundation/**`** — shared mechanisms. Plain helper classes, pure functions, factory functions. Framework-required bases (NestJS interceptors, pipes, filters, health indicators) live here as exception category 2 — keep them thin.
 
-## Pattern 1 — Inject a Helper (Composition) — Canonical 999.7.2 Example
+## Pattern 1 — Inject a Helper (Composition)
 
-**When:** A class needs a reusable mechanism (logging, metadata construction, retry, transaction, caching). The mechanism is service-agnostic and has its own collaborators (ClsService, config).
+**When:** A class needs a reusable mechanism (logging, metadata construction, retry, transaction, caching). The mechanism is service-agnostic and has its own collaborators (context service, config).
 
 **Approach:** Extract the mechanism into a plain helper class. Inject it via constructor. The host class stores the helper in a private readonly field and delegates.
 
-**999.7.2 BEFORE** (inheritance):
+**BEFORE** (inheritance — anti-pattern):
 
 ```ts
-import { AbstractGrpcClient } from '@email-platform/foundation';
-
-export class AuthClient extends AbstractGrpcClient<AuthProto.AuthServiceClient> {
-  constructor(grpc: ClientGrpc, cls: ClsService, defaultDeadlineMs: number) {
-    super(grpc, cls, SERVICE.auth.grpc.serviceName, defaultDeadlineMs, AuthClient.name);
-    // this.raw, this.call, this.buildMetadata, this.logger all come from base — HIDDEN STATE
+export class FooClient extends FooClientBase<FooProto.FooServiceClient> {
+  constructor(rpc: ClientRpc, ctx: CtxService, defaultTimeoutMs: number) {
+    super(rpc, ctx, SERVICE.foo.rpc.serviceName, defaultTimeoutMs, FooClient.name);
+    // this.raw, this.call, this.buildContext, this.logger all come from base — HIDDEN STATE
   }
-  login(request: AuthProto.LoginRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
-    return this.call('login', this.raw.login(request, this.buildMetadata(opts)));
+  doFoo(req: FooProto.DoFooRequest, opts?: CallOpts): Promise<FooProto.FooResult> {
+    return this.call('doFoo', this.raw.doFoo(req, this.buildContext(opts)));
   }
 }
 ```
 
-**999.7.2 AFTER** (composition):
+**AFTER** (composition):
 
 ```ts
-import type { GrpcCaller, CallOpts } from '@email-platform/foundation';
-
-export class AuthClient {
+export class FooClient {
   // Explicit field — dependency is visible at the type level
-  private readonly raw: AuthProto.AuthServiceClient;
+  private readonly raw: FooProto.FooServiceClient;
 
-  constructor(grpcClient: ClientGrpc, private readonly grpc: GrpcCaller) {
+  constructor(rpcClient: ClientRpc, private readonly helper: RpcHelper) {
     // Initialization is in user code — no hidden base constructor
-    this.raw = grpcClient.getService<AuthProto.AuthServiceClient>(SERVICE.auth.grpc.serviceName);
+    this.raw = rpcClient.getService<FooProto.FooServiceClient>(SERVICE.foo.rpc.serviceName);
   }
 
-  login(req: AuthProto.LoginRequest, opts?: CallOpts): Promise<AuthProto.TokenPair> {
+  doFoo(req: FooProto.DoFooRequest, opts?: CallOpts): Promise<FooProto.FooResult> {
     // Delegation is explicit — no `this.call` mystery
-    return this.grpc.call('login', opts, (m) => this.raw.login(req, m));
+    return this.helper.call('doFoo', opts, (m) => this.raw.doFoo(req, m));
   }
 }
 ```
 
 **Diff summary:**
 
-- Removed: `extends AbstractGrpcClient<T>` + `super(...)` + inherited `this.raw` / `this.call` / `this.buildMetadata`
-- Added: explicit `private readonly raw: T` field + `private readonly grpc: GrpcCaller` via DI + explicit `this.raw = grpcClient.getService<T>(...)` in constructor
-- Method body: `this.call(m, this.raw.m(req, this.buildMetadata(opts)))` → `this.grpc.call(m, opts, (m) => this.raw.m(req, m))`
+- Removed: `extends FooClientBase<T>` + `super(...)` + inherited `this.raw` / `this.call` / `this.buildContext`
+- Added: explicit `private readonly raw: T` field + `private readonly helper: RpcHelper` via DI + explicit `this.raw = rpcClient.getService<T>(...)` in constructor
+- Method body: `this.call(m, this.raw.m(req, this.buildContext(opts)))` → `this.helper.call(m, opts, (m) => this.raw.m(req, m))`
 
 **Benefits:**
 
 - Explicit dependencies at the constructor — no hidden inherited state
-- Trivially testable — pass a mock `GrpcCaller` in one line (structural typing)
-- Helper (`GrpcCaller`) lives in a single file — extension points (tracing, retry, circuit breaker) go there without touching 8 client files
+- Trivially testable — pass a mock helper in one line (structural typing)
+- Helper lives in a single file — extension points (tracing, retry, circuit breaker) go there without touching every client
 - No lifecycle hooks leak into domain classes (no `OnModuleInit` to fight with)
+
+**Evolution note.** This project's canonical reference implementations for this transition live under `.planning/phases/999.7.2-*/` (the initial composition refactor — introduces the helper) and `.planning/phases/999.7.3-*/` (the wrapper-class elimination — introduces a generic proxy that removes the need for per-method wrapper classes entirely). Read those phases for the current project-specific shape; the example above teaches the behavioural pattern abstractly.
 
 ## Pattern 2 — Delegate to a Strategy / Collaborator (General Shape)
 
@@ -256,9 +254,9 @@ class D extends C { /* ... */ }   // ← Inheritance depth > 2 almost always ind
 class BaseClient {
   constructor(protected readonly logger: Logger, protected readonly cls: ClsService) {}
 }
-class AuthClient extends BaseClient { }   // ← NO: inject Logger + ClsService directly
-class SenderClient extends BaseClient { } //    into each concrete class (or into a
-                                          //    plain helper and inject the helper)
+class FooClient extends BaseClient { }   // ← NO: inject Logger + ClsService directly
+class BarClient extends BaseClient { }   //    into each concrete class (or into a
+                                         //    plain helper and inject the helper)
 
 // ANTI-PATTERN 5 — Using `extends` for configuration composition
 abstract class ConfiguredService {
@@ -271,11 +269,11 @@ class FastService extends ConfiguredService {
 }
 // ← NO: use a plain config object passed to the constructor.
 
-// ANTI-PATTERN 6 — Client facade extending abstract infrastructure base (canonical 999.7.2 target)
-export class AuthClient extends AbstractGrpcClient<AuthProto.AuthServiceClient> { /* ... */ }
-// Replace with composition — inject a GrpcCaller helper:
-export class AuthClient {
-  constructor(grpcClient: ClientGrpc, private readonly grpc: GrpcCaller) { /* ... */ }
+// ANTI-PATTERN 6 — Client facade extending abstract infrastructure base
+export class FooClient extends FooClientBase<FooProto.FooServiceClient> { /* ... */ }
+// Replace with composition — inject a helper:
+export class FooClient {
+  constructor(rpcClient: ClientRpc, private readonly helper: RpcHelper) { /* ... */ }
 }
 ```
 
@@ -289,44 +287,32 @@ export class AuthClient {
 - **Adding a new typed exception.** Exception category 1 applies — extend `Error` or an existing typed exception.
 - **Creating a stream processor.** Exception category 3 applies — extend `stream.Transform`.
 
-**When NOT to use this skill:** Ignoring it does NOT create a production bug immediately; it creates a debt smell. But the whole codebase is expected to align with the rule — stale inheritance found in reviews should be filed as refactor-candidate work (e.g., the 4 HTTP clients in `apps/*/infrastructure/clients/{telegram,cloudfn,appstorespy,http-smoke}` that still extend `AbstractHttpClient` — flagged as pending an HTTP composition phase analogous to 999.7.2).
+**When NOT to use this skill:** Ignoring it does NOT create a production bug immediately; it creates a debt smell. But the whole codebase is expected to align with the rule — stale inheritance found in reviews should be filed as refactor-candidate work. Run `grep -rn 'extends ' apps/ packages/ --include='*.ts' | grep -v node_modules` to see the current inventory; each hit classifies against the Decision Tree.
 
 ## Enforcement
 
-Codebase-wide enforcement of this rule is currently partial and staged:
+Codebase-wide enforcement of this rule is staged through two mechanisms:
 
-- **ESLint Override 6** in `.eslintrc.js` enforces `no-restricted-syntax: ClassDeclaration[superClass]` on the 8 enumerated gRPC client paths (`apps/*/src/infrastructure/clients/{auth,sender,parser,audience,notifier}/*.client.ts` + 3 cross-service paths). Added in Phase 999.7.2 Plan 04. Any future `extends` on those paths fails lint.
-- **Skill activation** on trigger keywords (`extends`, `inheritance`, `base class`, `abstract class`, `superclass`) covers the rest of the codebase during authoring and review — no mechanical rule, but the skill loads automatically when the relevant keywords appear.
-- **PR review.** Reviewers use the Decision Tree above to classify every new `extends`. Non-matching exceptions are rejected or filed as refactor-candidates.
+- The project's ESLint configuration (currently `.eslintrc.js` at the repository root) contains a `no-restricted-syntax` rule that forbids `extends` on the primary-adapter-client paths. For the current glob set and rule shape, read that file. The config is the single source of truth — if paths or globs change, the config is the only place that needs updating.
+- Skill activation on trigger keywords (`extends`, `inheritance`, `base class`, `abstract class`, `superclass`) covers authoring and review workflows across the rest of the codebase.
 
-Broader mechanical enforcement (workspace-wide `no-restricted-syntax`) is deferred until the 4 HTTP clients migrate — today that rule would fire on legitimate infrastructure code pending refactor.
+The ESLint guard is retained as a regression trap: if a class using `extends` is reintroduced on the guarded paths, the rule fires on the `extends` line at lint time. A zero-match state for the guard is the intended steady-state, not a sign the guard is dead code.
 
-## Known Exceptions in Codebase (Inventory Snapshot — Phase 999.7.2, 2026-04-17)
+Broader mechanical enforcement (workspace-wide `no-restricted-syntax`) is deferred until legitimate exception-category hits on other paths are driven to zero — today such a rule would fire on legitimate infrastructure code pending refactor.
 
-Legitimate `extends` usages across the codebase — classification of the 23 `extends` hits catalogued in RESEARCH Target 7:
+## Finding the Current `extends` Census
 
-| # | File | `extends` target | Category | Disposition |
-|---|------|------------------|----------|-------------|
-| 1-8 | `apps/*/src/infrastructure/clients/*/*.client.ts` (8 gRPC clients) | `AbstractGrpcClient` | — | **this-phase target** (eliminated by 999.7.2) |
-| 9-12 | 4 HTTP clients: `apps/notifier/.../telegram/telegram.client.ts`, `apps/sender/.../cloud-functions/cloudfn.client.ts`, `apps/parser/.../appstorespy/appstorespy.client.ts`, `apps/gateway/.../http-smoke/http-smoke.client.ts` | `AbstractHttpClient` | — | **refactor-candidate** (future HTTP composition phase analogous to 999.7.2) |
-| 13 | `packages/foundation/src/external/http/client/abstract-http.client.ts` | (abstract base itself — no superclass) | N/A | base class itself — refactored away alongside HTTP composition phase |
-| 14 | `packages/foundation/src/external/errors/rpc-exception.filter.ts` (`AllRpcExceptionsFilter`) | `BaseRpcExceptionFilter` | 2 | NestJS framework base — discovered via reflection |
-| 15 | `packages/foundation/src/external/errors/grpc-exceptions.ts` (`GrpcException`) | `RpcException` | 1 | typed exception hierarchy base |
-| 16 | `packages/foundation/src/external/errors/grpc-exceptions.ts` (7 concrete: `NotFound` / `InvalidArgument` / `AlreadyExists` / `PermissionDenied` / `Unauthenticated` / `Internal` / `Unavailable`) | `GrpcException` | 1 | typed exception hierarchy |
-| 17-21 | 5 HTTP error classes: `HttpClientError`, `HttpError`, `TimeoutError`, `NetworkError`, `CircuitOpenError` in `packages/foundation/src/external/http/errors/*.ts` | `Error` / `HttpClientError` | 1 | typed exception hierarchy |
-| 22 | `packages/foundation/src/external/storage/public/size-counting.transform.ts` (`SizeCountingTransform`) | `stream.Transform` | 3 | Node.js stdlib — subclass required by stdlib contract |
-| 23 | `packages/foundation/src/external/storage/public/upload-too-large.error.ts` (`StorageUploadTooLargeError`) | `Error` | 1 | typed exception |
+To see the current runtime `extends` usages across the codebase classified against the Decision Tree, run:
 
-**Type-system-only `extends` (fully exempt, not counted above):**
+```bash
+grep -rn 'extends ' apps/ packages/ --include='*.ts' | grep -v node_modules
+```
 
-- `<T extends AbstractHttpClient>` in `http-client.provider.ts`
-- `TArgs extends unknown[]` in `opossum-circuit-breaker.adapter.ts` + `circuit-breaker.port.ts`
-- `<T extends object>` in `define-grpc-client.ts`
-- `loadConfig<T extends z.ZodType>` in `config-loader.ts`
-- Additional generic constraints in `compose.ts`, `define-service.ts`, `services.ts`
-- Interface-extends-interface usages across contracts and port declarations
+Walk each hit through the Decision Tree — legitimate hits map to exception categories 1-4; the rest are refactor-candidates.
 
-**Summary:** 11 legitimate runtime `extends` (categories 1-3) + 4 refactor-candidate HTTP clients + 1 abstract base pending deletion alongside HTTP refactor. Post-999.7.2, the 8 gRPC clients move out of the `extends` inventory entirely.
+**Type-system-only `extends`** (generic constraints, interface-extends-interface, conditional types) appear in the grep output as noise. Classify them as "type-system only — not counted" and move on — they are fully exempt.
+
+Pattern-level output (role-based): most hits should cluster around framework-required bases (NestJS filters / interceptors / pipes / Terminus health indicators), typed-exception hierarchies, and Node.js stdlib bases (`Transform` / `Readable`). Any hits outside these clusters on primary-adapter paths are refactor-candidates.
 
 ## See Also
 
@@ -334,6 +320,5 @@ Legitimate `extends` usages across the codebase — classification of the 23 `ex
 - `.agents/skills/clean-ddd-hexagonal/SKILL.md` — `apps/` Clean/DDD/Hexagonal architecture; DDD tactical-pattern bases (`AggregateRoot` / `Entity` / `ValueObject`) — when/if adopted — add a documented exception to this skill.
 - `.agents/skills/no-magic-values/SKILL.md` — related rule: prefer named constants over magic literals. Often applies alongside composition (helpers store constants that were previously hardcoded in base classes).
 - `.agents/skills/branching-patterns/SKILL.md` — related rule: prefer polymorphism via composition (Record dispatch / Map fallback / canHandle chain) over `switch/case` or `if/else` chains. Complementary to this skill — both aim at replacing behavior-via-inheritance with behavior-via-collaboration.
-- `.planning/phases/999.7.2-grpc-client-composition-refactor-replace-inheritance-with-injected-grpc-caller/` — canonical reference implementation: `AbstractGrpcClient` inheritance → injected `GrpcCaller` composition. 8 files migrated; skill rationale distilled from the retrospective.
-- `.planning/phases/999.7.3-grpc-client-promisify-proxy-replace-per-method-wrappers/` — second canonical reference: per-method `*.client.ts` wrapper classes (introduced as the composition target by 999.7.2) eliminated via generic `Promisified<T>` Proxy in foundation. Demonstrates that wrapper classes are a sibling form of over-engineering to inheritance — both create abstractions whose only value is mechanical mediation. Replace with a generic Proxy + TypeScript mapped type — single foundation primitive, zero apps-level boilerplate.
-- `apps/gateway/src/infrastructure/clients/auth/auth.client.ts` — canonical post-refactor source showing the composition shape.
+- `.planning/phases/999.7.2-*/` — first canonical reference implementation: inheritance → injected helper composition.
+- `.planning/phases/999.7.3-*/` — second canonical reference: per-method wrapper classes eliminated via generic promisified-proxy primitive in foundation. Demonstrates that wrapper classes are a sibling form of over-engineering to inheritance — both create abstractions whose only value is mechanical mediation.
