@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: planning
-stopped_at: Phase 999.11.4.1 context gathered
-last_updated: "2026-04-24T08:04:26.573Z"
+status: executing
+stopped_at: Completed 999.11.4.1-01
+last_updated: "2026-04-24T09:05:16.799Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 40
   completed_phases: 25
   total_plans: 127
-  completed_plans: 123
-  percent: 97
+  completed_plans: 124
+  percent: 98
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.11.4 — architecture-skill-vs-code-audit
+**Current focus:** Phase 999.11.4.1 — refactor-5-project-skills-from-inventory-level-to-principles
 
 ## Current Position
 
-Phase: 999.12
-Plan: Not started
-Status: Ready to plan
+Phase: 999.11.4.1 (refactor-5-project-skills-from-inventory-level-to-principles) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
 Last activity: 2026-04-24
 
-Progress: [██████████] 100%
+Progress: [██████████] 98%
 
 ## Performance Metrics
 
@@ -144,6 +144,7 @@ Progress: [██████████] 100%
 | Phase 999.11.4 P02 | 40min | 3 tasks | 2 files |
 | Phase 999.11.4 P03 | 15min | 3 tasks | 2 files |
 | Phase 999.11.4 P04 | ~120min (interrupt-resume) | 4 tasks | 4 files |
+| Phase 999.11.4.1 P01 | 30min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -282,6 +283,7 @@ Progress: [██████████] 100%
 - Plan 02 (DESC batch) — 4 findings across 2 skills (nhm-F-03..04 + icl-F-01..02), all refresh-skill remediation; paired findings share 999.1.8/999.1.9 config-factory root cause; audit-only invariant holds
 - Phase 999.11.4 Plan 03: HYBRID batch audit — 3 skills, 8 findings (all DESC-section), per-section combo methodology; sequential-fallback deviation Rule 3 (Task tool unavailable)
 - [Phase 999.11.4-04]: Plan 04 synthesis complete — AUDIT.md structurally complete per SPEC R6 + D-16 (Summary→Methodology→11 Skills→Orphan→Reclassification→Skipped, 16 findings across 10 audited skills); SOLUTIONS.md authored per SPEC R7 + Phase 999.1 precedent (16 entries × 1-3 variants, 7-col trade-off table, rejected-trail preserved); phase SUMMARY.md handoff with grep-verifiable Acceptance-level Audit Invariants table + 8 proposed sub-phase clusters 999.11.4.1..999.11.4.8. Interrupt-recovery protocol: SOLUTIONS.md orphan in working tree validated against SPEC R7 and committed as-is (preserving pre-interrupt synthesis). Audit-only invariant holds across all 24 docs(999.11.4-*) phase commits. Phase 999.11.4 ARCHITECTURALLY COMPLETE.
+- D-4 header-block wording locked for reuse by Plans 02..06 (see 999.11.4.1-01-SUMMARY.md)
 
 ### Pending Todos
 
@@ -313,8 +315,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 999.11.4.1 context gathered
-Resume file: --resume-file
+Last session: 2026-04-24T09:05:16.793Z
+Stopped at: Completed 999.11.4.1-01
+Resume file: None
 
 **Planned Phase:** 999.11.4.1 (Refactor project skills from inventory-level to principles-level content) — 6 plans — 2026-04-24T08:04:26.568Z

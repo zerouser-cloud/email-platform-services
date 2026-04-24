@@ -607,7 +607,7 @@ Plans:
 **Plans:** 6 plans
 
 Plans:
-- [ ] 999.11.4.1-01-PLAN.md — Refactor `nestjs-hexagonal-mapping` SKILL.md + references (LAYERS.md + NAMING.md); close nhm-F-03 + nhm-F-04; DRAFTS the D-4 header-block wording + the abstract config-factory wording that Plans 02..06 reuse verbatim per D-10a (Wave 1, 3 tasks, 3 atomic commits + newcomer test)
+- [x] 999.11.4.1-01-PLAN.md — Refactor `nestjs-hexagonal-mapping` SKILL.md + references (LAYERS.md + NAMING.md); close nhm-F-03 + nhm-F-04; DRAFTS the D-4 header-block wording + the abstract config-factory wording that Plans 02..06 reuse verbatim per D-10a (Wave 1, 3 tasks, 3 atomic commits + newcomer test) ✅ 2026-04-24
 - [ ] 999.11.4.1-02-PLAN.md — Refactor `infrastructure-client-layering` SKILL.md; reuse Plan 01's D-4 wording + config-factory wording byte-for-byte (D-10a pairing); close icl-F-01 (hand-rolled @Global() @Module({}) example replaced with abstract factory description) + icl-F-02 (split single-instance vs multi-instance-per-namespace sections) (Wave 2, 2 tasks, 2 atomic commits)
 - [ ] 999.11.4.1-03-PLAN.md — Refactor `infrastructure-guard` SKILL.md; close ig-F-01 + ig-F-02 by DELETING the Standard Ports inventory table and replacing with role-based identifier-governance section pointing at tracked env templates + tracked compose infra configuration per D-5 + D-8 (Wave 3, 2 tasks, 2 atomic commits)
 - [ ] 999.11.4.1-04-PLAN.md — Refactor `runtime-smoke-verification` SKILL.md §Project-Specific Note; close rsv-F-01 + rsv-F-02 by replacing specific pnpm-script enumeration + hard-coded gateway port with discovery commands against `package.json` and tracked env templates per D-5 + D-8 (Wave 4, 2 tasks, 2 atomic commits)
