@@ -601,13 +601,18 @@ Plans:
 
 ### Phase 999.11.4.1: Refactor project skills from inventory-level to principles-level content — consolidated remediation for 11 refresh-skill findings in 999.11.4-SOLUTIONS.md (5 primary skills + 4 aligned-sweep skills; clean-ddd-hexagonal deferred to a separate sub-phase) (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Rewrite 5 primary project skills (`infrastructure-guard`, `nestjs-hexagonal-mapping`, `infrastructure-client-layering`, `runtime-smoke-verification`, `composition-over-inheritance`) from inventory-level content (specific file paths, port numbers, class names, enumerated counts) to timeless principles that survive the "rename test" — every assertion stays true after any referenced file/class/variable is renamed. Close the 11 refresh-skill findings from Phase 999.11.4 AUDIT (ig-F-01, ig-F-02, nhm-F-03, nhm-F-04, icl-F-01, icl-F-02, rsv-F-01, rsv-F-02, coi-F-01, coi-F-02, coi-F-03). Apply the universal D-4 header-rule block ("This skill describes timeless principles — do NOT add inventory") to every refactored SKILL.md (5 primary + 4 aligned = 9 total). Preventive aligned sweep over `twelve-factor`, `env-schema`, `gsd-flow-guard`, `branching-patterns` per D-12. Docs-only phase — zero changes in `apps/`, `packages/`, `infra/`.
+**Requirements**: D-01..D-16 locked in 999.11.4.1-CONTEXT.md (no REQ-IDs in REQUIREMENTS.md per CONTEXT frontmatter); finding IDs ig-F-01..coi-F-03 serve as phase-local traceability anchors per D-16
 **Depends on:** Phase 999.11.4
-**Plans:** 0 plans
+**Plans:** 6 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.11.4.1 to break down)
+- [ ] 999.11.4.1-01-PLAN.md — Refactor `nestjs-hexagonal-mapping` SKILL.md + references (LAYERS.md + NAMING.md); close nhm-F-03 + nhm-F-04; DRAFTS the D-4 header-block wording + the abstract config-factory wording that Plans 02..06 reuse verbatim per D-10a (Wave 1, 3 tasks, 3 atomic commits + newcomer test)
+- [ ] 999.11.4.1-02-PLAN.md — Refactor `infrastructure-client-layering` SKILL.md; reuse Plan 01's D-4 wording + config-factory wording byte-for-byte (D-10a pairing); close icl-F-01 (hand-rolled @Global() @Module({}) example replaced with abstract factory description) + icl-F-02 (split single-instance vs multi-instance-per-namespace sections) (Wave 2, 2 tasks, 2 atomic commits)
+- [ ] 999.11.4.1-03-PLAN.md — Refactor `infrastructure-guard` SKILL.md; close ig-F-01 + ig-F-02 by DELETING the Standard Ports inventory table and replacing with role-based identifier-governance section pointing at tracked env templates + tracked compose infra configuration per D-5 + D-8 (Wave 3, 2 tasks, 2 atomic commits)
+- [ ] 999.11.4.1-04-PLAN.md — Refactor `runtime-smoke-verification` SKILL.md §Project-Specific Note; close rsv-F-01 + rsv-F-02 by replacing specific pnpm-script enumeration + hard-coded gateway port with discovery commands against `package.json` and tracked env templates per D-5 + D-8 (Wave 4, 2 tasks, 2 atomic commits)
+- [ ] 999.11.4.1-05-PLAN.md — Refactor `composition-over-inheritance` SKILL.md (largest findings-load — 3 findings); close coi-F-01 (Pattern 1 fictional example replaces deleted-code reference) + coi-F-02 (Application by Layer role-based + grep-on-demand) + coi-F-03 (Enforcement links to `.eslintrc.js` as authoritative source per D-6; static census replaced with grep command per D-8) (Wave 5, 2 tasks, 2 atomic commits)
+- [ ] 999.11.4.1-06-PLAN.md — Aligned-sweep: apply D-4 header block + single rename-test pass to 4 zero-findings skills (`twelve-factor`, `env-schema`, `gsd-flow-guard`, `branching-patterns`); 4 per-skill atomic commits per D-11 extended via D-12 closing clause + 1 closure commit with per-skill newcomer-test record + phase-level invariant check (D-4 coverage across all 9 skills; SOLUTIONS.md = 11 ☑ Approved rows) (Wave 6, 5 tasks, 5 atomic commits)
 
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
