@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.4.1-02
-last_updated: "2026-04-24T09:17:23.483Z"
+stopped_at: Completed 999.11.4.1-03
+last_updated: "2026-04-24T09:25:25.375Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 40
   completed_phases: 25
   total_plans: 127
-  completed_plans: 125
-  percent: 98
+  completed_plans: 126
+  percent: 99
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.4.1 (refactor-5-project-skills-from-inventory-level-to-principles) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-04-24
 
-Progress: [██████████] 98%
+Progress: [██████████] 99%
 
 ## Performance Metrics
 
@@ -146,6 +146,7 @@ Progress: [██████████] 98%
 | Phase 999.11.4 P04 | ~120min (interrupt-resume) | 4 tasks | 4 files |
 | Phase 999.11.4.1 P01 | 30min | 3 tasks | 4 files |
 | Phase 999.11.4.1 P02 | ~8min | 2 tasks tasks | 3 files files |
+| Phase 999.11.4.1 P03 | 12min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -289,6 +290,7 @@ Progress: [██████████] 98%
 - Plan 02 applied the single-sentence-purpose swap for the icl header block using Plan 01's pre-sanctioned phrasing ('layering client-side infrastructure across catalog / foundation / apps')
 - icl-F-02 resolved by splitting the old 'Redis / S3 / DB+ORM (single-instance)' section into True-single-instance vs Multi-instance-per-namespace H3 subsections, both role-based with fictional placeholders (DB_TOKEN, CACHE_TOKEN, STORAGE_CORE_TOKEN)
 - Anti-Pattern 9 added to icl SKILL.md to make the sanctioned-subpath + typed-port rule grep-visible alongside the §Multi-instance-per-namespace behavioural rules
+- Plan 999.11.4.1-03 — Applied principles-only refactor (D-5 + D-8) to infrastructure-guard skill: DELETED Standard Ports inventory table, replaced with role-based §"Infrastructure Identifiers — Where to Find Current Inventory" + grep command. Closed ig-F-01 + ig-F-02 in single atomic commit (6d65258). Newcomer test surfaced zero defects.
 
 ### Pending Todos
 
@@ -320,8 +322,8 @@ Progress: [██████████] 98%
 
 ## Session Continuity
 
-Last session: 2026-04-24T09:17:23.476Z
-Stopped at: Completed 999.11.4.1-02
+Last session: 2026-04-24T09:25:25.369Z
+Stopped at: Completed 999.11.4.1-03
 Resume file: None
 
 **Planned Phase:** 999.11.4.1 (Refactor project skills from inventory-level to principles-level content) — 6 plans — 2026-04-24T08:04:26.568Z
