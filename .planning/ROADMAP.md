@@ -599,6 +599,16 @@ Plans:
 - [x] 999.11.4-03-PLAN.md — HYBRID batch: 3 skills audited (rsv + coi + cdh) via per-section combo methodology; 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 ✅ 2026-04-22 (8 findings: 2 rsv + 3 coi + 3 cdh, all DESC-section, 29 sanctioned D-XX xref + 1 ad-hoc drift; sequential-fallback Rule 3 deviation — Task tool unavailable in context, identical output contract preserved)
 - [x] 999.11.4-04-PLAN.md — Synthesis: AUDIT.md finalisation (Orphan + Reclassification + Skipped sections + summary totals) + SOLUTIONS.md authoring (1-3 ranked variants per finding per Phase 999.1 precedent) + phase SUMMARY.md handoff doc; 4 atomic commits; Wave 5
 
+### Phase 999.11.4.1: Refactor project skills from inventory-level to principles-level content — consolidated remediation for 11 refresh-skill findings in 999.11.4-SOLUTIONS.md (5 primary skills + 4 aligned-sweep skills; clean-ddd-hexagonal deferred to a separate sub-phase) (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.11.4
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 999.11.4.1 to break down)
+
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
 **Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
