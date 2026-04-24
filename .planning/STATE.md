@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.4.1-01
-last_updated: "2026-04-24T09:05:16.799Z"
+stopped_at: Completed 999.11.4.1-02
+last_updated: "2026-04-24T09:17:23.483Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 40
   completed_phases: 25
   total_plans: 127
-  completed_plans: 124
+  completed_plans: 125
   percent: 98
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.4.1 (refactor-5-project-skills-from-inventory-level-to-principles) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-04-24
 
@@ -145,6 +145,7 @@ Progress: [██████████] 98%
 | Phase 999.11.4 P03 | 15min | 3 tasks | 2 files |
 | Phase 999.11.4 P04 | ~120min (interrupt-resume) | 4 tasks | 4 files |
 | Phase 999.11.4.1 P01 | 30min | 3 tasks | 4 files |
+| Phase 999.11.4.1 P02 | ~8min | 2 tasks tasks | 3 files files |
 
 ## Accumulated Context
 
@@ -284,6 +285,10 @@ Progress: [██████████] 98%
 - Phase 999.11.4 Plan 03: HYBRID batch audit — 3 skills, 8 findings (all DESC-section), per-section combo methodology; sequential-fallback deviation Rule 3 (Task tool unavailable)
 - [Phase 999.11.4-04]: Plan 04 synthesis complete — AUDIT.md structurally complete per SPEC R6 + D-16 (Summary→Methodology→11 Skills→Orphan→Reclassification→Skipped, 16 findings across 10 audited skills); SOLUTIONS.md authored per SPEC R7 + Phase 999.1 precedent (16 entries × 1-3 variants, 7-col trade-off table, rejected-trail preserved); phase SUMMARY.md handoff with grep-verifiable Acceptance-level Audit Invariants table + 8 proposed sub-phase clusters 999.11.4.1..999.11.4.8. Interrupt-recovery protocol: SOLUTIONS.md orphan in working tree validated against SPEC R7 and committed as-is (preserving pre-interrupt synthesis). Audit-only invariant holds across all 24 docs(999.11.4-*) phase commits. Phase 999.11.4 ARCHITECTURALLY COMPLETE.
 - D-4 header-block wording locked for reuse by Plans 02..06 (see 999.11.4.1-01-SUMMARY.md)
+- D-10a pairing enforced byte-for-byte for Plan 02 (icl): header-block diff = 1 sanctioned line; config-factory blockquote + directory-level-link diffs = 0 lines
+- Plan 02 applied the single-sentence-purpose swap for the icl header block using Plan 01's pre-sanctioned phrasing ('layering client-side infrastructure across catalog / foundation / apps')
+- icl-F-02 resolved by splitting the old 'Redis / S3 / DB+ORM (single-instance)' section into True-single-instance vs Multi-instance-per-namespace H3 subsections, both role-based with fictional placeholders (DB_TOKEN, CACHE_TOKEN, STORAGE_CORE_TOKEN)
+- Anti-Pattern 9 added to icl SKILL.md to make the sanctioned-subpath + typed-port rule grep-visible alongside the §Multi-instance-per-namespace behavioural rules
 
 ### Pending Todos
 
@@ -315,8 +320,8 @@ Progress: [██████████] 98%
 
 ## Session Continuity
 
-Last session: 2026-04-24T09:05:16.793Z
-Stopped at: Completed 999.11.4.1-01
+Last session: 2026-04-24T09:17:23.476Z
+Stopped at: Completed 999.11.4.1-02
 Resume file: None
 
 **Planned Phase:** 999.11.4.1 (Refactor project skills from inventory-level to principles-level content) — 6 plans — 2026-04-24T08:04:26.568Z
