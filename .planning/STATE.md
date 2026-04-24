@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.11.4.1-03
-last_updated: "2026-04-24T09:25:25.375Z"
+stopped_at: Completed 999.11.4.1-04
+last_updated: "2026-04-24T09:32:17.135Z"
 last_activity: 2026-04-24
 progress:
   total_phases: 40
   completed_phases: 25
   total_plans: 127
-  completed_plans: 126
-  percent: 99
+  completed_plans: 127
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.11.4.1 (refactor-5-project-skills-from-inventory-level-to-principles) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-04-24
 
-Progress: [██████████] 99%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -147,6 +147,7 @@ Progress: [██████████] 99%
 | Phase 999.11.4.1 P01 | 30min | 3 tasks | 4 files |
 | Phase 999.11.4.1 P02 | ~8min | 2 tasks tasks | 3 files files |
 | Phase 999.11.4.1 P03 | 12min | 2 tasks | 3 files |
+| Phase 999.11.4.1 PP04 | 4min | 2 tasks tasks | 3 files files |
 
 ## Accumulated Context
 
@@ -291,6 +292,7 @@ Progress: [██████████] 99%
 - icl-F-02 resolved by splitting the old 'Redis / S3 / DB+ORM (single-instance)' section into True-single-instance vs Multi-instance-per-namespace H3 subsections, both role-based with fictional placeholders (DB_TOKEN, CACHE_TOKEN, STORAGE_CORE_TOKEN)
 - Anti-Pattern 9 added to icl SKILL.md to make the sanctioned-subpath + typed-port rule grep-visible alongside the §Multi-instance-per-namespace behavioural rules
 - Plan 999.11.4.1-03 — Applied principles-only refactor (D-5 + D-8) to infrastructure-guard skill: DELETED Standard Ports inventory table, replaced with role-based §"Infrastructure Identifiers — Where to Find Current Inventory" + grep command. Closed ig-F-01 + ig-F-02 in single atomic commit (6d65258). Newcomer test surfaced zero defects.
+- [Phase 999.11.4.1-04]: runtime-smoke-verification refactor complete — rsv-F-01 + rsv-F-02 closed via principles-only refactor (not SOLUTIONS.md V1/V2). §Project-Specific Note rewritten to role-based description with on-demand discovery recipes (node one-liner against package.json + grep on .env* templates). D-4 header block reused byte-for-byte from Plan 01. Rule 2 completeness cleanup: 2 residual :3000 literals in §What to Do When a Script Is Missing + §Post-Verification Report swept to ${GATEWAY_PORT} in the same atomic commit. 8/11 SOLUTIONS.md rows now ☑ Approved (2 nhm + 2 icl + 2 ig + 2 rsv); 3 remaining (coi-F-01..03 in Plan 05 + aligned sweep in Plan 06). Plans 05-06 unblocked.
 
 ### Pending Todos
 
@@ -322,8 +324,8 @@ Progress: [██████████] 99%
 
 ## Session Continuity
 
-Last session: 2026-04-24T09:25:25.369Z
-Stopped at: Completed 999.11.4.1-03
+Last session: 2026-04-24T09:32:17.130Z
+Stopped at: Completed 999.11.4.1-04
 Resume file: None
 
 **Planned Phase:** 999.11.4.1 (Refactor project skills from inventory-level to principles-level content) — 6 plans — 2026-04-24T08:04:26.568Z
