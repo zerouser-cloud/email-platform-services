@@ -1,6 +1,8 @@
 # Naming Convention
 
-One-to-one file↔class per D-12 (`.planning/phases/999.10-*/999.10-CONTEXT.md`). File name, class name, and suffix are deterministic — no `*.handler.ts` or `*.processor.ts` without a semantic reason.
+This document describes timeless naming principles. Do NOT add inventory (specific file paths beyond stable workspace roots, class names tied to a particular production service, enumerated counts of services / ports / tokens). For current-state lookups, link to a tracked config file by role, link to an enclosing directory, or provide a `grep` command. Every assertion here must survive the rename test.
+
+One-to-one file↔class. File name, class name, and suffix are deterministic — no `*.handler.ts` or `*.processor.ts` without a semantic reason.
 
 ---
 
@@ -219,4 +221,12 @@ This extends D-18 (currently Repository-only) to include `Sender` when notifier 
 - **Health in bootstrap (999.11.2 D-08).** `infrastructure/bootstrap/health/health.controller.ts`, never `src/health/health.controller.ts` and never `infrastructure/inbound/rest/health.controller.ts`. Health is Ring-4 framework glue — it lives with the other composition-root artifacts (`bootstrap/config/`, `bootstrap/throttle/`), not with business-feature inbound adapters.
 - **One flat module per bounded context (D-11).** One `{svc}.module.ts` per service, flat. No `LoginModule` / `RegisterModule` feature submodules. Submodules are reserved for category composers introduced in 999.11.2 (`GrpcModule` inside `inbound/grpc/`, `PersistenceModule` inside `outbound/persistence/`, `GrpcClientsModule` inside `outbound/grpc-clients/`, `HttpClientsModule` inside `outbound/http-clients/`, `StorageModule` inside `outbound/storage/`, `RmqModule` inside `inbound/rmq/`) and for shared infrastructure from foundation (`LoggingModule`, foundation `PersistenceModule`).
 - **Mappers in a subfolder when a Drizzle row→entity translation exists (D-21, refined in 999.11.2).** `infrastructure/outbound/persistence/{aggregate}/mappers/{aggregate}.mapper.ts` is the canonical location once real persistence lands. Stub repositories without a real Drizzle translation may omit `mappers/` until the translation exists (see `apps/audience/src/infrastructure/outbound/persistence/group/` — stub repo without `mappers/` — as the canonical stub shape). Once a mapper is introduced, it lives in `mappers/` from day one of that aggregate's real-persistence phase.
-- **Per-service DI tokens (no cross-service sharing).** `apps/{svc}/src/{svc}.constants.ts` owns every cross-folder domain-port Symbol used inside that bounded context (5 services: auth, sender, parser, audience, notifier). **Gateway exception (D-11a, 999.11.2):** gateway has NO root `gateway.constants.ts` — the file was deleted after `GATEWAY_CONFIG` moved to `infrastructure/bootstrap/config/` and no domain-port Symbols remained. Two services never share a token file.
+- **Per-service DI tokens (no cross-service sharing).** `apps/{svc}/src/{svc}.constants.ts` owns every cross-folder domain-port Symbol used inside that bounded context, in every service that owns at least one such Symbol. A service whose composition root owns no cross-folder domain-port Symbols (for example, a REST facade that forwards to outbound gRPC without any application ports of its own) has no root `{svc}.constants.ts`. Two services never share a token file.
+
+---
+
+## See Also
+
+- CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" — project-level authoritative file-path matrix and paired doc.
+- `references/LAYERS.md` — layer-by-layer artefact-role descriptions referenced throughout this document.
+- `.agents/skills/no-magic-values/SKILL.md` — Symbol DI token rule referenced in the Class Name Rules section.
