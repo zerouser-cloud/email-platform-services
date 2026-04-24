@@ -5,6 +5,12 @@ description: Run smoke verification of the project runtime after a GSD phase fin
 
 # Runtime Smoke Verification
 
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for smoke-verifying the project runtime after a GSD phase or non-trivial code edit. It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
 After completing a GSD phase or making non-trivial code edits, verify the project actually starts and behaves correctly. Use only the project's own `package.json` scripts — do not invent commands. Test every local startup flow the project supports.
 
 ## Rule: Use Only `package.json` Scripts
@@ -122,7 +128,7 @@ Examples of legitimate "missing script" cases:
 
 | Need | Likely script name | If missing → ask user |
 |---|---|---|
-| Health endpoint check | `smoke:ready` | "Add `pnpm smoke:ready` calling curl, or one-time `curl -s :3000/health/ready`?" |
+| Health endpoint check | `smoke:ready` | "Add `pnpm smoke:ready` calling curl, or one-time `curl -s :${GATEWAY_PORT}/health/ready`?" |
 | End-to-end smoke | `smoke:e2e` | "Add `pnpm smoke:e2e`, or one-time pytest invocation?" |
 | Schema push | `db:push` / `prisma:push` | "Add `pnpm db:push`, or one-time `npx prisma db push`?" |
 | Seed data | `db:seed` | "Add `pnpm db:seed`, or one-time SQL invocation?" |
@@ -142,7 +148,7 @@ After running the verification, report concisely:
 | Build | pnpm build | ✓ 10/10 tasks |
 | Lint | pnpm lint | ✓ 7/7 tasks |
 | Start | pnpm start:native | ✓ all services up after 28s |
-| Health | curl :3000/health/ready | ✓ 5/5 upstreams up |
+| Health | curl :${GATEWAY_PORT}/health/ready | ✓ 5/5 upstreams up |
 | Stop | pnpm stop:native | ✓ |
 
 Summary: PASS — all checks green.
@@ -195,22 +201,54 @@ pnpm start:native            # ← without prior stop, port collisions / stale c
 
 ## Project-Specific Note
 
-This project (Email Platform) has these flows confirmed via `package.json`:
+This project's runtime consists of one or more locally-runnable deployment modes (typical shape: a host-services flow plus a fully-containerised flow). The authoritative list of `pnpm` scripts that orchestrate these modes lives in `package.json`. The authoritative list of ports and hostnames lives in the tracked env templates at the repository root. This section does NOT enumerate them — it describes how to discover them.
 
-- **Native** (services on host + infra in Docker):
-  `pnpm start:native` / `pnpm stop:native` / `pnpm reset:native`
-- **Isolated** (everything in Docker, with `--build`):
-  `pnpm start:isolated` / `pnpm stop:isolated` / `pnpm reset:isolated`
-- **Infra-only:** `pnpm infra:up` / `pnpm infra:down`
-- **Storage bootstrap:** `pnpm storage:bootstrap` (Garage S3 keys/buckets)
-- **Static checks:** `pnpm build`, `pnpm lint`, `pnpm typecheck`, `pnpm check-arch`
-- **Health endpoint:** `GET http://localhost:3000/health/ready` (gateway, native mode default port)
+### How to discover the scripts
 
-When verifying after a phase that touches runtime wiring (DI, gRPC clients, modules):
-1. Run BOTH flows when feasible — native catches host-env issues, isolated catches Dockerfile / image issues
-2. Per flow: stop → build → lint → start → wait for boot → curl /health/ready → stop
-3. Report 5 upstream gRPC clients all `up` for gateway readiness check
-4. If any flow fails, report verbatim error and stop — do NOT proceed to "phase complete"
+Run this against `package.json` to get the CURRENT inventory:
+
+```bash
+node -e 'const p = JSON.parse(require("fs").readFileSync("package.json","utf8")); console.log(Object.keys(p.scripts).sort().join("\n"));'
+```
+
+Classify each returned name using the table in §Discovery Procedure — any script whose name contains a role keyword (`start`, `stop`, `reset`, `build`, `lint`, `infra`, `test`) maps to the corresponding workflow step. Scripts that are transitive wrappers (one script calling another via `pnpm <other>`) are NOT user-facing smoke entry points; only the outermost role-named scripts are.
+
+### How to discover the health endpoint and port
+
+The gateway's HTTP port comes from the tracked env template, never from this skill body. List the tracked templates and read the gateway-port variable from them:
+
+```bash
+ls .env* 2>/dev/null                                     # discover tracked env templates
+grep -hE '^(GATEWAY|GATEWAY_HTTP)_PORT=' .env* 2>/dev/null | head -5   # read the current value
+```
+
+The gateway readiness endpoint path (`/health/ready`) is project-convention — confirm the current path against the gateway's health controller:
+
+```bash
+find apps/gateway -name '*.controller.ts' -exec grep -l -i 'health' {} \;
+```
+
+### Smoke-verification workflow template (per flow)
+
+For each locally-runnable flow surfaced by the discovery command, run the canonical sequence by ROLE — never inline a specific script name or port literal here:
+
+```
+1. Stop any leftover from a prior run        — pnpm stop:<flow>
+2. (Optional) Reset volumes if state is stale — pnpm reset:<flow>
+3. Build                                      — pnpm build
+4. Lint                                       — pnpm lint
+5. Start the flow                             — pnpm start:<flow>
+6. Wait for boot signal                       — log "started" / health endpoint 200
+7. Hit health endpoint                        — curl "http://localhost:${GATEWAY_PORT}/health/ready"
+8. (Optional) Run a representative request    — single round-trip per surface
+9. Stop the flow                              — pnpm stop:<flow>
+```
+
+`<flow>` is a placeholder for the flow name discovered above (e.g., the host-services flow, the fully-containerised flow). `${GATEWAY_PORT}` is the value the reader extracted via the grep recipe above — sourced from the tracked env template, not from this skill. When verifying after a phase that touches runtime wiring (DI, gRPC clients, modules), run every locally-runnable flow surfaced by the discovery command: each flow exercises a different env/image path and can break independently. If any flow fails, report the verbatim error and stop — do NOT proceed to "phase complete".
+
+### When in doubt
+
+When in doubt about which flows the project currently supports, which ports the gateway currently binds, or which readiness path it exposes, run the discovery commands above. The project author owns the runtime contract via `package.json` and the tracked env templates; this skill does not duplicate that state.
 
 ## See Also
 
