@@ -5,6 +5,12 @@ description: Route every action through GSD workflow before executing. Triggers 
 
 # GSD Flow Guard — Route Before Acting
 
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for routing every file change through the GSD workflow. It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
 Every file change in this repo must flow through a GSD command. Direct edits bypass tracking, atomic commits, deviation handling, and state sync. This skill is the checkpoint that fires before any Edit/Write/Bash-with-side-effects call.
 
 ## Rule
