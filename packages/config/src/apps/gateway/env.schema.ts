@@ -10,7 +10,11 @@ import { LoggingSchema } from '../../infra/logging.schema';
 import { GrpcSchema } from '../../infra/grpc.schema';
 import { CorsSchema } from '../../infra/cors.schema';
 import { RateLimitSchema } from '../../infra/rate-limit.schema';
+import { RedisSchema } from '../../infra/redis.schema';
 
+// Gateway nuance (Phase 999.12 D-15): Redis spread happens INSIDE BaseGatewayEnvSchema
+// (the .refine() on GatewayEnvSchema operates on the parsed object — extending the base
+// object before refinement is the correct seam per PATTERNS §P-5 lines 633-651).
 const BaseGatewayEnvSchema = z.object({
   ...GatewayTopologyShape,
   ...AuthTopologyShape,
@@ -22,6 +26,7 @@ const BaseGatewayEnvSchema = z.object({
   ...GrpcSchema.shape,
   ...CorsSchema.shape,
   ...RateLimitSchema.shape,
+  ...RedisSchema.shape,
 });
 
 export const GatewayEnvSchema = BaseGatewayEnvSchema.refine(
