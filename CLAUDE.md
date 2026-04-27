@@ -358,6 +358,7 @@
 | Upstream gRPC client | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/grpc-clients/{upstream}/` | `auth-client.module.ts` |
 | External HTTP client | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/http-clients/{vendor}/` | `telegram.client.ts` |
 | Storage adapter | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/storage/{bucket-or-namespace}/` | `bucket.module.ts`, `reports.module.ts` |
+| Cache adapter (Redis) | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/cache/` | `cache.module.ts` (re-exports foundation `CacheModule` — `CACHE_SERVICE` + `REDIS_HEALTH`) |
 | Config module + provider + `{SVC}_CONFIG` | Infrastructure (bootstrap) | `apps/{svc}/src/infrastructure/bootstrap/config/` | `auth-config.module.ts`, `auth-config.provider.ts`, `auth-config.constants.ts` |
 | HealthModule + HealthController | Infrastructure (bootstrap) | `apps/{svc}/src/infrastructure/bootstrap/health/` | `health.module.ts`, `health.controller.ts` |
 | ThrottleModule (gateway) | Infrastructure (bootstrap) | `apps/gateway/src/infrastructure/bootstrap/throttle/` | `throttle.module.ts` |
