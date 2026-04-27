@@ -83,19 +83,25 @@ module.exports = {
             files: ['apps/*/src/**/*.ts'],
             rules: {
                 'no-restricted-imports': ['error', {
-                    patterns: [{
-                        group: [
-                            '@email-platform/gateway', '@email-platform/gateway/*',
-                            '@email-platform/auth', '@email-platform/auth/*',
-                            '@email-platform/sender', '@email-platform/sender/*',
-                            '@email-platform/parser', '@email-platform/parser/*',
-                            '@email-platform/audience', '@email-platform/audience/*',
-                            '@email-platform/notifier', '@email-platform/notifier/*',
-                            '@email-platform/foundation/internal',
-                            '@email-platform/foundation/internal/*',
-                        ],
-                        message: 'Apps cannot import from other apps or from foundation internal. Use contracts for shared types; wrap internal primitives in infrastructure/.',
-                    }],
+                    patterns: [
+                        {
+                            group: [
+                                '@email-platform/gateway', '@email-platform/gateway/*',
+                                '@email-platform/auth', '@email-platform/auth/*',
+                                '@email-platform/sender', '@email-platform/sender/*',
+                                '@email-platform/parser', '@email-platform/parser/*',
+                                '@email-platform/audience', '@email-platform/audience/*',
+                                '@email-platform/notifier', '@email-platform/notifier/*',
+                                '@email-platform/foundation/internal',
+                                '@email-platform/foundation/internal/*',
+                            ],
+                            message: 'Apps cannot import from other apps or from foundation internal. Use contracts for shared types; wrap internal primitives in infrastructure/.',
+                        },
+                        {
+                            group: ['ioredis', 'ioredis/*'],
+                            message: 'Apps must not import ioredis directly — use CACHE_SERVICE token from @email-platform/foundation. See .agents/skills/infrastructure-client-layering/SKILL.md and Phase 999.12 D-08.',
+                        },
+                    ],
                 }],
             },
         },
