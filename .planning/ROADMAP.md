@@ -664,14 +664,24 @@ Plans:
 - [x] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
 
 
-### Phase 999.12: redis-canonical-alignment (BACKLOG)
+### Phase 999.12: redis-canonical-alignment
 
-**Goal:** Align Redis CacheModule setup with gRPC canonical reference (established in 999.11) — move config to `apps/*/src/infrastructure/cache/`, mirror foundation factory pattern (analog of `defineGrpcClient`), ensure `ioredis` hidden behind `CachePort` (ESLint guard). Absorbs existing backlog Phase 999.5 (CacheModule config to infrastructure layer). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.12".
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** Align Redis CacheModule with the canonical infra-client pattern (symmetry with gRPC post-999.7.x + persistence) and roll the structural cache adapter into all 6 services (auth, sender, audience, parser, notifier, gateway). Sender migrates `CacheModule.forRootAsync` from `bootstrap/health/` to a new `outbound/cache/cache.module.ts` thin app-level wrapper; the other 5 services receive the same wrapper + env schema spread + CACHE_CONFIG_PORT slice + REDIS_HEALTH inject. Gateway gains the single concrete business binding — `@nestjs/throttler` storage migrated from in-memory to Redis-backed via `@nest-lab/throttler-storage-redis@^1.2.0`, closing the distributed rate-limit gap. ESLint Override 4 forbids raw `ioredis` import in `apps/*/src/**`. CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" matrix gets a new Cache adapter row (D-09); Phase 21 D-02 receives an inline rate-limit-partial-unlock amendment in CONTEXT.md (D-16). Full context in `999.12-CONTEXT.md` (20 D-decisions); research and pattern map in `999.12-RESEARCH.md` + `999.12-PATTERNS.md`.
+**Requirements:** Tracked via decision IDs D-01..D-20 in CONTEXT.md (no explicit REQ-IDs in ROADMAP). Distributes across 11 plans per `decisions_addressed` frontmatter field.
+**Plans:** 11 plans
 
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+- [ ] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/*/src/** (D-08)
+- [ ] 999.12-02-PLAN.md — Foundation REDIS_CLIENT export amendment for D-13 throttle storage (Phase 21 D-04 narrowly amended; D-07/D-13)
+- [ ] 999.12-03-PLAN.md — Compose RedisSchema.shape into 5 env schemas (auth/audience/parser/notifier/gateway, D-15)
+- [ ] 999.12-04-PLAN.md — Sender migration: CacheModule from bootstrap/health/ to outbound/cache/ (D-02/D-03/D-04/D-05)
+- [ ] 999.12-05-PLAN.md — Auth structural cache rollout (D-02/D-03/D-15/D-20)
+- [ ] 999.12-06-PLAN.md — Audience structural cache rollout (D-02/D-03/D-15/D-20)
+- [ ] 999.12-07-PLAN.md — Parser structural cache rollout (D-02/D-03/D-15/D-20; multi-indicator readiness preserved)
+- [ ] 999.12-08-PLAN.md — Notifier structural cache rollout (D-02/D-03/D-15/D-20; mixed DI styles preserved per S-5)
+- [ ] 999.12-09-PLAN.md — Gateway structural cache rollout + root AppCacheModule import before ThrottleModule (D-02/D-03/D-12/D-15/D-20)
+- [ ] 999.12-10-PLAN.md — Gateway throttle migration to Redis-backed ThrottlerStorageRedisService (D-13/D-16)
+- [ ] 999.12-11-PLAN.md — Docs propagation: CLAUDE.md Cache adapter row + Phase 21 CONTEXT.md inline amendment (D-09/D-16)
 
 ### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
 
