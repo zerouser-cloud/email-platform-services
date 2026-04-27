@@ -671,9 +671,9 @@ Plans:
 **Plans:** 11 plans
 
 Plans:
-- [ ] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/*/src/** (D-08)
-- [ ] 999.12-02-PLAN.md — Foundation REDIS_CLIENT export amendment for D-13 throttle storage (Phase 21 D-04 narrowly amended; D-07/D-13)
-- [ ] 999.12-03-PLAN.md — Compose RedisSchema.shape into 5 env schemas (auth/audience/parser/notifier/gateway, D-15)
+- [x] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/*/src/** (D-08)
+- [x] 999.12-02-PLAN.md — Foundation REDIS_CLIENT export amendment for D-13 throttle storage (Phase 21 D-04 narrowly amended; D-07/D-13)
+- [x] 999.12-03-PLAN.md — Compose RedisSchema.shape into 5 env schemas (auth/audience/parser/notifier/gateway, D-15)
 - [ ] 999.12-04-PLAN.md — Sender migration: CacheModule from bootstrap/health/ to outbound/cache/ (D-02/D-03/D-04/D-05)
 - [ ] 999.12-05-PLAN.md — Auth structural cache rollout (D-02/D-03/D-15/D-20)
 - [ ] 999.12-06-PLAN.md — Audience structural cache rollout (D-02/D-03/D-15/D-20)
