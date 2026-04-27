@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
-stopped_at: Phase 999.12 context gathered (redis canonical alignment)
-last_updated: "2026-04-27T08:28:28.016Z"
-last_activity: 2026-04-27 -- Phase 999.12 execution started
+status: planning
+stopped_at: Phase 999.12 complete — verification passed (15/15 must-haves; D-20 dual-mode smoke green)
+last_updated: "2026-04-27T13:05:00.000Z"
+last_activity: 2026-04-27 -- Phase 999.12 complete (11 plans + Plan 12 hotfix)
 progress:
   total_phases: 40
-  completed_phases: 26
+  completed_phases: 27
   total_plans: 138
-  completed_plans: 129
-  percent: 93
+  completed_plans: 140
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.12 (redis-canonical-alignment) — EXECUTING
-Plan: 1 of 11
-Status: Executing Phase 999.12
-Last activity: 2026-04-27 -- Phase 999.12 execution started
+Phase: 999.12 (redis-canonical-alignment) — COMPLETE ✓
+Plan: 11 of 11 + Plan 12 hotfix (DI scope + docker network)
+Status: Phase complete; verification passed (15/15 must-haves)
+Last activity: 2026-04-27 -- Phase 999.12 complete (D-20 dual-mode smoke green)
 
 Progress: [██████████] 100%
 
