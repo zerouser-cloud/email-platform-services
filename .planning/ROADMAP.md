@@ -680,7 +680,7 @@ Plans:
 - [x] 999.12-07-PLAN.md — Parser structural cache rollout (D-02/D-03/D-15/D-20; multi-indicator readiness preserved)
 - [x] 999.12-08-PLAN.md — Notifier structural cache rollout (D-02/D-03/D-15/D-20; mixed DI styles preserved per S-5)
 - [x] 999.12-09-PLAN.md — Gateway structural cache rollout + root AppCacheModule import before ThrottleModule (D-02/D-03/D-12/D-15/D-20)
-- [ ] 999.12-10-PLAN.md — Gateway throttle migration to Redis-backed ThrottlerStorageRedisService (D-13/D-16)
+- [x] 999.12-10-PLAN.md — Gateway throttle migration to Redis-backed ThrottlerStorageRedisService (D-13/D-16)
 - [ ] 999.12-11-PLAN.md — Docs propagation: CLAUDE.md Cache adapter row + Phase 21 CONTEXT.md inline amendment (D-09/D-16)
 
 ### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
