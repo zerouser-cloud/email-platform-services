@@ -5,15 +5,19 @@ import {
   HEALTH,
   PUBLIC_BUCKET_HEALTH,
   PUBLIC_HEALTH_KEY,
+  REDIS_HEALTH,
 } from '@email-platform/foundation';
-import type { StorageHealthIndicator } from '@email-platform/foundation';
+import type { StorageHealthIndicator, CacheHealthIndicator } from '@email-platform/foundation';
 
 @Controller(HEALTH.ROUTE)
 export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
+    // class-based DI preserved per Phase 999.12 RESEARCH §S-5 (pre-existing
+    // asymmetry; promotion to Symbol-based DI deferred to a future phase).
     private readonly rabbitmq: RabbitMqHealthIndicator,
     @Inject(PUBLIC_BUCKET_HEALTH) private readonly publicBucket: StorageHealthIndicator,
+    @Inject(REDIS_HEALTH) private readonly redis: CacheHealthIndicator,
   ) {}
 
   @Get(HEALTH.LIVE)
@@ -28,6 +32,7 @@ export class HealthController {
     return this.health.check([
       () => this.rabbitmq.isHealthy(HEALTH.INDICATOR.RABBITMQ),
       () => this.publicBucket.isHealthy(PUBLIC_HEALTH_KEY),
+      () => this.redis.isHealthy(HEALTH.INDICATOR.REDIS),
     ]);
   }
 }

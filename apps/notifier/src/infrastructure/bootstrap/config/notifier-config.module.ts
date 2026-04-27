@@ -1,9 +1,11 @@
 import {
   createConfigModule,
   LOGGING_CONFIG_PORT,
+  CACHE_CONFIG_PORT,
   STORAGE_CORE_CONFIG_PORT,
   PUBLIC_STORAGE_CONFIG_PORT,
   type LoggingConfig,
+  type CacheConfig,
   type StorageCoreConfig,
   type PublicStorageConfig,
 } from '@email-platform/foundation';
@@ -38,6 +40,10 @@ export const NotifierConfigModule = createConfigModule({
         LOG_LEVEL: c.LOG_LEVEL,
         LOG_FORMAT: c.LOG_FORMAT,
       }),
+    },
+    {
+      port: CACHE_CONFIG_PORT,
+      slice: (c): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
     },
     {
       port: STORAGE_CORE_CONFIG_PORT,
