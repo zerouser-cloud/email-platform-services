@@ -12,6 +12,12 @@ import { AppCacheModule } from '../../outbound/cache';
   imports: [
     AppCacheModule,
     ThrottlerModule.forRootAsync({
+      // Phase 999.12-12 hotfix: forRootAsync useFactory resolves dependencies in
+      // its OWN module context, not the wrapper ThrottleModule's. Without explicit
+      // imports here, REDIS_CLIENT (exported by AppCacheModule) is unreachable to
+      // the factory and DI fails at boot. Canonical NestJS pattern for cross-module
+      // forRootAsync injection.
+      imports: [AppCacheModule],
       inject: [GATEWAY_CONFIG, REDIS_CLIENT],
       useFactory: (config: GatewayEnv, redis: RedisClient) => ({
         throttlers: [
