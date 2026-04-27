@@ -1,8 +1,10 @@
 import {
   createConfigModule,
   LOGGING_CONFIG_PORT,
+  CACHE_CONFIG_PORT,
   GRPC_CLIENT_CONFIG_PORT,
   type LoggingConfig,
+  type CacheConfig,
   type GrpcClientConfig,
 } from '@email-platform/foundation';
 import { GatewayEnvSchema } from '@email-platform/config';
@@ -18,6 +20,10 @@ export const GatewayConfigModule = createConfigModule({
         LOG_LEVEL: c.LOG_LEVEL,
         LOG_FORMAT: c.LOG_FORMAT,
       }),
+    },
+    {
+      port: CACHE_CONFIG_PORT,
+      slice: (c): CacheConfig => ({ REDIS_URL: c.REDIS_URL }),
     },
     {
       port: GRPC_CLIENT_CONFIG_PORT,
