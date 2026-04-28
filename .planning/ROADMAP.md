@@ -726,3 +726,12 @@ Plans:
 
 Plans:
 - [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.16: s3-garage-connectivity-isolated-mode-fix (BACKLOG)
+
+**Goal:** Fix S3 (Garage) connectivity in isolated mode — `parser /health/ready` and `notifier /health/ready` return HTTP 503 because `s3:parser` and `s3:public` health checks fail with "S3 storage connection failed". All other dependencies (cache, persistence, messaging) report `up`. Discovered during `/gsd:verify-work 999.12.1` runtime probing (Test 4b evidence in `999.12.1-UAT.md`). Pre-existing infrastructure issue, unrelated to Tier-1 Symbol token renames of 999.12.1. Investigation needed: Garage container status in isolated mode (`infra-garage-*`), S3 endpoint config drift between native and isolated profiles, network reachability from `infra-parser-1`/`infra-notifier-1`, credentials/access-key validity. Affects parser and notifier readiness probes only — services functional but degraded (gateway aggregator still shows them up via gRPC liveness, but per-service HTTP `/health/ready` returns 503).
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
