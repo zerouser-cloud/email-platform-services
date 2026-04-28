@@ -4,14 +4,14 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.12.1 Plan 06 complete (D-10 — COLUMN_LENGTH split-file extraction)
-last_updated: "2026-04-28T11:30:00.000Z"
+last_updated: "2026-04-28T10:15:14.346Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 41
   completed_phases: 27
   total_plans: 146
-  completed_plans: 146
-  percent: 99
+  completed_plans: 147
+  percent: 100
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.12.1 (infra-naming-convention-audit) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
-Progress: [██████████] 99%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -157,6 +157,7 @@ Progress: [██████████] 99%
 | Phase 999.12.1 P04 | 5min | 3 tasks | 9 files |
 | Phase 999.12.1 P05 | 2min | 2 tasks | 7 files |
 | Phase 999.12.1 P06 | ~6min | 2 tasks | 3 files |
+| Phase 999.12.1 P07 | 2min 25s | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -312,6 +313,7 @@ Progress: [██████████] 99%
 - [Phase ?]: 999.12.1 Plan 04 (D-08, D-09): RabbitMqHealthIndicator class-DI promoted to MESSAGING_HEALTH Symbol-DI under new external/messaging/ folder (atomic commit f2f0e2b, 9 files); D-09 zero-drift convention locked for Phase 999.13
 - [Phase ?]: Phase 999.12.1-05 (D-07): HEALTH.INDICATOR keys + values flipped in lock-step (REDIS→CACHE: 'cache', RABBITMQ→MESSAGING: 'messaging', POSTGRESQL→PERSISTENCE: 'persistence'); MEMORY_HEAP unchanged. 11 read sites in 6 health.controllers updated; gateway JSDoc + redisResult→cacheResult per Rule 1 doc-honesty. Atomic commit d47792c, 7 files. /health/ready JSON shape now {cache, messaging, persistence, memory_heap} — pre-prod safe. Pitfall 2 mitigated via TS as-const compile-time check (build exit 0 == no missed sites). Closes Plan 04 transient inconsistency this.messaging.isHealthy(HEALTH.INDICATOR.RABBITMQ) → MESSAGING. Tier-1 abstract surface end-to-end on layer-name axis.
 - [Phase 999.12.1-06] (D-10): COLUMN_LENGTH split-file extraction — generic SQL VARCHAR length conventions (`{ SHORT: 50, MEDIUM: 100, DEFAULT: 255 } as const`) moved out of PG-bound `persistence.constants.ts` into single-concern `column-length.constants.ts`. 1 NEW + 2 MOD = 3 files in atomic commit 3a050c7 (+17/-7). persistence/index.ts barrel re-exports COLUMN_LENGTH from new file; 4 schema consumers (apps/{auth,sender,parser,audience}/.../schema/*.schema.ts) UNCHANGED — barrel transparency proven (`git diff HEAD~1 HEAD apps/` empty). Tier-3 sealed invariant honored (D-12): PG_POOL_DEFAULTS + PG_HEALTH (PG-specific: pg.Pool config + 'SELECT 1') stay in persistence.constants.ts. `as const` wrapper preserved (T-999.12.1-25 mitigation). pnpm lint + build exit 0 before commit per D-19 quick gate; 4 schema imports resolve through new barrel path. File-naming convention check (no-magic-values): `*-constants.ts` kebab-case suffix preserved. Persistence layer's last orthogonal misplacement closed.
+- [Phase ?]: [v4.0 / 999.12.1 / D-14]: Tier 1/2/3 token framework + layer-name axis convention codified in .agents/skills/infrastructure-client-layering/SKILL.md (principles owner) — fictional names only, directory-link worked example, anti-pattern #10 added; CLAUDE.md cross-linked + cache row REDIS_HEALTH → CACHE_HEALTH inventory update (skill = principles, CLAUDE.md = inventory per Phase 999.11.4.1 D-4)
 
 ### Pending Todos
 
@@ -344,7 +346,7 @@ Progress: [██████████] 99%
 
 ## Session Continuity
 
-Last session: 2026-04-28T11:30:00.000Z
+Last session: 2026-04-28T10:15:09.258Z
 Stopped at: Phase 999.12.1 Plan 06 complete (D-10 — COLUMN_LENGTH split-file extraction)
 Resume file: None
 
