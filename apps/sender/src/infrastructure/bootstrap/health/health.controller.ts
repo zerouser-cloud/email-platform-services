@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
-import { HEALTH, DATABASE_HEALTH, REDIS_HEALTH } from '@email-platform/foundation';
+import { HEALTH, DATABASE_HEALTH, CACHE_HEALTH } from '@email-platform/foundation';
 import type { DatabaseHealthIndicator, CacheHealthIndicator } from '@email-platform/foundation';
 
 @Controller(HEALTH.ROUTE)
@@ -8,7 +8,7 @@ export class HealthController {
   constructor(
     private readonly health: HealthCheckService,
     @Inject(DATABASE_HEALTH) private readonly db: DatabaseHealthIndicator,
-    @Inject(REDIS_HEALTH) private readonly redis: CacheHealthIndicator,
+    @Inject(CACHE_HEALTH) private readonly cache: CacheHealthIndicator,
   ) {}
 
   @Get(HEALTH.LIVE)
@@ -22,7 +22,7 @@ export class HealthController {
   readiness() {
     return this.health.check([
       () => this.db.isHealthy(HEALTH.INDICATOR.POSTGRESQL),
-      () => this.redis.isHealthy(HEALTH.INDICATOR.REDIS),
+      () => this.cache.isHealthy(HEALTH.INDICATOR.REDIS),
     ]);
   }
 }

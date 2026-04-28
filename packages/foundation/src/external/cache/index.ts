@@ -1,7 +1,7 @@
 export { CacheModule } from './cache.module';
 export {
   CACHE_SERVICE,
-  REDIS_HEALTH,
+  CACHE_HEALTH,
   REDIS_CLIENT, // Phase 999.12 D-13 narrow unlock — see cache.module.ts
   REDIS_DEFAULTS,
   REDIS_HEALTH_CHECK,

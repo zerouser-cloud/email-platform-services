@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 import {
   CACHE_SERVICE,
   REDIS_CLIENT,
-  REDIS_HEALTH,
+  CACHE_HEALTH,
   REDIS_DEFAULTS,
   CACHE_CONFIG_PORT,
 } from './cache.constants';
@@ -31,8 +31,8 @@ export function cacheProviders(options: CacheModuleOptions): Provider[] {
       new RedisCacheService(redis, options.namespace),
   };
 
-  const redisHealthProvider: Provider = {
-    provide: REDIS_HEALTH,
+  const cacheHealthProvider: Provider = {
+    provide: CACHE_HEALTH,
     useExisting: RedisHealthIndicator,
   };
 
@@ -40,7 +40,7 @@ export function cacheProviders(options: CacheModuleOptions): Provider[] {
     redisClientProvider,
     cacheServiceProvider,
     RedisHealthIndicator,
-    redisHealthProvider,
+    cacheHealthProvider,
     RedisShutdownService,
   ];
 }

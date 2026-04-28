@@ -6,7 +6,7 @@ import { SERVICE } from '@email-platform/config';
  * AppCacheModule (Phase 999.12 D-03) — thin app-level wrapper around the
  * foundation CacheModule. Fixes the namespace from the catalog identity
  * (SERVICE.gateway.id) in a single place per service. Re-exports the
- * foundation CacheModule so consumers (HealthController via REDIS_HEALTH;
+ * foundation CacheModule so consumers (HealthController via CACHE_HEALTH;
  * future business services via CACHE_SERVICE; Phase 999.12 ThrottleModule
  * via REDIS_CLIENT post-D-13 migration) receive providers transitively.
  *

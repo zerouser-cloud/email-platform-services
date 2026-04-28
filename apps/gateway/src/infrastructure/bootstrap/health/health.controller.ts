@@ -3,7 +3,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { HealthCheckService, HealthCheck, type HealthIndicatorResult } from '@nestjs/terminus';
 import {
   HEALTH,
-  REDIS_HEALTH,
+  CACHE_HEALTH,
   getBuildInfo,
   GrpcClientHealthIndicator,
 } from '@email-platform/foundation';
@@ -29,7 +29,7 @@ export class HealthController {
     @Inject(PARSER_GRPC_HEALTH) parserHealth: GrpcClientHealthIndicator,
     @Inject(AUDIENCE_GRPC_HEALTH) audienceHealth: GrpcClientHealthIndicator,
     @Inject(NOTIFIER_GRPC_HEALTH) notifierHealth: GrpcClientHealthIndicator,
-    @Inject(REDIS_HEALTH) private readonly redis: CacheHealthIndicator,
+    @Inject(CACHE_HEALTH) private readonly cache: CacheHealthIndicator,
   ) {
     this.upstreams = [
       { key: SERVICE.auth.id, indicator: authHealth },
@@ -81,7 +81,7 @@ export class HealthController {
     );
 
     const redisResult = await this.health.check([
-      () => this.redis.isHealthy(HEALTH.INDICATOR.REDIS),
+      () => this.cache.isHealthy(HEALTH.INDICATOR.REDIS),
     ]);
 
     return {

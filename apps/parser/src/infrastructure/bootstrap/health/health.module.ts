@@ -10,9 +10,9 @@ import { AppCacheModule } from '../../outbound/cache';
  * wires TerminusModule + foundation PersistenceModule (exports DATABASE_HEALTH)
  * + AppStorageModule (exports PARSER_STORAGE_HEALTH via the private bucket
  * sub-module) + AppCacheModule (re-exports foundation CacheModule, namespace
- * from catalog — exports REDIS_HEALTH) so HealthController's three injects
+ * from catalog — exports CACHE_HEALTH) so HealthController's three injects
  * (`@Inject(DATABASE_HEALTH)`, `@Inject(PARSER_STORAGE_HEALTH)`, and
- * `@Inject(REDIS_HEALTH)`) resolve without relying on root-level propagation.
+ * `@Inject(CACHE_HEALTH)`) resolve without relying on root-level propagation.
  * Foundation's PersistenceModule is NOT `@Global()`.
  *
  * AppStorageModule is the parser storage composer (outbound/storage/) that

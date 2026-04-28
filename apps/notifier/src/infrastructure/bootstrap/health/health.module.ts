@@ -14,14 +14,14 @@ import { AppCacheModule } from '../../outbound/cache';
  * `AppStorageModule` composer so the `PUBLIC_BUCKET_HEALTH` token propagates from
  * `outbound/storage/reports/` up to `HealthController`'s `@Inject(PUBLIC_BUCKET_HEALTH)`
  * without relying on root-level propagation. `AppCacheModule` re-exports the
- * foundation `CacheModule` so the `REDIS_HEALTH` token resolves at the controller
+ * foundation `CacheModule` so the `CACHE_HEALTH` token resolves at the controller
  * the same way (foundation modules are NOT @Global()).
  *
  * Notifier-specific: no database wiring because notifier has NO PostgreSQL
  * persistence (no aggregates, no pg schema — only RMQ inbound + Telegram outbound
  * + shared public bucket + Redis cache cаркас). Mirrors the auth HealthModule
  * DATABASE_HEALTH wiring pattern, substituting RABBITMQ_HEALTH + PUBLIC_BUCKET_HEALTH
- * + REDIS_HEALTH.
+ * + CACHE_HEALTH.
  */
 @Module({
   imports: [TerminusModule, AppStorageModule, AppCacheModule],
