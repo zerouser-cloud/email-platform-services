@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: "Phase 999.12.1 shipped — PR #19"
-stopped_at: "Phase 999.12.1 ARCHITECTURALLY COMPLETE — Plan 08 final-smoke verified (8/8 plans done; 14/14 D-IDs realised; ready for /gsd:verify-work 999.12.1)"
-last_updated: "2026-04-28T13:00:34.693Z"
+stopped_at: Phase 999.17 context gathered
+last_updated: "2026-04-28T14:31:56.990Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 43
@@ -350,8 +350,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-04-28T11:00:00.000Z
-Stopped at: Phase 999.12.1 ARCHITECTURALLY COMPLETE — Plan 08 final-smoke verified (8/8 plans done; 14/14 D-IDs realised; ready for /gsd:verify-work 999.12.1)
-Resume file: None
+Last session: 2026-04-28T14:31:56.983Z
+Stopped at: Phase 999.17 context gathered
+Resume file: .planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-CONTEXT.md
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
