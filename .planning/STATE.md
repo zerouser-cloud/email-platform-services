@@ -4,13 +4,13 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.12.1 Plan 03 complete (D-06 — PUBLIC_STORAGE_HEALTH)
-last_updated: "2026-04-28T09:54:17.912Z"
+last_updated: "2026-04-28T10:02:34.406Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 41
   completed_phases: 27
   total_plans: 146
-  completed_plans: 144
+  completed_plans: 145
   percent: 99
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.12.1 (infra-naming-convention-audit) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
@@ -155,6 +155,7 @@ Progress: [██████████] 99%
 | Phase 999.12.1 P02 | 4min | 3 tasks | 19 files |
 | Phase 999.12.1 P03 | 2min | 3 tasks | 5 files |
 | Phase 999.12.1 P04 | 5min | 3 tasks | 9 files |
+| Phase 999.12.1 P05 | 2min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -308,6 +309,7 @@ Progress: [██████████] 99%
 - [Phase ?]: [Phase 999.12.1-02]: Persistence Tier-1 token+type rename — DATABASE_HEALTH→PERSISTENCE_HEALTH + DatabaseHealthIndicator→PersistenceHealthIndicator atomic single-commit f510f28 (19 files; 18 plan + 1 storage barrel comparative comment per Rule 1). 4 health.controllers (auth/sender/parser/audience) field db→persistence. Repository field db: NodePgDatabase UNCHANGED in 4 pg-*.repository.ts (Tier-2 Drizzle vocab preserved per D-05). PostgresHealthIndicator class name preserved (only implements clause renamed). Tier-2 (DRIZZLE/PG_POOL) + Tier-3 (PG_POOL_DEFAULTS/PG_HEALTH) sealed invariants honored. HEALTH.INDICATOR.POSTGRESQL string key preserved (Plan 05 owns D-07). pnpm lint+build exit 0 before commit.
 - [Phase 999.12.1-03]: Storage public-bucket Tier-1 token rename — PUBLIC_BUCKET_HEALTH→PUBLIC_STORAGE_HEALTH atomic single-commit 468bbed (5 files exactly per plan; 12+/12- symmetric, zero deviations). Notifier health.controller field publicBucket→publicStorage per 999.10.1 mirror rule (sole consumer; storage layer's last Tier-1 drift closed). PUBLIC_BUCKET = 'public' literal UNCHANGED per D-13 sealed invariant (deferred to Phase 999.14 s3-canonical-audit). PUBLIC_HEALTH_KEY = 's3:public' UNCHANGED (out-of-scope per RESEARCH §"Deferred Ideas"). Tier-2 (S3_CLIENT) + Tier-3 (S3_DEFAULTS/S3_HEALTH_CHECK/S3_TIME/S3_ERROR_NAME) sealed invariants honored. Per-service *_STORAGE_HEALTH (PARSER/SENDER/AUDIENCE) UNCHANGED — already canonical post-22.x. pnpm lint+build exit 0 before commit per D-19.
 - [Phase ?]: 999.12.1 Plan 04 (D-08, D-09): RabbitMqHealthIndicator class-DI promoted to MESSAGING_HEALTH Symbol-DI under new external/messaging/ folder (atomic commit f2f0e2b, 9 files); D-09 zero-drift convention locked for Phase 999.13
+- [Phase ?]: Phase 999.12.1-05 (D-07): HEALTH.INDICATOR keys + values flipped in lock-step (REDIS→CACHE: 'cache', RABBITMQ→MESSAGING: 'messaging', POSTGRESQL→PERSISTENCE: 'persistence'); MEMORY_HEAP unchanged. 11 read sites in 6 health.controllers updated; gateway JSDoc + redisResult→cacheResult per Rule 1 doc-honesty. Atomic commit d47792c, 7 files. /health/ready JSON shape now {cache, messaging, persistence, memory_heap} — pre-prod safe. Pitfall 2 mitigated via TS as-const compile-time check (build exit 0 == no missed sites). Closes Plan 04 transient inconsistency this.messaging.isHealthy(HEALTH.INDICATOR.RABBITMQ) → MESSAGING. Tier-1 abstract surface end-to-end on layer-name axis.
 
 ### Pending Todos
 
@@ -340,7 +342,7 @@ Progress: [██████████] 99%
 
 ## Session Continuity
 
-Last session: 2026-04-28T09:53:39.281Z
+Last session: 2026-04-28T10:02:17.041Z
 Stopped at: Phase 999.12.1 Plan 03 complete (D-06 — PUBLIC_STORAGE_HEALTH)
 Resume file: None
 
