@@ -3,7 +3,7 @@ import { HealthCheckService, HealthCheck } from '@nestjs/terminus';
 import {
   RabbitMqHealthIndicator,
   HEALTH,
-  PUBLIC_BUCKET_HEALTH,
+  PUBLIC_STORAGE_HEALTH,
   PUBLIC_HEALTH_KEY,
   CACHE_HEALTH,
 } from '@email-platform/foundation';
@@ -16,7 +16,7 @@ export class HealthController {
     // class-based DI preserved per Phase 999.12 RESEARCH §S-5 (pre-existing
     // asymmetry; promotion to Symbol-based DI deferred to a future phase).
     private readonly rabbitmq: RabbitMqHealthIndicator,
-    @Inject(PUBLIC_BUCKET_HEALTH) private readonly publicBucket: StorageHealthIndicator,
+    @Inject(PUBLIC_STORAGE_HEALTH) private readonly publicStorage: StorageHealthIndicator,
     @Inject(CACHE_HEALTH) private readonly cache: CacheHealthIndicator,
   ) {}
 
@@ -31,7 +31,7 @@ export class HealthController {
   readiness() {
     return this.health.check([
       () => this.rabbitmq.isHealthy(HEALTH.INDICATOR.RABBITMQ),
-      () => this.publicBucket.isHealthy(PUBLIC_HEALTH_KEY),
+      () => this.publicStorage.isHealthy(PUBLIC_HEALTH_KEY),
       () => this.cache.isHealthy(HEALTH.INDICATOR.REDIS),
     ]);
   }
