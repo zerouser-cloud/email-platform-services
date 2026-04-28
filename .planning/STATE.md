@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
+status: ready_to_plan
 stopped_at: Phase 999.12.1 ARCHITECTURALLY COMPLETE — Plan 08 final-smoke verified (8/8 plans done; 14/14 D-IDs realised; ready for /gsd:verify-work 999.12.1)
 last_updated: "2026-04-28T11:00:00.000Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 41
-  completed_phases: 27
+  completed_phases: 28
   total_plans: 146
   completed_plans: 147
-  percent: 100
+  percent: 68
 ---
 
 # Project State
@@ -25,9 +25,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.12.1 (infra-naming-convention-audit) — ARCHITECTURALLY COMPLETE
-Plan: 8 of 8 (all plans done)
-Status: Ready for /gsd:verify-work 999.12.1
+Phase: 999.13
+Plan: Not started
+Status: Ready to plan
 Last activity: 2026-04-28
 
 Progress: [██████████] 100%
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 103 (v1.0: 18, v2.0: 6, v3.0: 11)
+- Total plans completed: 111 (v1.0: 18, v2.0: 6, v3.0: 11)
 - Average duration: ~2min
 - Total execution time: --
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | 999.1.9 | 11 | - | - |
 | 999.11.4 | 6 | - | - |
 | 999.11.4.1 | 6 | - | - |
+| 999.12.1 | 8 | - | - |
 
 **Recent Trend:**
 
