@@ -27,9 +27,9 @@ export class HealthController {
   @HealthCheck()
   readiness() {
     return this.health.check([
-      () => this.persistence.isHealthy(HEALTH.INDICATOR.POSTGRESQL),
+      () => this.persistence.isHealthy(HEALTH.INDICATOR.PERSISTENCE),
       () => this.parserStorage.isHealthy(PARSER_STORAGE_HEALTH_KEY),
-      () => this.cache.isHealthy(HEALTH.INDICATOR.REDIS),
+      () => this.cache.isHealthy(HEALTH.INDICATOR.CACHE),
     ]);
   }
 }

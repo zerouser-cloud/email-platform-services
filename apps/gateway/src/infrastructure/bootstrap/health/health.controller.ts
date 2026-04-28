@@ -47,20 +47,21 @@ export class HealthController {
   }
 
   /**
-   * Readiness probe (Phase 999.12 D-05/D-20 — Option B locked at plan time).
+   * Readiness probe (Phase 999.12 D-05/D-20 — Option B locked at plan time;
+   * indicator key relabeled cache per Phase 999.12.1 D-07 layer-name axis).
    *
    * Two-stage composition:
    *   1. Promise.allSettled fan-out across the 5 upstream gRPC indicators
    *      (`upstreams[]`). The element type stays narrow
    *      (`{ key: string; indicator: GrpcClientHealthIndicator }`) — Option A
-   *      (widen the union to also accept CacheHealthIndicator and push redis
-   *      as a 6th element) was considered and rejected per planner revision
-   *      iter-1: it dilutes the array's semantic meaning ("upstream gRPC
-   *      services") and creates downstream awkwardness for any code
-   *      pattern-matching on GrpcClientHealthIndicator specifics.
-   *   2. A separate sequential `this.health.check([...])` for the Redis
-   *      indicator. Terminus merges the resulting `info.redis` /
-   *      `details.redis` slot into the response object alongside the
+   *      (widen the union to also accept CacheHealthIndicator and push the
+   *      cache indicator as a 6th element) was considered and rejected per
+   *      planner revision iter-1: it dilutes the array's semantic meaning
+   *      ("upstream gRPC services") and creates downstream awkwardness for
+   *      any code pattern-matching on GrpcClientHealthIndicator specifics.
+   *   2. A separate sequential `this.health.check([...])` for the cache
+   *      indicator. Terminus merges the resulting `info.cache` /
+   *      `details.cache` slot into the response object alongside the
    *      upstreams-derived results — same shape as a single uniform
    *      `health.check([...])` call from the caller's POV.
    */
@@ -80,14 +81,14 @@ export class HealthController {
       }),
     );
 
-    const redisResult = await this.health.check([
-      () => this.cache.isHealthy(HEALTH.INDICATOR.REDIS),
+    const cacheResult = await this.health.check([
+      () => this.cache.isHealthy(HEALTH.INDICATOR.CACHE),
     ]);
 
     return {
       ...upstreamsResult,
-      info: { ...(upstreamsResult.info ?? {}), ...(redisResult.info ?? {}) },
-      details: { ...(upstreamsResult.details ?? {}), ...(redisResult.details ?? {}) },
+      info: { ...(upstreamsResult.info ?? {}), ...(cacheResult.info ?? {}) },
+      details: { ...(upstreamsResult.details ?? {}), ...(cacheResult.details ?? {}) },
     };
   }
 }

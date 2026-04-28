@@ -32,9 +32,9 @@ export class HealthController {
   @HealthCheck()
   readiness() {
     return this.health.check([
-      () => this.messaging.isHealthy(HEALTH.INDICATOR.RABBITMQ),
+      () => this.messaging.isHealthy(HEALTH.INDICATOR.MESSAGING),
       () => this.publicStorage.isHealthy(PUBLIC_HEALTH_KEY),
-      () => this.cache.isHealthy(HEALTH.INDICATOR.REDIS),
+      () => this.cache.isHealthy(HEALTH.INDICATOR.CACHE),
     ]);
   }
 }
