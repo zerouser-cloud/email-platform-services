@@ -683,6 +683,16 @@ Plans:
 - [x] 999.12-10-PLAN.md — Gateway throttle migration to Redis-backed ThrottlerStorageRedisService (D-13/D-16)
 - [x] 999.12-11-PLAN.md — Docs propagation: CLAUDE.md Cache adapter row + Phase 21 CONTEXT.md inline amendment (D-09/D-16)
 
+### Phase 999.12.1: infra-naming-convention-audit (INSERTED)
+
+**Goal:** Audit naming convention across 4 backing-service abstractions (cache, persistence, storage, future rabbitmq) and fix Tier-1 drift. Storage layer (post-Phase 22.x) is the canonical reference baseline — abstract domain-role names on health/service/config tokens (`*_STORAGE_HEALTH`, `STORAGE_CORE_CONFIG_PORT`), tech-specific only on raw library instances (`S3_CLIENT`) and library defaults (`S3_DEFAULTS`). Cache layer drifts: `REDIS_HEALTH` token binds abstract `CacheHealthIndicator` — must be renamed to `CACHE_HEALTH` for symmetry with `DATABASE_HEALTH`/`*_STORAGE_HEALTH`. Persistence has one orthogonal misplacement (`COLUMN_LENGTH` lives in pg-pool constants but is generic VARCHAR semantics). Skill `infrastructure-client-layering` SKILL.md gets explicit Tier-1/2/3 convention section with storage as worked example, locking convention before 999.13 (RabbitMQ) writes new naming surface. Full pre-discussion analysis in `999.12.1-NOTES.md` — discuss-phase starts from there.
+**Requirements**: TBD (decision IDs assigned via discuss-phase)
+**Depends on:** Phase 999.12
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 999.12.1 to break down)
+
 ### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
 
 **Goal:** Build RabbitMQ client abstraction following gRPC canonical reference from 999.11 — foundation primitive (connection factory, channel lifecycle, publish/consume helpers), per-service modules in `apps/*/src/infrastructure/messaging/`, Symbol DI tokens, real `RabbitMqHealthIndicator` replacing current stub. Possibly merges with Phase 25 EventModule (or precedes it as canonical-pattern prerequisite). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.13".
