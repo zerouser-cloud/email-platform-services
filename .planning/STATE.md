@@ -4,14 +4,14 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.12.1 context gathered
-last_updated: "2026-04-28T08:28:34.719Z"
-last_activity: 2026-04-28 -- Phase 999.12.1 planning complete
+last_updated: "2026-04-28T09:29:38.615Z"
+last_activity: 2026-04-28
 progress:
   total_phases: 41
   completed_phases: 27
   total_plans: 146
-  completed_plans: 140
-  percent: 96
+  completed_plans: 141
+  percent: 97
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.12 — redis-canonical-alignment
+**Current focus:** Phase 999.12.1 — infra-naming-convention-audit
 
 ## Current Position
 
-Phase: 999.12 (redis-canonical-alignment) — COMPLETE ✓
-Plan: 11 of 11 + Plan 12 hotfix (DI scope + docker network)
+Phase: 999.12.1 (infra-naming-convention-audit) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-04-28 -- Phase 999.12.1 planning complete
+Last activity: 2026-04-28
 
-Progress: [██████████] 100%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -151,6 +151,7 @@ Progress: [██████████] 100%
 | Phase 999.11.4.1 PP04 | 4min | 2 tasks tasks | 3 files files |
 | Phase 999.11.4.1 P05 | 284s | 2 tasks tasks | 2 files (+1 SUMMARY) files |
 | Phase 999.11.4.1 P06 | ~15min | 5 tasks | 4 + 1 SUMMARY files |
+| Phase 999.12.1 P01 | 3min | 3 tasks | 22 files |
 
 ## Accumulated Context
 
@@ -300,6 +301,7 @@ Progress: [██████████] 100%
 - Plan 06 aligned-sweep: D-4 header block applied byte-for-byte to 4 aligned skills (twelve-factor, env-schema, gsd-flow-guard, branching-patterns) with only purpose-phrase substitution per skill; 4 per-skill atomic commits + 1 closure commit per D-11 extended via D-12 closing clause
 - Plan 06 rename-test outcomes: twelve-factor surfaced 2 latent-inventory 'Already in place' claims (§Factor III + §Factor IX) — rewritten to role-based shape descriptions per D-7 + D-2; env-schema / gsd-flow-guard / branching-patterns had zero latent inventory (D-12 closing clause — commits contained only the header-block addition)
 - Phase 999.11.4.1 phase-level invariant verified: D-4 header block present in all 9 refactored SKILL.md files (5 primary + 4 aligned); SOLUTIONS.md approved-count stable at 11 (no flips for aligned skills — they had no findings); zero changes in apps/, packages/, infra/ across the full phase
+- [Phase 999.12.1]: REDIS_HEALTH → CACHE_HEALTH (D-04 layer-name axis); field redis → cache in 6 health.controllers; Tier-2 REDIS_CLIENT and Tier-3 REDIS_DEFAULTS/REDIS_HEALTH_CHECK preserved per D-11/D-12 sealed — Cache layer Tier-1 surface aligned with hexagonal layer-name axis (matches storage canonical post-22.x); 22 files, atomic commit 15888bd; pnpm lint && build green per D-19 quick gate
 
 ### Pending Todos
 
@@ -332,8 +334,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-04-28T07:30:03.495Z
+Last session: 2026-04-28T09:28:35.373Z
 Stopped at: Phase 999.12.1 context gathered
-Resume file: .planning/phases/999.12.1-infra-naming-convention-audit/999.12.1-CONTEXT.md
+Resume file: None
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
