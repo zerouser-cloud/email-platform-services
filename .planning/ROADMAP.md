@@ -590,14 +590,29 @@ Plans:
 **Goal:** Audit all 10 working project skills against current code state via Heavy verify-against-reality methodology with Directional Authority Taxonomy (AUTH/DESC/HYBRID), producing 999.11.4-AUDIT.md (per-skill sections + summary table) and 999.11.4-SOLUTIONS.md (1-3 ranked remediation options per finding) for user-approved sub-phase creation outside this phase.
 **Requirements**: SPEC R1-R7 (locked in 999.11.4-SPEC.md — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11
-**Plans:** 5 plans
+**Plans:** 6/5 plans complete
 
 Plans:
-- [ ] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/*/{phase}-CONTEXT.md and *-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1)
-- [ ] 999.11.4-01-PLAN.md — AUTH batch: 6 parallel sub-agents audit no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns via grep-against-rules methodology; 7 atomic commits (1 scaffold + 6 per-skill); Wave 2
-- [ ] 999.11.4-02-PLAN.md — DESC batch: 2 parallel sub-agents audit nestjs-hexagonal-mapping, infrastructure-client-layering via skill-vs-phase-decisions methodology using PHASE-DECISIONS-INDEX; 3 atomic commits (2 per-skill + 1 SUMMARY); Wave 3
-- [ ] 999.11.4-03-PLAN.md — HYBRID batch: 3 parallel sub-agents audit runtime-smoke-verification, composition-over-inheritance, clean-ddd-hexagonal via per-section combo methodology (AUTH-section + DESC-section); 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 (sequenced after Plan 02 due to AUDIT.md file overlap)
-- [ ] 999.11.4-04-PLAN.md — Synthesis: AUDIT.md finalisation (Orphan + Reclassification + Skipped sections + summary totals) + SOLUTIONS.md authoring (1-3 ranked variants per finding per Phase 999.1 precedent) + phase SUMMARY.md handoff doc; 4 atomic commits; Wave 5
+- [x] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/*/{phase}-CONTEXT.md and *-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1) ✅ 2026-04-22 (419 decisions across 22 phases + 227 orphans)
+- [x] 999.11.4-01-PLAN.md — AUTH batch: 6 parallel sub-agents audit no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns via grep-against-rules methodology; 7 atomic commits (1 scaffold + 6 per-skill); Wave 2 ✅ 2026-04-22 (4 findings: 2 nmv + 2 ig; 4 skills aligned)
+- [x] 999.11.4-02-PLAN.md — DESC batch: 2 parallel sub-agents audit nestjs-hexagonal-mapping, infrastructure-client-layering via skill-vs-phase-decisions methodology using PHASE-DECISIONS-INDEX; 3 atomic commits (2 per-skill + 1 SUMMARY); Wave 3 ✅ 2026-04-22 (4 findings: nhm-F-03..04 + icl-F-01..02, all refresh-skill, 13 sanctioned D-XX xref, 0 ad-hoc drift)
+- [x] 999.11.4-03-PLAN.md — HYBRID batch: 3 skills audited (rsv + coi + cdh) via per-section combo methodology; 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 ✅ 2026-04-22 (8 findings: 2 rsv + 3 coi + 3 cdh, all DESC-section, 29 sanctioned D-XX xref + 1 ad-hoc drift; sequential-fallback Rule 3 deviation — Task tool unavailable in context, identical output contract preserved)
+- [x] 999.11.4-04-PLAN.md — Synthesis: AUDIT.md finalisation (Orphan + Reclassification + Skipped sections + summary totals) + SOLUTIONS.md authoring (1-3 ranked variants per finding per Phase 999.1 precedent) + phase SUMMARY.md handoff doc; 4 atomic commits; Wave 5
+
+### Phase 999.11.4.1: Refactor project skills from inventory-level to principles-level content — consolidated remediation for 11 refresh-skill findings in 999.11.4-SOLUTIONS.md (5 primary skills + 4 aligned-sweep skills; clean-ddd-hexagonal deferred to a separate sub-phase) (INSERTED)
+
+**Goal:** Rewrite 5 primary project skills (`infrastructure-guard`, `nestjs-hexagonal-mapping`, `infrastructure-client-layering`, `runtime-smoke-verification`, `composition-over-inheritance`) from inventory-level content (specific file paths, port numbers, class names, enumerated counts) to timeless principles that survive the "rename test" — every assertion stays true after any referenced file/class/variable is renamed. Close the 11 refresh-skill findings from Phase 999.11.4 AUDIT (ig-F-01, ig-F-02, nhm-F-03, nhm-F-04, icl-F-01, icl-F-02, rsv-F-01, rsv-F-02, coi-F-01, coi-F-02, coi-F-03). Apply the universal D-4 header-rule block ("This skill describes timeless principles — do NOT add inventory") to every refactored SKILL.md (5 primary + 4 aligned = 9 total). Preventive aligned sweep over `twelve-factor`, `env-schema`, `gsd-flow-guard`, `branching-patterns` per D-12. Docs-only phase — zero changes in `apps/`, `packages/`, `infra/`.
+**Requirements**: D-01..D-16 locked in 999.11.4.1-CONTEXT.md (no REQ-IDs in REQUIREMENTS.md per CONTEXT frontmatter); finding IDs ig-F-01..coi-F-03 serve as phase-local traceability anchors per D-16
+**Depends on:** Phase 999.11.4
+**Plans:** 6/6 plans complete
+
+Plans:
+- [x] 999.11.4.1-01-PLAN.md — Refactor `nestjs-hexagonal-mapping` SKILL.md + references (LAYERS.md + NAMING.md); close nhm-F-03 + nhm-F-04; DRAFTS the D-4 header-block wording + the abstract config-factory wording that Plans 02..06 reuse verbatim per D-10a (Wave 1, 3 tasks, 3 atomic commits + newcomer test) ✅ 2026-04-24
+- [x] 999.11.4.1-02-PLAN.md — Refactor `infrastructure-client-layering` SKILL.md; reuse Plan 01's D-4 wording + config-factory wording byte-for-byte (D-10a pairing); close icl-F-01 (hand-rolled @Global() @Module({}) example replaced with abstract factory description) + icl-F-02 (split single-instance vs multi-instance-per-namespace sections) (Wave 2, 2 tasks, 2 atomic commits) ✅ 2026-04-24
+- [x] 999.11.4.1-03-PLAN.md — Refactor `infrastructure-guard` SKILL.md; close ig-F-01 + ig-F-02 by DELETING the Standard Ports inventory table and replacing with role-based identifier-governance section pointing at tracked env templates + tracked compose infra configuration per D-5 + D-8 (Wave 3, 2 tasks, 2 atomic commits) ✅ 2026-04-24
+- [x] 999.11.4.1-04-PLAN.md — Refactor `runtime-smoke-verification` SKILL.md §Project-Specific Note; close rsv-F-01 + rsv-F-02 by replacing specific pnpm-script enumeration + hard-coded gateway port with discovery commands against `package.json` and tracked env templates per D-5 + D-8 (Wave 4, 2 tasks, 2 atomic commits) ✅ 2026-04-24
+- [x] 999.11.4.1-05-PLAN.md — Refactor `composition-over-inheritance` SKILL.md (largest findings-load — 3 findings); close coi-F-01 (Pattern 1 fictional example replaces deleted-code reference) + coi-F-02 (Application by Layer role-based + grep-on-demand) + coi-F-03 (Enforcement links to `.eslintrc.js` as authoritative source per D-6; static census replaced with grep command per D-8) (Wave 5, 2 tasks, 2 atomic commits) ✅ 2026-04-24
+- [x] 999.11.4.1-06-PLAN.md — Aligned-sweep: apply D-4 header block + single rename-test pass to 4 zero-findings skills (`twelve-factor`, `env-schema`, `gsd-flow-guard`, `branching-patterns`); 4 per-skill atomic commits per D-11 extended via D-12 closing clause + 1 closure commit with per-skill newcomer-test record + phase-level invariant check (D-4 coverage across all 9 skills; SOLUTIONS.md = 11 ☑ Approved rows) (Wave 6, 5 tasks, 5 atomic commits) ✅ 2026-04-24
 
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
@@ -649,14 +664,41 @@ Plans:
 - [x] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
 
 
-### Phase 999.12: redis-canonical-alignment (BACKLOG)
+### Phase 999.12: redis-canonical-alignment
 
-**Goal:** Align Redis CacheModule setup with gRPC canonical reference (established in 999.11) — move config to `apps/*/src/infrastructure/cache/`, mirror foundation factory pattern (analog of `defineGrpcClient`), ensure `ioredis` hidden behind `CachePort` (ESLint guard). Absorbs existing backlog Phase 999.5 (CacheModule config to infrastructure layer). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.12".
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** Align Redis CacheModule with the canonical infra-client pattern (symmetry with gRPC post-999.7.x + persistence) and roll the structural cache adapter into all 6 services (auth, sender, audience, parser, notifier, gateway). Sender migrates `CacheModule.forRootAsync` from `bootstrap/health/` to a new `outbound/cache/cache.module.ts` thin app-level wrapper; the other 5 services receive the same wrapper + env schema spread + CACHE_CONFIG_PORT slice + REDIS_HEALTH inject. Gateway gains the single concrete business binding — `@nestjs/throttler` storage migrated from in-memory to Redis-backed via `@nest-lab/throttler-storage-redis@^1.2.0`, closing the distributed rate-limit gap. ESLint Override 4 forbids raw `ioredis` import in `apps/*/src/**`. CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" matrix gets a new Cache adapter row (D-09); Phase 21 D-02 receives an inline rate-limit-partial-unlock amendment in CONTEXT.md (D-16). Full context in `999.12-CONTEXT.md` (20 D-decisions); research and pattern map in `999.12-RESEARCH.md` + `999.12-PATTERNS.md`.
+**Requirements:** Tracked via decision IDs D-01..D-20 in CONTEXT.md (no explicit REQ-IDs in ROADMAP). Distributes across 11 plans per `decisions_addressed` frontmatter field.
+**Plans:** 11 plans
 
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+- [x] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/*/src/** (D-08)
+- [x] 999.12-02-PLAN.md — Foundation REDIS_CLIENT export amendment for D-13 throttle storage (Phase 21 D-04 narrowly amended; D-07/D-13)
+- [x] 999.12-03-PLAN.md — Compose RedisSchema.shape into 5 env schemas (auth/audience/parser/notifier/gateway, D-15)
+- [x] 999.12-04-PLAN.md — Sender migration: CacheModule from bootstrap/health/ to outbound/cache/ (D-02/D-03/D-04/D-05)
+- [x] 999.12-05-PLAN.md — Auth structural cache rollout (D-02/D-03/D-15/D-20)
+- [x] 999.12-06-PLAN.md — Audience structural cache rollout (D-02/D-03/D-15/D-20)
+- [x] 999.12-07-PLAN.md — Parser structural cache rollout (D-02/D-03/D-15/D-20; multi-indicator readiness preserved)
+- [x] 999.12-08-PLAN.md — Notifier structural cache rollout (D-02/D-03/D-15/D-20; mixed DI styles preserved per S-5)
+- [x] 999.12-09-PLAN.md — Gateway structural cache rollout + root AppCacheModule import before ThrottleModule (D-02/D-03/D-12/D-15/D-20)
+- [x] 999.12-10-PLAN.md — Gateway throttle migration to Redis-backed ThrottlerStorageRedisService (D-13/D-16)
+- [x] 999.12-11-PLAN.md — Docs propagation: CLAUDE.md Cache adapter row + Phase 21 CONTEXT.md inline amendment (D-09/D-16)
+
+### Phase 999.12.1: infra-naming-convention-audit (INSERTED)
+
+**Goal:** Audit naming convention across 4 backing-service abstractions (cache, persistence, storage, future rabbitmq) and fix Tier-1 drift. Storage layer (post-Phase 22.x) is the canonical reference baseline — abstract domain-role names on health/service/config tokens (`*_STORAGE_HEALTH`, `STORAGE_CORE_CONFIG_PORT`), tech-specific only on raw library instances (`S3_CLIENT`) and library defaults (`S3_DEFAULTS`). Cache layer drifts: `REDIS_HEALTH` token binds abstract `CacheHealthIndicator` — must be renamed to `CACHE_HEALTH` for symmetry with `DATABASE_HEALTH`/`*_STORAGE_HEALTH`. Persistence has one orthogonal misplacement (`COLUMN_LENGTH` lives in pg-pool constants but is generic VARCHAR semantics). Skill `infrastructure-client-layering` SKILL.md gets explicit Tier-1/2/3 convention section with storage as worked example, locking convention before 999.13 (RabbitMQ) writes new naming surface. Full pre-discussion analysis in `999.12.1-NOTES.md` — discuss-phase starts from there.
+**Requirements**: D-01..D-14 (locked via /gsd:discuss-phase 2026-04-28; CONTEXT.md is the requirements set for this structural-rename phase)
+**Depends on:** Phase 999.12
+**Plans:** 8/8 plans complete
+
+Plans:
+- [x] 999.12.1-01-PLAN.md — Cache token rename: REDIS_HEALTH → CACHE_HEALTH + 6 health.controllers field redis → cache (D-04)
+- [x] 999.12.1-02-PLAN.md — Persistence token+type rename: DATABASE_HEALTH → PERSISTENCE_HEALTH + DatabaseHealthIndicator → PersistenceHealthIndicator + field db → persistence in 4 controllers (D-05)
+- [x] 999.12.1-03-PLAN.md — Storage token rename: PUBLIC_BUCKET_HEALTH → PUBLIC_STORAGE_HEALTH + notifier field publicBucket → publicStorage (D-06)
+- [x] 999.12.1-04-PLAN.md — Messaging migration: RabbitMqHealthIndicator → MessagingHealthIndicator + Symbol-DI promotion + new external/messaging/ folder + locks 999.13 convention (D-08, D-09)
+- [x] 999.12.1-05-PLAN.md — HEALTH.INDICATOR keys rename: REDIS/RABBITMQ/POSTGRESQL → CACHE/MESSAGING/PERSISTENCE (D-07)
+- [x] 999.12.1-06-PLAN.md — COLUMN_LENGTH extraction to column-length.constants.ts (orthogonal concern from PG-specific constants) (D-10)
+- [x] 999.12.1-07-PLAN.md — Codify Tier 1/2/3 framework + layer-name axis in skill SKILL.md (fictional names per 999.11.4.1 D-3) + CLAUDE.md inventory updates (D-14, D-01, D-02, D-03)
+- [x] 999.12.1-08-PLAN.md — Final phase-gate verification: dual-mode runtime smoke (pnpm start:native + pnpm start:isolated) + 14 D-IDs coverage matrix in SUMMARY.md (D-01..D-14 all realised)
 
 ### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
 
@@ -679,6 +721,24 @@ Plans:
 ### Phase 999.15: production-health-contract-ci-smoke (BACKLOG)
 
 **Goal:** Establish production health contract 3-tier (`/health/live` + `/health/ready` + optional `/health/startup`) across all 6 services, covering all infra deps via shallow checks (PG SELECT 1, Redis PING, S3 HeadBucket, RMQ channel status, gRPC upstream health). Move deep CRUD validation to CI post-deploy smoke job (GitHub Actions workflow + shell scripts per infra system) with Telegram alerts via existing notifier. Finalization phase after all infra abstractions aligned (999.11 → 999.12 → 999.13 → 999.14). Deferred: external synthetic monitoring (Datadog/Checkly), auto-rollback via Coolify API, scheduled continuous probes. Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.15".
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.16: s3-garage-connectivity-isolated-mode-fix (BACKLOG)
+
+**Goal:** Fix S3 (Garage) connectivity in isolated mode — `parser /health/ready` and `notifier /health/ready` return HTTP 503 because `s3:parser` and `s3:public` health checks fail with "S3 storage connection failed". All other dependencies (cache, persistence, messaging) report `up`. Discovered during `/gsd:verify-work 999.12.1` runtime probing (Test 4b evidence in `999.12.1-UAT.md`). Pre-existing infrastructure issue, unrelated to Tier-1 Symbol token renames of 999.12.1. Investigation needed: Garage container status in isolated mode (`infra-garage-*`), S3 endpoint config drift between native and isolated profiles, network reachability from `infra-parser-1`/`infra-notifier-1`, credentials/access-key validity. Affects parser and notifier readiness probes only — services functional but degraded (gateway aggregator still shows them up via gRPC liveness, but per-service HTTP `/health/ready` returns 503).
+**Requirements:** TBD
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+### Phase 999.17: devsecops-shift-left-security-tooling (BACKLOG)
+
+**Goal:** Внедрить трёхслойную систему security-проверок проекта на разных стадиях разработки. **Слой 1 — pre-commit (husky + lint-staged):** быстрая (<5s) проверка на staged файлах — gitleaks (secrets), ESLint+Prettier (lint+format). **Слой 2 — pre-push:** инкрементальные проверки (10-30s) на изменения относительно origin/main — Semgrep (SAST для NestJS/TS), `pnpm audit` при изменении lock-файла, Trivy config при изменении Dockerfile/compose. **Слой 3 — CI required gate (GitHub Actions, branch protection):** полный прогон gitleaks + Semgrep + Trivy fs (SCA + license) + Trivy config (Dockerfile + docker-compose) + Trivy image (после build) + Syft (SBOM artifact). Quality Gate с thresholds: HIGH/CRITICAL CVE → block merge, new secret detected → block, SAST HIGH+ → block. Принцип: hooks дают разработчику быстрый фидбек (можно обойти `--no-verify`), CI работает как обязательный gate (нельзя обойти при включённой branch protection). **Lean stack:** gitleaks, Semgrep, Trivy (3 режима — fs/config/image), Syft, husky 9, lint-staged. **Rejected during analysis:** SonarQube (80%+ overlap с Semgrep, тяжёлая инфраструктура — своя БД/сервер/лицензия для приватных репо), отдельный SCA tool помимо Trivy (Trivy fs покрывает npm SCA + license check). **Scope (in):** dev hooks (pre-commit, pre-push), CI workflows (`.github/workflows/security.yml`), Quality Gate config с thresholds, husky setup, документация локального запуска проверок. **Scope (out, devops layer):** continuous Trivy rescan продакшен-образов по cron (CVE feed обновляется ежедневно — нужен scheduled scanner), runtime security (Falco/Wiz/Aqua), DAST (ZAP/Burp), secrets management в проде (Vault/SOPS), WAF/IDS/IPS, k8s admission controllers. **Scope (deferred to separate phase):** Renovate/Dependabot для автоматических dep updates (это про процесс мерджа автоПР, не про сами scanners). **Open questions для discuss-phase:** (1) husky уже стоит в репо или ставим с нуля (проверить package.json + .husky/); (2) Renovate vs Dependabot — нативный для GitHub vs гибче для monorepo; (3) точные thresholds Quality Gate — только CRITICAL block или HIGH+ тоже; (4) pre-commit hook нужен или только CI (локальные hooks ловят секреты до push, но требуют дисциплины разработчика). Discovered 2026-04-28 после завершения Phase 999.12.1 в discussion на тему DevSecOps practices for the project.
 **Requirements:** TBD
 **Plans:** 0 plans
 

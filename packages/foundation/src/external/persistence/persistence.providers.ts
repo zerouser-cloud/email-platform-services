@@ -5,7 +5,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   DRIZZLE,
   PG_POOL,
-  DATABASE_HEALTH,
+  PERSISTENCE_HEALTH,
   PG_POOL_DEFAULTS,
   PERSISTENCE_CONFIG_PORT,
 } from './persistence.constants';
@@ -31,8 +31,8 @@ const drizzleProvider: Provider = {
   useFactory: (pool: Pool): NodePgDatabase => drizzle({ client: pool }),
 };
 
-const databaseHealthProvider: Provider = {
-  provide: DATABASE_HEALTH,
+const persistenceHealthProvider: Provider = {
+  provide: PERSISTENCE_HEALTH,
   useExisting: PostgresHealthIndicator,
 };
 
@@ -41,5 +41,5 @@ export const persistenceProviders: Provider[] = [
   drizzleProvider,
   DrizzleShutdownService,
   PostgresHealthIndicator,
-  databaseHealthProvider,
+  persistenceHealthProvider,
 ];

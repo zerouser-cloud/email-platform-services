@@ -23,7 +23,7 @@ import type { NamespaceOptions } from './namespaced-storage.interface';
  *     namespace: 'reports',
  *     contentType: CONTENT_TYPE.PDF,
  *     token: SHARED_REPORTS,
- *     healthToken: PUBLIC_BUCKET_HEALTH, // optional
+ *     healthToken: PUBLIC_STORAGE_HEALTH, // optional
  *   })
  */
 @Module({})

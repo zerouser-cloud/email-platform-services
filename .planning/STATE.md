@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: planning
-stopped_at: Phase 999.11.4 context gathered
-last_updated: "2026-04-22T11:17:22.548Z"
-last_activity: 2026-04-21
+status: "Phase 999.12.1 shipped — PR #19"
+stopped_at: "Phase 999.12.1 ARCHITECTURALLY COMPLETE — Plan 08 final-smoke verified (8/8 plans done; 14/14 D-IDs realised; ready for /gsd:verify-work 999.12.1)"
+last_updated: "2026-04-28T13:00:34.693Z"
+last_activity: 2026-04-28
 progress:
-  total_phases: 39
-  completed_phases: 24
-  total_plans: 121
-  completed_plans: 117
-  percent: 97
+  total_phases: 43
+  completed_phases: 28
+  total_plans: 146
+  completed_plans: 148
+  percent: 100
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.1.9 — config-layering-refactor-services-first-structure
+**Current focus:** Phase 999.12.1 — infra-naming-convention-audit
 
 ## Current Position
 
-Phase: 999.2
+Phase: 999.13
 Plan: Not started
-Status: Ready to plan
-Last activity: 2026-04-21
+Status: Phase 999.12.1 shipped — PR #19
+Last activity: 2026-04-28
 
 Progress: [██████████] 100%
 
@@ -36,7 +36,7 @@ Progress: [██████████] 100%
 
 **Velocity:**
 
-- Total plans completed: 91 (v1.0: 18, v2.0: 6, v3.0: 11)
+- Total plans completed: 111 (v1.0: 18, v2.0: 6, v3.0: 11)
 - Average duration: ~2min
 - Total execution time: --
 
@@ -59,6 +59,9 @@ Progress: [██████████] 100%
 | 999.7.3 | 6 | - | - |
 | 999.1.8 | 6 | - | - |
 | 999.1.9 | 11 | - | - |
+| 999.11.4 | 6 | - | - |
+| 999.11.4.1 | 6 | - | - |
+| 999.12.1 | 8 | - | - |
 
 **Recent Trend:**
 
@@ -138,6 +141,25 @@ Progress: [██████████] 100%
 | Phase 999.1.8 P04 | 4min 43sec | 4 tasks | 18 files |
 | Phase 999.1.8 P05 | ~8min 45sec | 7 tasks | 25 files |
 | Phase 999.1.8 P06 | 100min | 7 tasks | 2 files |
+| Phase 999.11.4 P00 | 45min | 3 tasks | 2 files |
+| Phase 999.11.4 P01 | 9min | 3 tasks | 2 files |
+| Phase 999.11.4 P02 | 40min | 3 tasks | 2 files |
+| Phase 999.11.4 P03 | 15min | 3 tasks | 2 files |
+| Phase 999.11.4 P04 | ~120min (interrupt-resume) | 4 tasks | 4 files |
+| Phase 999.11.4.1 P01 | 30min | 3 tasks | 4 files |
+| Phase 999.11.4.1 P02 | ~8min | 2 tasks tasks | 3 files files |
+| Phase 999.11.4.1 P03 | 12min | 2 tasks | 3 files |
+| Phase 999.11.4.1 PP04 | 4min | 2 tasks tasks | 3 files files |
+| Phase 999.11.4.1 P05 | 284s | 2 tasks tasks | 2 files (+1 SUMMARY) files |
+| Phase 999.11.4.1 P06 | ~15min | 5 tasks | 4 + 1 SUMMARY files |
+| Phase 999.12.1 P01 | 3min | 3 tasks | 22 files |
+| Phase 999.12.1 P02 | 4min | 3 tasks | 19 files |
+| Phase 999.12.1 P03 | 2min | 3 tasks | 5 files |
+| Phase 999.12.1 P04 | 5min | 3 tasks | 9 files |
+| Phase 999.12.1 P05 | 2min | 2 tasks | 7 files |
+| Phase 999.12.1 P06 | ~6min | 2 tasks | 3 files |
+| Phase 999.12.1 P07 | 2min 25s | 2 tasks | 2 files |
+| Phase 999.12.1 P08 | ~25min | 3 tasks | 1 file (SUMMARY only — no source change) |
 
 ## Accumulated Context
 
@@ -269,12 +291,39 @@ Progress: [██████████] 100%
 - Phase 999.1.8 closed — dual-mode runtime smoke green, 999.1-VERIFICATION.md populated, 999.1-VALIDATION.md reflipped (Plan 06)
 - D-18 invariants measured via ripgrep (gsd-verifier canonical tool) — bash grep inside sandbox unreliable on some project files (Plan 06)
 - /gsd:verify-work 999.1 and /gsd:verify-work 999.1.8 slash-commands deferred to user — executor cannot invoke slash commands (Plan 06)
+- 999.11.4 Plan 00: Chose MD-table format for phase-decision index (D-05 Claude's Discretion) — project markdown convention consistency
+- 999.11.4 Plan 00: Added env-schema as 14th topic-area alongside config — semantically distinct (Zod/schemas vs DI/loader)
+- 999.11.4 Plan 00: Only 2 skills (nestjs-hexagonal-mapping, infrastructure-client-layering) cite phase D-XXs — other 9 AUTHORITATIVE skills cite zero, as expected for universal rules
+- Phase 999.11.4 Plan 01 (AUTH batch audit): 4 findings catalogued across 6 AUTHORITATIVE skills; 2 fix-code (nmv-F-01 inline status strings, nmv-F-02 RETRY_DEFAULTS lower-case fields) + 2 refresh-skill (ig-F-01 Garage vs MinIO Standard Ports, ig-F-02 missing Notifier gRPC 50055 + service HTTP ports); 4 skills aligned (tf/es/gfg/bp)
+- Plan 02 (DESC batch) — 4 findings across 2 skills (nhm-F-03..04 + icl-F-01..02), all refresh-skill remediation; paired findings share 999.1.8/999.1.9 config-factory root cause; audit-only invariant holds
+- Phase 999.11.4 Plan 03: HYBRID batch audit — 3 skills, 8 findings (all DESC-section), per-section combo methodology; sequential-fallback deviation Rule 3 (Task tool unavailable)
+- [Phase 999.11.4-04]: Plan 04 synthesis complete — AUDIT.md structurally complete per SPEC R6 + D-16 (Summary→Methodology→11 Skills→Orphan→Reclassification→Skipped, 16 findings across 10 audited skills); SOLUTIONS.md authored per SPEC R7 + Phase 999.1 precedent (16 entries × 1-3 variants, 7-col trade-off table, rejected-trail preserved); phase SUMMARY.md handoff with grep-verifiable Acceptance-level Audit Invariants table + 8 proposed sub-phase clusters 999.11.4.1..999.11.4.8. Interrupt-recovery protocol: SOLUTIONS.md orphan in working tree validated against SPEC R7 and committed as-is (preserving pre-interrupt synthesis). Audit-only invariant holds across all 24 docs(999.11.4-*) phase commits. Phase 999.11.4 ARCHITECTURALLY COMPLETE.
+- D-4 header-block wording locked for reuse by Plans 02..06 (see 999.11.4.1-01-SUMMARY.md)
+- D-10a pairing enforced byte-for-byte for Plan 02 (icl): header-block diff = 1 sanctioned line; config-factory blockquote + directory-level-link diffs = 0 lines
+- Plan 02 applied the single-sentence-purpose swap for the icl header block using Plan 01's pre-sanctioned phrasing ('layering client-side infrastructure across catalog / foundation / apps')
+- icl-F-02 resolved by splitting the old 'Redis / S3 / DB+ORM (single-instance)' section into True-single-instance vs Multi-instance-per-namespace H3 subsections, both role-based with fictional placeholders (DB_TOKEN, CACHE_TOKEN, STORAGE_CORE_TOKEN)
+- Anti-Pattern 9 added to icl SKILL.md to make the sanctioned-subpath + typed-port rule grep-visible alongside the §Multi-instance-per-namespace behavioural rules
+- Plan 999.11.4.1-03 — Applied principles-only refactor (D-5 + D-8) to infrastructure-guard skill: DELETED Standard Ports inventory table, replaced with role-based §"Infrastructure Identifiers — Where to Find Current Inventory" + grep command. Closed ig-F-01 + ig-F-02 in single atomic commit (6d65258). Newcomer test surfaced zero defects.
+- [Phase 999.11.4.1-04]: runtime-smoke-verification refactor complete — rsv-F-01 + rsv-F-02 closed via principles-only refactor (not SOLUTIONS.md V1/V2). §Project-Specific Note rewritten to role-based description with on-demand discovery recipes (node one-liner against package.json + grep on .env* templates). D-4 header block reused byte-for-byte from Plan 01. Rule 2 completeness cleanup: 2 residual :3000 literals in §What to Do When a Script Is Missing + §Post-Verification Report swept to ${GATEWAY_PORT} in the same atomic commit. 8/11 SOLUTIONS.md rows now ☑ Approved (2 nhm + 2 icl + 2 ig + 2 rsv); 3 remaining (coi-F-01..03 in Plan 05 + aligned sweep in Plan 06). Plans 05-06 unblocked.
+- Plan 05 (composition-over-inheritance, largest findings-load — 3 findings): single atomic skill-body commit per D-11 closes coi-F-01 + coi-F-02 + coi-F-03. Pattern 1 canonical example converted to fictional FooClient / RpcHelper (removes deleted production class reference); §Application by Layer + §When NOT replace enumerated count/path with grep-on-demand per D-8; §Enforcement links to .eslintrc.js as authoritative source per D-6; static inventory snapshot replaced with §Finding the Current extends Census. D-4 header block byte-for-byte from Plan 01 (purpose-phrase substitution: 'preferring composition over inheritance'). Newcomer test (inline fallback per pre-approved mode, explicit dead-reference check per plan_specifics emphasis): 0 defects. SOLUTIONS.md approved count: 11 (was 8, +3).
+- Plan 06 aligned-sweep: D-4 header block applied byte-for-byte to 4 aligned skills (twelve-factor, env-schema, gsd-flow-guard, branching-patterns) with only purpose-phrase substitution per skill; 4 per-skill atomic commits + 1 closure commit per D-11 extended via D-12 closing clause
+- Plan 06 rename-test outcomes: twelve-factor surfaced 2 latent-inventory 'Already in place' claims (§Factor III + §Factor IX) — rewritten to role-based shape descriptions per D-7 + D-2; env-schema / gsd-flow-guard / branching-patterns had zero latent inventory (D-12 closing clause — commits contained only the header-block addition)
+- Phase 999.11.4.1 phase-level invariant verified: D-4 header block present in all 9 refactored SKILL.md files (5 primary + 4 aligned); SOLUTIONS.md approved-count stable at 11 (no flips for aligned skills — they had no findings); zero changes in apps/, packages/, infra/ across the full phase
+- [Phase 999.12.1]: REDIS_HEALTH → CACHE_HEALTH (D-04 layer-name axis); field redis → cache in 6 health.controllers; Tier-2 REDIS_CLIENT and Tier-3 REDIS_DEFAULTS/REDIS_HEALTH_CHECK preserved per D-11/D-12 sealed — Cache layer Tier-1 surface aligned with hexagonal layer-name axis (matches storage canonical post-22.x); 22 files, atomic commit 15888bd; pnpm lint && build green per D-19 quick gate
+- [Phase ?]: [Phase 999.12.1-02]: Persistence Tier-1 token+type rename — DATABASE_HEALTH→PERSISTENCE_HEALTH + DatabaseHealthIndicator→PersistenceHealthIndicator atomic single-commit f510f28 (19 files; 18 plan + 1 storage barrel comparative comment per Rule 1). 4 health.controllers (auth/sender/parser/audience) field db→persistence. Repository field db: NodePgDatabase UNCHANGED in 4 pg-*.repository.ts (Tier-2 Drizzle vocab preserved per D-05). PostgresHealthIndicator class name preserved (only implements clause renamed). Tier-2 (DRIZZLE/PG_POOL) + Tier-3 (PG_POOL_DEFAULTS/PG_HEALTH) sealed invariants honored. HEALTH.INDICATOR.POSTGRESQL string key preserved (Plan 05 owns D-07). pnpm lint+build exit 0 before commit.
+- [Phase 999.12.1-03]: Storage public-bucket Tier-1 token rename — PUBLIC_BUCKET_HEALTH→PUBLIC_STORAGE_HEALTH atomic single-commit 468bbed (5 files exactly per plan; 12+/12- symmetric, zero deviations). Notifier health.controller field publicBucket→publicStorage per 999.10.1 mirror rule (sole consumer; storage layer's last Tier-1 drift closed). PUBLIC_BUCKET = 'public' literal UNCHANGED per D-13 sealed invariant (deferred to Phase 999.14 s3-canonical-audit). PUBLIC_HEALTH_KEY = 's3:public' UNCHANGED (out-of-scope per RESEARCH §"Deferred Ideas"). Tier-2 (S3_CLIENT) + Tier-3 (S3_DEFAULTS/S3_HEALTH_CHECK/S3_TIME/S3_ERROR_NAME) sealed invariants honored. Per-service *_STORAGE_HEALTH (PARSER/SENDER/AUDIENCE) UNCHANGED — already canonical post-22.x. pnpm lint+build exit 0 before commit per D-19.
+- [Phase ?]: 999.12.1 Plan 04 (D-08, D-09): RabbitMqHealthIndicator class-DI promoted to MESSAGING_HEALTH Symbol-DI under new external/messaging/ folder (atomic commit f2f0e2b, 9 files); D-09 zero-drift convention locked for Phase 999.13
+- [Phase ?]: Phase 999.12.1-05 (D-07): HEALTH.INDICATOR keys + values flipped in lock-step (REDIS→CACHE: 'cache', RABBITMQ→MESSAGING: 'messaging', POSTGRESQL→PERSISTENCE: 'persistence'); MEMORY_HEAP unchanged. 11 read sites in 6 health.controllers updated; gateway JSDoc + redisResult→cacheResult per Rule 1 doc-honesty. Atomic commit d47792c, 7 files. /health/ready JSON shape now {cache, messaging, persistence, memory_heap} — pre-prod safe. Pitfall 2 mitigated via TS as-const compile-time check (build exit 0 == no missed sites). Closes Plan 04 transient inconsistency this.messaging.isHealthy(HEALTH.INDICATOR.RABBITMQ) → MESSAGING. Tier-1 abstract surface end-to-end on layer-name axis.
+- [Phase 999.12.1-06] (D-10): COLUMN_LENGTH split-file extraction — generic SQL VARCHAR length conventions (`{ SHORT: 50, MEDIUM: 100, DEFAULT: 255 } as const`) moved out of PG-bound `persistence.constants.ts` into single-concern `column-length.constants.ts`. 1 NEW + 2 MOD = 3 files in atomic commit 3a050c7 (+17/-7). persistence/index.ts barrel re-exports COLUMN_LENGTH from new file; 4 schema consumers (apps/{auth,sender,parser,audience}/.../schema/*.schema.ts) UNCHANGED — barrel transparency proven (`git diff HEAD~1 HEAD apps/` empty). Tier-3 sealed invariant honored (D-12): PG_POOL_DEFAULTS + PG_HEALTH (PG-specific: pg.Pool config + 'SELECT 1') stay in persistence.constants.ts. `as const` wrapper preserved (T-999.12.1-25 mitigation). pnpm lint + build exit 0 before commit per D-19 quick gate; 4 schema imports resolve through new barrel path. File-naming convention check (no-magic-values): `*-constants.ts` kebab-case suffix preserved. Persistence layer's last orthogonal misplacement closed.
+- [Phase ?]: [v4.0 / 999.12.1 / D-14]: Tier 1/2/3 token framework + layer-name axis convention codified in .agents/skills/infrastructure-client-layering/SKILL.md (principles owner) — fictional names only, directory-link worked example, anti-pattern #10 added; CLAUDE.md cross-linked + cache row REDIS_HEALTH → CACHE_HEALTH inventory update (skill = principles, CLAUDE.md = inventory per Phase 999.11.4.1 D-4)
+- [Phase 999.12.1-08]: Phase 999.12.1 ARCHITECTURALLY COMPLETE — final-smoke verification (no source changes). All 14 D-IDs (D-01..D-14) realised across 7 atomic source-change commits (Plans 01-07: 15888bd, f510f28, 468bbed, f2f0e2b, d47792c, 3a050c7, 0be519b). Workspace grep invariant matrix: 8 negative invariants = 0 (renames complete), 14+ positive invariants ≥1 (new names present), 11+ sealed invariants STILL present (Tier-2 REDIS_CLIENT/DRIZZLE/PG_POOL/S3_CLIENT + Tier-3 REDIS_DEFAULTS/REDIS_HEALTH_CHECK/PG_POOL_DEFAULTS/PG_HEALTH + D-13 PUBLIC_BUCKET='public' deferred to 999.14 + out-of-scope s3:* health-keys + 4 NodePgDatabase repo fields preserved). Dual-mode runtime smoke green: native (port 3000) + isolated (port 4000) HTTP 200 on /health/ready, JSON `.info|keys` contains layer-name keys (cache/messaging/persistence/memory_heap) + NO old keys (redis/rabbitmq/postgresql), 6/6 isolated containers Up (healthy), 0 UnknownDependenciesException(MESSAGING_HEALTH) in notifier docker logs (Pitfall 4 mitigated). Ready for /gsd:verify-work 999.12.1.
 
 ### Pending Todos
 
 - Consider widening Promisified<T> typed second-arg from Metadata to Metadata | CallOpts in foundation. Documented in `apps/gateway/src/test/grpc-client-sanity.ts` lines 31-34. Not blocking — sanity probe ergonomics issue only. Carry-forward to future fast/cleanup pass (no longer Plan 05/06 candidate; Phase 999.7.3 closed pending verify-work).
 - (Future observability phase) Restore the conscious D-04 regression — `grpc.client.call` per-call structured log entries are no longer emitted by the Promisified Proxy. Restoration via DI-injected logger in outer Proxy chain; rest of gRPC pipeline is unchanged so the restoration is local to `packages/foundation/src/external/grpc/clients/promisify-grpc-client.ts`.
 - (Future HTTP composition phase) 4 remaining HTTP clients still extend AbstractHttpClient (`apps/{notifier/telegram, sender/cloud-functions, parser/appstorespy, gateway/http-smoke}/.../*.client.ts`) — flagged refactor-candidate in composition-over-inheritance SKILL. Apply same pattern as 999.7.2 (composition via injected helper) once 999.7.3 verifies cleanly.
+- (Documentation accuracy) Plan 08 SUMMARY (`999.12.1-08-SUMMARY.md`) claims `notifier: {cache, messaging, publicStorage}` and `parser: {cache, persistence, parserStorage}` JSON shape, but actual runtime keys are `s3:public` / `s3:parser` (string-keys preserved per D-13 deferred to 999.14). Discovered during `/gsd:verify-work 999.12.1` Test 4b. See `.planning/todos/pending/2026-04-28-plan-08-summary-documentation-drift-string-keys-claim-accura.md`.
 
 ### Blockers/Concerns
 
@@ -296,11 +345,13 @@ Progress: [██████████] 100%
 - Phase 999.11.4 inserted after Phase 999.11: architecture-skill-vs-code audit (URGENT) — расширенная версия 999.11.3 на все 11 kustom skills проекта. Проверить каждый skill в `.agents/skills/` против текущего состояния кода и согласованных phase-decisions. Критический scope guard: **Directional Authority Taxonomy** — каждый skill/секция заранее классифицируется как AUTHORITATIVE (skill = закон, drift в коде = violation) / DESCRIPTIVE (код = эталон, skill догоняет) / HYBRID (per-section). Pre-классификация: AUTHORITATIVE — no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns; DESCRIPTIVE — nestjs-hexagonal-mapping, infrastructure-client-layering; HYBRID — runtime-smoke-verification, composition-over-inheritance, clean-ddd-hexagonal. Skipped — error-handling (broken, нет SKILL.md, отдельная фаза). Deliverables: AUDIT.md (per-skill findings с direction tags + phase-decision cross-refs) + SOLUTIONS.md (remediation plans: refresh skill / fix code / leave-as-is). Precedents: 999.1 (audit-only), 999.11.3 (skill refresh, single skill). Phase invariants I-0.1..I-0.4 должны быть locked в CONTEXT до старта аудита. Depends on 999.11.3 (после его завершения все 999.x фазы architectural state зафиксирован как baseline для сравнения).
 - Phase 999.1.9 inserted after Phase 999.1: config-layering-refactor-services-first-structure (URGENT) — полный рефакторинг системы конфигов по итогам ad-hoc обсуждения после завершения 999.1.8. Discovered: (1) текущий `TopologySchema` использует динамический `buildTopologyShape()` цикл, из-за чего `z.infer<typeof AudienceEnvSchema>` теряет топологические поля и требует ручных intersection-алиасов (`AuthEnv = GlobalTopology & ...`); (2) `SERVICE` каталог смешивает identity (id/package/serviceName/diToken) и topology (port: 3001, grpc.port: 50051) — при этом поле `port` нигде не используется в runtime (dead code, дублирует env); (3) gRPC server port хардкожен из каталога, HTTP port — из env: асимметрия источников истины. Scope фазы: (a) 4-слойная модель (Identity→catalog, Topology→env Zod, Internals→env per-service, Constants→foundation); (b) per-app раскладка в `packages/config/src/apps/{name}/` зеркально `/apps/{name}/` (identity.config.ts + topology.schema.ts + env.schema.ts + per-service external-apis); (c) shared infra schemas в `packages/config/src/infra/`; (d) статическая TopologySchema (spread литералов вместо цикла); (e) удаление ручных intersection-алиасов + `GlobalTopology` mapped-type; (f) упрощение `loadConfig` до `<T>(schema: T): z.infer<T>` (откат уродливого двойного generic из 999.1.8); (g) assembly pattern — `main.ts` импортирует готовый `audienceConfig` из bootstrap/config/, не вызывает `loadConfig` самостоятельно; (h) симметрия HTTP↔gRPC server ports (оба из env); (i) env parity check в CI script, не в runtime каждого сервиса; (j) удаление dead field `SERVICE.{svc}.port` + `displayName`. Predecessor: Phase 999.1 SOLUTIONS.md F-01 «TopologySchema refactor» blocker (слот textually зарезервирован под 999.1.1, renumbered to 999.1.9 per project convention — chronological). Research: inline-гипотеза подтверждена grep'ом (0 runtime usage `SERVICE.{svc}.port`, 0 usage `displayName`; gRPC server biding использует каталог, HTTP — env; per-service narrow-port pattern уже есть из 999.11.1/999.1.8). Откат WR-02 fix (commit aa4f988 → 7c272af revert) перед стартом — чтобы не держать уродство в репе до планирования фазы.
 - Phase 999.1.8 inserted after Phase 999.1: config-mechanism-consolidation-and-process-env-elimination (URGENT) — полноценная фаза-доработка findings Phase 999.1. Phase 999.1 закрыта как audit, но пропустила 2 критичных findings (F-15 CLI direct `process.env` в 4× drizzle.config.ts; F-16 Identity/Mechanism split нарушен — config mechanism не вынесен в foundation симметрично gRPC). User stance: «сделать сразу правильно, не полумерой». Scope фазы: (1) **re-audit** Phase 999.1 output + текущего config-состояния кодовой базы — матрица покрытия, гарантия что ничего не пропустим повторно; (2) **research** foundation/config factory shape: `loadConfig` relocation в `packages/foundation/src/config/` + `createConfigModule({schema, token, narrowPorts})` factory — pull-in reference: `infrastructure-client-layering` SKILL §Three-Layer Rule + gRPC foundation precedent (999.7.x); (3) **design lock** — amend DESIGN invariants: I-0.1 переформулировать (ровно 1 legal `process.env` read-site, no CLI exception), I-3.5 добавить (foundation owns config DI-binding factory), §4 Clean/Hexagonal fit расширить для config; (4) **implementation** в коде: 4× `drizzle.config.ts` → `loadConfig(SubSchema)`, перенос `loadConfig` в foundation, создание `createConfigModule()` factory, миграция 6 apps с ручных `@Global() {Svc}ConfigModule.forRoot()` на factory; atomic commits per-service per D-21 шаблону; (5) **verification** — grep-invariants (0 `process.env.*!` в apps/), dual-mode smoke gate (native + isolated), `/gsd:verify-work 999.1.8`. Depends on 999.1 (findings + DESIGN = input). Tech anchor: gRPC foundation factory pattern (999.7.x) = symmetry target. Reference: `.planning/phases/999.1-config-system-audit/999.1-HANDOFF.md` (F-15/F-16 детализация — использовать при discuss-phase).
+- Phase 999.11.4.1 inserted after Phase 999.11.4: skill-principles-refactor — consolidated remediation for 11 refresh-skill findings from Phase 999.11.4 AUDIT (URGENT) — пост-фазное обсуждение (2026-04-24) выявило meta-паттерн: 14 из 16 audit-findings имеют общий root cause — скиллы содержат inventory-level контент (конкретные файлы, порты, имена классов, списки путей), который протухает при каждом рефакторе. Разрозненные per-finding remediations в SOLUTIONS.md консолидируются в одну sub-phase с общей оптикой «timeless principles, inventory lives elsewhere». **Scope после discuss-phase 2026-04-24 — 9 скилов:** (primary, 11 findings): (a) `infrastructure-guard` — удалить Standard Ports table, формулировать принцип "infra IDs live in tracked env+compose config" без имён файлов; (b) `nestjs-hexagonal-mapping` — удалить конкретный file-count для `bootstrap/config/`, абстрактное описание factory + directory link; (c) `infrastructure-client-layering` — оставить слои catalog/foundation/apps + их обязанности, удалить hand-rolled `@Global() class` example, добавить subpath-export boundary rule; (d) `runtime-smoke-verification` — ссылать на package.json scripts динамически (не перечислять), резолвить порт абстрактно через env config; (e) `composition-over-inheritance` — оставить principle + 4 exception categories, удалить inventory (canonical example с удалённым кодом, HTTP clients list), ссылать на `.eslintrc.js` Override 6 + `grep` для current census. **Secondary (aligned sweep, 0 known findings):** (f) `twelve-factor`, (g) `env-schema`, (h) `gsd-flow-guard`, (i) `branching-patterns` — apply D-1..D-4 rules + minor sweep (header rule + rename-test pass); при 0 latent findings commit содержит только header-rule. **DEFERRED:** `clean-ddd-hexagonal` (3 cdh-F-* findings) вынесен в отдельный sub-phase, который будет зарегистрирован после завершения 999.11.4.1. 2 fix-code findings (nmv-F-01, nmv-F-02) выносятся в отдельную Phase 999.11.4.2. **16 decisions (D-1..D-16) locked in 999.11.4.1-CONTEXT.md:** Granularity rule (D-1 rename-test heuristic, D-2 abstract + directory link, D-3 one fictional example per pattern, D-4 skill-header rule preventing inventory creep); Replacement targets (D-5..D-8); Plan structure (D-9 6 plans, D-10 paired-first order, D-11 per-skill atomic commits, D-12 minor sweep for aligned); Verification (D-13..D-16 rename-test proof + diff review + newcomer test + dual findings-closure tracking). Meta-commitment: skills = timeless rules, phase artifacts / grep commands / config-files = current-state sources of truth.
+- Phase 999.12.1 inserted after Phase 999.12: infra-naming-convention-audit (URGENT)
 
 ## Session Continuity
 
-Last session: --stopped-at
-Stopped at: Phase 999.11.4 context gathered
-Resume file: --resume-file
+Last session: 2026-04-28T11:00:00.000Z
+Stopped at: Phase 999.12.1 ARCHITECTURALLY COMPLETE — Plan 08 final-smoke verified (8/8 plans done; 14/14 D-IDs realised; ready for /gsd:verify-work 999.12.1)
+Resume file: None
 
-**Planned Phase:** 999.11.4 (architecture-skill-vs-code-audit) — 5 plans — 2026-04-22T11:17:22.543Z
+**Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z

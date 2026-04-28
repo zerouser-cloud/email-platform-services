@@ -16,10 +16,10 @@ export * from './errors/rpc-exception.filter';
 export * from './errors/grpc-to-http.filter';
 export * from './health/health-constants';
 export * from './cache';
+export * from './messaging';
 export * from './storage';
 export * from './http';
 export * from './config';
-export * from './health/indicators/rabbitmq.health';
 export * from './resilience/grpc-deadline.interceptor';
 // Disambiguate RETRY_DEFAULTS collision: http/ barrel re-exports its own
 // RETRY_DEFAULTS (HTTP-specific). resilience/retry-connect has a legacy

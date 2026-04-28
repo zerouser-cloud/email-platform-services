@@ -9,8 +9,8 @@ export const HEALTH = {
   GRPC_STATUS_SERVING: 'SERVING',
   INDICATOR: {
     MEMORY_HEAP: 'memory_heap',
-    REDIS: 'redis',
-    RABBITMQ: 'rabbitmq',
-    POSTGRESQL: 'postgresql',
+    CACHE: 'cache',
+    MESSAGING: 'messaging',
+    PERSISTENCE: 'persistence',
   },
 } as const;

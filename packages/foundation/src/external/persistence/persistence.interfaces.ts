@@ -1,6 +1,6 @@
 import type { HealthIndicatorResult } from '@nestjs/terminus';
 
-export interface DatabaseHealthIndicator {
+export interface PersistenceHealthIndicator {
   isHealthy(key: string): Promise<HealthIndicatorResult>;
 }
 

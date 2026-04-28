@@ -1,26 +1,26 @@
 import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
-import { RabbitMqHealthIndicator } from '@email-platform/foundation';
+import { MessagingModule } from '@email-platform/foundation';
 import { HealthController } from './health.controller';
 import { AppStorageModule } from '../../outbound/storage';
+import { AppCacheModule } from '../../outbound/cache';
 
 /**
- * HealthModule (Phase 999.11.2 D-08) — wires TerminusModule for Terminus primitives,
- * owns `RabbitMqHealthIndicator` as a class-based provider (not a DI token — NestJS
- * injects by class reference), and imports the notifier `AppStorageModule` composer
- * so the `PUBLIC_BUCKET_HEALTH` token propagates from `outbound/storage/reports/` up
- * to `HealthController`'s `@Inject(PUBLIC_BUCKET_HEALTH)` without relying on
- * root-level propagation.
+ * HealthModule (Phase 999.12.1 D-08 — MessagingModule import; Phase 999.12 D-05
+ * AppCacheModule wiring; Phase 999.11.2 D-08 root structure) — wires
+ * TerminusModule, MessagingModule.forRootAsync() (Symbol-DI for MESSAGING_HEALTH —
+ * promoted from class-based DI per Phase 999.12.1 D-08 layer-name axis lock-in),
+ * AppStorageModule (PUBLIC_STORAGE_HEALTH propagation from outbound/storage/reports/),
+ * and AppCacheModule (CACHE_HEALTH propagation from outbound/cache/) so
+ * HealthController's three injects (@Inject(MESSAGING_HEALTH),
+ * @Inject(PUBLIC_STORAGE_HEALTH), @Inject(CACHE_HEALTH)) all resolve.
  *
- * Notifier-specific: no database wiring because notifier has NO PostgreSQL
- * persistence (no aggregates, no pg schema — only RMQ inbound + Telegram outbound
- * + shared public bucket). Mirrors the auth HealthModule DATABASE_HEALTH wiring
- * pattern, substituting RABBITMQ_HEALTH + PUBLIC_BUCKET_HEALTH.
+ * Notifier-specific: no database wiring (notifier has NO PostgreSQL persistence —
+ * no aggregates, no pg schema). Mirrors auth HealthModule PERSISTENCE_HEALTH
+ * wiring pattern, substituting MESSAGING_HEALTH + PUBLIC_STORAGE_HEALTH + CACHE_HEALTH.
  */
 @Module({
-  imports: [TerminusModule, AppStorageModule],
+  imports: [TerminusModule, MessagingModule.forRootAsync(), AppStorageModule, AppCacheModule],
   controllers: [HealthController],
-  providers: [RabbitMqHealthIndicator],
-  exports: [RabbitMqHealthIndicator],
 })
 export class HealthModule {}

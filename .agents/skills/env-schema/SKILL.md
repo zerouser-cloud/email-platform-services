@@ -5,6 +5,12 @@ description: Enforce strict env schema validation rules for Zod-based config sch
 
 # Env Schema — Strict Validation Rules
 
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for validating environment schemas strictly. It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
 Environment schemas validate, they don't invent. Every value must come from the environment explicitly. The schema catches missing or malformed config at boot — it never silently provides fallbacks.
 
 ## Rule: No Defaults in Env Schemas

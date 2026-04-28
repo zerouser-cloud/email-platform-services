@@ -1,5 +1,5 @@
 export const CACHE_SERVICE = Symbol('CACHE_SERVICE');
-export const REDIS_HEALTH = Symbol('REDIS_HEALTH');
+export const CACHE_HEALTH = Symbol('CACHE_HEALTH');
 export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
 
 // Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config port.

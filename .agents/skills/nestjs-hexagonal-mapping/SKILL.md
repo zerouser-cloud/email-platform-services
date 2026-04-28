@@ -5,7 +5,21 @@ description: Server-side NestJS↔Hexagonal layer mapping for gRPC microservices
 
 # NestJS↔Hexagonal Mapping (Server-Side)
 
-Server-side peer of `infrastructure-client-layering`. Where the client-side skill places gRPC/HTTP/RMQ **clients** across catalog/foundation/apps, this skill places **Controller / Service / UseCase / Port / Adapter / Domain** inside `apps/*/src/` for gRPC microservices. Reference implementation: Phase 999.10 (auth pilot in Plan 02 + sweep of sender/parser/audience in Plans 03-05), refined in Phase 999.11.2 which canonicalised `infrastructure/` into three direction sub-bins: `infrastructure/inbound/`, `infrastructure/outbound/`, `infrastructure/bootstrap/` (see `references/LAYERS.md` §Canonical Tree).
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for mapping NestJS primitives onto Hexagonal layers. It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
+## Authoritative references
+
+The current **file-path matrix** mapping every NestJS primitive to its Hexagonal slot in this project lives in the project-level paired doc: **CLAUDE.md §"NestJS↔Hexagonal Layer Mapping"**. That section is the single source of truth for the concrete directory layout and file naming conventions actually in use. This skill is the **decision-tree + anti-patterns** subset — it defers to the CLAUDE.md paired section for the current file-path matrix.
+
+When the CLAUDE.md paired section and this skill disagree, the CLAUDE.md paired section wins — it tracks the codebase; this skill teaches the pattern.
+
+---
+
+Server-side peer of `infrastructure-client-layering`. Where the client-side skill places gRPC/HTTP/RMQ **clients** across catalog/foundation/apps, this skill places **Controller / Service / UseCase / Port / Adapter / Domain** inside `apps/{svc}/src/` for gRPC microservices. See the CLAUDE.md paired section for the current canonical directory tree and `references/LAYERS.md` §Canonical Tree for the per-slice breakdown.
 
 **Why it exists:** NestJS gives you `@Module` / `@Controller` / `@Injectable` primitives. Hexagonal gives you layer boundaries. This skill is the one-to-one mapping — which NestJS primitive goes in which Hexagonal slot, with zero guesswork.
 
@@ -40,7 +54,7 @@ Read top-to-bottom: a proto request enters at the controller, is translated into
 |---|---|
 | Adding a new RPC method to an existing gRPC microservice | Gateway (REST facade without proto controller) — separate future phase |
 | Creating a new gRPC microservice (auth/sender/parser/audience shape) | Notifier (RMQ consumer without gRPC server) — merges with Phase 25 (EventModule) |
-| Reviewing a PR that touches `apps/*/src/application/`, `apps/*/src/domain/`, or `apps/*/src/infrastructure/inbound/grpc/` | Packages layer (`packages/foundation`, `packages/contracts`, `packages/config`) — utility libraries, not DDD |
+| Reviewing a PR that touches `apps/{svc}/src/application/`, `apps/{svc}/src/domain/`, or `apps/{svc}/src/infrastructure/inbound/grpc/` | Packages layer (`packages/foundation`, `packages/contracts`, `packages/config`) — utility libraries, not DDD |
 | Refactoring a 2-layer `UseCase implements Port` stack into the 3-layer `Controller → Service → UseCase` canonical form | Client-side gRPC (outbound) — use `infrastructure-client-layering` instead |
 
 ## Decision Tree — Adding a New RPC Method
@@ -85,9 +99,9 @@ Steps 2-6 are file-creation; Step 7 wires the controller; Step 8 wires DI. Atomi
 
 ## Proto Visibility (critical)
 
-**Only `apps/*/src/infrastructure/inbound/grpc/` (server-side inbound adapter) and `apps/*/src/infrastructure/outbound/grpc-clients/` (client-side outbound adapter) import `@email-platform/contracts`.** Domain and `application/**` never see proto types. This is the transport boundary — if gRPC is ever replaced by REST or RabbitMQ, nothing below the controller changes.
+**Only `apps/{svc}/src/infrastructure/inbound/grpc/` (server-side inbound adapter) and `apps/{svc}/src/infrastructure/outbound/grpc-clients/` (client-side outbound adapter) import `@email-platform/contracts`.** Domain and `application/` never see proto types. This is the transport boundary — if gRPC is ever replaced by REST or RabbitMQ, nothing below the controller changes.
 
-Enforced mechanically by ESLint Override 8 (domain isolation) and Override 9 (application isolation) in `.eslintrc.js` (added in Phase 999.10 Plan 06; paths refreshed in 999.11.2 Plan 08). See `references/PROTO-VISIBILITY.md` for the full file-type visibility matrix.
+Enforced mechanically by the project's ESLint config — the config's overrides isolate the domain layer and the application layer from proto types and `@nestjs/microservices` imports. See the project ESLint configuration at the repository root for the current override set and the exact path globs it restricts. See `references/PROTO-VISIBILITY.md` for the full file-type visibility matrix.
 
 ## Anti-Patterns
 
@@ -106,16 +120,17 @@ Full Don't / Do / Why / Detected-by block for each in `references/DO-DONT.md`.
 
 ## See Also
 
+- CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" — project-level authoritative file-path matrix and paired doc (the current canonical directory layout for this project).
 - `.agents/skills/clean-ddd-hexagonal/SKILL.md` — general Hexagonal philosophy + DDD tactical patterns (language-agnostic).
-- `.agents/skills/infrastructure-client-layering/SKILL.md` — paired skill (client-side gRPC layering across catalog/foundation/apps) + §Config subsection with Phase 999.11.2 refinement for `bootstrap/config/` placement. References: Phase 999.7.x, 999.11.1, 999.11.2.
+- `.agents/skills/infrastructure-client-layering/SKILL.md` — paired skill (client-side gRPC layering across catalog/foundation/apps) + §Config subsection with the `bootstrap/config/` placement rule.
 - `.agents/skills/composition-over-inheritance/SKILL.md` — services compose use cases, they do not extend them.
 - `.agents/skills/no-magic-values/SKILL.md` — Symbol DI tokens (never string tokens); every inbound/outbound port gets a `Symbol('XxxPort')`.
 
 ## References
 
-- `references/LAYERS.md` — per-layer (`infrastructure/`, `application/`, `domain/`) subfolder definitions with allowed imports and canonical file names.
-- `references/CALL-FLOW.md` — canonical ASCII call flow (Login example) plus variants: pure delegation, composite service, use-case reuse.
-- `references/NAMING.md` — one-to-one file↔class table (D-12) plus class-name rules (Controller/Service/UseCase/Port/Command/Mapper/Entity) plus **field-naming rules (Phase 999.10.1)**.
-- `references/EXAMPLES.md` — three worked examples (composite service, pure delegation, proto↔command mapping) plus 2-layer-to-3-layer before/after.
-- `references/PROTO-VISIBILITY.md` — 17-row table: who sees `@email-platform/contracts` / `@nestjs/microservices` / Drizzle / NestJS DI per file type.
-- `references/DO-DONT.md` — 9 anti-patterns in Don't / Do / Why / Detected-by format.
+- `references/LAYERS.md` — per-layer (`infrastructure/`, `application/`, `domain/`) subfolder definitions with allowed imports and artefact-role descriptions.
+- `references/CALL-FLOW.md` — canonical ASCII call flow plus variants: pure delegation, composite service, use-case reuse.
+- `references/NAMING.md` — file↔class conventions plus class-name rules (Controller/Service/UseCase/Port/Command/Mapper/Entity) plus **field-naming rules**.
+- `references/EXAMPLES.md` — worked examples (composite service, pure delegation, proto↔command mapping) plus 2-layer-to-3-layer before/after.
+- `references/PROTO-VISIBILITY.md` — file-type visibility matrix: who sees `@email-platform/contracts` / `@nestjs/microservices` / Drizzle / NestJS DI per file type.
+- `references/DO-DONT.md` — anti-patterns in Don't / Do / Why / Detected-by format.
