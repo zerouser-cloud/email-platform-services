@@ -20,7 +20,7 @@ import { AppCacheModule } from '../../outbound/cache';
  * Notifier-specific: no database wiring because notifier has NO PostgreSQL
  * persistence (no aggregates, no pg schema — only RMQ inbound + Telegram outbound
  * + shared public bucket + Redis cache cаркас). Mirrors the auth HealthModule
- * DATABASE_HEALTH wiring pattern, substituting RABBITMQ_HEALTH + PUBLIC_BUCKET_HEALTH
+ * PERSISTENCE_HEALTH wiring pattern, substituting RABBITMQ_HEALTH + PUBLIC_BUCKET_HEALTH
  * + CACHE_HEALTH.
  */
 @Module({

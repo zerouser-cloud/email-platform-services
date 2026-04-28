@@ -11,7 +11,7 @@ export * from './public';
 // `apps/notifier/src/health/health.controller.ts` import this interface as a type
 // to annotate the injected `*_STORAGE_HEALTH` providers. The interface lives under
 // `internal/storage/storage.interfaces.ts` but is public-facing (consumer-facing
-// contract for the *_STORAGE_HEALTH token), equivalent to DatabaseHealthIndicator
+// contract for the *_STORAGE_HEALTH token), equivalent to PersistenceHealthIndicator
 // which is exposed via external/persistence.
 // Re-exported here as type-only so the public barrel continues to expose only the
 // contract, not the primitive implementation class (which stays internal).

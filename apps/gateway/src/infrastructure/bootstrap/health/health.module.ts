@@ -13,7 +13,7 @@ import { HealthController } from './health.controller';
  *
  * Gateway has NO PostgreSQL persistence — foundation PersistenceModule is
  * deliberately NOT imported (verified gateway health.controller does NOT
- * inject DATABASE_HEALTH; only 5 *_GRPC_HEALTH tokens + CACHE_HEALTH).
+ * inject PERSISTENCE_HEALTH; only 5 *_GRPC_HEALTH tokens + CACHE_HEALTH).
  */
 @Module({
   imports: [TerminusModule, GrpcClientsModule, AppCacheModule],

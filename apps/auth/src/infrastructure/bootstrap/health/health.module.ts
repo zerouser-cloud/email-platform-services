@@ -6,9 +6,9 @@ import { AppCacheModule } from '../../outbound/cache';
 
 /**
  * HealthModule (Phase 999.11.2 D-08; AppCacheModule wiring per Phase 999.12 D-05) —
- * wires TerminusModule + foundation PersistenceModule (exports DATABASE_HEALTH)
+ * wires TerminusModule + foundation PersistenceModule (exports PERSISTENCE_HEALTH)
  * + AppCacheModule (re-exports foundation CacheModule, namespace from catalog)
- * so HealthController's dual `@Inject(DATABASE_HEALTH)` AND `@Inject(CACHE_HEALTH)`
+ * so HealthController's dual `@Inject(PERSISTENCE_HEALTH)` AND `@Inject(CACHE_HEALTH)`
  * resolves without relying on root-level propagation. Foundation's PersistenceModule
  * is NOT @Global(), so it must be explicitly imported here.
  */
