@@ -1,6 +1,10 @@
 export const CACHE_SERVICE = Symbol('CACHE_SERVICE');
-export const REDIS_HEALTH = Symbol('REDIS_HEALTH');
+export const CACHE_HEALTH = Symbol('CACHE_HEALTH');
 export const REDIS_CLIENT = Symbol('REDIS_CLIENT');
+
+// Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config port.
+// App-owned useFactory projects {SVC}_CONFIG into CacheConfig shape.
+export const CACHE_CONFIG_PORT = Symbol('CACHE_CONFIG_PORT');
 
 export const REDIS_DEFAULTS = {
   KEEP_ALIVE_MS: 10_000,

@@ -1,31 +1,31 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
-import { SenderEnvSchema } from './infrastructure/config';
-import { LoggingModule, PersistenceModule, CacheModule } from '@email-platform/foundation';
-import { SenderGrpcServer } from './infrastructure/grpc/sender.grpc-server';
-import { CreateCampaignUseCase } from './application/use-cases/create-campaign.use-case';
-import { PgCampaignRepository } from './infrastructure/persistence/pg-campaign.repository';
-import { HealthController } from './health/health.controller';
-import { CAMPAIGN_REPOSITORY_PORT, CREATE_CAMPAIGN_PORT } from './sender.constants';
+import { LoggingModule } from '@email-platform/foundation';
+import { SenderConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
+import { HttpClientsModule } from './infrastructure/outbound/http-clients';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(SenderEnvSchema),
-    PersistenceModule.forRootAsync(),
-    CacheModule.forRootAsync({ namespace: 'sender' }),
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    SenderConfigModule,
+    HealthModule,
     LoggingModule.forGrpcAsync('sender'),
+    GrpcClientsModule,
+    HttpClientsModule,
+    // GrpcModule owns inbound port → service bindings + use-cases + outbound
+    // AppPersistenceModule (Plan 10 Option A — cohesion with D-02).
+    GrpcModule,
   ],
-  controllers: [SenderGrpcServer, HealthController],
-  providers: [
-    { provide: CAMPAIGN_REPOSITORY_PORT, useClass: PgCampaignRepository },
-    { provide: CREATE_CAMPAIGN_PORT, useClass: CreateCampaignUseCase },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class SenderModule implements OnModuleDestroy {
   private readonly logger = new Logger(SenderModule.name);
 
   async onModuleDestroy(): Promise<void> {
     this.logger.log('Shutting down sender service...');
-    // TODO: drain gRPC server connections
   }
 }

@@ -1,5 +1,9 @@
 export const S3_CLIENT = Symbol('S3_CLIENT');
 
+// Canonical Config Access Contract (Phase 999.11.1 D-10) — narrow config port.
+// App-owned useFactory projects {SVC}_CONFIG into StorageCoreConfig shape.
+export const STORAGE_CORE_CONFIG_PORT = Symbol('STORAGE_CORE_CONFIG_PORT');
+
 export const S3_DEFAULTS = {
   FORCE_PATH_STYLE: true,
   REQUEST_CHECKSUM: 'WHEN_REQUIRED' as const,

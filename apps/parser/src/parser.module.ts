@@ -1,27 +1,28 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
-import { ParserEnvSchema } from './infrastructure/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { ParserGrpcServer } from './infrastructure/grpc/parser.grpc-server';
-import { StartParsingUseCase } from './application/use-cases/start-parsing.use-case';
-import { PgParserTaskRepository } from './infrastructure/persistence/pg-parser-task.repository';
-import { StorageModule } from './infrastructure/storage';
-import { HealthController } from './health/health.controller';
-import { StorageSmokeController } from './test/storage-smoke.controller';
-import { PARSER_TASK_REPOSITORY_PORT, START_PARSING_PORT } from './parser.constants';
+import { LoggingModule } from '@email-platform/foundation';
+import { ParserConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
+import { HttpClientsModule } from './infrastructure/outbound/http-clients';
+import { AppStorageModule } from './infrastructure/outbound/storage';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(ParserEnvSchema),
-    PersistenceModule.forRootAsync(),
-    StorageModule,
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    ParserConfigModule,
+    HealthModule,
     LoggingModule.forGrpcAsync('parser'),
+    GrpcClientsModule,
+    HttpClientsModule,
+    AppStorageModule,
+    // GrpcModule owns inbound port → service bindings + use-cases + outbound
+    // AppPersistenceModule (Plan 10 Option A — cohesion with D-02).
+    GrpcModule,
   ],
-  controllers: [ParserGrpcServer, HealthController, StorageSmokeController],
-  providers: [
-    { provide: PARSER_TASK_REPOSITORY_PORT, useClass: PgParserTaskRepository },
-    { provide: START_PARSING_PORT, useClass: StartParsingUseCase },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class ParserModule implements OnModuleDestroy {
   private readonly logger = new Logger(ParserModule.name);

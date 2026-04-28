@@ -31,6 +31,7 @@
     "dotenv-cli": "^11.0.0",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-check-file": "^2.8.0",
     "eslint-plugin-prettier": "^5.0.0",
     "husky": "^9.1.7",
     "prettier": "^3.0.0",

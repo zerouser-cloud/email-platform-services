@@ -1,0 +1,15 @@
+import { Module } from '@nestjs/common';
+import { CloudFnClientModule } from './cloud-functions';
+
+/**
+ * HttpClientsModule (Phase 999.11.2 D-06) — app-level composer for outbound
+ * HTTP vendor clients. First HTTP composer in the codebase (single-sub today:
+ * cloud-functions); the composer layer stays per D-06 verbatim so future
+ * vendors are added by editing this imports/exports array without
+ * restructuring the composition root.
+ */
+@Module({
+  imports: [CloudFnClientModule.forRoot()],
+  exports: [CloudFnClientModule],
+})
+export class HttpClientsModule {}

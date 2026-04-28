@@ -5,6 +5,12 @@ description: Replace if/else chains and switch/case with dispatch patterns. Trig
 
 # Branching Patterns — No if/else Chains, No switch/case
 
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for replacing imperative branching with declarative dispatch. It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
 Replace imperative branching with declarative dispatch. Choose the **simplest pattern that fits**.
 
 ## Rule

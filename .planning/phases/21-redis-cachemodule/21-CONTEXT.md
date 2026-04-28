@@ -16,6 +16,7 @@ CacheModule in foundation with DI-injected Redis client, health monitoring, per-
 ### Redis Usage Scope
 - **D-01:** Redis только для кэша в текущем milestone. Get/set/del + TTL — весь API
 - **D-02:** Сессии, rate-limiting, pub/sub — не в scope. Если появится конкретный use case (например token revocation), добавим отдельную абстракцию (не расширяем CachePort)
+> **AMENDED 2026-04-27 (Phase 999.12 D-16):** Rate-limiting partially unlocked for the *gateway only* via `@nest-lab/throttler-storage-redis`. The throttler library owns its own `ThrottlerStorage` interface — this is NOT an extension of `CachePort` (E-05 invariant preserved). Sessions, token revocation, and pub/sub remain deferred per the original D-02.
 - **D-03:** Legacy проект подтверждает: Redis используется только для task tracking (set/get/del с TTL). Auth на JWT stateless, refresh tokens в БД
 
 ### Redis API Scope

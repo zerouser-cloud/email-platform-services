@@ -5,6 +5,12 @@ description: Enforce 12-Factor App principles in code. Triggers on environment c
 
 # 12-Factor App — Code-Level Rules
 
+## Principles, Not Inventory
+
+This skill describes **timeless principles** for building environment-agnostic, config-driven services (12-factor). It does **not** describe the current state of the codebase. Do **not** add inventory to this file: specific file paths beyond stable workspace roots (`apps/`, `packages/`), port numbers, production class or function names, enumerated counts of files / services / overrides / lines. For current-state lookups, link to a tracked configuration file by **role** (e.g., "the project ESLint config"), link to the enclosing **directory** (not a file), or provide a `grep` command the reader runs on demand.
+
+Author-facing rule: if you feel the urge to write a specific file path, a real class name, or a count, stop and apply the **rename test** — would this sentence still be true if that file / class / number were renamed or changed tomorrow? If no, rewrite the sentence until it is.
+
 Enforce environment-agnostic, stateless, config-driven services. The app never knows where it runs.
 
 ## Rule: No Environment Branching
@@ -55,7 +61,7 @@ const port = config.get('HTTP_PORT');       // validated by Zod schema
 const mongoUrl = config.get('MONGO_URL');   // fails fast if missing
 ```
 
-**Already in place:** `@email-platform/config` with Zod validation does this correctly. Ensure no code bypasses it with direct `process.env` reads.
+**How it looks in practice:** a single project-wide config module performs Zod validation at boot and exposes validated, typed values via DI. No code path reads `process.env` directly outside that module. To see the current entry point, open `packages/config/` — the `@email-platform/config` package is the role-by-name entry (rename would be a top-level workspace move per D-8).
 
 ## Factor IV — Backing Services as Attached Resources
 
@@ -112,7 +118,7 @@ process.on('SIGTERM', async () => {
 });
 ```
 
-**Already in place:** Phase 7 implemented graceful shutdown. Ensure new services follow the same pattern.
+**How it looks in practice:** every long-running process installs a SIGTERM handler that stops accepting new work, drains in-flight work, releases connections to backing services, and exits with code `0`. New services follow the same shape — no bespoke shutdown path per service.
 
 ## Factor X — Dev/Prod Parity
 

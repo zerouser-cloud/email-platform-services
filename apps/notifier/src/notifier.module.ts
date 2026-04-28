@@ -1,30 +1,26 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { TerminusModule } from '@nestjs/terminus';
-import { AppConfigModule } from '@email-platform/config';
-import { NotifierEnvSchema } from './infrastructure/config';
-import { LoggingModule, RabbitMqHealthIndicator } from '@email-platform/foundation';
-import { HandleEventUseCase } from './application/use-cases/handle-event.use-case';
-import { TelegramNotificationSender } from './infrastructure/external/telegram-notification.sender';
-import { RabbitMQEventSubscriber } from './infrastructure/messaging/rabbitmq-event.subscriber';
-import { StorageModule } from './infrastructure/storage';
-import { HealthController } from './health/health.controller';
-import { StorageSmokeController } from './test/storage-smoke.controller';
-import { HANDLE_EVENT_PORT, NOTIFICATION_SENDER_PORT } from './notifier.constants';
+import { LoggingModule } from '@email-platform/foundation';
+import { NotifierConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { RmqModule } from './infrastructure/inbound/rmq';
+import { HttpClientsModule } from './infrastructure/outbound/http-clients';
+import { AppStorageModule } from './infrastructure/outbound/storage';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(NotifierEnvSchema),
-    TerminusModule,
-    StorageModule,
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    NotifierConfigModule,
+    HealthModule,
     LoggingModule.forHttpAsync('notifier'),
+    HttpClientsModule,
+    AppStorageModule,
+    // RmqModule owns HANDLE_EVENT_PORT + NOTIFICATION_SENDER_PORT bindings
+    // (Plan 10 Option A — consumer-cohesive with the RMQ inbound boundary).
+    RmqModule,
   ],
-  controllers: [HealthController, StorageSmokeController],
-  providers: [
-    { provide: NOTIFICATION_SENDER_PORT, useClass: TelegramNotificationSender },
-    { provide: HANDLE_EVENT_PORT, useClass: HandleEventUseCase },
-    RabbitMQEventSubscriber,
-    RabbitMqHealthIndicator,
-  ],
+  controllers: [],
+  providers: [],
 })
 export class NotifierModule implements OnModuleDestroy {
   private readonly logger = new Logger(NotifierModule.name);

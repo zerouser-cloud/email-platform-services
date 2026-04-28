@@ -1,30 +1,27 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
-import { AuthEnvSchema } from './infrastructure/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AuthGrpcServer } from './infrastructure/grpc/auth.grpc-server';
-import { LoginUseCase } from './application/use-cases/login.use-case';
-import { PgUserRepository } from './infrastructure/persistence/pg-user.repository';
-import { HealthController } from './health/health.controller';
-import { USER_REPOSITORY_PORT, LOGIN_PORT } from './auth.constants';
+import { LoggingModule } from '@email-platform/foundation';
+import { AuthConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(AuthEnvSchema),
-    PersistenceModule.forRootAsync(),
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    AuthConfigModule,
+    HealthModule,
     LoggingModule.forGrpcAsync('auth'),
+    // GrpcModule owns inbound port → service bindings + use-cases + outbound
+    // AppPersistenceModule (Plan 10 Option A — cohesion with D-02).
+    GrpcModule,
   ],
-  controllers: [AuthGrpcServer, HealthController],
-  providers: [
-    { provide: USER_REPOSITORY_PORT, useClass: PgUserRepository },
-    { provide: LOGIN_PORT, useClass: LoginUseCase },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AuthModule implements OnModuleDestroy {
   private readonly logger = new Logger(AuthModule.name);
 
   async onModuleDestroy(): Promise<void> {
     this.logger.log('Shutting down auth service...');
-    // TODO: drain gRPC server connections
   }
 }

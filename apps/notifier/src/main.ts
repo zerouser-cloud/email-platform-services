@@ -1,19 +1,21 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
-import { SERVICE, loadConfig } from '@email-platform/config';
-import { NotifierEnvSchema, type NotifierEnv } from './infrastructure/config';
+import { SERVICE, type NotifierEnv } from '@email-platform/config';
 import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { NOTIFIER_CONFIG } from './infrastructure/bootstrap/config/notifier-config.constants';
 import { NotifierModule } from './notifier.module';
 
 async function bootstrap() {
-  const config = loadConfig(NotifierEnvSchema) as NotifierEnv;
   const app = await NestFactory.create(NotifierModule, { bufferLogs: true });
+  const config = app.get<NotifierEnv>(NOTIFIER_CONFIG);
 
-  app.useLogger(app.get(Logger));
+  app.useLogger(await app.resolve(Logger));
   app.enableShutdownHooks();
 
-  app.connectMicroservice(createGrpcServerOptions(SERVICE.notifier, config.PROTO_DIR));
+  app.connectMicroservice(
+    createGrpcServerOptions(SERVICE.notifier, config.NOTIFIER_GRPC_PORT, config.PROTO_DIR),
+  );
 
   await app.startAllMicroservices();
   await app.listen(config.NOTIFIER_PORT, SERVER.DEFAULT_HOST);

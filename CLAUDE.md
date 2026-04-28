@@ -134,6 +134,8 @@
 - **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.agents/skills/twelve-factor/SKILL.md` for 12-Factor rules.
 - **No infrastructure changes without user approval.** Never change ports, docker-compose, .env files, credentials, or connection strings without explicit confirmation. Standard ports must be preserved (5432, 6379, 5672, 9000). See `.agents/skills/infrastructure-guard/SKILL.md` for pre-change checklist.
 - **No defaults or optionals in env schemas.** Zod env schemas must not use `.default()` or `.optional()`. No `z.coerce.boolean()` (use `z.string().transform(v => v === 'true')`). No fallbacks in consumer code (`?? value`, `|| value`). Every env var required, every value from `.env` files. See `.agents/skills/env-schema/SKILL.md` for rules.
+- **Infrastructure-client layering.** Identity → catalog (`packages/config`). Mechanisms → foundation (`packages/foundation`). Assembly + naming → apps. Catalog stays transport-agnostic (no `*Token` for grpc/http/rmq). Foundation stays service-agnostic (no `auth`/`sender` references). Single-instance infra (DB/Redis/S3) → token in foundation. Multi-instance with catalog identity (gRPC) → derive token in foundation, name in apps. Multi-instance without catalog (HTTP) → per-app constants. Reference: Phase 999.7.x (gRPC). See `.agents/skills/infrastructure-client-layering/SKILL.md` for decision tree. Tier 1/2/3 framework + layer-name axis convention defined in same skill (Tier 1 = layer-name abstractions, Tier 2 = raw lib instances, Tier 3 = library defaults; see skill for decision tree and rename-test).
+- **Runtime smoke verification.** After completing a GSD phase or non-trivial code edits, verify the project starts via `package.json` scripts ONLY — never invent commands like `start:infra:native`. If a needed verification step has no script, ASK the user to add one or grant one-time permission for a concrete command. Test ALL local startup flows the project supports (this project: `pnpm start:native` and `pnpm start:isolated`, with `stop:*`/`reset:*` counterparts). Per flow: stop → build → lint → start → wait for boot → curl `/health/ready` → stop. See `.agents/skills/runtime-smoke-verification/SKILL.md` for the full recipe.
 - Prettier configured with:
 - Format and check: `pnpm lint:fix` for workspace
 - Individual app linting: `eslint src/ --ext .ts`
@@ -325,15 +327,146 @@
 - **Parser/Notifier → MinIO/S3:** S3-compatible API for file storage
 <!-- GSD:architecture-end -->
 
+## NestJS↔Hexagonal Layer Mapping (gRPC microservices — auth, sender, parser, audience)
+
+**Canonical 3-layer server-side stack per Phase 999.10, refined per Phase 999.11.2 into inbound/outbound/bootstrap sub-partitioning. See `.agents/skills/nestjs-hexagonal-mapping/` for the full pattern, anti-patterns, and worked examples. This section is the surface reference; the skill is the source of truth.**
+
+### Direction split inside `infrastructure/` (Phase 999.11.2)
+
+`infrastructure/` partitions into three sub-bins, each reflecting a distinct semantic role:
+
+- **`infrastructure/inbound/`** — primary / driving adapters (Cockburn). Translate external input into application ports. Grouped by transport: `inbound/grpc/{svc}.controller.ts` (one file per proto service per NestJS idiom — `@GrpcMethod` binds a single class to a proto service), `inbound/rest/{feature}/` (gateway feature endpoints), `inbound/rmq/{event}.consumer.ts` (notifier event consumers).
+- **`infrastructure/outbound/`** — secondary / driven adapters (Cockburn). Implement outbound ports; translate domain → external. Feature-sliced per integration: `outbound/persistence/{aggregate}/`, `outbound/grpc-clients/{upstream}/`, `outbound/http-clients/{vendor}/`, `outbound/storage/{bucket-or-namespace}/`, `outbound/publishers/{event-type}/`.
+- **`infrastructure/bootstrap/`** — Uncle Bob Ring 4 framework glue + Seemann composition-root artifacts. NOT an adapter. Houses: `bootstrap/config/` (Zod env schema + config provider + `{SVC}_CONFIG` Symbol + `@Global() {Svc}ConfigModule`), `bootstrap/health/` (HealthModule wrapping TerminusModule + HealthController), `bootstrap/throttle/` (gateway only — rate-limit module registering APP_GUARD), `bootstrap/logging/` (optional — service-specific logging interceptors).
+
+### File-path reference table
+
+| NestJS Primitive | Hexagonal Layer | Location | Concrete File Example |
+|------------------|-----------------|----------|-----------------------|
+| `@Controller()` gRPC | Infrastructure (inbound) | `apps/{svc}/src/infrastructure/inbound/grpc/` | `auth.controller.ts` |
+| `@Controller()` REST resource | Infrastructure (inbound) | `apps/{svc}/src/infrastructure/inbound/rest/{feature}/` | `gateway/.../auth/auth.controller.ts` (future) |
+| `@Controller('health')` REST probe | Infrastructure (bootstrap) | `apps/{svc}/src/infrastructure/bootstrap/health/` | `health.controller.ts` |
+| RMQ `@EventPattern()` consumer | Infrastructure (inbound) | `apps/{svc}/src/infrastructure/inbound/rmq/` | `event.consumer.ts` |
+| `@Injectable()` Service (inbound port impl) | Application | `apps/{svc}/src/application/services/` | `login.service.ts` |
+| `@Injectable()` UseCase (atomic operation) | Application | `apps/{svc}/src/application/use-cases/` | `verify-credentials.use-case.ts` |
+| Port interface (inbound) | Application | `apps/{svc}/src/application/ports/inbound/` | `login.port.ts` |
+| Port interface (outbound) | Application | `apps/{svc}/src/application/ports/outbound/` | `user-repository.port.ts` |
+| Command DTO | Application | `apps/{svc}/src/application/commands/` | `login.command.ts` |
+| Entity (POJO) | Domain | `apps/{svc}/src/domain/entities/` | `user.entity.ts` |
+| Repository adapter | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/persistence/{aggregate}/` | `pg-user.repository.ts` |
+| Mapper | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/persistence/{aggregate}/mappers/` | `user.mapper.ts` |
+| Upstream gRPC client | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/grpc-clients/{upstream}/` | `auth-client.module.ts` |
+| External HTTP client | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/http-clients/{vendor}/` | `telegram.client.ts` |
+| Storage adapter | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/storage/{bucket-or-namespace}/` | `bucket.module.ts`, `reports.module.ts` |
+| Cache adapter (Redis) | Infrastructure (outbound) | `apps/{svc}/src/infrastructure/outbound/cache/` | `cache.module.ts` (re-exports foundation `CacheModule` — `CACHE_SERVICE` + `CACHE_HEALTH`) |
+| Config module + provider + `{SVC}_CONFIG` | Infrastructure (bootstrap) | `apps/{svc}/src/infrastructure/bootstrap/config/` | `auth-config.module.ts`, `auth-config.provider.ts`, `auth-config.constants.ts` |
+| HealthModule + HealthController | Infrastructure (bootstrap) | `apps/{svc}/src/infrastructure/bootstrap/health/` | `health.module.ts`, `health.controller.ts` |
+| ThrottleModule (gateway) | Infrastructure (bootstrap) | `apps/gateway/src/infrastructure/bootstrap/throttle/` | `throttle.module.ts` |
+| Composition root `@Module({})` | Root | `apps/{svc}/src/` | `auth.module.ts` |
+| Cross-folder DI tokens (domain ports) | Root | `apps/{svc}/src/` | `auth.constants.ts` (USER_REPOSITORY_PORT, LOGIN_PORT, ...) |
+
+### Field Naming Rules (from Phase 999.10.1 — unchanged)
+
+Dependency-injected field names reflect **runtime identity** — what DI actually binds. Field types retain the `Port` suffix as the architectural contract. DI tokens retain the `_PORT` suffix as architectural artifacts. Grep `_PORT` → full list of ports in a service.
+
+| Layer | Field name | Type | DI token | Runtime class |
+|-------|-----------|------|----------|---------------|
+| Controller → inbound port | `listGroupsService` | `ListGroupsPort` | `LIST_GROUPS_PORT` | `ListGroupsService` |
+| Service → use case | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class ref) | `VerifyCredentialsUseCase` |
+| UseCase → outbound port | `userRepository` | `UserRepositoryPort` | `USER_REPOSITORY_PORT` | `PgUserRepository` |
+
+**Domain-role suffixes** (`Repository`, `Factory`, `Policy`, `Sender` — ubiquitous language) ARE mirrored on the field. **Architectural-role suffixes** (`Port`, `Adapter`, `UseCase`, `Boundary` — hexagonal jargon) are NOT. Full treatment: `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules".
+
+### Proto visibility rules (refined paths)
+
+- `@email-platform/contracts` (generated proto types) is imported ONLY in `infrastructure/inbound/grpc/*.controller.ts` (server-side inbound adapter) AND in `infrastructure/outbound/grpc-clients/{upstream}/{upstream}-client.module.ts` + `*-notification.adapter.ts` (client-side outbound adapter). Enforced by ESLint Override 9 in `.eslintrc.js`.
+- `@nestjs/microservices` (`GrpcMethod` / `MessagePattern` decorators, `RpcException`) is a transport concern — infrastructure only. Enforced by Override 9.
+- `domain/` is pure TypeScript — no `@nestjs/*`, no `@grpc/*`, no proto, no `drizzle-orm`, no `pg`. Enforced by ESLint Override 8.
+- Full visibility matrix: `.agents/skills/nestjs-hexagonal-mapping/references/PROTO-VISIBILITY.md`.
+
+### Call flow (canonical)
+
+```
+gRPC request → {Service}Controller.method(req)   [infrastructure/inbound/grpc — implements XxxServiceController]
+                │ proto → Command DTO (domain types)
+                ▼
+             → {Feature}Port.execute(cmd)         [application/ports/inbound — our interface]
+                ▼
+             → {Feature}Service.execute(cmd)      [application/services — implements {Feature}Port]
+                │ composition of use cases (seam for logging / transactions / events)
+                ▼
+             → {Operation}UseCase.execute(...)    [application/use-cases — atomic step]
+                │ may call outbound ports
+                ▼
+             → Pg{Entity}Repository              [infrastructure/outbound/persistence/{aggregate}/]
+                ▼
+             → Domain Entity (POJO)
+```
+
+### Key rules (unchanged)
+
+- **Controller** implements the proto-generated interface. Never implements OUR port.
+- **Service** implements OUR inbound port. Never implements the proto interface.
+- **UseCase** is `@Injectable()` plain class. NEVER implements any inbound port.
+- **Command DTO** is a class (not interface) with `public readonly` constructor params.
+- **One flat `@Module({})` per bounded context at root — composes feature modules from all three sub-bins via `imports:`** (refined 999.11.2). No feature submodules above the category level. Shared infrastructure only from foundation (`PersistenceModule` in foundation exposes DRIZZLE; apps build their own category composers).
+- **No magic strings for DI tokens** — `Symbol()` in `{svc}.constants.ts` for cross-folder domain-port tokens; per-feature tokens co-located with their feature folder.
+- **Field names reflect runtime identity** — `Port` suffix appears on types and DI tokens, never on field names.
+
+### Composition root shape after 999.11.2
+
+Every `{svc}.module.ts` root imports feature modules only (never individual controllers/providers):
+
+```typescript
+@Module({
+  imports: [
+    {Svc}ConfigModule.forRoot(),                     // FIRST — @Global(), bootstrap/config/
+    HealthModule,                                     // bootstrap/health/ (D-08 applied in 999.11.2)
+    ThrottleModule,                                   // bootstrap/throttle/ — gateway only
+    LoggingModule.forGrpcAsync('{svc}'),              // foundation
+    PersistenceModule,                                // outbound/persistence/ composer — gRPC services only
+    GrpcClientsModule,                                // outbound/grpc-clients/ composer — where applicable
+    HttpClientsModule,                                // outbound/http-clients/ composer — where applicable
+    StorageModule,                                    // outbound/storage/ composer — parser, notifier
+    GrpcModule,                                       // inbound/grpc/ — gRPC services (declares controllers)
+    RmqModule,                                        // inbound/rmq/ — notifier only
+  ],
+  // controllers: [] — empty or near-empty after 999.11.2 (controllers live inside inbound/ composer modules)
+  providers: [
+    // Domain-port bindings (Zone 1: outbound port → adapter, Zone 2: inbound port → service)
+    // MAY also live in the respective feature composers; root keeps them only when necessary for cross-cutting.
+    // Zone 3 use-cases stay root-level until a feature-module opts to own them.
+  ],
+})
+```
+
+**Scope:** this mapping covers the four gRPC microservices (auth, sender, parser, audience) + gateway (REST facade with outbound grpc-clients + bootstrap/throttle) + notifier (RMQ consumer with outbound http-clients + storage). Gateway and notifier now share the same infrastructure-tree shape as the gRPC services; the distinction is which inbound adapter (grpc vs rest vs rmq) they host.
+
+**Skill reference:** `.agents/skills/nestjs-hexagonal-mapping/SKILL.md` — full pattern with the decision tree for adding a new RPC method, anti-patterns, and worked examples.
+
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+**CRITICAL: Before EVERY file-changing action (Edit, Write, Bash with side-effects), run the gsd-flow-guard checkpoint.** See `.agents/skills/gsd-flow-guard/SKILL.md` for the full decision tree.
 
-Use these entry points:
-- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd:debug` for investigation and bug fixing
-- `/gsd:execute-phase` for planned phase work
+**Self-check before any edit:**
+1. Am I inside a GSD workflow right now? → YES: continue. NO: go to 2.
+2. Which `/gsd:*` command handles this? → Route to it. None fits: go to 3.
+3. Did the user explicitly authorize a direct edit? → YES: proceed. NO: STOP and ask.
+
+**Routing table:**
+- `/gsd:fast` — trivial fixes, status updates, doc tweaks, ROADMAP checkbox flips (< 3 files, no planning needed)
+- `/gsd:quick` — medium tasks with GSD guarantees (atomic commits, state tracking)
+- `/gsd:debug` — investigation and bug fixing
+- `/gsd:execute-phase` — planned phase work
+- `/gsd:plan-phase` / `/gsd:insert-phase` — new feature or refactor requiring planning
+- `/gsd:docs-update` — project documentation generation
+
+**Common traps (historically violated):**
+- "Just update ROADMAP.md" → `/gsd:fast`, not direct Edit
+- "Small 2-file refactor" → `/gsd:fast` with atomic commit
+- "Found a bug while investigating" → report finding, route to `/gsd:debug` or `/gsd:fast`
+- "Phase done, flip the checkbox" → part of phase completion flow
 
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->

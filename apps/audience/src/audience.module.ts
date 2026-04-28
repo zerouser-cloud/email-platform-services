@@ -1,30 +1,29 @@
 import { Logger, Module, OnModuleDestroy } from '@nestjs/common';
-import { AppConfigModule } from '@email-platform/config';
-import { AudienceEnvSchema } from './infrastructure/config';
-import { LoggingModule, PersistenceModule } from '@email-platform/foundation';
-import { AudienceGrpcServer } from './infrastructure/grpc/audience.grpc-server';
-import { ImportRecipientsUseCase } from './application/use-cases/import-recipients.use-case';
-import { PgRecipientRepository } from './infrastructure/persistence/pg-recipient.repository';
-import { HealthController } from './health/health.controller';
-import { RECIPIENT_REPOSITORY_PORT, IMPORT_RECIPIENTS_PORT } from './audience.constants';
+import { LoggingModule } from '@email-platform/foundation';
+import { AudienceConfigModule } from './infrastructure/bootstrap/config';
+import { HealthModule } from './infrastructure/bootstrap/health';
+import { GrpcModule } from './infrastructure/inbound/grpc';
+import { GrpcClientsModule } from './infrastructure/outbound/grpc-clients';
 
 @Module({
   imports: [
-    AppConfigModule.forRoot(AudienceEnvSchema),
-    PersistenceModule.forRootAsync(),
+    // @Global() config module — MUST precede any foundation module that uses
+    // nested `SomeExternalModule.forRootAsync({inject: [CONFIG_PORT]})` (Plan 10 Rule 3 fix).
+    AudienceConfigModule,
+    HealthModule,
     LoggingModule.forGrpcAsync('audience'),
+    GrpcClientsModule,
+    // GrpcModule owns inbound port → service bindings + use-cases + outbound
+    // AppPersistenceModule (Plan 10 Option A — cohesion with D-02).
+    GrpcModule,
   ],
-  controllers: [AudienceGrpcServer, HealthController],
-  providers: [
-    { provide: RECIPIENT_REPOSITORY_PORT, useClass: PgRecipientRepository },
-    { provide: IMPORT_RECIPIENTS_PORT, useClass: ImportRecipientsUseCase },
-  ],
+  controllers: [],
+  providers: [],
 })
 export class AudienceModule implements OnModuleDestroy {
   private readonly logger = new Logger(AudienceModule.name);
 
   async onModuleDestroy(): Promise<void> {
     this.logger.log('Shutting down audience service...');
-    // TODO: drain gRPC server connections
   }
 }

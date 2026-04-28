@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { type HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus';
 import { Pool } from 'pg';
 import { PG_POOL, PG_HEALTH } from './persistence.constants';
-import type { DatabaseHealthIndicator } from './persistence.interfaces';
+import type { PersistenceHealthIndicator } from './persistence.interfaces';
 
 @Injectable()
-export class PostgresHealthIndicator implements DatabaseHealthIndicator {
+export class PostgresHealthIndicator implements PersistenceHealthIndicator {
   constructor(
     private readonly healthIndicatorService: HealthIndicatorService,
     @Inject(PG_POOL) private readonly pool: Pool,
