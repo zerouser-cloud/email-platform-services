@@ -4,8 +4,8 @@ export {
   PG_POOL,
   PERSISTENCE_HEALTH,
   PG_POOL_DEFAULTS,
-  COLUMN_LENGTH,
   PG_HEALTH,
   PERSISTENCE_CONFIG_PORT,
 } from './persistence.constants';
+export { COLUMN_LENGTH } from './column-length.constants';
 export type { PersistenceHealthIndicator, PersistenceConfig } from './persistence.interfaces';
