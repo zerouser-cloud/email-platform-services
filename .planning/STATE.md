@@ -4,13 +4,13 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.12.1 context gathered
-last_updated: "2026-04-28T09:29:38.615Z"
+last_updated: "2026-04-28T09:37:41.041Z"
 last_activity: 2026-04-28
 progress:
   total_phases: 41
   completed_phases: 27
   total_plans: 146
-  completed_plans: 141
+  completed_plans: 142
   percent: 97
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.12.1 (infra-naming-convention-audit) — EXECUTING
-Plan: 2 of 8
+Plan: 3 of 8
 Status: Ready to execute
 Last activity: 2026-04-28
 
@@ -152,6 +152,7 @@ Progress: [██████████] 97%
 | Phase 999.11.4.1 P05 | 284s | 2 tasks tasks | 2 files (+1 SUMMARY) files |
 | Phase 999.11.4.1 P06 | ~15min | 5 tasks | 4 + 1 SUMMARY files |
 | Phase 999.12.1 P01 | 3min | 3 tasks | 22 files |
+| Phase 999.12.1 P02 | 4min | 3 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -302,6 +303,7 @@ Progress: [██████████] 97%
 - Plan 06 rename-test outcomes: twelve-factor surfaced 2 latent-inventory 'Already in place' claims (§Factor III + §Factor IX) — rewritten to role-based shape descriptions per D-7 + D-2; env-schema / gsd-flow-guard / branching-patterns had zero latent inventory (D-12 closing clause — commits contained only the header-block addition)
 - Phase 999.11.4.1 phase-level invariant verified: D-4 header block present in all 9 refactored SKILL.md files (5 primary + 4 aligned); SOLUTIONS.md approved-count stable at 11 (no flips for aligned skills — they had no findings); zero changes in apps/, packages/, infra/ across the full phase
 - [Phase 999.12.1]: REDIS_HEALTH → CACHE_HEALTH (D-04 layer-name axis); field redis → cache in 6 health.controllers; Tier-2 REDIS_CLIENT and Tier-3 REDIS_DEFAULTS/REDIS_HEALTH_CHECK preserved per D-11/D-12 sealed — Cache layer Tier-1 surface aligned with hexagonal layer-name axis (matches storage canonical post-22.x); 22 files, atomic commit 15888bd; pnpm lint && build green per D-19 quick gate
+- [Phase ?]: [Phase 999.12.1-02]: Persistence Tier-1 token+type rename — DATABASE_HEALTH→PERSISTENCE_HEALTH + DatabaseHealthIndicator→PersistenceHealthIndicator atomic single-commit f510f28 (19 files; 18 plan + 1 storage barrel comparative comment per Rule 1). 4 health.controllers (auth/sender/parser/audience) field db→persistence. Repository field db: NodePgDatabase UNCHANGED in 4 pg-*.repository.ts (Tier-2 Drizzle vocab preserved per D-05). PostgresHealthIndicator class name preserved (only implements clause renamed). Tier-2 (DRIZZLE/PG_POOL) + Tier-3 (PG_POOL_DEFAULTS/PG_HEALTH) sealed invariants honored. HEALTH.INDICATOR.POSTGRESQL string key preserved (Plan 05 owns D-07). pnpm lint+build exit 0 before commit.
 
 ### Pending Todos
 
@@ -334,7 +336,7 @@ Progress: [██████████] 97%
 
 ## Session Continuity
 
-Last session: 2026-04-28T09:28:35.373Z
+Last session: 2026-04-28T09:37:36.057Z
 Stopped at: Phase 999.12.1 context gathered
 Resume file: None
 
