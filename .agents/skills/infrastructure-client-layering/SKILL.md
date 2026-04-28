@@ -57,6 +57,46 @@ Every infra-client deals with tokens of distinct natures. Place each one accordi
 
 **Rule:** transport tokens are NEVER added to catalog. The catalog stays identity-only. If you find yourself writing `SERVICE.{svc}.grpcToken` or `SERVICE.{svc}.httpToken` — stop, that's a layer violation.
 
+## Tier 1/2/3 Token Framework + Layer-Name Axis
+
+Every infra-client surface declares tokens of three distinct natures. Place each
+according to its nature, not by reflex copy-paste. The framework refines §"Token
+Classification" above by sorting tokens along an orthogonal axis: **what the token
+binds** (abstract surface vs raw library object vs library-specific defaults) and,
+in turn, **which name-axis the token MUST follow** (layer-name vs tech-name).
+
+| Tier | What it binds | Naming axis | Example (fictional) |
+|------|---------------|-------------|---------------------|
+| **Tier 1** | An abstract domain-role surface — DI tokens binding `*HealthIndicator` types, service tokens binding port interfaces, config-port tokens, abstract type names | **Layer-name** (the hexagonal layer, e.g., `foo` / `bar`) | `FOO_HEALTH` (token), `FOO_SERVICE` (token), `FOO_CONFIG_PORT` (token), `FooHealthIndicator` (type), `FooPort` (type) — where `Foo` is the layer |
+| **Tier 2** | A raw library instance — DI binds the literal library object (a real client / handle / connection) | **Tech-name** (legitimately tech-specific — DI injects a concrete library object, the name should honest-reflect that identity) | `LIB_CLIENT` (raw library handle for `LibName`) |
+| **Tier 3** | Library-specific defaults / commands — `as const` objects holding library options, health-check command literals, knobs honoured by one specific library | **Tech-name** (tech identifier honest — these are concrete library knobs, renaming them to abstract loses readability) | `LIB_DEFAULTS = { KEEPALIVE_MS: ... } as const`, `LIB_HEALTH_CHECK = { COMMAND: 'PING' } as const` |
+
+### The Layer-Name Axis Rule (Tier 1 only)
+
+The prefix of any Tier-1 artefact MUST equal its **hexagonal-layer name** (the
+architectural layer in the Cockburn / Evans / Uncle Bob sense — the folder name
+under `packages/foundation/src/external/`), NOT the **backing-service domain**
+(database / queue / object-store / key-value-store), NOT the **specific tech**
+(any concrete library or vendor identifier). The rule survives any change of
+underlying tech: swap one library for another within the same layer and the
+Tier-1 surface name `FOO_HEALTH` (where `Foo` is the layer) stays correct;
+`FOO_LIBNAME_HEALTH` would orphan immediately.
+
+**Rename test:** if the Tier-1 token contains the name of the backing library
+(or its synonym in domain language — e.g., the database product name standing
+in for the persistence layer), it fails the rule. Fix by replacing the library
+identifier with the hexagonal-layer name. The Tier-2 and Tier-3 names in the
+same module remain tech-named — only Tier 1 is bound to the layer-name axis.
+
+### Worked Example
+
+A canonical implementation lives at the directory
+`packages/foundation/src/external/storage/` — open the directory to see the
+applied pattern: Tier-1 tokens prefixed with the layer name (layer-name axis),
+Tier-2 raw client tokens prefixed with the library name (tech-name honest),
+Tier-3 library options as `*_DEFAULTS` (tech-name honest). The directory is
+the entry point; specific filenames intentionally omitted per the rename test.
+
 ## Decision Tree -- Adding a New Infra-Client
 
 ```
@@ -267,6 +307,16 @@ import { STORAGE_CORE_TOKEN } from '@email-platform/foundation';   // ← NO: co
 @Inject(STORAGE_CORE_TOKEN) private readonly raw: unknown;         // ← NO: typed port is the contract
 // Instead: call the foundation per-namespace factory and receive a typed namespace port
 // bound to a per-namespace DI token declared in this app's constants.
+
+// ANTI-PATTERN 10 — Tier-1 token bound to an abstract type but tech-named (axis mismatch)
+@Inject(LIBNAME_HEALTH) private readonly layer: LayerHealthIndicator;
+//      ^^^^^^^^^^^^^^^                       ^^^^^^^^^^^^^^^^^^^^^^^
+//      Tier-1 token: tech-name prefix        Tier-1 type: layer-name prefix
+//      ← Mismatch: token reads as Tier 2 (raw lib) but binds Tier 1 (abstract surface).
+// Symptom: code-review confusion ("is this the abstract surface or the raw client?"),
+// orphaned token name on next library swap. Fix by renaming the token prefix to the
+// layer name (LAYER_HEALTH); the type stays unchanged. Tier-2 raw-library tokens in
+// the same module legitimately keep tech-names — the rule applies to Tier 1 only.
 ```
 
 ## When to Apply This Skill
