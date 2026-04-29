@@ -3,5 +3,6 @@ packages:
   - 'packages/*'
 allowBuilds:
   '@nestjs/core': true
+  esbuild: false
   grpc-tools: true
   protobufjs: true
