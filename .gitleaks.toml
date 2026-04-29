@@ -1,0 +1,27 @@
+# Phase 999.17 — gitleaks config (extends default rules + project allowlist).
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+#
+# This file extends gitleaks' default rules. Project-specific rules
+# go below. The default config is comprehensive — only add rules that
+# are unique to this codebase.
+title = "Email Platform — gitleaks config"
+
+[extend]
+# Use the embedded default config + add the rules below.
+useDefault = true
+
+# Project-specific allowlists (if any false-positives surface):
+[allowlist]
+description = "Allowlist for known-safe paths and patterns"
+paths = [
+  '''(.*?)(jpg|gif|doc|pdf|bin|svg|socket)''',
+]
+# Add more entries only with a comment explaining WHY this is safe.
+
+# Project-specific rules (none initially — add only if you discover
+# a credential format unique to this codebase that the default misses).
+# [[rules]]
+# id = "project-internal-token"
+# description = "Internal service token format"
+# regex = '''project_[a-z0-9]{32}'''
+# tags = ["internal-token"]
