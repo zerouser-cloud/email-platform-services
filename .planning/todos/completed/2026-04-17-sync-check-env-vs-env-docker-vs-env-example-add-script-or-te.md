@@ -13,6 +13,7 @@ files:
 Env files могут рассинхронизироваться незаметно. В Phase 24.1 env hygiene добавили 6 HTTP env vars в `.env.docker` и `.env.example`, но не обновили `.env` (который используется для native mode).
 
 Обнаружено в UAT Phase 999.7 (2026-04-17): sender, parser, notifier падают при старте native mode с ZodError — missing env vars:
+
 - `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BASE_URL` (notifier)
 - `CLOUDFN_API_KEY`, `CLOUDFN_BASE_URL` (sender)
 - `APPSTORESPY_API_KEY`, `APPSTORESPY_BASE_URL` (parser)
