@@ -1,5 +1,12 @@
-# Phase 999.17 — gitleaks config (extends default rules + project allowlist).
+# Phase 999.17 — gitleaks config (extends default rules; no project-specific allowlist).
 # See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+#
+# Phase 999.17-12 (2026-04-29 amendment): the original [allowlist].paths regex
+# `(.*?)(jpg|gif|doc|pdf|bin|svg|socket)` was unanchored and matched real source
+# files (apps/auth/src/documentation.ts, apps/sender/src/binary-helper.ts, etc.)
+# as substrings, silently skipping them from secret scanning (CR-02).
+# Removed entirely; gitleaks default config (`useDefault = true` below) already
+# covers binary file types per gitleaks docs.
 #
 # This file extends gitleaks' default rules. Project-specific rules
 # go below. The default config is comprehensive — only add rules that
@@ -9,14 +16,6 @@ title = "Email Platform — gitleaks config"
 [extend]
 # Use the embedded default config + add the rules below.
 useDefault = true
-
-# Project-specific allowlists (if any false-positives surface):
-[allowlist]
-description = "Allowlist for known-safe paths and patterns"
-paths = [
-  '''(.*?)(jpg|gif|doc|pdf|bin|svg|socket)''',
-]
-# Add more entries only with a comment explaining WHY this is safe.
 
 # Project-specific rules (none initially — add only if you discover
 # a credential format unique to this codebase that the default misses).
