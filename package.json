@@ -23,6 +23,8 @@
     "storage:bootstrap": "bash infra/docker/storage-bootstrap.sh",
     "docker:up": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml up --build",
     "docker:down": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml down",
+    "security:pre-commit": "lint-staged && pnpm run security:secrets-staged",
+    "security:secrets-staged": "docker run --rm -v $(pwd):/repo -w /repo zricethezav/gitleaks:v8.30.1 git --pre-commit --staged --no-banner",
     "prepare": "husky"
   },
   "devDependencies": {
