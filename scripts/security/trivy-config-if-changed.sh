@@ -2,7 +2,7 @@
 # Phase 999.17 — Trivy config guard clause (only runs if Dockerfile/compose changed vs origin/main).
 # See .planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-07-PLAN.md.
 # Trivy mode = config (D-06; static scan, no CVE feed required).
-# Docker-wrapped per D-16 + D-14 (aquasec/trivy:0.50 — major.minor pin).
+# Docker-wrapped per D-16 + D-14 (aquasec/trivy:0.50.4 — patch pin; Docker Hub has no major.minor tag for trivy).
 set -euo pipefail
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
@@ -25,8 +25,8 @@ if git diff --quiet origin/main -- 'Dockerfile' 'infra/docker/**' 'infra/docker-
   exit 0
 fi
 
-echo -e "${GREEN}  RUN${NC}: infra files changed; running Trivy config (Docker-wrapped, aquasec/trivy:0.50)."
+echo -e "${GREEN}  RUN${NC}: infra files changed; running Trivy config (Docker-wrapped, aquasec/trivy:0.50.4)."
 exec docker run --rm \
   -v "$(pwd):/repo" -w /repo \
-  aquasec/trivy:0.50 \
+  aquasec/trivy:0.50.4 \
   config --severity HIGH,CRITICAL --exit-code 1 .
