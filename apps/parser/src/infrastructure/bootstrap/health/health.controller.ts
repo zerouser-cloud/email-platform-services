@@ -1,5 +1,5 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { HealthCheck, HealthCheckService } from '@nestjs/terminus';
+import { HealthCheck, HealthCheckService, type HealthCheckResult } from '@nestjs/terminus';
 import { HEALTH, PERSISTENCE_HEALTH, CACHE_HEALTH } from '@email-platform/foundation';
 import type {
   PersistenceHealthIndicator,
@@ -25,7 +25,7 @@ export class HealthController {
 
   @Get(HEALTH.READY)
   @HealthCheck()
-  readiness() {
+  readiness(): Promise<HealthCheckResult> {
     return this.health.check([
       () => this.persistence.isHealthy(HEALTH.INDICATOR.PERSISTENCE),
       () => this.parserStorage.isHealthy(PARSER_STORAGE_HEALTH_KEY),
