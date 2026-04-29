@@ -66,44 +66,53 @@
 ## Phase Details
 
 ### Phase 20: Config Decomposition
+
 **Goal**: Services validate only the environment variables they actually need, and adding new infrastructure concerns does not require touching a monolithic schema
 **Depends on**: Phase 19 (v3.0 complete)
 **Requirements**: CFG-01, CFG-02, CFG-03, CFG-04
 **Success Criteria** (what must be TRUE):
-  1. Env schema is split into independent Zod sub-schemas per concern (redis, s3, rabbitmq, http, tracing) that can be imported individually
-  2. GlobalEnvSchema composes sub-schemas via spread -- adding a new sub-schema requires only one import line
-  3. Each service's config module validates only the env vars relevant to its imported infrastructure modules, not the full set
-  4. A developer can add a new env var group (e.g., for a new backing service) by creating one sub-schema file without modifying existing schemas
-**Plans**: 2 plans
-Plans:
+
+1. Env schema is split into independent Zod sub-schemas per concern (redis, s3, rabbitmq, http, tracing) that can be imported individually
+2. GlobalEnvSchema composes sub-schemas via spread -- adding a new sub-schema requires only one import line
+3. Each service's config module validates only the env vars relevant to its imported infrastructure modules, not the full set
+4. A developer can add a new env var group (e.g., for a new backing service) by creating one sub-schema file without modifying existing schemas
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
 - [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 21: Redis CacheModule
+
 **Goal**: Services can use Redis for caching through a DI-injected client with health monitoring and namespace isolation, following the PersistenceModule pattern
 **Depends on**: Phase 20
 **Requirements**: CACHE-01, CACHE-02, CACHE-03, CACHE-04
 **Success Criteria** (what must be TRUE):
-  1. CacheModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook -- structurally matching PersistenceModule
-  2. A service importing CacheModule can inject the Redis client via DI token and perform get/set/del operations against a running Redis instance
-  3. Health endpoint reports real Redis connection status (not a stub returning "up")
-  4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
-**Plans**: 2 plans
-Plans:
+
+1. CacheModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook -- structurally matching PersistenceModule
+2. A service importing CacheModule can inject the Redis client via DI token and perform get/set/del operations against a running Redis instance
+3. Health endpoint reports real Redis connection status (not a stub returning "up")
+4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 21-01-PLAN.md — Create CacheModule in foundation (ioredis, DI tokens, health, shutdown, namespace)
 - [x] 21-02-PLAN.md — Integrate CacheModule into sender service
 
 ### Phase 22: S3 StorageModule
+
 **Goal**: Services can store and retrieve files through a DI-injected S3 client that works identically with MinIO (local) and Garage (production) without code changes
 **Depends on**: Phase 20
 **Requirements**: S3-01, S3-02, S3-03, S3-04
 **Success Criteria** (what must be TRUE):
-  1. StorageModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook
-  2. The same client code works against MinIO (local dev) and Garage (production) -- switching requires only env var changes, zero code changes
-  3. All env vars use S3_* prefix (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET) -- no MINIO_* references remain in codebase
-  4. A service importing StorageModule can upload, download, and delete files through the injected client
-**Plans**: 2 plans
-Plans:
+
+1. StorageModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook
+2. The same client code works against MinIO (local dev) and Garage (production) -- switching requires only env var changes, zero code changes
+3. All env vars use S3*\* prefix (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET) -- no MINIO*\* references remain in codebase
+4. A service importing StorageModule can upload, download, and delete files through the injected client
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
@@ -115,9 +124,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
+
 - [ ] 22.5-01-PLAN.md — Replace MinIO with Garage v2.1.0 in compose stacks + commit garage.toml + garage-bootstrap.sh + env files + npm script
-- [ ] 22.5-02-PLAN.md — Foundation rename: external/storage/reports/ → public/, REPORTS_* → PUBLIC_* symbols, barrel flip
-- [ ] 22.5-03-PLAN.md — Update parser+notifier storage modules, smoke controllers, and health controllers to PUBLIC_* surface
+- [ ] 22.5-02-PLAN.md — Foundation rename: external/storage/reports/ → public/, REPORTS*\* → PUBLIC*\* symbols, barrel flip
+- [ ] 22.5-03-PLAN.md — Update parser+notifier storage modules, smoke controllers, and health controllers to PUBLIC\_\* surface
 - [ ] 22.5-04-PLAN.md — Rewrite docs/runbooks/bucket-provisioning.md for all 4 envs + live local smoke+readiness acceptance checkpoint
 
 ### Phase 22.4: public-bucket-abstraction (INSERTED)
@@ -128,87 +138,103 @@ Plans:
 **Plans:** 3/3 plans complete
 
 Plans:
+
 - [x] 22.4-01-PLAN.md — Foundation port+factory+deps: NamespacedStoragePort, SharedNamespaceModule.forNamespace, lib-storage multipart, size-limit Transform, env schema extension, remove presigner
-- [x] 22.4-02-PLAN.md — Apps integration: rewire parser+notifier to SHARED_REPORTS, rewrite smoke controllers (Readable + HTTP GET), sync .env* files, remove obsolete PublicStorageModule facade
+- [x] 22.4-02-PLAN.md — Apps integration: rewire parser+notifier to SHARED_REPORTS, rewrite smoke controllers (Readable + HTTP GET), sync .env\* files, remove obsolete PublicStorageModule facade
 - [x] 22.4-03-PLAN.md — Runbook update: anonymous-read policy step, new env vars, Garage URL caveat, private-bucket warning, verify curl step
 
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
+
 **Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
 **Depends on**: Phase 22, Phase 22.1, Phase 22.2
 **Requirements**: SSMK-01, SSMK-02, SSMK-03, SSMK-04, SSMK-05
 **Success Criteria** (what must be TRUE):
-  1. Parser exposes smoke endpoints for both PARSER_STORAGE and REPORTS_STORAGE covering upload, download, delete, exists, getSignedUrl
-  2. Notifier exposes smoke endpoints for REPORTS_STORAGE covering the same StoragePort surface
-  3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
-  4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
-  5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
-**Plans**: 3 plans
-Plans:
+
+1. Parser exposes smoke endpoints for both PARSER_STORAGE and REPORTS_STORAGE covering upload, download, delete, exists, getSignedUrl
+2. Notifier exposes smoke endpoints for REPORTS_STORAGE covering the same StoragePort surface
+3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
+4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
+5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
+   **Plans**: 3 plans
+   Plans:
+
 - [x] 22.3-01-PLAN.md — Proto definitions (parser.proto smoke rpc + new notifier.proto) + notifier gRPC infrastructure
 - [x] 22.3-02-PLAN.md — Storage smoke gRPC controllers in parser and notifier test/ directories
 - [x] 22.3-03-PLAN.md — Gateway REST proxy controller under /test/ with gRPC clients to parser and notifier
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
+
 **Goal**: Полная процедура создания S3 bucket'ов документирована как операционный runbook, покрывающий все 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage). Любой оператор может следовать runbook без предварительных знаний и получить рабочие buckets. Нулевые изменения в коде, docker-compose, env-схемах — единственный deliverable `docs/runbooks/bucket-provisioning.md`.
 **Depends on**: Phase 22, Phase 22.1
 **Requirements**: SPRV-01, SPRV-02, SPRV-03, SPRV-04, SPRV-05
 **Scope change**: Оригинальный scope (code-based auto-provisioning с env flag) был отклонён в `/gsd:discuss-phase` 2026-04-09. Причины зафиксированы в `.planning/phases/22.2-bucket-provisioning-automation/22.2-CONTEXT.md` decisions D-01..D-03 и в Rationale секции самого runbook. Phase 22.3 prerequisite изменён: "выполнить runbook и создать buckets" вместо "auto-provisioning работает".
 **Success Criteria** (what must be TRUE):
-  1. `docs/runbooks/bucket-provisioning.md` существует и покрывает все 4 окружения отдельными self-contained разделами в порядке local-native → local-isolated → dev Coolify/Garage → prod Coolify/Garage
-  2. Новый разработчик с нуля может следовать runbook и получить рабочие buckets в любом из 4 окружений без внешней помощи
-  3. Garage секции (dev, prod) включают шаги создания key binding с подчёркнутым warning блоком — без key binding bucket недоступен приложению
-  4. Каждый раздел включает `curl` verification step против `/health/ready` с примерами OK и DOWN ответов
-  5. Rationale секция объясняет решение не автоматизировать (12-factor separation, Garage key bindings incompatibility, minimal prod permissions, safety против silent misconfig, unified approach)
-  6. Ноль изменений в `apps/`, `packages/`, `infra/` — только в `docs/` и `.planning/`
-**Plans**: 2 plans
-Plans:
+
+1. `docs/runbooks/bucket-provisioning.md` существует и покрывает все 4 окружения отдельными self-contained разделами в порядке local-native → local-isolated → dev Coolify/Garage → prod Coolify/Garage
+2. Новый разработчик с нуля может следовать runbook и получить рабочие buckets в любом из 4 окружений без внешней помощи
+3. Garage секции (dev, prod) включают шаги создания key binding с подчёркнутым warning блоком — без key binding bucket недоступен приложению
+4. Каждый раздел включает `curl` verification step против `/health/ready` с примерами OK и DOWN ответов
+5. Rationale секция объясняет решение не автоматизировать (12-factor separation, Garage key bindings incompatibility, minimal prod permissions, safety против silent misconfig, unified approach)
+6. Ноль изменений в `apps/`, `packages/`, `infra/` — только в `docs/` и `.planning/`
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 22.2-01-PLAN.md — Переписать REQUIREMENTS.md/ROADMAP.md/PROJECT.md под новый docs-only scope
 - [x] 22.2-02-PLAN.md — Создать docs/runbooks/bucket-provisioning.md с 4 env разделами + rationale + known gap
 
 ### Phase 22.1: s3-core-encapsulation (INSERTED)
+
 **Goal**: Per-service composition StorageModule fully owns the S3 client lifecycle — root modules import a single storage module and have no knowledge of underlying S3 infrastructure
 **Depends on**: Phase 22
 **Requirements**: SENC-01, SENC-02, SENC-03, SENC-04
 **Success Criteria** (what must be TRUE):
-  1. parser.module.ts and notifier.module.ts each import exactly one storage-related module (the per-service composition StorageModule)
-  2. S3CoreModule is imported only from within per-service composition StorageModule, never from a root service module
-  3. Adding a new bucket type to an existing service requires only a new per-bucket module plus a composition update -- no changes to the root service module
-  4. pnpm build remains green; all existing storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) still resolve correctly after refactor
-**Plans**: 5 plans
-Plans:
+
+1. parser.module.ts and notifier.module.ts each import exactly one storage-related module (the per-service composition StorageModule)
+2. S3CoreModule is imported only from within per-service composition StorageModule, never from a root service module
+3. Adding a new bucket type to an existing service requires only a new per-bucket module plus a composition update -- no changes to the root service module
+4. pnpm build remains green; all existing storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, \*\_STORAGE_HEALTH) still resolve correctly after refactor
+   **Plans**: 5 plans
+   Plans:
+
 - [x] 22.1-01-PLAN.md — Create external/internal skeletons, relocate storage primitives to internal/storage/, remove @Global(), rewrite ReportsStorageModule with explicit S3CoreModule import
 - [x] 22.1-02-PLAN.md — Relocate non-storage subsystems to external/, flip top-level barrel to one-line re-export, drop S3CoreModule from parser.module.ts and notifier.module.ts
 - [x] 22.1-03-PLAN.md — Add exports field to foundation package.json, upgrade tsconfig.base.json to node16/node16, force rebuild
 - [x] 22.1-04-PLAN.md — Rewrite parser-storage.module.ts with @email-platform/foundation/internal subpath imports, delete Plan 02 BucketStorageModule compat shim
-- [x] 22.1-05-PLAN.md — Add single static ESLint rule (apps/*/src override + apps/*/src/infrastructure override), automated probe verification, human-verified boot smoke tests
+- [x] 22.1-05-PLAN.md — Add single static ESLint rule (apps/_/src override + apps/_/src/infrastructure override), automated probe verification, human-verified boot smoke tests
 
 ### Phase 23: gRPC Client Typed Wrappers
+
 **Goal**: Services communicate via gRPC using type-safe client wrappers that enforce proto contracts at compile time and handle deadlines automatically
 **Depends on**: Phase 20
 **Requirements**: GRPC-01, GRPC-02, GRPC-03, GRPC-04
 **Success Criteria** (what must be TRUE):
-  1. Foundation provides a gRPC client framework that binds to proto-generated TypeScript types -- calling a non-existent method or passing wrong types is a compile error
-  2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
-  3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
-  4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
-**Plans**: 4 plans
-Plans:
+
+1. Foundation provides a gRPC client framework that binds to proto-generated TypeScript types -- calling a non-existent method or passing wrong types is a compile error
+2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
+3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
+4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
+   **Plans**: 4 plans
+   Plans:
+
 - [x] 23-01-PLAN.md — Migrate SERVICE.diToken to Symbol.for() + delete obsolete GrpcClientModule
 - [x] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
 - [x] 23-03-PLAN.md — Five per-service client modules (audience, auth, parser, sender, notifier) + barrel
 - [x] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
 
 ### Phase 24: HTTP Client & Circuit Breaker
+
 **Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection
 **Depends on**: Phase 20
 **Requirements**: HTTP-01, HTTP-02, HTTP-03, HTTP-04
 **Success Criteria** (what must be TRUE):
-  1. Foundation provides an HTTP client framework with configurable retry, timeout, and structured request/response logging
-  2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
-  3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
-  4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
-**Plans**: 3 plans
-Plans:
+
+1. Foundation provides an HTTP client framework with configurable retry, timeout, and structured request/response logging
+2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
+3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
+4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
+   **Plans**: 3 plans
+   Plans:
+
 - [x] 24-01-PLAN.md — Foundation HTTP primitives: opossum + AbstractHttpClient + retry + CB + errors + types, export via foundation barrel
 - [x] 24-02-PLAN.md — Contracts external types (Telegram/AppStoreSpy/CloudFn) + external-apis config sub-schema + per-service env extensions + .env files
 - [x] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
@@ -221,42 +247,49 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 24.1-01-PLAN.md — Foundation port+adapter scaffolding: constants split, types, error hierarchy + chain-of-mappers, retry ports, CB port + opossum adapter, logger port + Pino adapter, DI tokens, Wave 0 scripts (check-no-bang.sh, check-env-parity.sh)
 - [x] 24.1-02-PLAN.md — Thin AbstractHttpClient orchestrator (param-bag, ~80-120 lines) + httpClientProvider factory + D-16/D-17 barrel cleanup + delete 6 pre-24.1 root-level files
 - [x] 24.1-03-PLAN.md — Migrate 3 per-vendor clients+modules (telegram/appstorespy/cloudfn) to param-bag + httpClientProvider + getOrThrow; split HttpSmokeClient to infrastructure/; extract HTTP_SMOKE_DEFAULTS + status(code) builder + CircuitState return types; remove HTTP_CLIENT_DEFAULTS compat bridge
 - [x] 24.1-04-PLAN.md — Env hygiene: rotate Telegram token via @BotFather + Coolify prod/dev, git rm --cached .env.docker, create .env.docker.example (variant B), create docs/runbooks/env-setup.md (4-env matrix + rotation + sync rule), final runtime smoke verification
 
 ### Phase 25: RabbitMQ EventModule
+
 **Goal**: Services can publish and consume domain events through typed interfaces with guaranteed delivery semantics, dead letter handling, and health monitoring
 **Depends on**: Phase 20
 **Requirements**: EVENT-01, EVENT-02, EVENT-03, EVENT-04, EVENT-05
 **Success Criteria** (what must be TRUE):
-  1. EventModule exists in foundation with publisher/consumer abstraction, Symbol DI tokens, health indicator, and shutdown hook
-  2. Consumed messages use manual acknowledgment by default -- a message is not removed from the queue until the handler explicitly acks it
-  3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
-  4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
-  5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
-**Plans**: 0 plans (not yet planned)
+
+1. EventModule exists in foundation with publisher/consumer abstraction, Symbol DI tokens, health indicator, and shutdown hook
+2. Consumed messages use manual acknowledgment by default -- a message is not removed from the queue until the handler explicitly acks it
+3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
+4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
+5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
+   **Plans**: 0 plans (not yet planned)
 
 ### Phase 26: Graceful Shutdown
+
 **Goal**: When a service receives SIGTERM, all in-flight work completes and all connections close in the correct order before the process exits
 **Depends on**: Phase 21, Phase 22, Phase 23, Phase 24, Phase 25
 **Requirements**: SHUT-01, SHUT-02, SHUT-03
 **Success Criteria** (what must be TRUE):
-  1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
-  2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
-  3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
-**Plans**: 0 plans (not yet planned)
+
+1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
+2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
+3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
+   **Plans**: 0 plans (not yet planned)
 
 ### Phase 27: Distributed Tracing
+
 **Goal**: A single correlation ID follows a request from gateway entry through all downstream gRPC calls and RabbitMQ event chains, visible in every log line
 **Depends on**: Phase 23, Phase 25
 **Requirements**: TRACE-01, TRACE-02, TRACE-03
 **Success Criteria** (what must be TRUE):
-  1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
-  2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
-  3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
-**Plans**: 0 plans (not yet planned)
+
+1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
+2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
+3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
+   **Plans**: 0 plans (not yet planned)
 
 ## Progress
 
@@ -265,52 +298,53 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23 -> 24 -> 25 -> 26 -> 27
 
 Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any order, but sequential execution is recommended for pattern refinement (simplest module first).
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Contract Consolidation | v1.0 | 1/1 | Complete | 2026-04-04 |
-| 2. Configuration Management | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 3. Error Handling & Safety | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 4. Architecture Reference Implementation | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 5. Architecture Replication & Boundaries | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 6. Health & Resilience | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 7. Logging, Security & Operations | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 10. Foundation DrizzleModule & Health | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 11. Docker Infrastructure | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 12. Auth Schema & Repository (Reference) | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 16. CI Pipeline | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 17. Docker Image Build & Push | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete | 2026-04-04 |
-| 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
-| 18.1. Deployment Polish | v3.0 | 2/2 | Complete | 2026-04-08 |
-| 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
-| 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
-| 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
-| 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
-| 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
-| 23. gRPC Client Typed Wrappers | v4.0 | 4/4 | Complete    | 2026-04-15 |
-| 24. HTTP Client & Circuit Breaker | v4.0 | 3/3 | Complete    | 2026-04-15 |
-| 24.1. HTTP client foundation hardening | v4.0 | 4/4 | Complete    | 2026-04-16 |
-| 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
-| 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
-| 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
+| Phase                                      | Milestone | Plans Complete | Status      | Completed  |
+| ------------------------------------------ | --------- | -------------- | ----------- | ---------- |
+| 1. Contract Consolidation                  | v1.0      | 1/1            | Complete    | 2026-04-04 |
+| 2. Configuration Management                | v1.0      | 3/3            | Complete    | 2026-04-04 |
+| 3. Error Handling & Safety                 | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 4. Architecture Reference Implementation   | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 5. Architecture Replication & Boundaries   | v1.0      | 3/3            | Complete    | 2026-04-04 |
+| 6. Health & Resilience                     | v1.0      | 3/3            | Complete    | 2026-04-04 |
+| 7. Logging, Security & Operations          | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 8. Verification                            | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 9. Config & MongoDB Cleanup                | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 10. Foundation DrizzleModule & Health      | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 11. Docker Infrastructure                  | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 12. Auth Schema & Repository (Reference)   | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 13. Remaining Services Schema & Repository | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 14. Verification & Documentation           | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 15. Docker Compose Split & Environment     | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 16. CI Pipeline                            | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 16.1. Docker Port Isolation                | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 17. Docker Image Build & Push              | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 17.1. Fix DI Double Registration           | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 17.2. No Magic Values Skill & Audit        | v3.0      | 3/3            | Complete    | 2026-04-04 |
+| 18. Deployment via Coolify                 | v3.0      | 3/3            | Complete    | 2026-04-06 |
+| 18.1. Deployment Polish                    | v3.0      | 2/2            | Complete    | 2026-04-08 |
+| 19. Verification                           | v3.0      | 0/0            | Complete    | 2026-04-08 |
+| 20. Config Decomposition                   | v4.0      | 2/2            | Complete    | 2026-04-08 |
+| 21. Redis CacheModule                      | v4.0      | 2/2            | Complete    | 2026-04-08 |
+| 22. S3 StorageModule                       | v4.0      | 3/3            | Complete    | 2026-04-09 |
+| 22.3. Storage Smoke Test Endpoints         | v4.0      | 4/4            | Complete    | 2026-04-14 |
+| 23. gRPC Client Typed Wrappers             | v4.0      | 4/4            | Complete    | 2026-04-15 |
+| 24. HTTP Client & Circuit Breaker          | v4.0      | 3/3            | Complete    | 2026-04-15 |
+| 24.1. HTTP client foundation hardening     | v4.0      | 4/4            | Complete    | 2026-04-16 |
+| 25. RabbitMQ EventModule                   | v4.0      | 0/0            | Not started | -          |
+| 26. Graceful Shutdown                      | v4.0      | 0/0            | Not started | -          |
+| 27. Distributed Tracing                    | v4.0      | 0/0            | Not started | -          |
 
 ## Backlog
 
 ### Phase 999.1: Config System Audit (audit-only phase) (PROMOTED)
 
-**Goal:** Провести **полный audit** системы конфигов проекта с трассировкой usage по всей кодовой базе — не только где конфиги объявляются, но и где/как используются, куда проистекают, какие архитектурные инварианты нарушаются. **Фаза docs-only** — никакого кода не трогаем. Deliverables: **`999.1-AUDIT.md`** (inventory + categorized findings по 5 слоям) + **`999.1-SOLUTIONS.md`** (2-4 варианта фикса per finding с trade-offs и recommended pick). После завершения — user review checkpoint вне фазы: по каждому approved solution создаётся своя sub-phase (999.1.1, 999.1.2, ...) через `/gsd:insert-phase`. Audit scope: **(Layer 1 Definition & Loading)** packages/config/*, apps/*/bootstrap/config/*, drizzle.config.ts, foundation narrow-config; **(Layer 2 Usage tracing)** все `@Inject({SVC}_CONFIG)` callsites, narrow config port consumers, SERVICE catalog reads, main.ts bootstrap reads, CLI/scripts; **(Layer 3 Violations)** direct `process.env` outside legal zones, hardcoded magic values that should be config, non-null assertions, type casts на config surface; **(Layer 4 Propagation)** app→foundation slice factory boundaries, cross-service via catalog, RMQ inbound, documentation drift (CLAUDE.md + infrastructure-client-layering SKILL + env-schema SKILL + twelve-factor SKILL); **(Layer 5 Missing configs)** env-значения упоминаемые но не в схеме, .env.example vs фактическое usage, infrastructure config (docker-compose, Coolify, CI) vs app config coherence. Принцип фазы: verify-against-reality — каждое finding'а бэкапится grep/Read выдачей, чтобы не было спекуляций о текущем состоянии. Precedent для audit-only phase: Phase 999.11.3 (docs-only skill refresh).
+**Goal:** Провести **полный audit** системы конфигов проекта с трассировкой usage по всей кодовой базе — не только где конфиги объявляются, но и где/как используются, куда проистекают, какие архитектурные инварианты нарушаются. **Фаза docs-only** — никакого кода не трогаем. Deliverables: **`999.1-AUDIT.md`** (inventory + categorized findings по 5 слоям) + **`999.1-SOLUTIONS.md`** (2-4 варианта фикса per finding с trade-offs и recommended pick). После завершения — user review checkpoint вне фазы: по каждому approved solution создаётся своя sub-phase (999.1.1, 999.1.2, ...) через `/gsd:insert-phase`. Audit scope: **(Layer 1 Definition & Loading)** packages/config/_, apps/_/bootstrap/config/\*, drizzle.config.ts, foundation narrow-config; **(Layer 2 Usage tracing)** все `@Inject({SVC}_CONFIG)` callsites, narrow config port consumers, SERVICE catalog reads, main.ts bootstrap reads, CLI/scripts; **(Layer 3 Violations)** direct `process.env` outside legal zones, hardcoded magic values that should be config, non-null assertions, type casts на config surface; **(Layer 4 Propagation)** app→foundation slice factory boundaries, cross-service via catalog, RMQ inbound, documentation drift (CLAUDE.md + infrastructure-client-layering SKILL + env-schema SKILL + twelve-factor SKILL); **(Layer 5 Missing configs)** env-значения упоминаемые но не в схеме, .env.example vs фактическое usage, infrastructure config (docker-compose, Coolify, CI) vs app config coherence. Принцип фазы: verify-against-reality — каждое finding'а бэкапится grep/Read выдачей, чтобы не было спекуляций о текущем состоянии. Precedent для audit-only phase: Phase 999.11.3 (docs-only skill refresh).
 **Requirements:** D-01..D-20 (locked decisions in 999.1-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; docs-only audit phase)
-**Depends on:** Phase 999.11.3 (latest config-related architectural state — {SVC}_CONFIG Symbol contract from 999.11.1 D-08, bootstrap/config placement from 999.11.2, refreshed skill from 999.11.3 — audit measures against this baseline)
+**Depends on:** Phase 999.11.3 (latest config-related architectural state — {SVC}\_CONFIG Symbol contract from 999.11.1 D-08, bootstrap/config placement from 999.11.2, refreshed skill from 999.11.3 — audit measures against this baseline)
 **Plans:** 5/4 plans complete
 
 Plans:
+
 - [x] 999.1-01-PLAN.md — Lock canonical config system design (DESIGN.md: 7-level taxonomy + 29 invariants + cross-ref matrix)
 - [x] 999.1-02-PLAN.md — Audit config system against canonical design (AUDIT.md: 5-layer findings catalog with F-NN template)
 - [x] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
@@ -324,6 +358,7 @@ Plans:
 **Plans:** 11/11 plans complete
 
 Plans:
+
 - [x] 999.1.9-01-PLAN.md — W1: Package structure setup (infra/ + apps/ skeletons, 8 shared schemas moved, coexistence with legacy)
 - [x] 999.1.9-02-PLAN.md — W2: Env vars addition — 5× `{SVC}_GRPC_PORT` in 4 env files (D-15) [infrastructure-guard gate]
 - [x] 999.1.9-03-PLAN.md — W3: Audience canary migration + foundation factories (createConfigModule D-10, grpc-server.factory D-16) + dual-mode smoke [canary gate]
@@ -344,6 +379,7 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.1.8-01-PLAN.md — Re-audit Phase 999.1: inline amend AUDIT/SOLUTIONS/DESIGN/SUMMARY/VERIFICATION (add F-15 + F-16 findings, reword I-0.1 without CLI exception, add I-3.5 foundation owns config DI factory, 29 → 30 invariants) + flip 999.1-VALIDATION.md to in_progress.
 - [x] 999.1.8-02-PLAN.md — Research (NO-OP — research already captured in 999.1.8-RESEARCH.md; metadata-only placeholder for plan numbering).
 - [x] 999.1.8-03-PLAN.md — Foundation side: create `packages/foundation/src/external/config/{load-config.ts, create-config-module.ts, index.ts}`, amend `external/index.ts` barrel, add zod runtime dep to foundation package.json (consumer-first D-04 — add without removing config side).
@@ -358,6 +394,7 @@ Plans:
 **Outcome realised by 999.11.1:** per-service `{SVC}_CONFIG` Symbol pattern (Canonical Config Access Contract per D-08..D-12), foundation narrow config interfaces (D-10), full `@nestjs/config` replace (D-11), 18 callsites migrated across 10 files + cascade through 3 HTTP vendor modules. All known occurrences listed below — `gateway/health/health.controller.ts`, `gateway/throttle/throttle.module.ts`, foundation cache/persistence/logging/storage/grpc/http — resolved in Phase 999.11.1 Plans 01-09.
 
 **Original known occurrences (all closed by 999.11.1):**
+
 - `gateway/health/health.controller.ts` — closed via D-05 relocation (Plan 02, commit `6dc6279`) + D-12 migration
 - `gateway/throttle/throttle.module.ts` — closed via Plan 03 (commit `c1672a0`, IC-09 resolved)
 - Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты remain (scheduled for separate Phase 999.1 — TopologySchema Static Refactor, not absorbed)
@@ -371,6 +408,7 @@ Plans:
 **Plans:** 0 plans (scope folded into 999.11.1)
 
 Plans:
+
 - [x] ABSORBED — see Phase 999.11.1 Plans 01-09 for implementation; Plan 10 docs-update commit records the absorption
 
 ### Phase 999.4: CacheService quality — improve get() type safety and error handling (BACKLOG)
@@ -380,6 +418,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.3: PersistenceModule — убрать PG_POOL export наружу (BACKLOG)
@@ -389,6 +428,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.5: Вынести CacheModule конфигурацию в infrastructure layer сервисов (BACKLOG)
@@ -398,6 +438,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.6: Настроить HTTPS для Garage WebUI на Coolify (BACKLOG)
@@ -407,6 +448,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.7: Перенести gRPC client modules из foundation в infrastructure layer сервисов (BACKLOG)
@@ -417,6 +459,7 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 999.7-01-PLAN.md — Foundation defineGrpcClient() factory + barrel update
 - [x] 999.7-02-PLAN.md — Gateway: 5 per-upstream client dirs + rewire consumers
 - [x] 999.7-03-PLAN.md — Cross-service: sender->audience, parser->notifier, audience->parser + root modules
@@ -430,6 +473,7 @@ Plans:
 **Plans:** 5/5 plans complete
 
 Plans:
+
 - [x] 999.7.1-01-PLAN.md — Wave 0: pre-refactor inventory audit (D-11) + install eslint-plugin-check-file@^2.8.0
 - [x] 999.7.1-02-PLAN.md — Wave 1: foundation `defineGrpcClient` signature change + internal token derivation (D-01..D-03)
 - [x] 999.7.1-03-PLAN.md — Wave 2: refactor 5 gateway gRPC upstreams (auth/sender/parser/audience/notifier) atomically (D-04..D-09)
@@ -447,13 +491,13 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.7.2-01-PLAN.md — Wave 1: foundation GrpcCaller helper + defineGrpcClient 2-arg build signature + barrel type export (D-01..D-09)
 - [x] 999.7.2-02-PLAN.md — Wave 2: pilot AuthClient composition migration + runtime smoke checkpoint (D-11 + D-12)
 - [x] 999.7.2-03a-PLAN.md — Wave 3: sweep 4 gateway-side clients (sender/parser/audience/notifier) — atomic commit per upstream (D-13 + D-14)
 - [x] 999.7.2-03b-PLAN.md — Wave 4: sweep 3 cross-service clients (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-13 + D-14)
 - [x] 999.7.2-04-PLAN.md — Wave 5: delete AbstractGrpcClient + update infrastructure-client-layering skill + append ESLint ClassDeclaration[superClass] guard (D-10 + D-15 + D-16)
 - [x] 999.7.2-05-PLAN.md — Wave 6: create composition-over-inheritance universal skill + final runtime smoke BOTH start:native + start:isolated (D-17 + final D-12/D-14)
-
 
 ### Phase 999.7.3: gRPC client promisify proxy — replace per-method wrappers (INSERTED)
 
@@ -463,6 +507,7 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.7.3-01-PLAN.md — Wave 1: foundation create promisify-grpc-client.ts + delete grpc-caller.ts + simplify defineGrpcClient (D-02..D-10)
 - [x] 999.7.3-02-PLAN.md — Wave 2: pilot AuthClient migration to Promisified Proxy + runtime smoke checkpoint (D-09 + D-11 + D-15) — code complete; runtime smoke gate DEFERRED to Plan 03 (gateway compile-blocked by 4 unmigrated upstreams)
 - [x] 999.7.3-03-PLAN.md — Wave 3: sweep 4 gateway upstreams (sender/parser/audience/notifier) — atomic commit per upstream (D-14 + D-15 + D-19) — gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke executed: structural design validated (gateway boots, /health/ready reaches all 5 upstreams), strict 5/5-up criterion deferred to Plan 04 (cross-service services blocked from boot)
@@ -478,6 +523,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.9: gRPC client RxJS leakage refinements (open discussion) (BACKLOG)
@@ -485,6 +531,7 @@ Plans:
 **Goal:** Open-for-discussion polish on `AbstractGrpcClient` (RxJS surface). Surfaced during Phase 999.7.1 retrospective. NO commitment to implement until reviewed — items 1/2/4 are minor polish; item 3 is conditional on adding streaming RPCs.
 
 **Items to evaluate:**
+
 1. Replace `lastValueFrom` with `firstValueFrom` in `AbstractGrpcClient.call()` — semantically tighter for unary
 2. Add `AbortSignal` cancellation support to `CallOpts` (client-side cancel via `takeUntil(fromEvent(signal, 'abort'))`)
 3. Streaming RPC adapter (`callStream`/`callIterable` returning `AsyncIterable<T>`) — only if streaming RPCs added later
@@ -495,6 +542,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.10: Application architecture — add Service layer + restructure Hexagonal stack across all microservices (ARCHITECTURALLY COMPLETE — awaiting /gsd:verify-work)
@@ -504,6 +552,7 @@ Plans:
 **Why this phase:** обсуждение между user и agent 2026-04-18 после Phase 999.7.3 (server-side gRPC pattern audit). Auth — Hexagonal reference impl, но НЕТ Application Service слоя (use cases имплементируют inbound ports напрямую). Naming inconsistency: `AuthGrpcServer` vs `HealthController`. HealthController в outlier `apps/{service}/src/health/` вместо `infrastructure/controllers/rest/`. Pattern не зафиксирован skill'ом → drift риск. Все architectural decisions уже зафиксированы в pre-discussion notes (999.10-NOTES.md, 12 D-LOCKED entries).
 
 **Locked decisions (D-LOCKED-01..D-LOCKED-12 in NOTES.md):**
+
 1. Унифицированный 3-слойный stack (Controller→Service→UseCase везде, всегда)
 2. Per-feature service granularity (LoginService, RegisterService — не один большой)
 3. Use case всегда отдельный класс (даже если pure delegation сегодня)
@@ -527,7 +576,8 @@ Plans:
 **Plans:** 7/7 plans complete
 
 Plans:
-- [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md; no code)
+
+- [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/\*.md; no code)
 - [x] 999.10-02-PLAN.md — Auth pilot (full Controller → Service → UseCase refactor + 6 inbound ports + 6 services + 8 use cases per D-23 audit)
 - [x] 999.10-03-PLAN.md — Sender sweep (11 RPCs → 10 services + shared TransitionCampaignStatusUseCase)
 - [x] 999.10-04-PLAN.md — Parser sweep (8 RPCs via canonical stack — Pitfall 3 resolved via Option A canonicalise; StorageSmokeController deleted, smoke logic in 3 real-I/O use cases; atomic commit 22fcb5e)
@@ -552,11 +602,11 @@ Plans:
 
 **Конкретные правила per слой:**
 
-| Слой | Field name | Type | DI token | Runtime class |
-|------|-----------|------|----------|---------------|
-| Controller injects inbound port | `listGroupsService` | `ListGroupsPort` | `LIST_GROUPS_PORT` | `ListGroupsService` |
-| Service injects use case | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class reference) | `VerifyCredentialsUseCase` |
-| UseCase injects outbound port | `userRepository` | `UserRepositoryPort` | `USER_REPOSITORY_PORT` | `PgUserRepository` |
+| Слой                            | Field name          | Type                       | DI token               | Runtime class              |
+| ------------------------------- | ------------------- | -------------------------- | ---------------------- | -------------------------- |
+| Controller injects inbound port | `listGroupsService` | `ListGroupsPort`           | `LIST_GROUPS_PORT`     | `ListGroupsService`        |
+| Service injects use case        | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class reference)    | `VerifyCredentialsUseCase` |
+| UseCase injects outbound port   | `userRepository`    | `UserRepositoryPort`       | `USER_REPOSITORY_PORT` | `PgUserRepository`         |
 
 **Pre-discussion artifact:** `.planning/phases/999.10.1-hexagonal-naming-convention-refactor/999.10.1-NOTES.md` (full dialogue snapshot + 2 research reports + locked decisions + open questions)
 
@@ -566,11 +616,12 @@ Plans:
 **Plans:** 5/5 plans complete
 
 Plans:
+
 - [x] 999.10.1-01-PLAN.md — auth pilot (6 controller + 4 use-case Repository field renames; services 6/6 already compliant) — PASSED (2 atomic commits 16c52f3 + e6ab119; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 13/13 structural grep invariants PASS on auth slice)
 - [x] 999.10.1-02-PLAN.md — sender sweep (10 controller + 4 use-case Repository + 10 service UseCase field renames per D-19) — PASSED (3 atomic commits 06f6889 + 4ceaf24 + 11235dd; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 18/18 structural grep invariants PASS; D-19 strict composed rule validated — pause/resume both use transitionCampaignStatus)
 - [x] 999.10.1-03-PLAN.md — parser sweep (7 controller incl. 2 edge-case type-stem derivations + 3 use-case Repository + 7 service UseCase incl. 1 dual-field service) — PASSED (3 atomic commits d532800 + 6aa600e + 8e3b417; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up + `/test/parser/storage-service` `allPassed:true` both buckets; 29/29 structural grep invariants PASS on parser slice; D-01 A.edge rule first empirically validated — runStorageSmokeService/cleanupStorageSmokeService derived from TYPE STEM, NOT short form; D-19 strict dual-field rule second application on run-storage-smoke.service.ts)
 - [x] 999.10.1-04-PLAN.md — audience sweep (8 controller collision-showcase + 7 use-case Repository with D-20 atomic underscore drop + 8 service UseCase incl. shared TransitionRecipientsStatusUseCase) — PASSED (3 atomic commits 20a758b + fd61e45 + 071e96b; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 32/32 structural grep invariants PASS on audience slice + phase-level rollup; D-16 collision showcase validated — `listGroupsService: ListGroupsPort` resolves method↔field clash; D-20 atomic underscore drop realised — 0 `_\w+` fields in audience application layer; D-19 strict third real-world application — mark-as-sent + reset-send-status both use `transitionRecipientsStatus` from shared TransitionRecipientsStatusUseCase; PHASE-LEVEL INVARIANTS ALL GREEN: 0 Port-fields / 31 Service-fields / 18 Repository-fields / 0 underscores workspace-wide)
-- [x] 999.10.1-05-PLAN.md — docs finalization (atomic 6-file commit 58ea450 per D-13/D-14/D-22: CLAUDE.md + ARCHITECTURE.md + NAMING.md + EXAMPLES.md + DO-DONT.md + SKILL.md; NAMING.md gains ~170-line "## Field Naming Rules (Phase 999.10.1)" section with 7 sub-blocks a-g incl. 3 worked examples + 6-author reference split table + Clean Code ch.2 Hungarian anti-pattern citation; DO-DONT.md adds anti-pattern #10 with grep detector; SKILL.md D-22 mini-update; 12 Task 1 grep invariants + 4 phase-level D-01/D-02/D-04/D-20 invariants all PASS; pnpm lint 7/7 + pnpm build 10/10 cached green; Task 2 human-verify deferred to /gsd:verify-work 999.10.1; PHASE 999.10.1 ARCHITECTURALLY COMPLETE — all 22 D-* decisions D-01..D-22 realised)
+- [x] 999.10.1-05-PLAN.md — docs finalization (atomic 6-file commit 58ea450 per D-13/D-14/D-22: CLAUDE.md + ARCHITECTURE.md + NAMING.md + EXAMPLES.md + DO-DONT.md + SKILL.md; NAMING.md gains ~170-line "## Field Naming Rules (Phase 999.10.1)" section with 7 sub-blocks a-g incl. 3 worked examples + 6-author reference split table + Clean Code ch.2 Hungarian anti-pattern citation; DO-DONT.md adds anti-pattern #10 with grep detector; SKILL.md D-22 mini-update; 12 Task 1 grep invariants + 4 phase-level D-01/D-02/D-04/D-20 invariants all PASS; pnpm lint 7/7 + pnpm build 10/10 cached green; Task 2 human-verify deferred to /gsd:verify-work 999.10.1; PHASE 999.10.1 ARCHITECTURALLY COMPLETE — all 22 D-\* decisions D-01..D-22 realised)
 
 ### Phase 999.11: infra-abstraction-audit-smoke-cleanup
 
@@ -580,6 +631,7 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 999.11-01-PLAN.md — Gateway smoke removal (3 atomic commits: storage-smoke + http-smoke + grpc-client-sanity; OQ-1 resolution deletes infrastructure/clients/http-smoke/ atomically)
 - [x] 999.11-02-PLAN.md — Parser backend smoke hexagonal slice deletion (1 atomic commit d5db160: 9 application files + 3 infrastructure edits — 12 file ops; parser.controller.ts keeps throwing stubs until Plan 04 regenerates ParserProto.ParserServiceController; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10; bisect-safe)
 - [x] 999.11-03-PLAN.md — Notifier backend smoke deletion (1 atomic commit f78d74e: 2 file changes — 1 edit + 1 delete; asymmetric scope confirmed empirically pre-edit — no hexagonal slice existed to remove per RESEARCH.md Pitfall 2; StorageSmokeController + @GrpcMethod handlers for NotifierService.RunStorageSmoke/CleanupStorageSmoke gone from runtime; TelegramSmokeController preserved per D-03; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10)
@@ -593,7 +645,8 @@ Plans:
 **Plans:** 6/5 plans complete
 
 Plans:
-- [x] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/*/{phase}-CONTEXT.md and *-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1) ✅ 2026-04-22 (419 decisions across 22 phases + 227 orphans)
+
+- [x] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/_/{phase}-CONTEXT.md and _-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1) ✅ 2026-04-22 (419 decisions across 22 phases + 227 orphans)
 - [x] 999.11.4-01-PLAN.md — AUTH batch: 6 parallel sub-agents audit no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns via grep-against-rules methodology; 7 atomic commits (1 scaffold + 6 per-skill); Wave 2 ✅ 2026-04-22 (4 findings: 2 nmv + 2 ig; 4 skills aligned)
 - [x] 999.11.4-02-PLAN.md — DESC batch: 2 parallel sub-agents audit nestjs-hexagonal-mapping, infrastructure-client-layering via skill-vs-phase-decisions methodology using PHASE-DECISIONS-INDEX; 3 atomic commits (2 per-skill + 1 SUMMARY); Wave 3 ✅ 2026-04-22 (4 findings: nhm-F-03..04 + icl-F-01..02, all refresh-skill, 13 sanctioned D-XX xref, 0 ad-hoc drift)
 - [x] 999.11.4-03-PLAN.md — HYBRID batch: 3 skills audited (rsv + coi + cdh) via per-section combo methodology; 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 ✅ 2026-04-22 (8 findings: 2 rsv + 3 coi + 3 cdh, all DESC-section, 29 sanctioned D-XX xref + 1 ad-hoc drift; sequential-fallback Rule 3 deviation — Task tool unavailable in context, identical output contract preserved)
@@ -607,6 +660,7 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.11.4.1-01-PLAN.md — Refactor `nestjs-hexagonal-mapping` SKILL.md + references (LAYERS.md + NAMING.md); close nhm-F-03 + nhm-F-04; DRAFTS the D-4 header-block wording + the abstract config-factory wording that Plans 02..06 reuse verbatim per D-10a (Wave 1, 3 tasks, 3 atomic commits + newcomer test) ✅ 2026-04-24
 - [x] 999.11.4.1-02-PLAN.md — Refactor `infrastructure-client-layering` SKILL.md; reuse Plan 01's D-4 wording + config-factory wording byte-for-byte (D-10a pairing); close icl-F-01 (hand-rolled @Global() @Module({}) example replaced with abstract factory description) + icl-F-02 (split single-instance vs multi-instance-per-namespace sections) (Wave 2, 2 tasks, 2 atomic commits) ✅ 2026-04-24
 - [x] 999.11.4.1-03-PLAN.md — Refactor `infrastructure-guard` SKILL.md; close ig-F-01 + ig-F-02 by DELETING the Standard Ports inventory table and replacing with role-based identifier-governance section pointing at tracked env templates + tracked compose infra configuration per D-5 + D-8 (Wave 3, 2 tasks, 2 atomic commits) ✅ 2026-04-24
@@ -616,23 +670,25 @@ Plans:
 
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
-**Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
+**Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/\*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
 **Requirements**: D-01..D-08 (locked decisions in 999.11.3-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11.2 (канонический tree landed) + Phase 999.11.1 D-08 (bootstrap/config slice shape)
 **Plans:** 2/2 plans complete
 
 Plans:
+
 - [x] 999.11.3-01-PLAN.md — Refresh core skill surface: SKILL.md + LAYERS.md with canonical inbound/outbound/bootstrap paths, full §Canonical Tree rewrite, 3 new parent sections (§Bootstrap, §Inbound, §Outbound), gateway D-11a exception documented (Wave 1, atomic commit)
-- [ ] 999.11.3-02-PLAN.md — Refresh 5 references/*.md + bidirectional cross-ref with infrastructure-client-layering + write 999.11.3-VERIFICATION.md + flip VALIDATION.md nyquist_compliant flag (Wave 2, atomic commit)
+- [ ] 999.11.3-02-PLAN.md — Refresh 5 references/\*.md + bidirectional cross-ref with infrastructure-client-layering + write 999.11.3-VERIFICATION.md + flip VALIDATION.md nyquist_compliant flag (Wave 2, atomic commit)
 
 ### Phase 999.11.2: infrastructure-tree-canonical-split (INSERTED)
 
-**Goal:** Refactor `apps/{svc}/src/infrastructure/` across all 6 microservices into canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4 + Graca Explicit Architecture. Feature-slicing per direction (per aggregate / upstream / vendor / cross-cutting concern). Create HealthModule across all 6 services (D-08). Move {SVC}_CONFIG into bootstrap/config/ (D-10). Delete empty gateway.constants.ts (D-11a). Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping + .eslintrc.js Override 6/7/9 paths + infrastructure-client-layering skill. D-14 dual-mode smoke gate at phase end per 999.11.1 precedent. Behavior-preserving — no business logic, no tests. ~65 file moves + ~36 creates + 1 delete + 5 empty-dir cleanups.
+**Goal:** Refactor `apps/{svc}/src/infrastructure/` across all 6 microservices into canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4 + Graca Explicit Architecture. Feature-slicing per direction (per aggregate / upstream / vendor / cross-cutting concern). Create HealthModule across all 6 services (D-08). Move {SVC}\_CONFIG into bootstrap/config/ (D-10). Delete empty gateway.constants.ts (D-11a). Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping + .eslintrc.js Override 6/7/9 paths + infrastructure-client-layering skill. D-14 dual-mode smoke gate at phase end per 999.11.1 precedent. Behavior-preserving — no business logic, no tests. ~65 file moves + ~36 creates + 1 delete + 5 empty-dir cleanups.
 **Requirements**: D-01..D-17 (locked decisions in 999.11.2-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 999.11
 **Plans:** 10/10 plans complete
 
 Plans:
+
 - [ ] 999.11.2-01-PLAN.md — Migrate auth service (template for plans 02-06; 1 aggregate, 1 proto, 0 cross-app clients; Commit 1)
 - [ ] 999.11.2-02-PLAN.md — Migrate audience service (2 aggregates, 1 gRPC upstream; first multi-sub persistence composer; Commit 2)
 - [ ] 999.11.2-03-PLAN.md — Migrate sender service (1 aggregate, 1 gRPC upstream, 1 HTTP vendor; three outbound composer categories; Commit 3)
@@ -652,7 +708,8 @@ Plans:
 **Plans:** 10/10 plans complete
 
 Plans:
-- [x] 999.11.1-01-PLAN.md — Register {SVC}_CONFIG Symbols + providers in all 6 services (dormant, D-08)
+
+- [x] 999.11.1-01-PLAN.md — Register {SVC}\_CONFIG Symbols + providers in all 6 services (dormant, D-08)
 - [x] 999.11.1-02-PLAN.md — Relocate 2 health controllers (gateway + notifier) to infrastructure/controllers/rest (D-05)
 - [x] 999.11.1-03-PLAN.md — Relocate ThrottleModule to infrastructure/throttle + migrate to GATEWAY_CONFIG (D-06, first real consumer)
 - [x] 999.11.1-04-PLAN.md — Foundation narrow-config migration: cache + persistence + logging + storage (D-10, IC-01..IC-03, IC-07, IC-08)
@@ -663,7 +720,6 @@ Plans:
 - [x] 999.11.1-09-PLAN.md — Remove @nestjs/config — delete AppConfigModule + scrub deps across workspace (D-11)
 - [x] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
 
-
 ### Phase 999.12: redis-canonical-alignment
 
 **Goal:** Align Redis CacheModule with the canonical infra-client pattern (symmetry with gRPC post-999.7.x + persistence) and roll the structural cache adapter into all 6 services (auth, sender, audience, parser, notifier, gateway). Sender migrates `CacheModule.forRootAsync` from `bootstrap/health/` to a new `outbound/cache/cache.module.ts` thin app-level wrapper; the other 5 services receive the same wrapper + env schema spread + CACHE_CONFIG_PORT slice + REDIS_HEALTH inject. Gateway gains the single concrete business binding — `@nestjs/throttler` storage migrated from in-memory to Redis-backed via `@nest-lab/throttler-storage-redis@^1.2.0`, closing the distributed rate-limit gap. ESLint Override 4 forbids raw `ioredis` import in `apps/*/src/**`. CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" matrix gets a new Cache adapter row (D-09); Phase 21 D-02 receives an inline rate-limit-partial-unlock amendment in CONTEXT.md (D-16). Full context in `999.12-CONTEXT.md` (20 D-decisions); research and pattern map in `999.12-RESEARCH.md` + `999.12-PATTERNS.md`.
@@ -671,7 +727,8 @@ Plans:
 **Plans:** 11 plans
 
 Plans:
-- [x] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/*/src/** (D-08)
+
+- [x] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/\*/src/\*\* (D-08)
 - [x] 999.12-02-PLAN.md — Foundation REDIS_CLIENT export amendment for D-13 throttle storage (Phase 21 D-04 narrowly amended; D-07/D-13)
 - [x] 999.12-03-PLAN.md — Compose RedisSchema.shape into 5 env schemas (auth/audience/parser/notifier/gateway, D-15)
 - [x] 999.12-04-PLAN.md — Sender migration: CacheModule from bootstrap/health/ to outbound/cache/ (D-02/D-03/D-04/D-05)
@@ -691,6 +748,7 @@ Plans:
 **Plans:** 8/8 plans complete
 
 Plans:
+
 - [x] 999.12.1-01-PLAN.md — Cache token rename: REDIS_HEALTH → CACHE_HEALTH + 6 health.controllers field redis → cache (D-04)
 - [x] 999.12.1-02-PLAN.md — Persistence token+type rename: DATABASE_HEALTH → PERSISTENCE_HEALTH + DatabaseHealthIndicator → PersistenceHealthIndicator + field db → persistence in 4 controllers (D-05)
 - [x] 999.12.1-03-PLAN.md — Storage token rename: PUBLIC_BUCKET_HEALTH → PUBLIC_STORAGE_HEALTH + notifier field publicBucket → publicStorage (D-06)
@@ -707,6 +765,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.14: s3-canonical-audit (BACKLOG)
@@ -716,6 +775,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.15: production-health-contract-ci-smoke (BACKLOG)
@@ -725,6 +785,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.16: s3-garage-connectivity-isolated-mode-fix (BACKLOG)
@@ -734,13 +795,26 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.17: devsecops-shift-left-security-tooling (BACKLOG)
 
 **Goal:** Внедрить трёхслойную систему security-проверок проекта на разных стадиях разработки. **Слой 1 — pre-commit (husky + lint-staged):** быстрая (<5s) проверка на staged файлах — gitleaks (secrets), ESLint+Prettier (lint+format). **Слой 2 — pre-push:** инкрементальные проверки (10-30s) на изменения относительно origin/main — Semgrep (SAST для NestJS/TS), `pnpm audit` при изменении lock-файла, Trivy config при изменении Dockerfile/compose. **Слой 3 — CI required gate (GitHub Actions, branch protection):** полный прогон gitleaks + Semgrep + Trivy fs (SCA + license) + Trivy config (Dockerfile + docker-compose) + Trivy image (после build) + Syft (SBOM artifact). Quality Gate с thresholds: HIGH/CRITICAL CVE → block merge, new secret detected → block, SAST HIGH+ → block. Принцип: hooks дают разработчику быстрый фидбек (можно обойти `--no-verify`), CI работает как обязательный gate (нельзя обойти при включённой branch protection). **Lean stack:** gitleaks, Semgrep, Trivy (3 режима — fs/config/image), Syft, husky 9, lint-staged. **Rejected during analysis:** SonarQube (80%+ overlap с Semgrep, тяжёлая инфраструктура — своя БД/сервер/лицензия для приватных репо), отдельный SCA tool помимо Trivy (Trivy fs покрывает npm SCA + license check). **Scope (in):** dev hooks (pre-commit, pre-push), CI workflows (`.github/workflows/security.yml`), Quality Gate config с thresholds, husky setup, документация локального запуска проверок. **Scope (out, devops layer):** continuous Trivy rescan продакшен-образов по cron (CVE feed обновляется ежедневно — нужен scheduled scanner), runtime security (Falco/Wiz/Aqua), DAST (ZAP/Burp), secrets management в проде (Vault/SOPS), WAF/IDS/IPS, k8s admission controllers. **Scope (deferred to separate phase):** Renovate/Dependabot для автоматических dep updates (это про процесс мерджа автоПР, не про сами scanners). **Open questions для discuss-phase:** (1) husky уже стоит в репо или ставим с нуля (проверить package.json + .husky/); (2) Renovate vs Dependabot — нативный для GitHub vs гибче для monorepo; (3) точные thresholds Quality Gate — только CRITICAL block или HIGH+ тоже; (4) pre-commit hook нужен или только CI (локальные hooks ловят секреты до push, но требуют дисциплины разработчика). Discovered 2026-04-28 после завершения Phase 999.12.1 в discussion на тему DevSecOps practices for the project.
 **Requirements:** TBD
-**Plans:** 10/10 plans complete
+**Plans:** 12 plans (10/10 original complete; 2 gap-closure plans pending — see 999.17-VERIFICATION.md CR-01 + CR-02)
 
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+- [x] 999.17-01-PLAN.md — pnpm 9 → 11 bump (D-11 prerequisite)
+- [x] 999.17-02-PLAN.md — lint-staged install + .lintstagedrc.json (D-01, D-12)
+- [x] 999.17-03-PLAN.md — .gitleaks.toml + .gitleaksignore (D-03, D-09, D-14, D-16)
+- [x] 999.17-04-PLAN.md — .semgrep.yml + .semgrepignore (D-13, D-09, D-14, D-16)
+- [x] 999.17-05-PLAN.md — .trivyignore (D-09, D-14, D-16)
+- [x] 999.17-06-PLAN.md — pre-commit hook + security:secrets-staged (D-01, D-02, D-03)
+- [x] 999.17-07-PLAN.md — pre-push hook + security:\* chain (D-01, D-02, D-06, D-10, D-13)
+- [x] 999.17-08-PLAN.md — renovate.json (D-08)
+- [x] 999.17-09-PLAN.md — DEVOPS-HANDOFF.md + .gitlab-ci-security.yml.example (D-04, D-05, D-07, D-15)
+- [x] 999.17-10-PLAN.md — End-to-end smoke + STATE.md closure
+- [ ] 999.17-11-PLAN.md — GAP-CLOSURE: restore working build-script trust gate (CR-01 — strictDepBuilds:true + exhaustive allowBuilds + Plan 02 SUMMARY correction)
+- [ ] 999.17-12-PLAN.md — GAP-CLOSURE: fix gitleaks allowlist regex blind spot (CR-02 — delete unanchored allowlist; rely on useDefault path exclusions)
