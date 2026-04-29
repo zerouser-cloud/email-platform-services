@@ -25,6 +25,12 @@
     "docker:down": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml down",
     "security:pre-commit": "lint-staged && pnpm run security:secrets-staged",
     "security:secrets-staged": "docker run --rm -v $(pwd):/repo -w /repo zricethezav/gitleaks:v8.30.1 git --pre-commit --staged --no-banner",
+    "security:audit-if-lock-changed": "bash scripts/security/audit-if-lock-changed.sh",
+    "security:env-parity": "bash scripts/check-env-parity.sh",
+    "security:pre-push": "pnpm run security:typecheck && pnpm run security:env-parity && pnpm run security:semgrep-diff && pnpm run security:audit-if-lock-changed && pnpm run security:trivy-config-if-changed",
+    "security:semgrep-diff": "bash scripts/security/semgrep-diff.sh",
+    "security:trivy-config-if-changed": "bash scripts/security/trivy-config-if-changed.sh",
+    "security:typecheck": "turbo run typecheck",
     "prepare": "husky"
   },
   "devDependencies": {
