@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: Inserted urgent sub-phase 999.17.1
-stopped_at: Phase 999.17 context gathered
-last_updated: '2026-04-29T11:27:00.847Z'
+stopped_at: Phase 999.17.1 context gathered
+last_updated: '2026-04-29T12:46:54.591Z'
 last_activity: 2026-04-29 -- Phase 999.17.1 inserted after 999.17
 progress:
   total_phases: 44
@@ -353,8 +353,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-04-28T14:31:56.983Z
-Stopped at: Phase 999.17 context gathered
-Resume file: .planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-CONTEXT.md
+Last session: 2026-04-29T12:46:54.585Z
+Stopped at: Phase 999.17.1 context gathered
+Resume file: .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-CONTEXT.md
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
