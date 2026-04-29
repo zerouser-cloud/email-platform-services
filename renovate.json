@@ -1,0 +1,31 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended"
+    ],
+    "vulnerabilityAlerts": {
+        "enabled": true,
+        "labels": ["security"]
+    },
+    "osvVulnerabilityAlerts": true,
+    "lockFileMaintenance": {
+        "enabled": true,
+        "schedule": ["before 3am on Monday"]
+    },
+    "postUpdateOptions": ["pnpmDedupe"],
+    "packageRules": [
+        {
+            "description": "Group monorepo internal packages — apps/* and packages/*",
+            "matchFileNames": ["apps/**", "packages/**"],
+            "groupName": "monorepo internal"
+        },
+        {
+            "description": "Group all patch-level updates into a weekly PR",
+            "matchUpdateTypes": ["patch"],
+            "groupName": "all patch updates",
+            "schedule": ["before 3am on Monday"]
+        }
+    ],
+    "minimumReleaseAge": "14 days",
+    "automerge": false
+}
