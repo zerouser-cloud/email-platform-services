@@ -14,3 +14,17 @@
 #    here only after rotation is impossible AND the value is verified to be
 #    a fixture / test data / non-production.
 # 4. Empty file = clean state. Do not add entries proactively.
+
+# Phase 999.17.1 (2026-04-29): Plan 05 markdown describes future gitleaks NEGATIVE
+# fixture content — synthetic AWS keys (AKIA...EXAMPLE2 per 999.17 Plan 12). These
+# are PLANNING ARTIFACTS, not secrets in source code. Path-block via .gitleaks.toml
+# [allowlist] is preferred but doesn't apply to top-level allowlists in gitleaks v8.30
+# when extending default rules; per-finding fingerprint suppression is the working
+# alternative. Re-evaluate after 999.17.1 ships and Plan 03 adds path-block for
+# `scripts/security/fixtures/**` in this same file.
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:175
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:189
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:191
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:243
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:301
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:345
