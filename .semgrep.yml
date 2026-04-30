@@ -25,6 +25,13 @@ rulesets:
   - p/nodejs
   - p/owasp-top-ten
   - p/r2c-security-audit
+  - p/security-audit # D-08 — broader moderate-confidence pack closing D-3 (eval-injection silent fail-open)
+
+
+# D-10: Custom rules discovered automatically by scripts/security/semgrep-diff.sh
+# from the .semgrep/rules/ directory (file-per-rule convention) — see Plan 06.
+# rejected: --config auto (D-12, see also 999.17 D-13) — requires Semgrep cloud
+# account, may mutate without git diff, breaks reproducibility.
 
 # Local project rules (none initially per D-13 — registry composition only).
 # Add a `rules:` block here only after a follow-up phase identifies a
