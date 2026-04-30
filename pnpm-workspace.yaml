@@ -2,6 +2,12 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
+# pnpm 10+ moved `inject-workspace-packages` setting from .npmrc to
+# pnpm-workspace.yaml (camelCase). Required for `pnpm deploy` to bundle
+# workspace packages as hard-linked file copies (used in Docker build
+# Stage 1, infra/docker/app.Dockerfile Step 5).
+injectWorkspacePackages: true
+
 # Phase 999.17 + 999.17-11 — supply-chain build-script trust gate.
 # See .planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-11-PLAN.md.
 #
