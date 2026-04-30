@@ -36,6 +36,15 @@ RUN pnpm --filter @email-platform/contracts run generate \
     && pnpm --filter @email-platform/foundation run build \
     && pnpm --filter @email-platform/${APP_NAME} run build
 
+# Step 4.5: Refresh injected workspace dependencies after build.
+# pnpm 11 with injectWorkspacePackages=true creates hard-linked file copies
+# of workspace deps at install time. After Step 4 fills the source dist/,
+# the injected copies in dependents (e.g. apps/gateway/node_modules/@email-platform/foundation)
+# remain stale. Re-running install refreshes the hard links to include the
+# newly built dist/ artefacts. See pnpm docs: "After workspace package is
+# updated, run pnpm install again to update hard links."
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
 # Step 5: Deploy production bundle
 RUN pnpm deploy --filter @email-platform/${APP_NAME} --prod /prod/app
 
