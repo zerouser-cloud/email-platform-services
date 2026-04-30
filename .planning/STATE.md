@@ -4,8 +4,8 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.17.1 context gathered
-last_updated: '2026-04-29T14:36:36.515Z'
-last_activity: 2026-04-29 -- Phase 999.17.1 planning complete
+last_updated: "2026-04-30T05:54:22.749Z"
+last_activity: 2026-04-30 -- Phase 999.17.1 execution started
 progress:
   total_phases: 44
   completed_phases: 29
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.17 — devsecops-shift-left-security-tooling
+**Current focus:** Phase 999.17.1 — quality-security-decouple-and-prove-fixtures
 
 ## Current Position
 
-Phase: 999.17.1 (quality-security-decouple-and-prove-fixtures) — NOT PLANNED
-Plan: 1 of 12
-Status: Ready to execute
-Last activity: 2026-04-29 -- Phase 999.17.1 planning complete
+Phase: 999.17.1 (quality-security-decouple-and-prove-fixtures) — EXECUTING
+Plan: 1 of 11
+Status: Executing Phase 999.17.1
+Last activity: 2026-04-30 -- Phase 999.17.1 execution started
 
 Progress: [██████████] 100%
 
