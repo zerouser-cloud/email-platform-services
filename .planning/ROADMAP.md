@@ -821,13 +821,15 @@ Plans:
 
 ### Phase 999.17.2: DevSecOps Hardening + Secrets Rotation (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 999.17
-**Plans:** 0 plans
+**Goal:** Close shift-left coverage gaps surfaced by 999.17.1 Plan 04 empirical UAT (4 real config bugs + 1 tracked-secret pattern). Sub-phase fixes scanner config (`.gitleaksignore` invalid glob → AM-01; `secrets-full.sh` `dir`→`git` → AM-02; two anchored top-level `[[allowlists]]` → D-05 fixtures + D-06 manifest shape), one-time content cleanup of 23 gitleaks findings to D-07 redacted format (D-08), AI-discipline rule in CLAUDE.md (D-09), 12-Factor Garage `rpc_secret` via NATIVE `GARAGE_RPC_SECRET` env override (D-10 — research-amended path; no envsubst, no template, no `.gitignore` for tracked config), `999.17.2-DEVOPS-HANDOFF.md` with rotation+CI+k8s+history+GitLab-migration coordination (D-11). Defense principle (locked): one standard for everything in git — defense via format (redacted examples), not via path. Two narrow exceptions justified independently: D-05 test infrastructure (industry-standard self-tests) + D-06 manifest shape-allowlist (idiomatic gitleaks v8 pattern, discriminates by shape not path). Discovered 2026-04-30 after 999.17.1 Plan 04 setup-push UAT exposed 142 raw findings → drilled to 4 real bugs + 1 tracked secret + 1 GSD-framework false-positive.
+**Requirements**: none — sub-phase, uses CONTEXT.md decision IDs (D-03..D-13, AM-01, AM-02, OQ-3, OQ-5)
+**Depends on:** Phase 999.17.1 (paused at Plan 04 Task 4 manual UAT — D-12 unblock)
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 999.17.2 to break down)
+
+- [ ] 999.17.2-01-PLAN.md — Wave 1: scanner config (AM-01 invalid glob removal, AM-02 git-mode, D-05 fixture path-allowlist, D-06 manifest shape-allowlist) + D-09 CLAUDE.md AI rule + OQ-5 historical-Telegram-token fingerprint suppressions
+- [ ] 999.17.2-02-PLAN.md — Wave 2: D-08 content cleanup (19 findings across 8 files) + OQ-3 strict-D-09 (5 non-firing literals in 24.1-04-PLAN.md) + D-10 Garage native env override (3 infra files) + D-11 DEVOPS-HANDOFF.md (6 sections incl. §6 GitLab migration coordination) + final acceptance smoke (BOTH start flows)
 
 ### Phase 999.17.1: quality-security-decouple-and-prove-fixtures (INSERTED)
 
