@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.17.1 context gathered
-last_updated: "2026-04-30T05:54:22.749Z"
+stopped_at: Phase 999.17.2 context gathered
+last_updated: "2026-04-30T07:26:58.575Z"
 last_activity: 2026-04-30 -- Phase 999.17.1 execution started
 progress:
-  total_phases: 44
+  total_phases: 45
   completed_phases: 29
   total_plans: 169
-  completed_plans: 160
-  percent: 95
+  completed_plans: 164
+  percent: 97
 ---
 
 # Project State
@@ -21,7 +21,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.17.1 — quality-security-decouple-and-prove-fixtures
+**Current focus:** Phase 999.17.2 — DevSecOps Hardening + Secrets Rotation (paused parent: 999.17.1)
 
 ## Current Position
 
@@ -350,11 +350,12 @@ Progress: [██████████] 100%
 - Phase 999.12.1 inserted after Phase 999.12: infra-naming-convention-audit (URGENT)
 - Phase 999.17 (devsecops-shift-left-security-tooling) DONE — 2026-04-29. All 10 plans (01-10) executed; phase verified end-to-end in Plan 10. **Closures:** Folded todo 2026-04-17 (env-parity sync check `.env` vs `.env.docker` vs `.env.example`) → CLOSED via D-10 mechanism (`scripts/check-env-parity.sh` UNCHANGED from Phase 24.1 + 999.1.9 W10 baseline; wrapped by `pnpm run security:env-parity` in Plan 07; runs on every pre-push). **Artifacts shipped (12+):** 8 npm-scripts under `security:*` namespace (Plans 06+07: `security:pre-commit`, `security:pre-push`, `security:secrets-staged`, `security:typecheck`, `security:env-parity`, `security:semgrep-diff`, `security:audit-if-lock-changed`, `security:trivy-config-if-changed`); 2 husky hooks (`.husky/pre-commit` NEW Plan 06, `.husky/pre-push` REFACTORED Plan 07); 3 helper shell scripts under `scripts/security/` (audit-if-lock-changed.sh, trivy-config-if-changed.sh, semgrep-diff.sh — Plan 07); 6 root config files (`.lintstagedrc.json` Plan 02, `.gitleaks.toml` + `.gitleaksignore` Plan 03, `.semgrep.yml` + `.semgrepignore` Plan 04, `.trivyignore` Plan 05, `renovate.json` Plan 08); 2 root docs (`DEVOPS-HANDOFF.md` + `.gitlab-ci-security.yml.example` Plan 09); pnpm 9→11 bump Plan 01 (fixes `pnpm audit` HTTP 410 per D-11). **Smoke results (Plan 10):** Pre-commit BLOCKS fake-secret commits + PASSES clean commits + BYPASSES via `--no-verify` (D-04 expected); pre-push runs typecheck + env-parity + semgrep-diff + conditional audit + conditional trivy-config; env-parity green on clean tree (folded todo closure VERIFIED); dual-runtime smoke `pnpm start:native` AND `pnpm start:isolated` both reach `/health/ready` 200. **Out of scope (deferred per CONTEXT §Deferred Ideas):** GitHub Actions security workflow (short transition window; GitLab migration imminent); continuous Trivy `image` rescan production (DevOps cron — `DEVOPS-HANDOFF.md`); Renovate `automerge: true` tuning (post-DevOps-activation, 2-4 weeks empirical data); custom NestJS-specific Semgrep rules (track 2 weeks of registry findings first per D-13); TS rewrite of `check-env-parity.sh` (current grep-based works; refactor only if `.merge()`/`.extend()` Zod schemas appear); license compliance dashboards (GitLab Premium feature). **Next:** DevOps activates `renovate.json` + implements CI security pipeline per `DEVOPS-HANDOFF.md` + `.gitlab-ci-security.yml.example`.
 - Phase 999.17.1 inserted after Phase 999.17: quality-security-decouple-and-prove-fixtures (URGENT)
+- Phase 999.17.2 inserted after Phase 999.17: DevSecOps Hardening + Secrets Rotation (URGENT)
 
 ## Session Continuity
 
-Last session: 2026-04-29T12:46:54.585Z
-Stopped at: Phase 999.17.1 context gathered
-Resume file: .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-CONTEXT.md
+Last session: 2026-04-30T07:26:58.568Z
+Stopped at: Phase 999.17.2 context gathered
+Resume file: .planning/phases/999.17.2-devsecops-hardening-secrets-rotation/999.17.2-CONTEXT.md
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
