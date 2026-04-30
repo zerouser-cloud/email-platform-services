@@ -28,3 +28,30 @@
 .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:243
 .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:301
 .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:345
+
+# === Historical findings — POST-ROTATION ACCEPTANCE SIGNATURE, pending DevOps rotation per 999.17.2-DEVOPS-HANDOFF.md § 1.1 ===
+#
+# Two fingerprint entries below silence the historical Telegram-bot-token literal that was
+# tracked in .env.docker at commit c638e69 (2026-04-15, "set real Telegram bot token") and
+# remained at commit 382fc1f (preceding placeholder commit; gitleaks v8.30.1 may not flag it
+# directly but second fingerprint is defensive). Token will be revoked by DevOps; revoke
+# renders value worthless. Literal remains in commits as historical record (BFG/git-filter-repo
+# NOT applied per CONTEXT.md D-12 — risky for shared repo, no incremental safety post-revoke).
+#
+# IMPORTANT — pre-rotation acceptance window: until DevOps confirms revoke, these suppressions
+# silence findings whose values are still LIVE. This is an accepted known-risk window
+# coordinated with DevOps (see 999.17.2-DEVOPS-HANDOFF.md § 1.1). Do NOT merge to main without
+# DevOps rotation confirmation.
+#
+# Re-evaluation trigger: GitLab migration (project_gitlab_migration.md memory). Two scenarios:
+#   (a) Full-history migration (default): suppressions migrate as-is with the repo. No action.
+#   (b) Fresh-repo migration (clean break): suppressions become moot — delete entries below
+#       and verify pnpm security:secrets-full exits 0 without them.
+#
+# Discipline rule (Rule-of-thumb): do NOT add new entries here. New leaks → rotate + history
+# rewrite via git-filter-repo, do NOT suppress. This entry exists as one-time historical
+# acceptance only. Each new finding requires its own evaluation + own comment + own rotation
+# evidence. The 2 entries below are SCOPED to the specific commit-SHA-equivalent fingerprint
+# of the historical Telegram-token leak — never reuse this suppression for any new finding.
+c638e69e4c6a4ca9c269d92b676219640279f0d5:.env.docker:telegram-bot-api-token:52
+382fc1f2885444a54a584a82c53433bf1502706a:.env.docker:telegram-bot-api-token:52
