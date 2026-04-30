@@ -11,7 +11,10 @@ cd "$PROJECT_ROOT"
 # shellcheck source=./_versions.sh
 . "$(dirname "${BASH_SOURCE[0]}")/_versions.sh"
 
+# Phase 999.17.2 (D-04 / AM-02): use `git` mode (scans git-tracked content via
+# `git log -p`), NOT `dir` (which would scan filesystem and pick up untracked
+# .pnpm-store/, .claude/worktrees/, etc — 111 false-positives in 999.17.1 UAT).
 exec docker run --rm \
   -v "$(pwd):/repo" -w /repo \
   "$GITLEAKS_IMAGE" \
-  dir /repo --no-banner
+  git /repo --no-banner

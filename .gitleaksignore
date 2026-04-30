@@ -28,6 +28,3 @@
 .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:243
 .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:301
 .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:345
-
-# Phase 999.17.1 — fixture path-block (D-07). Verify mode bypasses via explicit `dir <path>` argument.
-scripts/security/fixtures/**
