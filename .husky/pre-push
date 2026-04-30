@@ -1,1 +1,5 @@
-pnpm run security:pre-push
+#!/usr/bin/env sh
+# Phase 999.17.1 — delegate to parallel orchestrator (D-14).
+# Stdin (4-tuple per ref) is forwarded to the orchestrator via inherited fd 0.
+# Delete-only push detection (D-19) lives INSIDE the orchestrator.
+exec bash scripts/security/pre-push-orchestrator.sh
