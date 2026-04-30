@@ -14,18 +14,18 @@
 
 ## Environment Variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `API_BASE_URL` | Yes* | Garage admin API URL (e.g. `http://garage:3903`) |
-| `API_ADMIN_KEY` | Yes* | Garage admin token |
-| `S3_ENDPOINT_URL` | No | S3 API endpoint (e.g. `http://garage:3900`) — needed for object browser |
-| `S3_REGION` | No | S3 region |
-| `CONFIG_PATH` | No | Path to `garage.toml` (default: `/etc/garage.toml`) |
-| `BASE_PATH` | No | URL prefix for reverse proxy |
-| `AUTH_USER_PASS` | No | WebUI login auth: `username:bcrypt_hash` |
-| `PORT` | No | Listen port (default: 3909) |
+| Variable          | Required | Description                                                             |
+| ----------------- | -------- | ----------------------------------------------------------------------- |
+| `API_BASE_URL`    | Yes\*    | Garage admin API URL (e.g. `http://garage:3903`)                        |
+| `API_ADMIN_KEY`   | Yes\*    | Garage admin token                                                      |
+| `S3_ENDPOINT_URL` | No       | S3 API endpoint (e.g. `http://garage:3900`) — needed for object browser |
+| `S3_REGION`       | No       | S3 region                                                               |
+| `CONFIG_PATH`     | No       | Path to `garage.toml` (default: `/etc/garage.toml`)                     |
+| `BASE_PATH`       | No       | URL prefix for reverse proxy                                            |
+| `AUTH_USER_PASS`  | No       | WebUI login auth: `username:bcrypt_hash`                                |
+| `PORT`            | No       | Listen port (default: 3909)                                             |
 
-*Either mount `garage.toml` OR set `API_BASE_URL` + `API_ADMIN_KEY`. Env vars are fallback when toml not found. [VERIFIED: GitHub README]
+\*Either mount `garage.toml` OR set `API_BASE_URL` + `API_ADMIN_KEY`. Env vars are fallback when toml not found. [VERIFIED: GitHub README]
 
 ## Connection to Existing Garage
 
@@ -35,7 +35,7 @@ For our setup (no `garage.toml` available in WebUI container):
 
 ```
 API_BASE_URL=http://garage-wgs8kw8o4c08840844ss0o8g:3903
-API_ADMIN_KEY=nWWLgyi3SK72cn29cJaHTqyASkb5rAj0
+API_ADMIN_KEY=<garage-admin-token-redacted>
 S3_ENDPOINT_URL=http://garage-wgs8kw8o4c08840844ss0o8g:3900
 ```
 
@@ -43,15 +43,15 @@ The container name `garage-wgs8kw8o4c08840844ss0o8g` is resolvable on the Coolif
 
 ## Capabilities
 
-| Feature | Supported |
-|---------|-----------|
-| Cluster health status | Yes |
-| Cluster layout / node roles | Yes |
-| Create/update/delete buckets | Yes |
-| Browse objects in buckets | Yes |
-| Create access keys | Yes |
-| Assign keys to buckets (permissions) | Yes |
-| Upload/download objects | Yes (via browser) |
+| Feature                              | Supported         |
+| ------------------------------------ | ----------------- |
+| Cluster health status                | Yes               |
+| Cluster layout / node roles          | Yes               |
+| Create/update/delete buckets         | Yes               |
+| Browse objects in buckets            | Yes               |
+| Create access keys                   | Yes               |
+| Assign keys to buckets (permissions) | Yes               |
+| Upload/download objects              | Yes (via browser) |
 
 [VERIFIED: GitHub README + Dokploy template docs]
 
@@ -68,17 +68,17 @@ services:
     container_name: garage-webui
     restart: unless-stopped
     ports:
-      - "3909:3909"
+      - '3909:3909'
     environment:
-      API_BASE_URL: "http://garage-wgs8kw8o4c08840844ss0o8g:3903"
-      API_ADMIN_KEY: "nWWLgyi3SK72cn29cJaHTqyASkb5rAj0"
-      S3_ENDPOINT_URL: "http://garage-wgs8kw8o4c08840844ss0o8g:3900"
-      AUTH_USER_PASS: "admin:BCRYPT_HASH_HERE"
+      API_BASE_URL: 'http://garage-wgs8kw8o4c08840844ss0o8g:3903'
+      API_ADMIN_KEY: '<garage-admin-token-redacted>'
+      S3_ENDPOINT_URL: 'http://garage-wgs8kw8o4c08840844ss0o8g:3900'
+      AUTH_USER_PASS: 'admin:BCRYPT_HASH_HERE'
 
 networks:
   default:
     external: true
-    name: coolify  # same network as Garage container
+    name: coolify # same network as Garage container
 ```
 
 ### Option B: Add to existing Garage compose
