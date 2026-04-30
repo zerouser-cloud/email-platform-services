@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.17.2 context gathered
-last_updated: '2026-04-30T08:55:47.532Z'
-last_activity: 2026-04-30 -- Phase 999.17.2 execution started
+stopped_at: Completed 999.17.2-01-PLAN.md
+last_updated: '2026-04-30T09:08:30.265Z'
+last_activity: 2026-04-30
 progress:
   total_phases: 45
   completed_phases: 29
   total_plans: 171
-  completed_plans: 164
+  completed_plans: 165
   percent: 96
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.17.2 (devsecops-hardening-secrets-rotation) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 999.17.2
-Last activity: 2026-04-30 -- Phase 999.17.2 execution started
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-30
 
-Progress: [██████████] 100%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -160,6 +160,7 @@ Progress: [██████████] 100%
 | Phase 999.12.1 P06 | ~6min | 2 tasks | 3 files |
 | Phase 999.12.1 P07 | 2min 25s | 2 tasks | 2 files |
 | Phase 999.12.1 P08 | ~25min | 3 tasks | 1 file (SUMMARY only — no source change) |
+| Phase 999.17.2 P01 | 9min | 4 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -317,6 +318,8 @@ Progress: [██████████] 100%
 - [Phase 999.12.1-06] (D-10): COLUMN*LENGTH split-file extraction — generic SQL VARCHAR length conventions (`{ SHORT: 50, MEDIUM: 100, DEFAULT: 255 } as const`) moved out of PG-bound `persistence.constants.ts` into single-concern `column-length.constants.ts`. 1 NEW + 2 MOD = 3 files in atomic commit 3a050c7 (+17/-7). persistence/index.ts barrel re-exports COLUMN_LENGTH from new file; 4 schema consumers (apps/{auth,sender,parser,audience}/.../schema/*.schema.ts) UNCHANGED — barrel transparency proven (`git diff HEAD~1 HEAD apps/` empty). Tier-3 sealed invariant honored (D-12): PG*POOL_DEFAULTS + PG_HEALTH (PG-specific: pg.Pool config + 'SELECT 1') stay in persistence.constants.ts. `as const` wrapper preserved (T-999.12.1-25 mitigation). pnpm lint + build exit 0 before commit per D-19 quick gate; 4 schema imports resolve through new barrel path. File-naming convention check (no-magic-values): `*-constants.ts` kebab-case suffix preserved. Persistence layer's last orthogonal misplacement closed.
 - [Phase ?]: [v4.0 / 999.12.1 / D-14]: Tier 1/2/3 token framework + layer-name axis convention codified in .agents/skills/infrastructure-client-layering/SKILL.md (principles owner) — fictional names only, directory-link worked example, anti-pattern #10 added; CLAUDE.md cross-linked + cache row REDIS_HEALTH → CACHE_HEALTH inventory update (skill = principles, CLAUDE.md = inventory per Phase 999.11.4.1 D-4)
 - [Phase 999.12.1-08]: Phase 999.12.1 ARCHITECTURALLY COMPLETE — final-smoke verification (no source changes). All 14 D-IDs (D-01..D-14) realised across 7 atomic source-change commits (Plans 01-07: 15888bd, f510f28, 468bbed, f2f0e2b, d47792c, 3a050c7, 0be519b). Workspace grep invariant matrix: 8 negative invariants = 0 (renames complete), 14+ positive invariants ≥1 (new names present), 11+ sealed invariants STILL present (Tier-2 REDIS_CLIENT/DRIZZLE/PG_POOL/S3_CLIENT + Tier-3 REDIS_DEFAULTS/REDIS_HEALTH_CHECK/PG_POOL_DEFAULTS/PG_HEALTH + D-13 PUBLIC_BUCKET='public' deferred to 999.14 + out-of-scope s3:\* health-keys + 4 NodePgDatabase repo fields preserved). Dual-mode runtime smoke green: native (port 3000) + isolated (port 4000) HTTP 200 on /health/ready, JSON `.info|keys` contains layer-name keys (cache/messaging/persistence/memory_heap) + NO old keys (redis/rabbitmq/postgresql), 6/6 isolated containers Up (healthy), 0 UnknownDependenciesException(MESSAGING_HEALTH) in notifier docker logs (Pitfall 4 mitigated). Ready for /gsd:verify-work 999.12.1.
+- [Phase ?]: Phase 999.17.2-01: D-06 regexTarget swapped from 'match' to 'secret' (Rule 1 auto-fix) — anchored regex against gitleaks v8.30.1 Match field never satisfies due to surrounding key-prefix; Secret target works correctly. RESEARCH.md A5 authorized fallback. Manifest findings drop 23→21.
+- [Phase ?]: Phase 999.17.2-01: OQ-5 fingerprints retained for both c638e69 + 382fc1f despite empirical 1-fire reality (gitleaks deduplicates by introducing-commit; only c638e69 fires). Defensive coverage per PLAN must_haves.
 
 ### Pending Todos
 
@@ -354,8 +357,8 @@ Progress: [██████████] 100%
 
 ## Session Continuity
 
-Last session: 2026-04-30T07:26:58.568Z
-Stopped at: Phase 999.17.2 context gathered
-Resume file: .planning/phases/999.17.2-devsecops-hardening-secrets-rotation/999.17.2-CONTEXT.md
+Last session: 2026-04-30T09:08:24.928Z
+Stopped at: Completed 999.17.2-01-PLAN.md
+Resume file: None
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
