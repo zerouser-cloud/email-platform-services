@@ -23,3 +23,11 @@
 # # absence, but our entrypoint container is upstream-managed.
 # # See: https://internal-tracker/issue/123 — re-evaluate 2026-09-01
 # AVD-DS-0026 exp:2026-09-01
+
+# Phase 999.17.1 — fixture path-block (D-07).
+# Trivy 0.50.4 supports path-globs in .trivyignore for fs scans; verify-mode in Wave 3
+# bypasses via explicit subdirectory path argument and `--skip-dirs` fallback.
+# If a future trivy version drops path-glob support in .trivyignore, fall back to
+# `--skip-dirs scripts/security/fixtures` flag in package.json#scripts.security:trivy-config-if-changed
+# and trivy-fs invocations.
+scripts/security/fixtures
