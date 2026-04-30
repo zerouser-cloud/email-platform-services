@@ -39,18 +39,18 @@ RUN pnpm --filter @email-platform/contracts run generate \
 # Step 4b: Refresh injected workspace dependencies before app build.
 # pnpm 11 with injectWorkspacePackages=true creates hard-linked file copies
 # of workspace deps at install time. After Step 4a fills the source dist/,
-# the injected copies in apps/${APP_NAME}/node_modules/@email-platform/foundation
-# (and contracts/config) remain stale. Re-running install refreshes the hard
-# links to include the newly built dist/ artefacts. Without this, app build
-# fails with "Cannot find module '@email-platform/foundation'". See pnpm docs:
-# "After workspace package is updated, run pnpm install again to update hard links."
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# injected copies in apps/${APP_NAME}/node_modules/@email-platform/* remain
+# stale (lockfile unchanged → frozen-lockfile install is a no-op).
+# `--force` flag explicitly re-injects: per pnpm docs "When source workspace
+# package is modified, pnpm install must be re-run with --force to re-inject
+# the updated files into dependents."
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --force
 
-# Step 4c: Now build the app — its node_modules contain refreshed dist/ from packages.
+# Step 4c: Now build the app — its node_modules contain re-injected dist/ from packages.
 RUN pnpm --filter @email-platform/${APP_NAME} run build
 
-# Step 4d: Refresh injected copies once more so deploy bundles the just-built app dist/.
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+# Step 4d: Refresh once more so deploy bundles the just-built app dist/.
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --force
 
 # Step 5: Deploy production bundle
 RUN pnpm deploy --filter @email-platform/${APP_NAME} --prod /prod/app
