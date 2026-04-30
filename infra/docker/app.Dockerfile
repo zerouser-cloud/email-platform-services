@@ -29,20 +29,27 @@ COPY tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/${APP_NAME} ./apps/${APP_NAME}
 
-# Step 4: Generate proto TypeScript, then build packages in dependency order
+# Step 4a: Generate proto TypeScript, then build shared packages in dependency order.
+# These build into packages/*/dist/ in source workspace.
 RUN pnpm --filter @email-platform/contracts run generate \
     && pnpm --filter @email-platform/contracts run build \
     && pnpm --filter @email-platform/config run build \
-    && pnpm --filter @email-platform/foundation run build \
-    && pnpm --filter @email-platform/${APP_NAME} run build
+    && pnpm --filter @email-platform/foundation run build
 
-# Step 4.5: Refresh injected workspace dependencies after build.
+# Step 4b: Refresh injected workspace dependencies before app build.
 # pnpm 11 with injectWorkspacePackages=true creates hard-linked file copies
-# of workspace deps at install time. After Step 4 fills the source dist/,
-# the injected copies in dependents (e.g. apps/gateway/node_modules/@email-platform/foundation)
-# remain stale. Re-running install refreshes the hard links to include the
-# newly built dist/ artefacts. See pnpm docs: "After workspace package is
-# updated, run pnpm install again to update hard links."
+# of workspace deps at install time. After Step 4a fills the source dist/,
+# the injected copies in apps/${APP_NAME}/node_modules/@email-platform/foundation
+# (and contracts/config) remain stale. Re-running install refreshes the hard
+# links to include the newly built dist/ artefacts. Without this, app build
+# fails with "Cannot find module '@email-platform/foundation'". See pnpm docs:
+# "After workspace package is updated, run pnpm install again to update hard links."
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Step 4c: Now build the app — its node_modules contain refreshed dist/ from packages.
+RUN pnpm --filter @email-platform/${APP_NAME} run build
+
+# Step 4d: Refresh injected copies once more so deploy bundles the just-built app dist/.
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # Step 5: Deploy production bundle
