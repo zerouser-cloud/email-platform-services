@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
+status: verifying
 stopped_at: Completed 999.17.2-01-PLAN.md
-last_updated: '2026-04-30T09:08:30.265Z'
+last_updated: '2026-04-30T09:28:40.818Z'
 last_activity: 2026-04-30
 progress:
   total_phases: 45
-  completed_phases: 29
+  completed_phases: 30
   total_plans: 171
-  completed_plans: 165
-  percent: 96
+  completed_plans: 166
+  percent: 97
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 Phase: 999.17.2 (devsecops-hardening-secrets-rotation) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-30
 
-Progress: [██████████] 96%
+Progress: [██████████] 97%
 
 ## Performance Metrics
 
@@ -161,6 +161,7 @@ Progress: [██████████] 96%
 | Phase 999.12.1 P07 | 2min 25s | 2 tasks | 2 files |
 | Phase 999.12.1 P08 | ~25min | 3 tasks | 1 file (SUMMARY only — no source change) |
 | Phase 999.17.2 P01 | 9min | 4 tasks | 4 files |
+| Phase 999.17.2 P02 | 12min | 5 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -320,6 +321,7 @@ Progress: [██████████] 96%
 - [Phase 999.12.1-08]: Phase 999.12.1 ARCHITECTURALLY COMPLETE — final-smoke verification (no source changes). All 14 D-IDs (D-01..D-14) realised across 7 atomic source-change commits (Plans 01-07: 15888bd, f510f28, 468bbed, f2f0e2b, d47792c, 3a050c7, 0be519b). Workspace grep invariant matrix: 8 negative invariants = 0 (renames complete), 14+ positive invariants ≥1 (new names present), 11+ sealed invariants STILL present (Tier-2 REDIS_CLIENT/DRIZZLE/PG_POOL/S3_CLIENT + Tier-3 REDIS_DEFAULTS/REDIS_HEALTH_CHECK/PG_POOL_DEFAULTS/PG_HEALTH + D-13 PUBLIC_BUCKET='public' deferred to 999.14 + out-of-scope s3:\* health-keys + 4 NodePgDatabase repo fields preserved). Dual-mode runtime smoke green: native (port 3000) + isolated (port 4000) HTTP 200 on /health/ready, JSON `.info|keys` contains layer-name keys (cache/messaging/persistence/memory_heap) + NO old keys (redis/rabbitmq/postgresql), 6/6 isolated containers Up (healthy), 0 UnknownDependenciesException(MESSAGING_HEALTH) in notifier docker logs (Pitfall 4 mitigated). Ready for /gsd:verify-work 999.12.1.
 - [Phase ?]: Phase 999.17.2-01: D-06 regexTarget swapped from 'match' to 'secret' (Rule 1 auto-fix) — anchored regex against gitleaks v8.30.1 Match field never satisfies due to surrounding key-prefix; Secret target works correctly. RESEARCH.md A5 authorized fallback. Manifest findings drop 23→21.
 - [Phase ?]: Phase 999.17.2-01: OQ-5 fingerprints retained for both c638e69 + 382fc1f despite empirical 1-fire reality (gitleaks deduplicates by introducing-commit; only c638e69 fires). Defensive coverage per PLAN must_haves.
+- [Phase ?]: [Phase 999.17.2-02]: D-08 + OQ-3 + D-10 native env override + D-11 DEVOPS-HANDOFF complete; Plan 02 follow-up — 20 D-08 fingerprint suppressions added to .gitleaksignore (Rule-1 deviation; gitleaks git mode scans history). Tasks 4a + 6 manual-UAT checkpoints deferred awaiting user one-time-permission.
 
 ### Pending Todos
 
@@ -357,7 +359,7 @@ Progress: [██████████] 96%
 
 ## Session Continuity
 
-Last session: 2026-04-30T09:08:24.928Z
+Last session: 2026-04-30T09:28:14.125Z
 Stopped at: Completed 999.17.2-01-PLAN.md
 Resume file: None
 
