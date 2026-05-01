@@ -50,14 +50,19 @@ if [ ${#RULESET_IDS[@]} -eq 0 ]; then
   exit 1
 fi
 
-echo -e "${GREEN}  RUN${NC}: Semgrep diff vs $BASELINE with ${#RULESET_IDS[@]} ruleset(s) (Docker-wrapped, semgrep/semgrep:1.95.0)."
+echo -e "${GREEN}  RUN${NC}: Semgrep diff vs $BASELINE with ${#RULESET_IDS[@]} ruleset(s) (Docker-wrapped, semgrep/semgrep:1.95.0, ci mode)."
 # D-4 fix: --metrics=off prevents phone-home that introduced exit-code non-determinism
 # between pre-push hook and manual run. Note: --metrics=off does NOT disable registry
 # rule download (RESEARCH §Pitfall 2) — first-time fetch still hits the network.
-# Image upgrade (999.17.1 Plan 04 amendment): returntocorp/semgrep:1.50 silently
-# exited 2 on --baseline-commit when stdout was redirected (no diagnostic output);
-# semgrep/semgrep:1.95.0 fixes that and matches the renamed canonical org image.
+#
+# CI mode (999.17.1 Plan 04 amendment): switched from `semgrep scan --baseline-commit`
+# to `semgrep ci` with SEMGREP_BASELINE_COMMIT env var. The interactive `scan` command
+# silently exits 2 on --baseline-commit when stdout is not a TTY (broken in 1.50, also
+# in 1.95.0); the `ci` subcommand is designed for non-interactive CI / pre-push use
+# and handles baseline diffing reliably regardless of stdout type. `--error` flag is
+# implicit in `ci` mode (blocking findings ⇒ non-zero exit).
 exec docker run --rm \
   -v "$(pwd):/repo" -w /repo \
+  -e SEMGREP_BASELINE_COMMIT="$BASELINE" \
   semgrep/semgrep:1.95.0 \
-  semgrep scan --metrics=off "${RULESET_FLAGS[@]}" --baseline-commit "$BASELINE" --error
+  semgrep ci --metrics=off "${RULESET_FLAGS[@]}"
