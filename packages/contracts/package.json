@@ -3,24 +3,26 @@
     "version": "0.0.1",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
-    "files": ["dist", "proto"],
+    "files": [
+        "dist",
+        "proto"
+    ],
     "scripts": {
         "generate": "sh scripts/generate.sh",
         "build": "tsc -p tsconfig.json",
         "typecheck": "tsc --noEmit"
     },
-    "dependencies": {},
     "peerDependencies": {
         "@bufbuild/protobuf": "^2.2.3"
     },
     "devDependencies": {
         "@bufbuild/protobuf": "^2.2.3",
         "@grpc/grpc-js": "^1.12.6",
-        "@nestjs/microservices": "^11.0.1",
+        "@nestjs/microservices": "^11.1.19",
+        "@types/node": "^20.0.0",
         "grpc-tools": "^1.12.4",
         "rxjs": "^7.8.1",
         "ts-proto": "^2.6.0",
-        "@types/node": "^20.0.0",
         "typescript": "^5.0.0"
     }
 }
