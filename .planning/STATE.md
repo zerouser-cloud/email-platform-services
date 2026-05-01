@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Completed 999.17.2-01-PLAN.md
-last_updated: '2026-05-01T07:56:03.068Z'
+stopped_at: Phase 999.17.3 context gathered
+last_updated: '2026-05-01T09:45:13.084Z'
 last_activity: 2026-05-01 -- Phase 999.17.1 execution started
 progress:
   total_phases: 47
@@ -360,8 +360,8 @@ Progress: [██████████] 97%
 
 ## Session Continuity
 
-Last session: 2026-04-30T09:28:14.125Z
-Stopped at: Completed 999.17.2-01-PLAN.md
-Resume file: None
+Last session: 2026-05-01T09:45:13.078Z
+Stopped at: Phase 999.17.3 context gathered
+Resume file: .planning/phases/999.17.3-vulnerability-remediation-direct-dep-upgrades/999.17.3-CONTEXT.md
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
