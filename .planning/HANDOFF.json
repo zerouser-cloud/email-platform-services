@@ -1,0 +1,135 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-05-01T07:00:47.909Z",
+  "phase": "999.17.1",
+  "phase_name": "quality-security-decouple-and-prove-fixtures",
+  "phase_dir": ".planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures",
+  "plan": 4,
+  "task": 4,
+  "total_tasks": 4,
+  "status": "paused",
+  "completed_tasks": [
+    {
+      "id": "999.17.1-01",
+      "name": "Wave 1: package.json namespace split (quality:* / security:* / hygiene:*) + scripts/security/_versions.sh",
+      "status": "done",
+      "commit": "21142d6"
+    },
+    {
+      "id": "999.17.1-02",
+      "name": "Wave 1: semgrep-diff.sh fixes (D-4 metrics-off, D-5 counter, D-10 custom rules)",
+      "status": "done",
+      "commit": "306f1e2"
+    },
+    {
+      "id": "999.17.1-03",
+      "name": "Wave 1: append fixtures path-block to .gitleaksignore/.semgrepignore/.trivyignore",
+      "status": "done",
+      "commit": "183a760"
+    },
+    {
+      "id": "999.17.1-04 Tasks 0-3",
+      "name": "Wave 2: pre-push-orchestrator.sh + verify-if-changed.sh stub + .husky/pre-push delegator + .husky/pre-commit refactor",
+      "status": "done",
+      "commit": "0d47d28",
+      "progress": "Tasks 0-3 of 4 done; partial SUMMARY 8fa1402 documents pause point"
+    }
+  ],
+  "remaining_tasks": [
+    {
+      "id": "999.17.1-04 Task 4",
+      "name": "Plan 04 Task 4 manual UAT (V-07/V-08/V-09)",
+      "status": "not_started",
+      "details": "V-07 setup-push to bare repo (zero false-positive flood); V-08 mixed delete-add push; V-09 quality-fail-does-NOT-block-hygiene checkpoint. Manual recipes in 999.17.1-04-PLAN.md Task 4 section."
+    },
+    {
+      "id": "999.17.1-05",
+      "name": "Wave 3: gitleaks fixtures + verify-gitleaks.sh",
+      "status": "not_started"
+    },
+    {
+      "id": "999.17.1-06a",
+      "name": "Wave 3: Custom Semgrep Rule 1 — no-raw-env-outside-config + positive/negative fixtures",
+      "status": "not_started"
+    },
+    {
+      "id": "999.17.1-06b",
+      "name": "Wave 3: Custom Semgrep Rule 2 — grpc-controller-missing-filter + eval-injection D-3 reproducer + verify-semgrep.sh",
+      "status": "not_started"
+    },
+    {
+      "id": "999.17.1-07",
+      "name": "Wave 3: trivy-config + trivy-fs fixtures + verify scripts",
+      "status": "not_started"
+    },
+    {
+      "id": "999.17.1-08",
+      "name": "Wave 3: pnpm-audit + build-trust fixtures + verify scripts",
+      "status": "not_started"
+    },
+    {
+      "id": "999.17.1-09",
+      "name": "Wave 3: verify.sh dispatcher + verify-if-changed.sh predicate (replaces Plan 04 stub)",
+      "status": "not_started"
+    },
+    {
+      "id": "999.17.1-10",
+      "name": "Wave 4: 999.17.1-VERIFICATION.md + 999.17.1-DEVOPS-HANDOFF.md + runtime-smoke-verification",
+      "status": "not_started"
+    }
+  ],
+  "blockers": [
+    {
+      "description": "Branch coordination — 999.17.2 work commits not on 999.17.1 branch yet (sub-phase merge pending per D-12)",
+      "type": "technical",
+      "workaround": "First action on resume: git checkout gsd/phase-999.17.1-quality-security-decouple-and-prove-fixtures && git merge --no-ff gsd/phase-999.17.2-devsecops-hardening-secrets-rotation -m 'merge: 999.17.2 sub-phase into 999.17.1 (D-12 clean baseline coordination)'. Then update STATE.md to phase=999.17.1 active via gsd-sdk query state.begin-phase --phase 999.17.1 --name quality-security-decouple-and-prove-fixtures --plans 11"
+    }
+  ],
+  "human_actions_pending": [
+    {
+      "action": "Manual UAT V-07 / V-08 / V-09 (push to bare repo, mixed delete-add push, quality-fail-does-not-block-hygiene)",
+      "context": "Plan 04 Task 4 — by definition manual; recipes in .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-04-PLAN.md. Now testable per D-12 clean baseline (pnpm security:secrets-full exit 0 verified empirically)",
+      "blocking": true
+    },
+    {
+      "action": "DevOps rotation Telegram bot token (@BotFather /revoke + issue new + store as TELEGRAM_BOT_TOKEN k8s Secret / GitLab CI variable)",
+      "context": "Documented in .planning/phases/999.17.2-devsecops-hardening-secrets-rotation/999.17.2-DEVOPS-HANDOFF.md §1.1. Gates main merge of 999.17.2 (.gitleaksignore fingerprints silence still-LIVE values pre-rotation). NOT blocking local resume work on 999.17.1.",
+      "blocking": false
+    },
+    {
+      "action": "DevOps rotation Garage rpc_secret (openssl rand -hex 32 + store as GARAGE_RPC_SECRET k8s Secret)",
+      "context": "Documented in 999.17.2-DEVOPS-HANDOFF.md §1.2. Gates main merge of 999.17.2.",
+      "blocking": false
+    }
+  ],
+  "decisions": [
+    {
+      "decision": "Sub-phase merge approach (Путь A) — 999.17.2 → 999.17.1 directly, NOT via main",
+      "rationale": "999.17.2 was carved-out sub-phase of 999.17.1 specifically to unblock D-12 (clean scanner baseline for Plan 04 Task 4 manual UAT). Logical merge back to parent. Avoids requiring main merge before DevOps rotation completes (which would silence still-LIVE values per .gitleaksignore Plan 01 Task 4 comment block). Local work proceeds independent of rotation timing.",
+      "phase": "999.17.2"
+    },
+    {
+      "decision": "Dev-1 — 20 additional fingerprint suppressions in .gitleaksignore for D-08 historical findings (mirrors OQ-5 pattern)",
+      "rationale": "User-approved: HEAD redactions don't affect git history (gitleaks git mode scans full history). 19 D-08-scope literals were synthetic planning-doc examples never live in production (fake AKIA, expired Garage rpc_secret in old commits, smoke-test entropy false-positives, deprecated admin-tokens). Plus 1 garage.toml expired rpc_secret. BFG/git-filter-repo NOT applied. GitLab migration is the cleanup trigger (full-history scenario → migrate as-is; fresh-repo scenario → drop entries).",
+      "phase": "999.17.2"
+    },
+    {
+      "decision": "Pnpm 11 Docker migration — rm -rf node_modules + pnpm install pattern (NOT --force, NOT --legacy, NOT force-legacy-deploy)",
+      "rationale": "Empirically verified on host: pnpm install --force does NOT refresh injectWorkspacePackages snapshot ('Already up to date'). Selective rm of .pnpm cache also insufficient. Only working refresh path: full rm of all node_modules + reinstall. Content-addressable pnpm store at /pnpm/store survives via BuildKit cache mount so re-resolve is fast. No bandaids: zero --legacy flag, zero force-legacy-deploy escape hatch.",
+      "phase": "999.17.2"
+    },
+    {
+      "decision": "8 Dockerfile / pnpm-workspace.yaml / .npmrc / lockfile follow-up commits inline within 999.17.2",
+      "rationale": "999.17-01 D-11 (2026-04-29) bumped pnpm 9→11 in package.json but did NOT verify Docker isolated build chain. Bug (Node 20 vs pnpm 11 Node-22-required + injectWorkspacePackages deploy issue + injection refresh issue) sat unnoticed until 999.17.2 Plan 02 Task 6 attempted runtime smoke. User-directed inline fixes (no scope deferral) to make pnpm start:isolated work end-to-end. Phase 999.18 added to backlog for post-migration system audit.",
+      "phase": "999.17.2"
+    },
+    {
+      "decision": "Phase 999.18 post-pnpm-11-migration system audit added to BACKLOG",
+      "rationale": "Accumulated changes from 999.17.x cycle (8 infra commits + dual lockfile regen + 22 fingerprint suppressions + Garage native env override + planning docs cleanup) warrant systemic re-evaluation rather than per-phase incremental verification. 7-dimension audit scope documented in ROADMAP.md.",
+      "phase": "999.17.2"
+    }
+  ],
+  "uncommitted_files": [],
+  "next_action": "Sub-phase merge: git checkout gsd/phase-999.17.1-quality-security-decouple-and-prove-fixtures && git merge --no-ff gsd/phase-999.17.2-devsecops-hardening-secrets-rotation -m 'merge: 999.17.2 sub-phase into 999.17.1 (D-12 clean baseline coordination)'. Then: gsd-sdk query state.begin-phase --phase 999.17.1 --name quality-security-decouple-and-prove-fixtures --plans 11. Then: read .planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-04-PLAN.md Task 4 section for V-07/V-08/V-09 manual UAT recipes. Confirm with user whether to (a) execute only Plan 04 Task 4 manual UAT now and stop, or (b) continue through Plans 05-10 as full Wave 3+4 cycle.",
+  "context_notes": "999.17.2 was a 7-decision sub-phase carved out of 999.17.1 to unblock paused Plan 04 Task 4 (D-12 coordination). Now ships clean baseline: pnpm security:secrets-full exit 0 (1149 commits, 21.49 MB scanned, no leaks); pnpm start:isolated boots 6 apps + Garage healthy + /health/ready returns HTTP 200; pnpm start:native infra healthy. 8/8 verifier must-haves PASSED. 999.17.1 Wave 3 Plans 05-08 are ORTHOGONAL to 999.17.2 — fixtures have own allowlist (D-05) + manifest shape allowlist (D-06) is shape-not-path discriminator. Main merge of 999.17.2 deferred until DevOps rotation; local resume work proceeds independent of rotation timing. Branch state: current=999.17.2 HEAD (2f938e2 → 32ffb24); 999.17.1 paused at 0d47d28 (linear ancestor of 999.17.2). Sub-phase merge required as first resume action."
+}

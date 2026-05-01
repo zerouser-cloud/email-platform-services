@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG NODE_VERSION=20-alpine
+ARG NODE_VERSION=22-alpine
 
 # ─── Stage 1: Builder ─────────────────────────────────────────
 FROM node:${NODE_VERSION} AS builder
@@ -29,12 +29,32 @@ COPY tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/${APP_NAME} ./apps/${APP_NAME}
 
-# Step 4: Generate proto TypeScript, then build packages in dependency order
+# Step 4a: Generate proto TypeScript, then build shared packages in dependency order.
+# These build into packages/*/dist/ in source workspace.
 RUN pnpm --filter @email-platform/contracts run generate \
     && pnpm --filter @email-platform/contracts run build \
     && pnpm --filter @email-platform/config run build \
-    && pnpm --filter @email-platform/foundation run build \
-    && pnpm --filter @email-platform/${APP_NAME} run build
+    && pnpm --filter @email-platform/foundation run build
+
+# Step 4b: Refresh injected workspace dependencies before app build.
+# pnpm 11 with injectWorkspacePackages=true snapshots workspace package contents
+# at install time. After Step 4a fills source dist/, injected copies in
+# node_modules/.pnpm/@email-platform+* remain stale. `pnpm install --force` does
+# NOT refresh them (verified empirically — pnpm reports "already up to date"
+# even with new dist/). The only refresh path: remove node_modules entirely
+# and reinstall, which forces fresh injection from current source.
+# Content-addressable pnpm store at /pnpm/store survives this so re-resolve
+# is fast (no network fetches). This is the canonical pattern for pnpm 11
+# multi-stage Docker builds with injectWorkspacePackages.
+RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+# Step 4c: Now build the app — its node_modules contain re-injected dist/ from packages.
+RUN pnpm --filter @email-platform/${APP_NAME} run build
+
+# Step 4d: Refresh once more so deploy bundles the just-built app dist/.
+RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 # Step 5: Deploy production bundle
 RUN pnpm deploy --filter @email-platform/${APP_NAME} --prod /prod/app

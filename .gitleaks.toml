@@ -25,3 +25,25 @@ useDefault = true
 # regex = '''project_[a-z0-9]{32}'''
 # tags = ["internal-token"]
 
+# ----------------------------------------------------------------------------
+# Phase 999.17.2 D-05 — fixture path allowlist (test infrastructure exception).
+# Industry-standard exception for security tooling self-tests. Anchored regex.
+# See .planning/phases/999.17.2-.../999.17.2-CONTEXT.md D-05.
+# ----------------------------------------------------------------------------
+[[allowlists]]
+description = "Test fixtures (security gate self-tests) — synthetic triggering-format secrets used to prove scanner detection works. Industry-standard exception for security tooling test infrastructure (cf. semgrep test framework, trivy testdata, gitleaks own tests/). Anchored regex; one well-known path; no other path-allowlists."
+paths = ['''^scripts/security/fixtures/''']
+
+# ----------------------------------------------------------------------------
+# Phase 999.17.2 D-06 — manifest shape-and-scope allowlist (idiomatic gitleaks v8 pattern).
+# NOT a path carve-out: discriminates by SHAPE of finding inside one specific file.
+# Real AWS keys, JWTs, or PEM blocks in the same file STILL fire (default rules unaffected).
+# See .planning/phases/999.17.2-.../999.17.2-CONTEXT.md D-06 + canonical README package-lock.json example.
+# ----------------------------------------------------------------------------
+[[allowlists]]
+description = "GSD framework integrity manifest — ~280 SHA-256 file hashes. Suppresses findings ONLY when (1) located in this exact file AND (2) extracted secret shape is bare 64-char lowercase hex. Real AWS keys, JWTs, or PEM blocks in the same file still fire because their secret shapes don't satisfy the regex (default rules unaffected). Idiomatic gitleaks v8 pattern — see canonical package-lock.json example in gitleaks README. NOTE: empirical verification (Phase 999.17.2-01 Task 2) showed gitleaks v8.30.1 builds Match = '<key>: \"<hash>\"' (entire capture incl. prefix), so anchored ^[a-f0-9]{64}$ never satisfies regexTarget=\"match\". regexTarget=\"secret\" targets the extracted secret (bare hex) and works correctly. Per RESEARCH.md A5: 'if hashes still fire, swap to secret'."
+condition = "AND"
+paths = ['''^\.claude/gsd-file-manifest\.json$''']
+regexes = ['''^[a-f0-9]{64}$''']
+regexTarget = "secret"
+
