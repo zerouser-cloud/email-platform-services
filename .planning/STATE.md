@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
+status: executing
 stopped_at: Completed 999.17.2-01-PLAN.md
-last_updated: '2026-04-30T09:28:40.818Z'
-last_activity: 2026-04-30
+last_updated: '2026-05-01T07:56:03.068Z'
+last_activity: 2026-05-01 -- Phase 999.17.1 execution started
 progress:
-  total_phases: 45
+  total_phases: 47
   completed_phases: 30
   total_plans: 171
   completed_plans: 166
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.17.2 — devsecops-hardening-secrets-rotation
+**Current focus:** Phase 999.17.1 — quality-security-decouple-and-prove-fixtures
 
 ## Current Position
 
-Phase: 999.17.2 (devsecops-hardening-secrets-rotation) — EXECUTING
-Plan: 2 of 2
-Status: Phase complete — ready for verification
-Last activity: 2026-04-30
+Phase: 999.17.1 (quality-security-decouple-and-prove-fixtures) — EXECUTING
+Plan: 1 of 11
+Status: Executing Phase 999.17.1
+Last activity: 2026-05-01 -- Phase 999.17.1 execution started
 
 Progress: [██████████] 97%
 
@@ -356,6 +356,7 @@ Progress: [██████████] 97%
 - Phase 999.17 (devsecops-shift-left-security-tooling) DONE — 2026-04-29. All 10 plans (01-10) executed; phase verified end-to-end in Plan 10. **Closures:** Folded todo 2026-04-17 (env-parity sync check `.env` vs `.env.docker` vs `.env.example`) → CLOSED via D-10 mechanism (`scripts/check-env-parity.sh` UNCHANGED from Phase 24.1 + 999.1.9 W10 baseline; wrapped by `pnpm run security:env-parity` in Plan 07; runs on every pre-push). **Artifacts shipped (12+):** 8 npm-scripts under `security:*` namespace (Plans 06+07: `security:pre-commit`, `security:pre-push`, `security:secrets-staged`, `security:typecheck`, `security:env-parity`, `security:semgrep-diff`, `security:audit-if-lock-changed`, `security:trivy-config-if-changed`); 2 husky hooks (`.husky/pre-commit` NEW Plan 06, `.husky/pre-push` REFACTORED Plan 07); 3 helper shell scripts under `scripts/security/` (audit-if-lock-changed.sh, trivy-config-if-changed.sh, semgrep-diff.sh — Plan 07); 6 root config files (`.lintstagedrc.json` Plan 02, `.gitleaks.toml` + `.gitleaksignore` Plan 03, `.semgrep.yml` + `.semgrepignore` Plan 04, `.trivyignore` Plan 05, `renovate.json` Plan 08); 2 root docs (`DEVOPS-HANDOFF.md` + `.gitlab-ci-security.yml.example` Plan 09); pnpm 9→11 bump Plan 01 (fixes `pnpm audit` HTTP 410 per D-11). **Smoke results (Plan 10):** Pre-commit BLOCKS fake-secret commits + PASSES clean commits + BYPASSES via `--no-verify` (D-04 expected); pre-push runs typecheck + env-parity + semgrep-diff + conditional audit + conditional trivy-config; env-parity green on clean tree (folded todo closure VERIFIED); dual-runtime smoke `pnpm start:native` AND `pnpm start:isolated` both reach `/health/ready` 200. **Out of scope (deferred per CONTEXT §Deferred Ideas):** GitHub Actions security workflow (short transition window; GitLab migration imminent); continuous Trivy `image` rescan production (DevOps cron — `DEVOPS-HANDOFF.md`); Renovate `automerge: true` tuning (post-DevOps-activation, 2-4 weeks empirical data); custom NestJS-specific Semgrep rules (track 2 weeks of registry findings first per D-13); TS rewrite of `check-env-parity.sh` (current grep-based works; refactor only if `.merge()`/`.extend()` Zod schemas appear); license compliance dashboards (GitLab Premium feature). **Next:** DevOps activates `renovate.json` + implements CI security pipeline per `DEVOPS-HANDOFF.md` + `.gitlab-ci-security.yml.example`.
 - Phase 999.17.1 inserted after Phase 999.17: quality-security-decouple-and-prove-fixtures (URGENT)
 - Phase 999.17.2 inserted after Phase 999.17: DevSecOps Hardening + Secrets Rotation (URGENT)
+- Phase 999.17.3 inserted after Phase 999.17: vulnerability-remediation-direct-dep-upgrades — clean direct-dep upgrades to close 22 pnpm-audit findings (1 critical / 8 high / 13 moderate) surfaced when pnpm 9->11 fixed audit HTTP 410. NO pnpm.overrides workarounds. Carve-out from 999.17.1 Plan 04 Task 4 (mirrors 999.17.2 sub-phase pattern). Returns to 999.17.1 V-08/V-09 on clean baseline. (URGENT)
 
 ## Session Continuity
 

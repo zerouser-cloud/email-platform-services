@@ -819,6 +819,17 @@ Plans:
 - [x] 999.17-11-PLAN.md — GAP-CLOSURE: restore working build-script trust gate (CR-01 — strictDepBuilds:true + exhaustive allowBuilds + Plan 02 SUMMARY correction)
 - [x] 999.17-12-PLAN.md — GAP-CLOSURE: fix gitleaks allowlist regex blind spot (CR-02 — delete unanchored allowlist; rely on useDefault path exclusions)
 
+### Phase 999.17.3: vulnerability-remediation-direct-dep-upgrades (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.17
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 999.17.3 to break down)
+
 ### Phase 999.17.2: DevSecOps Hardening + Secrets Rotation (INSERTED)
 
 **Goal:** Close shift-left coverage gaps surfaced by 999.17.1 Plan 04 empirical UAT (4 real config bugs + 1 tracked-secret pattern). Sub-phase fixes scanner config (`.gitleaksignore` invalid glob → AM-01; `secrets-full.sh` `dir`→`git` → AM-02; two anchored top-level `[[allowlists]]` → D-05 fixtures + D-06 manifest shape), one-time content cleanup of 23 gitleaks findings to D-07 redacted format (D-08), AI-discipline rule in CLAUDE.md (D-09), 12-Factor Garage `rpc_secret` via NATIVE `GARAGE_RPC_SECRET` env override (D-10 — research-amended path; no envsubst, no template, no `.gitignore` for tracked config), `999.17.2-DEVOPS-HANDOFF.md` with rotation+CI+k8s+history+GitLab-migration coordination (D-11). Defense principle (locked): one standard for everything in git — defense via format (redacted examples), not via path. Two narrow exceptions justified independently: D-05 test infrastructure (industry-standard self-tests) + D-06 manifest shape-allowlist (idiomatic gitleaks v8 pattern, discriminates by shape not path). Discovered 2026-04-30 after 999.17.1 Plan 04 setup-push UAT exposed 142 raw findings → drilled to 4 real bugs + 1 tracked secret + 1 GSD-framework false-positive.
