@@ -13,10 +13,11 @@
 **Goal:** Унифицированные абстракции для всей инфраструктуры — каркасы в foundation, per-service адаптеры — с изоляцией сервисов от знаний об инфраструктуре, в стиле Clean/Hexagonal.
 
 **Target features:**
+
 - gRPC client каркас в foundation + per-service адаптеры в infrastructure/clients/
 - RabbitMQ publisher/consumer абстракция + per-service конфигурация
 - HTTP client каркас для внешних API + per-service адаптеры
-- S3 client через AWS SDK (unified MinIO/Garage, env rename MINIO_* → S3_*)
+- S3 client через AWS SDK (unified MinIO/Garage, env rename MINIO*\* → S3*\*)
 - Redis client в едином стиле
 - Distributed tracing (propagation через gRPC metadata, RabbitMQ headers)
 - Graceful shutdown (корректное завершение connections, in-flight запросов)
@@ -78,6 +79,7 @@
 - ✓ Config Mechanism Consolidation (inline amend of Phase 999.1 post-close gaps F-15 + F-16): `loadConfig` relocated to `packages/foundation/src/external/config/load-config.ts` (now sole canonical `process.env` boundary), new foundation-owned `createConfigModule<TEnv>({schema, token, narrowPorts})` factory symmetric to gRPC `defineGrpcClient` precedent, 6/6 services migrated from hand-rolled `@Global() @Module({}) static forRoot()` to factory call, 6× `{svc}-config.provider.ts` files deleted, 4× `drizzle.config.ts` migrated to `loadConfig` (0 direct `process.env` reads in `apps/`), `packages/config/src/config-loader.ts` deleted + re-export removed; 999.1 artefacts inline-amended to 16 F-NN (F-15 blocker L3, F-16 major L4) + 30 invariants (I-0.1 reworded to «no CLI exception», new I-3.5 «foundation owns config DI factory»); 999.1-VALIDATION.md frontmatter reflipped back to `status: complete` / `nyquist_compliant: true` after re-verification; dual-mode runtime smoke gate passed (`pnpm start:native` + `pnpm start:isolated`, both HTTP 200 `/health/ready` + 5/5 upstreams up + 0 ERROR/WARN/FATAL); Phase 999.1.8 inserted between 999.1 and 999.1.1..999.1.7 (renumbered from slot originally reserved by 999.1 SOLUTIONS.md for F-01 TopologySchema refactor) — Phase 999.1.8
 
 ### Active
+
 - [ ] gRPC client каркас в foundation + per-service адаптеры
 - [ ] RabbitMQ publisher/consumer абстракция + per-service конфигурация
 - [ ] HTTP client каркас для внешних API + per-service адаптеры
@@ -118,38 +120,39 @@
 
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| DDD только в apps/, не в packages/ | Packages — утилитарные библиотеки, DDD в них избыточен | ✓ Good |
-| Тесты отложены на следующий этап | Сначала прочный фундамент, потом покрытие тестами | — Pending |
-| Бизнес-логику не реализуем | Фокус на архитектурной чистоте, не на фичах | — Pending |
-| MongoDB → PostgreSQL + Drizzle | Реляционные данные (кампании→группы→получатели), типобезопасность, миграции, лучший DDD fit | ✓ Good |
-| Kubernetes откладываем | Docker Compose достаточен для текущего масштаба (6 сервисов) | — Pending |
-| Инфра-изменения только с одобрения | Порты, credentials, docker-compose нельзя менять без согласования | ✓ Good |
-| PersistenceModule — единый фасад для PostgreSQL+Redis | Один модуль, один pool, один scope. Нет отдельных DrizzleModule/HealthModule | ✓ Good |
-| Deployment через Coolify | Self-hosted PaaS для всех проектов, auto-deploy из GitHub, Traefik + auto-TLS | ✓ Good |
-| CI push-based deploy вместо Diun | Diun слал 6 webhooks per cycle, CI вызывает Coolify API 1 раз после сборки | ✓ Good |
-| Garage вместо MinIO на prod | Coolify one-click, S3-compatible, легковесный | ✓ Good |
-| Build-info.json вместо env vars | Зашито в образ при сборке, не зависит от runtime env | ✓ Good |
-| Canonical Config Access Contract (per-service `{SVC}_CONFIG` Symbol) | Единый pattern для config-инъекции — идентичность сервиса задаёт root Symbol; foundation объявляет narrow config interfaces (`CacheConfig`/`PersistenceConfig`/`GrpcClientConfig`/…); apps собирают slice-factories через `{SVC}_CONFIG`. Заменяет `@nestjs/config` полностью. `@Global()` per-service `{Svc}ConfigModule` — обязательно для резолва nested `forRootAsync` | ✓ Good — Phase 999.11.1 |
-| Use-case config-purity (D-09) | `application/use-cases/` получают env-values как method args, не через DI. Keeps use-cases чистыми и тестируемыми без config fixtures | ✓ Good — Phase 999.11.1 |
-| Canonical infrastructure tree split (inbound/outbound/bootstrap) | `apps/{svc}/src/infrastructure/` делится на 3 bin per Cockburn primary/secondary + Uncle Bob Ring 3/Ring 4. Inbound = driving adapters (controllers/consumers). Outbound = driven adapters (repositories/clients/publishers). Bootstrap = framework glue (config/health/throttle/logging) — не adapters, Ring 4. Feature-slicing внутри каждого направления по aggregate/upstream/vendor/concern | ✓ Good — Phase 999.11.2 |
-| Inbound port bindings co-located with controller (D-02 refinement) | port→service bindings (`{ provide: XXX_PORT, useClass: YyyService }`) живут в inbound adapter module (GrpcModule/RmqModule), не в root {Svc}Module. Hexagonal cohesion: inbound module владеет всем что его controller consumes. Surfaced by Phase 999.11.2 Plan 10 D-14 smoke gate (DI scope regression caught at runtime) | ✓ Good — Phase 999.11.2 |
+| Decision                                                             | Rationale                                                                                                                                                                                                                                                                                                                                                                                        | Outcome                 |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| DDD только в apps/, не в packages/                                   | Packages — утилитарные библиотеки, DDD в них избыточен                                                                                                                                                                                                                                                                                                                                           | ✓ Good                  |
+| Тесты отложены на следующий этап                                     | Сначала прочный фундамент, потом покрытие тестами                                                                                                                                                                                                                                                                                                                                                | — Pending               |
+| Бизнес-логику не реализуем                                           | Фокус на архитектурной чистоте, не на фичах                                                                                                                                                                                                                                                                                                                                                      | — Pending               |
+| MongoDB → PostgreSQL + Drizzle                                       | Реляционные данные (кампании→группы→получатели), типобезопасность, миграции, лучший DDD fit                                                                                                                                                                                                                                                                                                      | ✓ Good                  |
+| Kubernetes откладываем                                               | Docker Compose достаточен для текущего масштаба (6 сервисов)                                                                                                                                                                                                                                                                                                                                     | — Pending               |
+| Инфра-изменения только с одобрения                                   | Порты, credentials, docker-compose нельзя менять без согласования                                                                                                                                                                                                                                                                                                                                | ✓ Good                  |
+| PersistenceModule — единый фасад для PostgreSQL+Redis                | Один модуль, один pool, один scope. Нет отдельных DrizzleModule/HealthModule                                                                                                                                                                                                                                                                                                                     | ✓ Good                  |
+| Deployment через Coolify                                             | Self-hosted PaaS для всех проектов, auto-deploy из GitHub, Traefik + auto-TLS                                                                                                                                                                                                                                                                                                                    | ✓ Good                  |
+| CI push-based deploy вместо Diun                                     | Diun слал 6 webhooks per cycle, CI вызывает Coolify API 1 раз после сборки                                                                                                                                                                                                                                                                                                                       | ✓ Good                  |
+| Garage вместо MinIO на prod                                          | Coolify one-click, S3-compatible, легковесный                                                                                                                                                                                                                                                                                                                                                    | ✓ Good                  |
+| Build-info.json вместо env vars                                      | Зашито в образ при сборке, не зависит от runtime env                                                                                                                                                                                                                                                                                                                                             | ✓ Good                  |
+| Canonical Config Access Contract (per-service `{SVC}_CONFIG` Symbol) | Единый pattern для config-инъекции — идентичность сервиса задаёт root Symbol; foundation объявляет narrow config interfaces (`CacheConfig`/`PersistenceConfig`/`GrpcClientConfig`/…); apps собирают slice-factories через `{SVC}_CONFIG`. Заменяет `@nestjs/config` полностью. `@Global()` per-service `{Svc}ConfigModule` — обязательно для резолва nested `forRootAsync`                       | ✓ Good — Phase 999.11.1 |
+| Use-case config-purity (D-09)                                        | `application/use-cases/` получают env-values как method args, не через DI. Keeps use-cases чистыми и тестируемыми без config fixtures                                                                                                                                                                                                                                                            | ✓ Good — Phase 999.11.1 |
+| Canonical infrastructure tree split (inbound/outbound/bootstrap)     | `apps/{svc}/src/infrastructure/` делится на 3 bin per Cockburn primary/secondary + Uncle Bob Ring 3/Ring 4. Inbound = driving adapters (controllers/consumers). Outbound = driven adapters (repositories/clients/publishers). Bootstrap = framework glue (config/health/throttle/logging) — не adapters, Ring 4. Feature-slicing внутри каждого направления по aggregate/upstream/vendor/concern | ✓ Good — Phase 999.11.2 |
+| Inbound port bindings co-located with controller (D-02 refinement)   | port→service bindings (`{ provide: XXX_PORT, useClass: YyyService }`) живут в inbound adapter module (GrpcModule/RmqModule), не в root {Svc}Module. Hexagonal cohesion: inbound module владеет всем что его controller consumes. Surfaced by Phase 999.11.2 Plan 10 D-14 smoke gate (DI scope regression caught at runtime)                                                                      | ✓ Good — Phase 999.11.2 |
 
 ## Infrastructure Module Architecture
 
 Backing services абстрагированы через модули-фасады в packages/foundation. Каждый модуль владеет connection, health indicator и exports для сервисов.
 
-| Модуль | Backing services | Статус |
-|--------|-----------------|--------|
-| **PersistenceModule** | PostgreSQL (pool, Drizzle ORM, health) | Ready — Phase 10 |
-| **CacheModule** | Redis (DI client, CachePort, namespaced keys, health) | Ready — Phase 21 |
+| Модуль                                                        | Backing services                                                                                                                                                                                                                                               | Статус                  |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| **PersistenceModule**                                         | PostgreSQL (pool, Drizzle ORM, health)                                                                                                                                                                                                                         | Ready — Phase 10        |
+| **CacheModule**                                               | Redis (DI client, CachePort, namespaced keys, health)                                                                                                                                                                                                          | Ready — Phase 21        |
 | **S3CoreModule + BucketStorageModule + ReportsStorageModule** | MinIO / Garage (non-global S3Client singleton via class-identity dedup, self-contained BucketStorageModule.forBucket factory, shared reports module in foundation, per-bucket health tokens, reachable only via `@email-platform/foundation/internal` subpath) | Ready — Phase 22 + 22.1 |
-| **EventModule** | RabbitMQ (connection, publisher, consumer, health) | Planned — Phase 25 |
-| **gRPC Client Promisified Proxy** | gRPC (foundation `Promisified<T>` mapped type + Proxy factory; consumers inject typed Promise-returning client directly; deadline metadata + per-call CallOpts; observability deferred to future phase) | Ready — Phase 999.7.3 |
-| **HTTP Client + Circuit Breaker** | External HTTP APIs (resilient client, retry, timeout) | Planned — Phase 24 |
+| **EventModule**                                               | RabbitMQ (connection, publisher, consumer, health)                                                                                                                                                                                                             | Planned — Phase 25      |
+| **gRPC Client Promisified Proxy**                             | gRPC (foundation `Promisified<T>` mapped type + Proxy factory; consumers inject typed Promise-returning client directly; deadline metadata + per-call CallOpts; observability deferred to future phase)                                                        | Ready — Phase 999.7.3   |
+| **HTTP Client + Circuit Breaker**                             | External HTTP APIs (resilient client, retry, timeout)                                                                                                                                                                                                          | Planned — Phase 24      |
 
 Сервисы собирают только нужные модули:
+
 - auth, sender, parser, audience → PersistenceModule
 - sender → + EventModule (publish), + CacheModule (если Redis отдельно)
 - notifier → EventModule (consume)
@@ -160,6 +163,7 @@ Backing services абстрагированы через модули-фасад
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd:transition`):
+
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -167,10 +171,12 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone** (via `/gsd:complete-milestone`):
+
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after Phase 999.11.4.1 complete (Refactor 5 project skills from inventory-level to principles-level — docs-only consolidated remediation for 11 refresh-skill findings from Phase 999.11.4 AUDIT, 6 plans across 6 waves, verification 9/9 must-haves PASSED). All 11 findings closed (nhm-F-03/04, icl-F-01/02, ig-F-01/02, rsv-F-01/02, coi-F-01/02/03) in `999.11.4-SOLUTIONS.md`. D-4 "Principles, Not Inventory" header block present in 9 refactored SKILL.md files (5 primary + 4 aligned-sweep: twelve-factor, env-schema, gsd-flow-guard, branching-patterns). Every new assertion passes rename test (D-13). Zero code changes in `apps/`, `packages/`, `infra/`. Secondary fix: `nestjs-hexagonal-mapping/references/NAMING.md` refactored to `{svc}`/`FooController`/grep-on-demand pattern after code-review flagged residual inventory (WR-01/02/03 resolved, REVIEW-FIX.md records commit `35d1988`). Newcomer-test (D-15) per skill: 0 defects. Clean-ddd-hexagonal deferred to a separate sub-phase; no-magic-values fix-code findings routed to Phase 999.11.4.2. Previous Phase 999.11.4 complete before this — see git log --grep=999.11.4.)*
+
+_Last updated: 2026-05-02 after Phase 999.17.3 complete (Vulnerability remediation via direct-dep upgrades — sub-phase carve-out из 999.17.1 Plan 04 Task 4. 5 ordered waves закрыли 21/22 audit advisories — 1c→0c, 8h→0h, 13m→1m. Финальный residual: esbuild GHSA-67mh-4wv8-2f99 (drizzle-kit-blocked). Per user-locked Path A1 (revised D-01 acceptance): strict-zero deferred до отдельной phase 999.17.5 для drizzle-orm 0.45.2 → 1.x bump. Verification 11/11 must-haves PASSED. Major changes: ESLint v8→v9.39.4 + flat-config rewrite (`.eslintrc.js` → `eslint.config.cjs` per D-09, 9 architectural overrides preserved); NestJS family 11.0.1→11.1.19 across 6 apps + foundation; @grpc/proto-loader 0.7.15→0.8.0 (5 apps); @aws-sdk/client-s3+lib-storage 3.1030→3.1040; @nestjs/cli+schematics; grpc-tools, turbo bumped; ts-node-dev removed (D-03 carry-along). drizzle-kit RC bump empirically reverted in W4 (rc.1 incompatible с drizzle-orm 0.45.2 `_relations` subpath). 12 atomic commits. Pattern A (atomic-bump) + Pattern G (lockfile lock-in SEAL) проверены. Previous Phase 999.11.4.1 complete before this — see git log --grep=999.11.4.1.)_
