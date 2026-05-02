@@ -37,3 +37,8 @@ npm-debug.log*
 
 # Private credentials (Claude workspace)
 .planning/.secrets/
+
+# Claude/GSD ephemeral state
+.claude/scheduled_tasks.lock
+.claude/gsd-user-files-backup/
+.claude/worktrees/
