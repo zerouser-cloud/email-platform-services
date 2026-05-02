@@ -1,180 +1,188 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-01T07:57:11.575Z",
-  "phase": "999.17.1",
-  "phase_name": "quality-security-decouple-and-prove-fixtures",
-  "phase_dir": ".planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures",
-  "plan": 4,
-  "task": 4,
-  "total_tasks": 4,
-  "status": "paused",
+  "timestamp": "2026-05-02T11:21:35.255Z",
+  "phase": "999.17.3",
+  "phase_name": "vulnerability-remediation-direct-dep-upgrades",
+  "phase_dir": ".planning/phases/999.17.3-vulnerability-remediation-direct-dep-upgrades",
+  "plan": "post-verify",
+  "task": "carve-out-999.18",
+  "total_tasks": 5,
+  "status": "paused_for_audit_carve_out",
+  "carve_out_chain": [
+    {
+      "level": 1,
+      "phase": "999.17.1",
+      "phase_name": "quality-security-decouple-and-prove-fixtures",
+      "status": "paused_mid_plan_04_task_4",
+      "paused_at": "2026-05-01T07:57:11.575Z",
+      "blocker": "V-08 + V-09 of Plan 04 Task 4 require clean pnpm-audit baseline",
+      "resume_after": "999.17.3 sub-phase merge AND 999.18 audit complete"
+    },
+    {
+      "level": 2,
+      "phase": "999.17.3",
+      "phase_name": "vulnerability-remediation-direct-dep-upgrades",
+      "status": "verified_but_post_close_regression",
+      "verified_at": "2026-05-02T13:30:00Z",
+      "verification_score": "11/11 (Path A1 override)",
+      "post_close_finding": "Isolated-mode Dockerfile workspace-leak regression discovered in /gsd:verify-work UAT 2026-05-02 — Issue #1 closed by commit caaad40, Issue #2 deferred to 999.18",
+      "resume_after": "999.18 audit complete (Issue #2 in 999.18 scope)"
+    },
+    {
+      "level": 3,
+      "phase": "999.18",
+      "phase_name": "post-pnpm-11-migration-system-audit",
+      "status": "pending_promotion_from_backlog",
+      "scope_summary": "7 dimensions in current backlog entry + 2 to be added in discuss-phase: (8) Coolify → Kubernetes migration impact, (9) Architectural good-practices review",
+      "absorbs": ["999.17.3 Issue #2 (foundation tsc workspace-inject regression)"],
+      "resume_after": "this is the active level — no further nesting"
+    }
+  ],
   "completed_tasks": [
     {
-      "id": "999.17.1-01",
-      "name": "Wave 1: package.json namespace split (quality:* / security:* / hygiene:*) + scripts/security/_versions.sh",
+      "id": "999.17.3 W1",
+      "name": "Wave 1 Critical (gRPC) — @grpc/proto-loader 0.7.15 → 0.8.0",
       "status": "done",
-      "commit": "21142d6"
+      "commit": "4185cb3"
     },
     {
-      "id": "999.17.1-02",
-      "name": "Wave 1: semgrep-diff.sh fixes (D-4 metrics-off, D-5 counter, D-10 custom rules)",
+      "id": "999.17.3 W2",
+      "name": "Wave 2 Runtime — NestJS family ^11.0.1 → ^11.1.19 + AWS SDK ^3.1030 → ^3.1040",
       "status": "done",
-      "commit": "306f1e2"
+      "commit": "c1ad020 5ef803b 4c4c0c4 fe81a13 728f588"
     },
     {
-      "id": "999.17.1-03",
-      "name": "Wave 1: append fixtures path-block to .gitleaksignore/.semgrepignore/.trivyignore",
+      "id": "999.17.3 W3",
+      "name": "Wave 3 ESLint v9 flat config rewrite",
       "status": "done",
-      "commit": "183a760"
+      "commit": "a74a563"
     },
     {
-      "id": "999.17.1-04 Tasks 0-3",
-      "name": "Wave 2: pre-push-orchestrator.sh + verify-if-changed.sh stub + .husky/pre-push delegator + .husky/pre-commit refactor",
+      "id": "999.17.3 W4",
+      "name": "Wave 4 Dev tooling — @nestjs/cli + grpc-tools + turbo + ts-node-dev removal; drizzle-kit RC reverted (Path A1)",
       "status": "done",
-      "commit": "0d47d28",
-      "progress": "Tasks 0-3 of 4 done; partial SUMMARY 8fa1402 documents pause point"
+      "commit": "88646cd 974cc2a f60cefd 1c32245"
     },
     {
-      "id": "999.17.2 sub-phase merge",
-      "name": "Sub-phase merge 999.17.2 -> 999.17.1 (D-12 clean baseline coordination)",
-      "status": "done",
-      "commit": "78296c0",
-      "progress": "29 commits from 999.17.2 merged with --no-ff per D-12 sub-phase boundary"
+      "id": "999.17.3 W5",
+      "name": "Wave 5 Lockfile lock-in — canonical regen, D-12 idempotence, native dual-pass smoke",
+      "status": "done_with_caveat",
+      "commit": "df9a8a6",
+      "progress": "Native smoke green; isolated documented as 'pre-existing baseline issue' — claim partially incorrect (corrected via UAT post-close finding 2026-05-02)"
     },
     {
-      "id": "999.17.1-04 amendment 1/3",
-      "name": "Plan 04 Task 4 amendment: env-parity drift GARAGE_RPC_SECRET (carry-over from 999.17.2 D-10 incompleteness)",
+      "id": "999.17.3 verify-work formal",
+      "name": "Goal-backward verification — 11/11 must-haves under Path A1 acceptance",
       "status": "done",
-      "commit": "ac94219",
-      "progress": "Added GARAGE_RPC_SECRET to .env.example + ORCHESTRATOR_ONLY_KEYS in scripts/check-env-parity.sh; .env updated locally (gitignored); env-parity green"
+      "commit": "f016223"
     },
     {
-      "id": "999.17.1-04 amendment 2a/3",
-      "name": "Plan 04 Task 4 amendment: semgrep-diff.sh image upgrade returntocorp/semgrep:1.50 -> semgrep/semgrep:1.95.0",
+      "id": "999.17.3 post-close UAT discovery",
+      "name": "/gsd:verify-work 999.17.3 UAT Test 1 (Cold Start Smoke) found isolated-mode regression",
       "status": "done",
-      "commit": "d59f183"
+      "commit": "(no commit; UAT.md created in caaad40)"
     },
     {
-      "id": "999.17.1-04 amendment 2b/3",
-      "name": "Plan 04 Task 4 amendment follow-up: switch semgrep-diff.sh from `scan --baseline-commit` to `ci` mode (deterministic exit-code on non-TTY stdout)",
+      "id": "999.17.3 Issue #1 fix",
+      "name": "/gsd:fast — .dockerignore nested-glob bug — `node_modules`/`dist` → `**/node_modules`/`**/dist`",
       "status": "done",
-      "commit": "55c4170",
-      "progress": "Image rename alone insufficient: scan --baseline-commit silently exits 2 on redirected stdout in BOTH 1.50 and 1.95.0; ci subcommand designed for CI/pre-push, takes baseline via SEMGREP_BASELINE_COMMIT env var; verified 677 rules / 0 findings / exit 0"
-    },
-    {
-      "id": "999.17.1-04 amendment 3/3",
-      "name": "Plan 04 Task 4 amendment: add .prettierignore + reformat packages/config/src/service.ts",
-      "status": "done",
-      "commit": "6e71380",
-      "progress": ".prettierignore excludes packages/contracts/src/generated/ + dist/; service.ts reformatted (line-wrap drift from 999.1.9-09 commit 2c2a78e)"
-    },
-    {
-      "id": "999.17.1-04 V-07",
-      "name": "Plan 04 Task 4 V-07: delete-only push exits 0 without orchestrator (D-19)",
-      "status": "done",
-      "progress": "PASS: log contains '[INFO] Delete-only push detected'; orchestrator skipped; push exit 0"
+      "commit": "caaad40",
+      "progress": "Closes Issue #1 (host packages/*/node_modules + apps/*/node_modules leak via COPY); empirically verified contracts generate now passes — Issue #2 surfaces at next layer (foundation tsc)"
     }
   ],
   "remaining_tasks": [
     {
-      "id": "999.17.1-04 V-08",
-      "name": "Plan 04 Task 4 V-08: mixed push (delete + new ref) runs orchestrator full chain on clean audit baseline",
-      "status": "blocked_by_999.17.3",
-      "details": "Semantic acceptance: '[START] quality / security / hygiene' all in log. ALREADY OBSERVED in last attempt — orchestrator dispatched all 3 axes correctly. But push BLOCKED by 22 pnpm-audit findings in security axis (1 critical / 8 high / 13 moderate). Re-run AFTER 999.17.3 merges back with clean audit. Note: V-08 acceptance is orchestrator BEHAVIOR, not zero findings — orchestrator blocking on real bugs IS correct."
-    },
-    {
-      "id": "999.17.1-04 V-09",
-      "name": "Plan 04 Task 4 V-09: quality FAIL but hygiene OK (D-2 decoupling acceptance)",
-      "status": "blocked_by_999.17.3",
-      "details": "Semantic acceptance: '[FAIL] quality' AND '[ OK ] hygiene' in same run. Re-run after 999.17.3 with explicit typecheck-failure injection per Plan 04 PLAN.md Test 3 recipe."
-    },
-    {
-      "id": "999.17.1-05",
-      "name": "Wave 3: gitleaks fixtures + verify-gitleaks.sh",
+      "id": "999.18-promote",
+      "name": "/gsd:review-backlog → promote 999.18 from BACKLOG to active milestone",
       "status": "not_started"
     },
     {
-      "id": "999.17.1-06a",
-      "name": "Wave 3: Custom Semgrep Rule 1 — no-raw-env-outside-config + positive/negative fixtures",
+      "id": "999.18-discuss",
+      "name": "/gsd:discuss-phase 999.18 — fold expanded scope: Issue #2 empirical input + dim 8 (Coolify→k8s) + dim 9 (architectural good-practices); decide audit-only vs audit-and-fix mode",
       "status": "not_started"
     },
     {
-      "id": "999.17.1-06b",
-      "name": "Wave 3: Custom Semgrep Rule 2 — grpc-controller-missing-filter + eval-injection D-3 reproducer + verify-semgrep.sh",
+      "id": "999.18-plan",
+      "name": "/gsd:plan-phase 999.18 — likely 4-plan audit pattern (research → audit findings → SOLUTIONS variants → synthesis) per 999.1 precedent",
       "status": "not_started"
     },
     {
-      "id": "999.17.1-07",
-      "name": "Wave 3: trivy-config + trivy-fs fixtures + verify scripts",
+      "id": "999.18-execute",
+      "name": "/gsd:execute-phase 999.18 — auto-creates branch via per-phase branching",
       "status": "not_started"
     },
     {
-      "id": "999.17.1-08",
-      "name": "Wave 3: pnpm-audit + build-trust fixtures + verify scripts",
+      "id": "999.18-verify",
+      "name": "/gsd:verify-work 999.18",
       "status": "not_started"
     },
     {
-      "id": "999.17.1-09",
-      "name": "Wave 3: verify.sh dispatcher + verify-if-changed.sh predicate (replaces Plan 04 stub)",
-      "status": "not_started"
-    },
-    {
-      "id": "999.17.1-10",
-      "name": "Wave 4: 999.17.1-VERIFICATION.md + 999.17.1-DEVOPS-HANDOFF.md + runtime-smoke-verification",
-      "status": "not_started"
+      "id": "post-999.18 resume",
+      "name": "Resume 999.17.3 closure path: handle uncommitted generated/* + sub-phase merge → 999.17.1 V-08/V-09 → continue 999.17.1 Wave 3+4 (Plans 05-10)",
+      "status": "blocked_by_999.18"
     }
   ],
   "blockers": [
     {
-      "description": "22 pnpm-audit findings (1 critical / 8 high / 13 moderate) block 999.17.1 Plan 04 Task 4 V-08/V-09 re-run via pre-push security axis. Findings were always present in dependency tree but invisible until 999.17.2 pnpm 9->11 migration fixed `pnpm audit` HTTP 410 error.",
+      "description": "Issue #2: Dockerfile Step 4a foundation tsc fails with `error TS2307: Cannot find module '@email-platform/config'`. Workspace-package injection chain: packages/foundation/node_modules/@email-platform/config snapshot taken at Step 2 install (before Step 4a builds config dist/), so foundation tsc resolves the empty pre-build snapshot. Step 4b refresh (`rm -rf node_modules + pnpm install --frozen-lockfile`) is positioned AFTER foundation build. Fix candidates noted in UAT.md missing[] but require investigation, not trivial.",
       "type": "technical",
-      "workaround": "Phase 999.17.3 (vulnerability-remediation-direct-dep-upgrades) inserted to clean audit baseline via direct-dep upgrades. After 999.17.3 verifies, sub-phase merge 999.17.3 -> 999.17.1 (mirroring 999.17.2 -> 999.17.1 pattern), then re-run V-08/V-09 in resumed 999.17.1 session."
+      "workaround": "Native mode (`pnpm start:native`) works on verified path per W5 — unaffected. Defer isolated-mode full closure to 999.18 audit."
+    },
+    {
+      "description": "999.17.1 Plan 04 Task 4 V-08 + V-09 still blocked from 2026-05-01 carve-out chain. Resumes only after 999.17.3 sub-phase merge to 999.17.1 — which itself blocked on 999.18 (carries Issue #2 fix recommendation).",
+      "type": "technical",
+      "workaround": "Sub-phase merge could proceed today on Path A1 (native smoke sufficient) but doing so would propagate broken isolated build into 999.17.1 baseline. Better wait for 999.18 to clarify Issue #2 path."
     }
   ],
   "human_actions_pending": [
     {
-      "action": "DevOps rotation Telegram bot token (@BotFather /revoke + issue new + store as TELEGRAM_BOT_TOKEN k8s Secret / GitLab CI variable)",
-      "context": "Carry-forward from 999.17.2-DEVOPS-HANDOFF.md §1.1. Gates main merge of 999.17.2. NOT blocking 999.17.1 / 999.17.3 local resume work.",
+      "action": "Decide on uncommitted `packages/contracts/src/generated/{notifier,parser}.ts` (W5 ts-proto 2.11.4→2.11.6 transitive bump artifacts that were not staged in commit df9a8a6). Either commit them as W5-followup OR git restore them to drop the regen.",
+      "context": "Working tree shows 23 insertions / 23 deletions across the two files — service path string literals annotated `as const` (per W5 SUMMARY tech-stack/patterns). No runtime change. Decision can land in 999.17.3 sub-phase merge or be picked up in 999.18 build-artifact-parity dimension.",
       "blocking": false
     },
     {
-      "action": "DevOps rotation Garage rpc_secret (openssl rand -hex 32 + store as GARAGE_RPC_SECRET k8s Secret)",
-      "context": "Carry-forward from 999.17.2-DEVOPS-HANDOFF.md §1.2. Gates main merge of 999.17.2.",
+      "action": "Telegram bot token rotation (carry-forward from 999.17.2)",
+      "context": "Carry-over from prior HANDOFF.json. Gates main merge of 999.17.2. NOT blocking carve-out work.",
+      "blocking": false
+    },
+    {
+      "action": "Garage rpc_secret rotation (carry-forward from 999.17.2)",
+      "context": "Same as above.",
       "blocking": false
     }
   ],
   "decisions": [
     {
-      "decision": "999.17.3 sub-phase carve-out from 999.17.1 Plan 04 Task 4 — mirrors 999.17.2 pattern (carve out, work, sub-phase merge back, resume parent)",
-      "rationale": "22 pnpm-audit findings are real production hygiene work that warrants its own GSD cycle (research -> plan -> execute -> verify), not ad-hoc bumps in the middle of UAT. Carve-out preserves Plan 04 Task 4 as a focused orchestrator-behavior test once baseline is clean.",
+      "decision": "Promote Phase 999.18 (post-pnpm-11-migration-system-audit) from backlog to active",
+      "rationale": "Existing backlog scope already covers 7 dims of build-system / dependency / build-artifact / runtime / security / tech-debt / architectural-debt. User-expanded scope adds 2 more dims (Coolify→k8s migration impact, architectural good-practices review). 999.17.3 W5 isolated-mode regression Issue #2 is a natural empirical input for dim 1 (Build-system audit). Carve-out pattern mirrors 999.17.2 → 999.17.1 and 999.17.3 → 999.17.1.",
+      "phase": "999.18"
+    },
+    {
+      "decision": "Audit-only vs audit-and-fix decision DEFERRED to /gsd:discuss-phase 999.18",
+      "rationale": "User stated 'делать ради того что бы просто делать тоже не нужно, нужен объективный аудит'. Audit-only (999.1 precedent) keeps separation between findings and remediation, allows per-finding decision. Audit-and-fix (999.11.1 precedent) folds critical fixes inline. Decision inputs (criticality of Issue #2, Coolify→k8s timing, breath of architectural findings) are best surfaced in discuss-phase.",
+      "phase": "999.18"
+    },
+    {
+      "decision": "Issue #1 (.dockerignore nested glob bug) closed via /gsd:fast (commit caaad40), NOT folded into 999.18",
+      "rationale": "Per memory feedback_phase_completeness 'small drift → inline amendment'. Issue #1 was a 1-line config fix with localized root cause + empirical verification. Ceremonious carve-out for 1 line would be over-engineering. Trade-off: W5 SUMMARY D-W5-04 'pre-existing baseline issue (NOT W5 regression)' claim is now partially incorrect — corrected via UAT.md root_cause section, but W5-SUMMARY itself NOT amended (low ROI; 999.18 audit can address as part of dim 6 tech-debt cleanup if needed).",
       "phase": "999.17.3"
     },
     {
-      "decision": "NO pnpm.overrides for vulnerability remediation",
-      "rationale": "Overrides force transitive versions without updating parents — they mask upstream's failure to update, can break peer-dep contracts, and defeat the security gate's purpose (gate should enforce dep hygiene, not teach how to bypass). Direct-dep upgrades only: bump our @nestjs/*, eslint, turbo, etc. to versions that pull in patched transitives naturally.",
-      "phase": "999.17.3"
+      "decision": "Issue #2 (foundation tsc workspace-inject regression) DEFERRED to 999.18 — out of scope for /gsd:fast",
+      "rationale": "Per /gsd:fast guardrail 'If you're unsure how to implement it, STOP and redirect'. Issue #2 fix candidates require Dockerfile refactor, pnpm 11 + injectWorkspacePackages investigation, or workspace pattern change — not 1-line. Natural fit for 999.18 dim 1 (Build-system audit) + dim 7 (Architectural debt). UAT.md missing[] enumerates 3 candidate fix paths.",
+      "phase": "999.18"
     },
     {
-      "decision": "Plan 04 Task 4 V-07/V-08/V-09 acceptance is orchestrator BEHAVIOR, not zero findings",
-      "rationale": "Per Plan 04 PLAN.md acceptance assertions: V-08 OK = '[START] quality' in log (= orchestrator dispatched on mixed push); V-09 OK = '[FAIL] quality' AND '[ OK ] hygiene' in same run (= D-2 decoupling proven). Pre-push BLOCKING on real findings IS the orchestrator working correctly — it must enforce, not just dispatch.",
+      "decision": "Sub-phase merge 999.17.3 → 999.17.1 DELAYED until 999.18 finishes",
+      "rationale": "Original HANDOFF.json (2026-05-01) called for merge after /gsd:verify-work 999.17.3 PASS. Verify-work formally PASSED at 11/11 must-haves (Path A1), but UAT post-discovery showed isolated-mode regression. Merging now would propagate broken isolated build into 999.17.1 V-08/V-09 test surface. 999.18 dim 1 may produce a fix recommendation that lands BEFORE merge for cleaner V-08/V-09 baseline.",
       "phase": "999.17.1"
-    },
-    {
-      "decision": "999.17.3 phase numbering: SDK first computed 999.17.2.1 (child of 999.17.2) when after_phase=999.17.2; reverted, redone with after_phase=999.17 -> correct sibling slot 999.17.3",
-      "rationale": "999.17.x is a sub-phase family under parent 999.17 (DevSecOps shift-left tooling). 999.17.3 should be a sibling of 999.17.1/999.17.2, not a child of 999.17.2. SDK convention: pass the PARENT's phase number as after_phase, SDK auto-calculates next decimal in that parent's child sequence.",
-      "phase": "999.17.3"
-    },
-    {
-      "decision": "@nestjs/microservices 11.0.1->11.1.19 + @nestjs/core 11.0.1->11.1.18 ad-hoc bumps DISCARDED in this session — will be redone properly inside 999.17.3 with research backing",
-      "rationale": "These bumps were applied mid-V-08-debug without research/plan, generating a 5215-line lockfile diff. Even though the bumps themselves are correct (close GHSA-hpwf-8g29-85qm critical + 1 moderate naturally, not via override), they belong inside 999.17.3 Plan 01 with proper test coverage and atomic commit framing. Per project memory `feedback_phase_completeness.md`: when we don't know the full upgrade-graph implications, route through proper GSD cycle.",
-      "phase": "999.17.3"
     }
   ],
   "uncommitted_files": [
-    ".planning/STATE.md",
-    ".planning/ROADMAP.md",
-    ".planning/phases/999.17.3-vulnerability-remediation-direct-dep-upgrades/.gitkeep"
+    "packages/contracts/src/generated/notifier.ts",
+    "packages/contracts/src/generated/parser.ts",
+    ".claude/scheduled_tasks.lock"
   ],
-  "next_action": "USER ONLY TYPES SLASH COMMANDS — NO MANUAL git commands. Sequence: (1) `/gsd:discuss-phase 999.17.3` — runs on current 999.17.1 branch, agent gathers context interactively (acceptance threshold for audit, scope of dev vs prod deps, upstream-stuck handling). (2) `/gsd:plan-phase 999.17.3` — agent runs research-phase as part of plan flow, then creates PLAN.md (still on 999.17.1 branch). (3) `/gsd:execute-phase 999.17.3` — agent AUTOMATICALLY creates branch `gsd/phase-999.17.3-vulnerability-remediation-direct-dep-upgrades` via `git checkout -b $BRANCH_NAME` (per-phase branching strategy hard-coded in execute-phase.md workflow), then runs the plan with atomic commits per task. (4) `/gsd:verify-work 999.17.3` — verifier validates acceptance. (5) `/gsd:resume-work` — agent reads THIS HANDOFF.json, sees 999.17.3 verified, AGENT THEN runs the sub-phase merge (`git checkout gsd/phase-999.17.1-... && git merge --no-ff gsd/phase-999.17.3-... -m 'merge: 999.17.3 sub-phase into 999.17.1 (clean audit baseline for Plan 04 Task 4 V-08/V-09)'`) — user does NOT type git, agent does. (6) Then agent re-runs Plan 04 Task 4 V-08/V-09 against clean audit baseline.",
-  "context_notes": "Paused mid-Plan-04-Task-4 of 999.17.1. Three real regressions caught by V-08 fixed cleanly (env-parity / semgrep image+ci-mode / prettier). V-08 then surfaced 22 pre-existing pnpm-audit findings (always there, just invisible until pnpm 9->11 fixed audit HTTP 410). Tried pnpm.overrides as quick-fix — user correctly rejected as workaround. Reverted overrides + ad-hoc @nestjs bumps + 5215-line lockfile diff. Inserted Phase 999.17.3 in ROADMAP. The carve-out pattern is identical to 999.17.2: work cleanly in own branch, verify, sub-phase merge back, resume parent. Critical insight: V-07/V-08/V-09 acceptance is about ORCHESTRATOR BEHAVIOR (decoupling proven, dispatch correct), NOT 'zero audit findings' — orchestrator blocking on real bugs IS the orchestrator working. The 22 findings just need their own clean GSD cycle to clear. Mental model on resume: 'finish 999.17.3 -> merge -> V-08/V-09 are now ALREADY semantically passing in last attempt, just re-run for explicit log evidence on clean baseline -> approve Plan 04 Task 4 -> continue to Wave 3+4'."
+  "next_action": "USER ONLY TYPES SLASH COMMANDS — NO MANUAL git commands. Sequence: (1) `/gsd:review-backlog` — promote 999.18 from BACKLOG to active milestone (writes ROADMAP.md + STATE.md). (2) `/gsd:discuss-phase 999.18` — interactive context-gathering; user feeds in: Issue #2 as empirical input (cite UAT.md Gaps section + diagnosis), dim 8 (Coolify→k8s migration impact), dim 9 (architectural good-practices review), audit-only vs audit-and-fix decision, scope deferrals. (3) `/gsd:plan-phase 999.18`. (4) `/gsd:execute-phase 999.18` — auto-creates branch `gsd/phase-999.18-...` via per-phase strategy. (5) `/gsd:verify-work 999.18`. (6) `/gsd:resume-work` — re-reads THIS HANDOFF.json, sees 999.18 verified, presents 999.17.3 closure options: handle generated/* uncommitted, then sub-phase merge to 999.17.1 (or alternative path if 999.18 surfaces blockers).",
+  "context_notes": "Three-level carve-out chain. Top frame: 999.17.1 paused since 2026-05-01 awaiting clean audit baseline for V-08/V-09. Middle frame: 999.17.3 vulnerability remediation completed today (5 waves, 21/22 advisories closed under Path A1, esbuild residual to 999.17.5). Bottom frame: 999.18 audit about to start, absorbs 999.17.3 post-close findings + broader build-system/k8s-migration questions. /gsd:verify-work 999.17.3 UAT is partial — Test 1 marked issue (Issue #1 closed today by caaad40, but T1 stays issue until isolated mode fully boots after Issue #2 lands), Tests 2-7 pending (re-test post-999.18 fixes if any), Test 8 blocked. UAT.md Gaps section is the formal handoff document for 999.18 discuss-phase to consume verbatim — root_cause + artifacts + missing all filled. Expect 999.18 discuss-phase to broaden the existing backlog 7-dim scope to 9 dims. After 999.18 closes (audit-only or audit-and-fix mode TBD), come back here, decide on uncommitted generated/* files, then sub-phase merge to 999.17.1, then resume 999.17.1 V-08/V-09. Mental model: 'Issue #1 was the ts-proto plugin not found error from /gsd:verify-work — fixed via 1-line .dockerignore. Issue #2 is the next-layer foundation tsc cannot resolve @email-platform/config — surfaced after Issue #1 fix, deferred to 999.18.' Memory anchors: feedback_phase_completeness (sized recovery), feedback_per_phase_branching (each phase own branch), feedback_no_guessing (research before acting), feedback_report_dont_fix (report architectural decisions, don't silently patch)."
 }
