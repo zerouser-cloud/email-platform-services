@@ -888,7 +888,7 @@ Plans:
 **Goal:** Ship build-system migration по 5-Wave plan из 999.18.1-MIGRATION-RUNBOOK.md (consumes ADR + DOCKERFILE-REFERENCE + RE-EVAL-TRIGGERS verbatim per CONTEXT D-16). Closes 11 F-NN findings (F-01/F-02/F-03/F-04/F-04-d8/F-05/F-08/F-12/F-15/F-20/F-24) via Dockerfile rewrite (distroless runner + pnpm fetch + offline install), transport-aligned cleanup (drop HTTP server в 5 services + register gRPC Health), multi-arch CI (linux/amd64+linux/arm64 via QEMU), Placement A pre-build contract-gen, и compose healthcheck swap. Final gate: dual-mode smoke + 4 verifier suite + rollback drill on temporary branch.
 **Requirements**: F-01, F-02, F-03, F-04, F-04-d8, F-05, F-08, F-12, F-15, F-20, F-24, I-S0.1..I-S2.9 (27 invariants)
 **Depends on:** Phase 999.18
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 
@@ -896,7 +896,7 @@ Plans:
 - [x] 999.18.2-02-PLAN.md — Wave 1: orchestrator scaffolding — drop injectWorkspacePackages from pnpm-workspace.yaml (ADR (b) M3) + F-24 cache-hash closure (turbo.json tasks.generate.inputs += pnpm-lock.yaml) + native smoke gate
 - [x] 999.18.2-03-PLAN.md — Wave 2 (most invasive): Dockerfile rewrite (Stage 0 + Stage 1 pruner+fetcher+installer+builder + Stage 2 distroless runner + grpc_health_probe COPY) + transport-aligned cleanup (drop app.listen в 5 services + verify gRPC Health Path A + remove HTTP debug ports 3001-3005 + drop \_PORT env vars + 5 Zod schema cleanup) + atomic commit + dual-mode smoke + image-determinism verify + rollback drill
 - [x] 999.18.2-04-PLAN.md — Wave 3: CI multi-arch (QEMU + linux/amd64,linux/arm64 per ADR implicit-fifth) + Placement A pre-build contract-gen + drift-check gate (F-12 V2) + compose healthcheck swap (gateway HTTP wget; 5 services grpc_health_probe) + start_period 30s
-- [ ] 999.18.2-05-PLAN.md — Wave 4: final verification — full dual-mode smoke + 4 Wave 0 verifier suite en bloc + rollback drill on temporary branch (revert all 4 wave anchors + byte-for-byte Dockerfile match + restore via git reset --hard) + Wave 4 anchor commit + handoff to /gsd:resume-work 999.18
+- [x] 999.18.2-05-PLAN.md — Wave 4: final verification — full dual-mode smoke + 4 Wave 0 verifier suite en bloc + rollback drill on temporary branch (revert all 4 wave anchors + byte-for-byte Dockerfile match + restore via git reset --hard) + Wave 4 anchor commit + handoff to /gsd:resume-work 999.18
 
 ### Phase 999.18.1: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (INSERTED)
 
