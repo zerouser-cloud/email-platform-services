@@ -90,6 +90,7 @@ RESULT=$(gsd-sdk query phase.remove "${target}" --force)
 ```
 
 The CLI handles:
+
 - Deleting the phase directory
 - Renumbering all subsequent directories (in reverse order to avoid conflicts)
 - Renaming all files inside renumbered directories (PLAN.md, SUMMARY.md, etc.)
@@ -103,7 +104,7 @@ Extract from result: `removed`, `directory_deleted`, `renamed_directories`, `ren
 Stage and commit the removal:
 
 ```bash
-gsd-sdk query commit "chore: remove phase {target} ({original-phase-name})" .planning/
+gsd-sdk query commit "chore: remove phase {target} ({original-phase-name})" --files .planning/
 ```
 
 The commit message preserves the historical record of what was removed.
@@ -132,6 +133,7 @@ Would you like to:
 
 ---
 ```
+
 </step>
 
 </process>
@@ -143,7 +145,7 @@ Would you like to:
 - Don't manually renumber — use `gsd-sdk query phase.remove` which handles all renumbering
 - Don't add "removed phase" notes to STATE.md — git commit is the record
 - Don't modify completed phase directories
-</anti_patterns>
+  </anti_patterns>
 
 <success_criteria>
 Phase removal is complete when:
@@ -152,4 +154,4 @@ Phase removal is complete when:
 - [ ] `gsd-sdk query phase.remove` executed successfully
 - [ ] Changes committed with descriptive message
 - [ ] User informed of changes
-</success_criteria>
+      </success_criteria>

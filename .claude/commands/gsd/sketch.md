@@ -1,7 +1,7 @@
 ---
 name: gsd:sketch
 description: Sketch UI/design ideas with throwaway HTML mockups, or propose what to sketch next (frontier mode)
-argument-hint: "[design idea to explore] [--quick] [--text] or [frontier]"
+argument-hint: '[design idea to explore] [--quick] [--text] [--wrap-up] or [frontier]'
 allowed-tools:
   - Read
   - Write
@@ -15,6 +15,7 @@ allowed-tools:
   - mcp__context7__resolve-library-id
   - mcp__context7__query-docs
 ---
+
 <objective>
 Explore design directions through throwaway HTML mockups before committing to implementation.
 Each sketch produces 2-3 variants for comparison. Sketches live in `.planning/sketches/` and
@@ -22,6 +23,7 @@ integrate with GSD commit patterns, state tracking, and handoff workflows. Loads
 findings to ground mockups in real data shapes and validated interaction patterns.
 
 Two modes:
+
 - **Idea mode** (default) — describe a design idea to sketch
 - **Frontier mode** (no argument or "frontier") — analyzes existing sketch landscape and proposes consistency and frontier sketches
 
@@ -30,6 +32,7 @@ Does not require `/gsd-new-project` — auto-creates `.planning/sketches/` if ne
 
 <execution_context>
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/sketch.md
+@/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/sketch-wrap-up.md
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/references/ui-brand.md
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/references/sketch-theme-system.md
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/references/sketch-interactivity.md
@@ -45,10 +48,15 @@ Does not require `/gsd-new-project` — auto-creates `.planning/sketches/` if ne
 Design idea: $ARGUMENTS
 
 **Available flags:**
+
 - `--quick` — Skip mood/direction intake, jump straight to decomposition and building. Use when the design direction is already clear.
-</context>
+- `--wrap-up` — Package sketch design findings into a persistent project skill for future build conversations. Runs the sketch-wrap-up workflow.
+  </context>
 
 <process>
-Execute the sketch workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/sketch.md end-to-end.
+Parse the first token of $ARGUMENTS:
+- If it is `--wrap-up`: strip the flag, execute the sketch-wrap-up workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/sketch-wrap-up.md end-to-end.
+- Otherwise: execute the sketch workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/sketch.md end-to-end.
+
 Preserve all workflow gates (intake, decomposition, target stack research, variant evaluation, MANIFEST updates, commit patterns).
 </process>

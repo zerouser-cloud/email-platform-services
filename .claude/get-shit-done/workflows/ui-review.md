@@ -8,8 +8,9 @@ Retroactive 6-pillar visual audit of implemented frontend code. Standalone comma
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
+
 - gsd-ui-auditor — Audits UI against design requirements
-</available_agent_types>
+  </available_agent_types>
 
 <process>
 
@@ -28,6 +29,7 @@ UI_AUDITOR_MODEL=$(gsd-sdk query resolve-model gsd-ui-auditor --raw)
 ```
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► UI AUDIT — PHASE {N}: {name}
@@ -44,9 +46,9 @@ UI_REVIEW_FILE=$(ls "${PHASE_DIR}"/*-UI-REVIEW.md 2>/dev/null | head -1)
 
 **If `SUMMARY_FILES` empty:** Exit — "Phase {N} not executed. Run /gsd-execute-phase {N} first."
 
-
 **Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
 **If `UI_REVIEW_FILE` non-empty:** Use AskUserQuestion:
+
 - header: "Existing UI Review"
 - question: "UI-REVIEW.md already exists for Phase {N}."
 - options:
@@ -59,6 +61,7 @@ If "Re-audit": continue.
 ## 2. Gather Context Paths
 
 Build file list for auditor:
+
 - All SUMMARY.md files in phase dir
 - All PLAN.md files in phase dir
 - UI-SPEC.md (if exists — audit baseline)
@@ -82,11 +85,12 @@ Conduct 6-pillar visual audit of Phase {phase_number}: {phase_name}
 </objective>
 
 <files_to_read>
+
 - {summary_paths} (Execution summaries)
 - {plan_paths} (Execution plans — what was intended)
 - {ui_spec_path} (UI Design Contract — audit baseline, if exists)
 - {context_path} (User decisions, if exists)
-</files_to_read>
+  </files_to_read>
 
 ${AGENT_SKILLS_UI_REVIEWER}
 
@@ -106,6 +110,8 @@ Task(
   description="UI Audit Phase {N}"
 )
 ```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 ## 4. Handle Return
 
@@ -174,12 +180,13 @@ tools is detected at runtime.
 ## 5. Commit (if configured)
 
 ```bash
-gsd-sdk query commit "docs(${padded_phase}): UI audit review" "${PHASE_DIR}/${PADDED_PHASE}-UI-REVIEW.md"
+gsd-sdk query commit "docs(${padded_phase}): UI audit review" --files "${PHASE_DIR}/${PADDED_PHASE}-UI-REVIEW.md"
 ```
 
 </process>
 
 <success_criteria>
+
 - [ ] Phase validated
 - [ ] SUMMARY.md files found (execution completed)
 - [ ] Existing review handled (re-audit/view)
@@ -187,4 +194,4 @@ gsd-sdk query commit "docs(${padded_phase}): UI audit review" "${PHASE_DIR}/${PA
 - [ ] UI-REVIEW.md created in phase directory
 - [ ] Score summary displayed to user
 - [ ] Next steps presented
-</success_criteria>
+      </success_criteria>

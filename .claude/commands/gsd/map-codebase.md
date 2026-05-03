@@ -1,7 +1,7 @@
 ---
 name: gsd:map-codebase
 description: Analyze codebase with parallel mapper agents to produce .planning/codebase/ documents
-argument-hint: "[optional: specific area to map, e.g., 'api' or 'auth']"
+argument-hint: '[--fast [--focus tech|arch|quality|concerns]] [--query <term>|status|diff|refresh] [area]'
 allowed-tools:
   - Read
   - Bash
@@ -23,20 +23,34 @@ Output: .planning/codebase/ folder with 7 structured documents about the codebas
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/map-codebase.md
 </execution_context>
 
+<flags>
+- **--fast**: Lightweight scan mode — spawns one mapper agent instead of four. Accepts an optional `--focus` value: `tech`, `arch`, `quality`, `concerns`, or `tech+arch` (default). Faster and lower-context than the full map.
+- **--query**: Codebase intelligence query mode. Sub-commands: `query <term>`, `status`, `diff`, `refresh`. Requires intel to be enabled in config (`intel.enabled: true`). Runs inline for query/status/diff; spawns an agent for refresh.
+- **(no flag)**: Full parallel map — spawns 4 mapper agents to produce all 7 codebase documents.
+</flags>
+
 <context>
-Focus area: $ARGUMENTS (optional - if provided, tells agents to focus on specific subsystem)
+Arguments: $ARGUMENTS
+
+Parse the first token of $ARGUMENTS:
+
+- If it is `--fast`: strip the flag, run the scan workflow (passing remaining args including optional --focus).
+- If it is `--query`: strip the flag, run the intel workflow (passing remaining args as the subcommand).
+- Otherwise: pass all of $ARGUMENTS as focus area to the map-codebase workflow.
 
 **Load project state if exists:**
 Check for .planning/STATE.md - loads context if project already initialized
 
 **This command can run:**
+
 - Before /gsd-new-project (brownfield codebases) - creates codebase map first
 - After /gsd-new-project (greenfield codebases) - updates codebase map as code evolves
 - Anytime to refresh codebase understanding
-</context>
+  </context>
 
 <when_to_use>
 **Use map-codebase for:**
+
 - Brownfield projects before initialization (understand existing code first)
 - Refreshing codebase map after significant changes
 - Onboarding to an unfamiliar codebase
@@ -44,9 +58,10 @@ Check for .planning/STATE.md - loads context if project already initialized
 - When STATE.md references outdated codebase info
 
 **Skip map-codebase for:**
+
 - Greenfield projects with no code yet (nothing to map)
 - Trivial codebases (<5 files)
-</when_to_use>
+  </when_to_use>
 
 <process>
 1. Check if .planning/codebase/ already exists (offer to refresh or skip)
@@ -63,9 +78,10 @@ Check for .planning/STATE.md - loads context if project already initialized
 </process>
 
 <success_criteria>
+
 - [ ] .planning/codebase/ directory created
 - [ ] All 7 codebase documents written by mapper agents
 - [ ] Documents follow template structure
 - [ ] Parallel agents completed without errors
 - [ ] User knows next steps
-</success_criteria>
+      </success_criteria>

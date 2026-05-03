@@ -103,7 +103,7 @@ Add note that this is the last plan and what comes after:
 
 **Also available:**
 - `/gsd-discuss-phase 2` — gather context first
-- `/gsd-research-phase 2` — investigate unknowns
+- `/gsd-plan-phase --research-phase 2` — investigate unknowns
 - Review roadmap
 
 ---
@@ -132,7 +132,7 @@ Show completion status before next action:
 
 **Also available:**
 - `/gsd-discuss-phase 3` — gather context first
-- `/gsd-research-phase 3` — investigate unknowns
+- `/gsd-plan-phase --research-phase 3` — investigate unknowns
 - Review what Phase 2 built
 
 ---
@@ -155,7 +155,7 @@ When there's no clear primary action:
 
 **To discuss context first:** `/gsd-discuss-phase 3`
 
-**To research unknowns:** `/gsd-research-phase 3`
+**To research unknowns:** `/gsd-plan-phase --research-phase 3`
 
 ---
 ```
@@ -186,6 +186,7 @@ All 4 phases shipped
 
 ```markdown
 ### Phase 2: Authentication
+
 **Goal**: JWT login flow with refresh tokens
 ```
 
@@ -195,6 +196,7 @@ Extract: `**Phase 2: Authentication** — JWT login flow with refresh tokens`
 
 ```markdown
 Plans:
+
 - [ ] 02-03: Add refresh token rotation
 ```
 
@@ -245,9 +247,13 @@ Sounds like an afterthought. Use "Also available:" instead.
 ### Don't: Fenced code blocks for commands
 
 ```
+
 ```
+
 /gsd-plan-phase 3
+
 ```
+
 ```
 
 Fenced blocks inside templates create nesting ambiguity. Use inline backticks instead.

@@ -8,10 +8,11 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
+
 - gsd-project-researcher — Researches project-level technical decisions
 - gsd-research-synthesizer — Synthesizes findings from parallel research agents
 - gsd-roadmapper — Creates phased execution roadmaps
-</available_agent_types>
+  </available_agent_types>
 
 <auto_mode>
 
@@ -67,6 +68,7 @@ AGENT_SKILLS_ROADMAPPER=$(gsd-sdk query agent-skills gsd-roadmapper)
 Parse JSON for: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `project_exists`, `has_codebase_map`, `planning_exists`, `has_existing_code`, `has_package_file`, `is_brownfield`, `needs_codebase_map`, `has_git`, `project_path`, `agents_installed`, `missing_agents`.
 
 **If `agents_installed` is false:** Display a warning before proceeding:
+
 ```
 ⚠ GSD agents not installed. The following agents are missing from your agents directory:
   {missing_agents joined with newline}
@@ -78,17 +80,20 @@ with "agent type not found". Run the installer with --global to make agents avai
 
 Proceeding without research subagents — roadmap will be generated inline.
 ```
+
 Skip Steps 6–7 (parallel research and synthesis) and proceed directly to roadmap creation in Step 8.
 
 **Detect runtime and set instruction file name:**
 
 Derive `RUNTIME` from the invoking prompt's `execution_context` path:
+
 - Path contains `/.codex/` → `RUNTIME=codex`
 - Path contains `/.gemini/` → `RUNTIME=gemini`
 - Path contains `/.config/opencode/` or `/.opencode/` → `RUNTIME=opencode`
 - Otherwise → `RUNTIME=claude`
 
 If `execution_context` path is not available, fall back to env vars:
+
 ```bash
 if [ -n "$CODEX_HOME" ]; then RUNTIME="codex"
 elif [ -n "$GEMINI_CONFIG_DIR" ]; then RUNTIME="gemini"
@@ -97,6 +102,7 @@ else RUNTIME="claude"; fi
 ```
 
 Set the instruction file variable:
+
 ```bash
 if [ "$RUNTIME" = "codex" ]; then INSTRUCTION_FILE="AGENTS.md"; else INSTRUCTION_FILE="CLAUDE.md"; fi
 ```
@@ -116,7 +122,6 @@ git init
 **If auto mode:** Skip to Step 4 (assume greenfield, synthesize PROJECT.md from provided document).
 
 **If `needs_codebase_map` is true** (from init — existing code detected but no codebase map):
-
 
 **Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
 Use AskUserQuestion:
@@ -236,7 +241,7 @@ gsd-sdk query config-new-project '{"mode":"yolo","granularity":"[selected]","par
 
 ```bash
 mkdir -p .planning
-gsd-sdk query commit "chore: add project config" .planning/config.json
+gsd-sdk query commit "chore: add project config" --files .planning/config.json
 ```
 
 **Persist auto-advance chain flag to config (survives context compaction):**
@@ -269,8 +274,8 @@ If any of these exist, surface them before questioning:
 ⚡ Prior exploration detected:
 {if SPIKE_SKILL}  ✓ Spike findings skill: {path} — validated patterns from experiments
 {if SKETCH_SKILL}  ✓ Sketch findings skill: {path} — validated design decisions
-{if HAS_SPIKES && !SPIKE_SKILL}  ◆ Raw spikes in .planning/spikes/ — consider `/gsd-spike-wrap-up` to package findings
-{if HAS_SKETCHES && !SKETCH_SKILL}  ◆ Raw sketches in .planning/sketches/ — consider `/gsd-sketch-wrap-up` to package findings
+{if HAS_SPIKES && !SPIKE_SKILL}  ◆ Raw spikes in .planning/spikes/ — consider `/gsd-spike --wrap-up` to package findings
+{if HAS_SKETCHES && !SKETCH_SKILL}  ◆ Raw sketches in .planning/sketches/ — consider `/gsd-sketch --wrap-up` to package findings
 
 These findings will be incorporated into project context and available to planning agents.
 ```
@@ -408,16 +413,17 @@ Initialize with any decisions made during questioning:
 ```markdown
 ## Key Decisions
 
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| [Choice from questioning] | [Why] | — Pending |
+| Decision                  | Rationale | Outcome   |
+| ------------------------- | --------- | --------- |
+| [Choice from questioning] | [Why]     | — Pending |
 ```
 
 **Last updated footer:**
 
 ```markdown
 ---
-*Last updated: [date] after initialization*
+
+_Last updated: [date] after initialization_
 ```
 
 **Evolution section** (include at the end of PROJECT.md, before the footer):
@@ -428,6 +434,7 @@ Initialize with any decisions made during questioning:
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd-transition`):
+
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -435,6 +442,7 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone** (via `/gsd-complete-milestone`):
+
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
@@ -447,7 +455,7 @@ Do not compress. Capture everything gathered.
 
 ```bash
 mkdir -p .planning
-gsd-sdk query commit "docs: initialize project" .planning/PROJECT.md
+gsd-sdk query commit "docs: initialize project" --files .planning/PROJECT.md
 ```
 
 ## 5. Workflow Preferences
@@ -461,6 +469,7 @@ DEFAULTS_RAW=$(cat ~/.gsd/defaults.json 2>/dev/null)
 ```
 
 Format the JSON into human-readable bullets using these label mappings:
+
 - `mode` → "Mode"
 - `granularity` → "Granularity"
 - `parallelization` → "Execution" (`true` → "Parallel", `false` → "Sequential")
@@ -594,11 +603,11 @@ questions: [
 
 These spawn additional agents during planning/execution. They add tokens and time but improve quality.
 
-| Agent | When it runs | What it does |
-|-------|--------------|--------------|
-| **Researcher** | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
-| **Plan Checker** | After plan is created | Verifies plan actually achieves the phase goal |
-| **Verifier** | After phase execution | Confirms must-haves were delivered |
+| Agent            | When it runs               | What it does                                          |
+| ---------------- | -------------------------- | ----------------------------------------------------- |
+| **Researcher**   | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
+| **Plan Checker** | After plan is created      | Verifies plan actually achieves the phase goal        |
+| **Verifier**     | After phase execution      | Confirms must-haves were delivered                    |
 
 All recommended for important projects. Skip for quick experiments.
 
@@ -666,7 +675,7 @@ gsd-sdk query config-new-project '{"mode":"[yolo|interactive]","granularity":"[s
 **Commit config.json:**
 
 ```bash
-gsd-sdk query commit "chore: add project config" .planning/config.json
+gsd-sdk query commit "chore: add project config" --files .planning/config.json
 ```
 
 ## 5.1. Sub-Repo Detection
@@ -916,6 +925,8 @@ Use template: /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platfor
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Pitfalls research")
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling all 4 researcher Task() calls above, do NOT read research files or synthesize content independently while the subagents are active. Wait for all 4 researchers to complete before spawning the synthesizer. This prevents duplicate work and wasted context.
+
 After all 4 agents complete, spawn synthesizer to create SUMMARY.md:
 
 ```
@@ -940,6 +951,8 @@ Commit after writing.
 </output>
 ", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
 ```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 Display research complete banner and key findings:
 
@@ -1110,7 +1123,7 @@ If "adjust": Return to scoping.
 **Commit requirements:**
 
 ```bash
-gsd-sdk query commit "docs: define v1 requirements" .planning/REQUIREMENTS.md
+gsd-sdk query commit "docs: define v1 requirements" --files .planning/REQUIREMENTS.md
 ```
 
 ## 8. Create Roadmap
@@ -1155,6 +1168,8 @@ Write files first, then return. This ensures artifacts persist even if context i
 </instructions>
 ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Create roadmap")
 ```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 **Handle roadmapper return:**
 
@@ -1242,6 +1257,8 @@ Use AskUserQuestion:
   ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Revise roadmap")
   ```
 
+  > **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 - Present revised roadmap
 - Loop until user approves
 
@@ -1258,7 +1275,7 @@ This ensures new projects get the default GSD workflow-enforcement guidance and 
 **Commit roadmap (after approval or auto mode):**
 
 ```bash
-gsd-sdk query commit "docs: create roadmap ([N] phases)" .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md "$INSTRUCTION_FILE"
+gsd-sdk query commit "docs: create roadmap ([N] phases)" --files .planning/ROADMAP.md .planning/STATE.md .planning/REQUIREMENTS.md "$INSTRUCTION_FILE"
 ```
 
 ## 9. Done

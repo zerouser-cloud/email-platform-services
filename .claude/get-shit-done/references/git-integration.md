@@ -11,15 +11,15 @@ The git log should read like a changelog of what shipped, not a diary of plannin
 
 <commit_points>
 
-| Event                   | Commit? | Why                                              |
-| ----------------------- | ------- | ------------------------------------------------ |
-| BRIEF + ROADMAP created | YES     | Project initialization                           |
-| PLAN.md created         | NO      | Intermediate - commit with plan completion       |
-| RESEARCH.md created     | NO      | Intermediate                                     |
-| DISCOVERY.md created    | NO      | Intermediate                                     |
-| **Task completed**      | YES     | Atomic unit of work (1 commit per task)         |
-| **Plan completed**      | YES     | Metadata commit (SUMMARY + STATE + ROADMAP)     |
-| Handoff created         | YES     | WIP state preserved                              |
+| Event                   | Commit? | Why                                         |
+| ----------------------- | ------- | ------------------------------------------- |
+| BRIEF + ROADMAP created | YES     | Project initialization                      |
+| PLAN.md created         | NO      | Intermediate - commit with plan completion  |
+| RESEARCH.md created     | NO      | Intermediate                                |
+| DISCOVERY.md created    | NO      | Intermediate                                |
+| **Task completed**      | YES     | Atomic unit of work (1 commit per task)     |
+| **Plan completed**      | YES     | Metadata commit (SUMMARY + STATE + ROADMAP) |
+| Handoff created         | YES     | WIP state preserved                         |
 
 </commit_points>
 
@@ -51,7 +51,7 @@ Phases:
 What to commit:
 
 ```bash
-gsd-sdk query commit "docs: initialize [project-name] ([N] phases)" .planning/
+gsd-sdk query commit "docs: initialize [project-name] ([N] phases)" --files .planning/
 ```
 
 </format>
@@ -62,8 +62,11 @@ gsd-sdk query commit "docs: initialize [project-name] ([N] phases)" .planning/
 Each task gets its own commit immediately after completion.
 
 > **Parallel agents:** When running as a parallel executor (spawned by execute-phase),
-> use `--no-verify` on all commits to avoid pre-commit hook lock contention.
-> The orchestrator validates hooks once after all agents complete.
+> run commits normally — let pre-commit hooks run. Do NOT pass `--no-verify` by default
+> (#2924). Hooks should fire on the introducing commit; silent bypass violates project
+> CLAUDE.md guidance. If a project explicitly opts out via
+> `workflow.worktree_skip_hooks=true`, the orchestrator surfaces that flag in the
+> executor prompt; absent that signal, hooks run normally.
 
 ```
 {type}({phase}-{plan}): {task-name}
@@ -74,6 +77,7 @@ Each task gets its own commit immediately after completion.
 ```
 
 **Commit types:**
+
 - `feat` - New feature/functionality
 - `fix` - Bug fix
 - `test` - Test-only (TDD RED phase)
@@ -133,7 +137,7 @@ SUMMARY: .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md
 What to commit:
 
 ```bash
-gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" .planning/phases/XX-name/{phase}-{plan}-PLAN.md .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md
+gsd-sdk query commit "docs({phase}-{plan}): complete [plan-name] plan" --files .planning/phases/XX-name/{phase}-{plan}-PLAN.md .planning/phases/XX-name/{phase}-{plan}-SUMMARY.md .planning/STATE.md .planning/ROADMAP.md
 ```
 
 **Note:** Code files NOT included - already committed per-task.
@@ -153,7 +157,7 @@ Current: [task name]
 What to commit:
 
 ```bash
-gsd-sdk query commit "wip: [phase-name] paused at task [X]/[Y]" .planning/
+gsd-sdk query commit "wip: [phase-name] paused at task [X]/[Y]" --files .planning/
 ```
 
 </format>
@@ -162,6 +166,7 @@ gsd-sdk query commit "wip: [phase-name] paused at task [X]/[Y]" .planning/
 <example_log>
 
 **Old approach (per-plan commits):**
+
 ```
 a7f2d1 feat(checkout): Stripe payments with webhook verification
 3e9c4b feat(products): catalog with search, filters, and pagination
@@ -171,6 +176,7 @@ a7f2d1 feat(checkout): Stripe payments with webhook verification
 ```
 
 **New approach (per-task commits):**
+
 ```
 # Phase 04 - Checkout
 1a2b3c docs(04-01): complete checkout flow plan
@@ -209,6 +215,7 @@ Each plan produces 2-4 commits (tasks + metadata). Clear, granular, bisectable.
 <anti_patterns>
 
 **Still don't commit (intermediate artifacts):**
+
 - PLAN.md creation (commit with plan completion)
 - RESEARCH.md (intermediate)
 - DISCOVERY.md (intermediate)
@@ -216,6 +223,7 @@ Each plan produces 2-4 commits (tasks + metadata). Clear, granular, bisectable.
 - "Fixed typo in roadmap"
 
 **Do commit (outcomes):**
+
 - Each task completion (feat/fix/test/refactor)
 - Plan completion metadata (docs)
 - Project initialization (docs)
@@ -229,22 +237,26 @@ Each plan produces 2-4 commits (tasks + metadata). Clear, granular, bisectable.
 ## Why Per-Task Commits?
 
 **Context engineering for AI:**
+
 - Git history becomes primary context source for future Claude sessions
 - `git log --grep="{phase}-{plan}"` shows all work for a plan
 - `git diff <hash>^..<hash>` shows exact changes per task
 - Less reliance on parsing SUMMARY.md = more context for actual work
 
 **Failure recovery:**
+
 - Task 1 committed ✅, Task 2 failed ❌
 - Claude in next session: sees task 1 complete, can retry task 2
 - Can `git reset --hard` to last successful task
 
 **Debugging:**
+
 - `git bisect` finds exact failing task, not just failing plan
 - `git blame` traces line to specific task context
 - Each commit is independently revertable
 
 **Observability:**
+
 - Solo developer + Claude workflow benefits from granular attribution
 - Atomic commits are git best practice
 - "Commit noise" irrelevant when consumer is Claude, not humans

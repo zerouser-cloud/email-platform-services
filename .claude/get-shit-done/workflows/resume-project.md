@@ -140,7 +140,7 @@ Present complete project status to user:
     Resume with: Task tool (resume parameter with agent ID)
 
 [If pending todos exist:]
-📋 [N] pending todos — /gsd-check-todos to review
+📋 [N] pending todos — /gsd-capture --list to review
 
 [If blockers exist:]
 ⚠️  Carried concerns:
@@ -228,6 +228,7 @@ Wait for user selection.
 Based on user selection, route to appropriate workflow:
 
 - **Execute plan** → Show command for user to run after clearing:
+
   ```
   ---
 
@@ -241,7 +242,9 @@ Based on user selection, route to appropriate workflow:
 
   ---
   ```
+
 - **Plan phase** → Show command for user to run after clearing:
+
   ```
   ---
 
@@ -257,15 +260,16 @@ Based on user selection, route to appropriate workflow:
 
   **Also available:**
   - `/gsd-discuss-phase [N] ${GSD_WS}` — gather context first
-  - `/gsd-research-phase [N] ${GSD_WS}` — investigate unknowns
+  - `/gsd-plan-phase --research-phase [N] ${GSD_WS}` — investigate unknowns
 
   ---
   ```
+
 - **Advance to next phase** → ./transition.md (internal workflow, invoked inline — NOT a user command)
 - **Check todos** → Read .planning/todos/pending/, present summary
 - **Review alignment** → Read PROJECT.md, compare to current state
 - **Something else** → Ask what they need
-</step>
+  </step>
 
 <step name="update_session">
 Before proceeding to routed workflow, update session continuity:
@@ -307,6 +311,7 @@ This handles cases where:
 
 <quick_resume>
 If user says "continue" or "go":
+
 - Load state silently
 - Determine primary action
 - Execute immediately without presenting options

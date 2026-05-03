@@ -33,40 +33,40 @@
   },
   "agent_skills": {
     "gsd-researcher": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-planner": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-checker": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-executor": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-verifier": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-architecture-validator": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ]
   },
   "mode": "yolo",

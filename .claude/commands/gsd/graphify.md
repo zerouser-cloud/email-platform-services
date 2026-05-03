@@ -1,7 +1,7 @@
 ---
 name: gsd:graphify
-description: "Build, query, and inspect the project knowledge graph in .planning/graphs/"
-argument-hint: "[build|query <term>|status|diff]"
+description: 'Build, query, and inspect the project knowledge graph in .planning/graphs/'
+argument-hint: '[build|query <term>|status|diff]'
 allowed-tools:
   - Read
   - Bash
@@ -52,13 +52,13 @@ Then run /gsd-graphify build to create the initial graph.
 
 Parse `$ARGUMENTS` to determine the operation mode:
 
-| Argument | Action |
-|----------|--------|
-| `build` | Spawn graphify-builder agent (Step 3) |
-| `query <term>` | Run inline query (Step 2a) |
-| `status` | Run inline status check (Step 2b) |
-| `diff` | Run inline diff check (Step 2c) |
-| No argument or unknown | Show usage message |
+| Argument               | Action                                |
+| ---------------------- | ------------------------------------- |
+| `build`                | Spawn graphify-builder agent (Step 3) |
+| `query <term>`         | Run inline query (Step 2a)            |
+| `status`               | Run inline status check (Step 2b)     |
+| `diff`                 | Run inline diff check (Step 2c)       |
+| No argument or unknown | Show usage message                    |
 
 **Usage message** (shown when no argument or unrecognized argument):
 
@@ -83,6 +83,7 @@ node /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/
 ```
 
 Parse the JSON output and display results:
+
 - If the output contains `"disabled": true`, display the disabled message from Step 1 and **STOP**
 - If the output contains `"error"` field, display the error message and **STOP**
 - If no nodes found, display: `No graph matches for '<term>'. Try /gsd-graphify build to create or rebuild the graph.`
@@ -99,6 +100,7 @@ node /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/
 ```
 
 Parse the JSON output and display:
+
 - If `exists: false`, display the message field
 - Otherwise show last build time, node/edge/hyperedge counts, and STALE or FRESH indicator
 
@@ -113,6 +115,7 @@ node /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/
 ```
 
 Parse the JSON output and display:
+
 - If `no_baseline: true`, display the message field
 - Otherwise show node and edge change counts (added/removed/changed)
 
@@ -152,37 +155,45 @@ gsd-tools path: /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platf
 
 1. **Invoke graphify:**
    Run from the project root:
-   ```
-   graphify . --update
-   ```
-   This builds the knowledge graph with SHA256 incremental caching.
-   Timeout: up to 5 minutes (or as configured via graphify.build_timeout).
+```
+
+graphify update .
+
+```
+This builds the knowledge graph with SHA256 incremental caching.
+Timeout: up to 5 minutes (or as configured via graphify.build_timeout).
 
 2. **Validate output:**
-   Check that graphify-out/graph.json exists and is valid JSON with nodes[] and edges[] arrays.
-   If graphify exited non-zero or graph.json is not parseable, output:
-   ## GRAPHIFY BUILD FAILED
-   Include the stderr output for debugging. Do NOT delete .planning/graphs/ -- prior valid graph remains available.
+Check that graphify-out/graph.json exists and is valid JSON with nodes[] and edges[] arrays.
+If graphify exited non-zero or graph.json is not parseable, output:
+## GRAPHIFY BUILD FAILED
+Include the stderr output for debugging. Do NOT delete .planning/graphs/ -- prior valid graph remains available.
 
 3. **Copy artifacts to .planning/graphs/:**
-   ```
-   cp graphify-out/graph.json .planning/graphs/graph.json
-   cp graphify-out/graph.html .planning/graphs/graph.html
-   cp graphify-out/GRAPH_REPORT.md .planning/graphs/GRAPH_REPORT.md
-   ```
-   These three files are the build output consumed by query, status, and diff commands.
+```
+
+cp graphify-out/graph.json .planning/graphs/graph.json
+cp graphify-out/graph.html .planning/graphs/graph.html
+cp graphify-out/GRAPH_REPORT.md .planning/graphs/GRAPH_REPORT.md
+
+```
+These three files are the build output consumed by query, status, and diff commands.
 
 4. **Write diff snapshot:**
-   ```
-   node \"/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/bin/gsd-tools.cjs\" graphify build snapshot
-   ```
-   This creates .planning/graphs/.last-build-snapshot.json for future diff comparisons.
+```
+
+node \"/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/bin/gsd-tools.cjs\" graphify build snapshot
+
+```
+This creates .planning/graphs/.last-build-snapshot.json for future diff comparisons.
 
 5. **Report build summary:**
-   ```
-   node \"/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/bin/gsd-tools.cjs\" graphify status
-   ```
-   Display the node count, edge count, and hyperedge count from the status output.
+```
+
+node \"/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/bin/gsd-tools.cjs\" graphify status
+
+```
+Display the node count, edge count, and hyperedge count from the status output.
 
 When complete, output: ## GRAPHIFY BUILD COMPLETE with the summary counts.
 If something fails at any step, output: ## GRAPHIFY BUILD FAILED with details."

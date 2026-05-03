@@ -18,18 +18,20 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
+
 - gsd-phase-researcher — Researches technical approaches for a phase
 - gsd-planner — Creates detailed plans from phase scope
 - gsd-plan-checker — Reviews plan quality before execution
 - gsd-executor — Executes plan tasks, commits, creates SUMMARY.md
 - gsd-verifier — Verifies phase completion, checks quality gates
 - gsd-code-reviewer — Reviews source files for bugs, security issues, and code quality
-</available_agent_types>
+  </available_agent_types>
 
 <process>
 **Step 1: Parse arguments and get task description**
 
 Parse `$ARGUMENTS` for:
+
 - `--full` flag → store `$FULL_MODE=true`, `$DISCUSS_MODE=true`, `$RESEARCH_MODE=true`, `$VALIDATE_MODE=true`
 - `--validate` flag → store `$VALIDATE_MODE=true`
 - `--discuss` flag → store `$DISCUSS_MODE=true`
@@ -39,7 +41,6 @@ Parse `$ARGUMENTS` for:
 After parsing, normalize: if `$DISCUSS_MODE` and `$RESEARCH_MODE` and `$VALIDATE_MODE` are all true, set `$FULL_MODE=true`. This ensures `--discuss --research --validate` is treated identically to `--full`.
 
 If `$DESCRIPTION` is empty after parsing, prompt user interactively:
-
 
 **Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
 
@@ -58,6 +59,7 @@ If still empty, re-prompt: "Please provide a task description."
 Display banner based on active flags:
 
 If `$FULL_MODE` (all phases enabled — `--full` or all granular flags):
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (FULL)
@@ -67,6 +69,7 @@ If `$FULL_MODE` (all phases enabled — `--full` or all granular flags):
 ```
 
 If `$DISCUSS_MODE` and `$VALIDATE_MODE` (no research):
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (DISCUSS + VALIDATE)
@@ -76,6 +79,7 @@ If `$DISCUSS_MODE` and `$VALIDATE_MODE` (no research):
 ```
 
 If `$DISCUSS_MODE` and `$RESEARCH_MODE` (no validate):
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (DISCUSS + RESEARCH)
@@ -85,6 +89,7 @@ If `$DISCUSS_MODE` and `$RESEARCH_MODE` (no validate):
 ```
 
 If `$RESEARCH_MODE` and `$VALIDATE_MODE` (no discuss):
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (RESEARCH + VALIDATE)
@@ -94,6 +99,7 @@ If `$RESEARCH_MODE` and `$VALIDATE_MODE` (no discuss):
 ```
 
 If `$DISCUSS_MODE` only:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (DISCUSS)
@@ -103,6 +109,7 @@ If `$DISCUSS_MODE` only:
 ```
 
 If `$RESEARCH_MODE` only:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (RESEARCH)
@@ -112,6 +119,7 @@ If `$RESEARCH_MODE` only:
 ```
 
 If `$VALIDATE_MODE` only:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► QUICK TASK (VALIDATE)
@@ -152,14 +160,23 @@ Parse JSON for: `planner_model`, `executor_model`, `checker_model`, `verifier_mo
 USE_WORKTREES=$(gsd-sdk query config-get workflow.use_worktrees 2>/dev/null || echo "true")
 ```
 
-If the project uses git submodules, worktree isolation is skipped:
+If the project uses git submodules, worktree isolation is unsafe **only when the quick task touches a submodule path**. The previous behavior unconditionally disabled worktree isolation whenever `.gitmodules` existed, which penalised every quick task in a submodule project even when the task was nowhere near a submodule. Parse submodule paths from `.gitmodules` so the executor can act on actual submodule paths rather than the mere file's existence:
 
 ```bash
+# Parse submodule paths from .gitmodules once (empty if no .gitmodules).
+# SUBMODULE_PATHS is a newline-separated list of repo-relative paths used as
+# a fail-loud commit-time guard inside the quick-task executor — if the
+# executor stages any path that falls inside SUBMODULE_PATHS, it must abort
+# the commit and surface the conflict rather than silently corrupting the
+# submodule state.
 if [ -f .gitmodules ]; then
-  echo "[worktree] Submodule project detected (.gitmodules exists) — falling back to sequential execution"
-  USE_WORKTREES=false
+  SUBMODULE_PATHS=$(git config --file .gitmodules --get-regexp '^submodule\..*\.path$' 2>/dev/null | awk '{print $2}')
+else
+  SUBMODULE_PATHS=""
 fi
 ```
+
+Quick mode does not have a pre-declared `files_modified` list (the task is freeform), so use a fail-loud guard at commit time: when the executor stages files for the quick-task commit, if any staged path falls inside a `SUBMODULE_PATHS` entry, abort with a clear error explaining that worktree-isolated commits cannot safely span submodule boundaries — the user can re-run with `workflow.use_worktrees=false` to fall back to sequential execution on the main tree. If `SUBMODULE_PATHS` is empty (no `.gitmodules` in the repo), worktree isolation proceeds normally.
 
 **If `roadmap_exists` is false:** Error — Quick mode requires an active project with ROADMAP.md. Run `/gsd-new-project` first.
 
@@ -171,10 +188,52 @@ Quick tasks can run mid-phase - validation only checks ROADMAP.md exists, not ph
 
 **If `branch_name` is empty/null:** Skip and continue on the current branch.
 
-**If `branch_name` is set:** Check out the quick-task branch before any planning commits:
+**If `branch_name` is set:** Check out the quick-task branch before any planning commits.
+
+The new branch must fork off the project's default branch (`origin/HEAD`), not
+off whatever HEAD happens to be checked out — otherwise consecutive quick tasks
+compound on top of each other and stay unpushed (#2916). If `$branch_name`
+already exists locally, reuse it as-is so resumed work is not rebased.
 
 ```bash
-git checkout -b "$branch_name" 2>/dev/null || git checkout "$branch_name"
+DEFAULT_BRANCH=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
+DEFAULT_BRANCH=${DEFAULT_BRANCH:-main}
+
+if git show-ref --verify --quiet "refs/heads/$branch_name"; then
+  git switch "$branch_name" \
+    || { echo "ERROR: Could not switch to existing quick-task branch '$branch_name'." >&2; exit 1; }
+else
+  # Fetch the default branch so origin/$DEFAULT_BRANCH is current. If the fetch
+  # fails (offline, no remote, auth failure) AND we have no local copy of
+  # origin/$DEFAULT_BRANCH to fall back on, abort — creating the branch off
+  # arbitrary HEAD is exactly the bug #2916 fixed.
+  if ! git fetch --quiet origin "$DEFAULT_BRANCH"; then
+    if ! git show-ref --verify --quiet "refs/remotes/origin/$DEFAULT_BRANCH"; then
+      echo "ERROR: Could not fetch origin/$DEFAULT_BRANCH and no local copy exists. Refusing to create '$branch_name' off the current HEAD (#2916). Resolve the remote/network issue and retry." >&2
+      exit 1
+    fi
+    echo "WARNING: git fetch origin $DEFAULT_BRANCH failed; using the local copy of origin/$DEFAULT_BRANCH as base." >&2
+  fi
+
+  if [ -n "$(git status --porcelain)" ]; then
+    echo "WARNING: Uncommitted changes present. Carrying them onto the new quick-task branch — they will be branched off origin/$DEFAULT_BRANCH (not the previous-task HEAD)."
+  else
+    # Best-effort: fast-forward the local default branch so subsequent local
+    # work sees the latest tip. Failure here is non-fatal because we always
+    # create the new branch directly from origin/$DEFAULT_BRANCH below.
+    git switch --quiet "$DEFAULT_BRANCH" 2>/dev/null \
+      && git merge --ff-only --quiet "origin/$DEFAULT_BRANCH" 2>/dev/null \
+      || true
+  fi
+
+  # Pin the new branch to origin/$DEFAULT_BRANCH so the start point is
+  # deterministic regardless of which branch we are currently on (#2916).
+  # On success HEAD is exactly at origin/$DEFAULT_BRANCH, so a post-creation
+  # merge-base / "ahead-of" guard would be unreachable — the explicit base
+  # argument here is the single source of correctness for #2916.
+  git checkout -b "$branch_name" "origin/$DEFAULT_BRANCH" \
+    || { echo "ERROR: Could not create '$branch_name' from origin/$DEFAULT_BRANCH (#2916)." >&2; exit 1; }
+fi
 ```
 
 All quick-task commits for this run stay on that branch. User handles merge/rebase afterward.
@@ -199,6 +258,7 @@ mkdir -p "$QUICK_DIR"
 ```
 
 Report to user:
+
 ```
 Creating quick task ${quick_id}: ${DESCRIPTION}
 Directory: ${QUICK_DIR}
@@ -213,6 +273,7 @@ Store `$QUICK_DIR` for use in orchestration.
 Skip this step entirely if NOT `$DISCUSS_MODE`.
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► DISCUSSING QUICK TASK
@@ -226,6 +287,7 @@ Display banner:
 Analyze `$DESCRIPTION` to identify 2-4 gray areas — implementation decisions that would change the outcome and that the user should weigh in on.
 
 Use the domain-aware heuristic to generate phase-specific (not generic) gray areas:
+
 - Something users **SEE** → layout, density, interactions, states
 - Something users **CALL** → responses, errors, auth, versioning
 - Something users **RUN** → output format, flags, modes, error handling
@@ -271,6 +333,7 @@ AskUserQuestion(
 ```
 
 Rules:
+
 - Options must be concrete choices, not abstract categories
 - Highlight recommended choice where you have a clear opinion
 - If user selects "Other" with freeform text, switch to plain text follow-up (per questioning.md freeform rule)
@@ -300,12 +363,15 @@ ${DESCRIPTION}
 ## Implementation Decisions
 
 ### ${area_1_name}
+
 - ${decision_from_discussion}
 
 ### ${area_2_name}
+
 - ${decision_from_discussion}
 
 ### Claude's Discretion
+
 ${areas_where_user_said_you_decide_or_areas_not_discussed}
 
 </decisions>
@@ -320,6 +386,7 @@ ${any_specific_references_or_examples_from_discussion}
 </specifics>
 
 <canonical_refs>
+
 ## Canonical References
 
 ${any_specs_adrs_or_docs_referenced_during_discussion}
@@ -340,6 +407,7 @@ Report: `Context captured: ${QUICK_DIR}/${quick_id}-CONTEXT.md`
 Skip this step entirely if NOT `$RESEARCH_MODE`.
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► RESEARCHING QUICK TASK
@@ -392,7 +460,10 @@ Return: ## RESEARCH COMPLETE with file path
 )
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 After researcher returns:
+
 1. Verify research exists at `${QUICK_DIR}/${quick_id}-RESEARCH.md`
 2. Report: "Research complete: ${QUICK_DIR}/${quick_id}-RESEARCH.md"
 
@@ -448,7 +519,10 @@ Return: ## PLANNING COMPLETE with plan path
 )
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 After planner returns:
+
 1. Verify plan exists at `${QUICK_DIR}/${quick_id}-PLAN.md`
 2. Extract plan count (typically 1 for quick tasks)
 3. Report: "Plan created: ${QUICK_DIR}/${quick_id}-PLAN.md"
@@ -462,6 +536,7 @@ If plan not found, error: "Planner failed to create ${quick_id}-PLAN.md"
 Skip this step entirely if NOT `$VALIDATE_MODE`.
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► CHECKING PLAN
@@ -478,8 +553,9 @@ Checker prompt:
 **Task Description:** ${DESCRIPTION}
 
 <files_to_read>
+
 - ${QUICK_DIR}/${quick_id}-PLAN.md (Plan to verify)
-</files_to_read>
+  </files_to_read>
 
 ${AGENT_SKILLS_CHECKER}
 
@@ -487,6 +563,7 @@ ${AGENT_SKILLS_CHECKER}
 </verification_context>
 
 <check_dimensions>
+
 - Requirement coverage: Does the plan address the task description?
 - Task completeness: Do tasks have files, action, verify, done fields?
 - Key links: Are referenced files real?
@@ -498,9 +575,10 @@ ${DISCUSS_MODE ? '- Context compliance: Does the plan honor locked decisions fro
 </check_dimensions>
 
 <expected_output>
+
 - ## VERIFICATION PASSED — all checks pass
 - ## ISSUES FOUND — structured issue list
-</expected_output>
+  </expected_output>
 ```
 
 ```
@@ -511,6 +589,8 @@ Task(
   description="Check quick plan: ${DESCRIPTION}"
 )
 ```
+
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 **Handle checker return:**
 
@@ -532,8 +612,9 @@ Revision prompt:
 **Mode:** quick-full (revision)
 
 <files_to_read>
+
 - ${QUICK_DIR}/${quick_id}-PLAN.md (Existing plan)
-</files_to_read>
+  </files_to_read>
 
 ${AGENT_SKILLS_PLANNER}
 
@@ -557,6 +638,8 @@ Task(
 )
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 After planner returns → spawn checker again, increment iteration_count.
 
 **If iteration_count >= 2:**
@@ -578,7 +661,21 @@ if [ "${USE_WORKTREES}" != "false" ]; then
   COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
   if [ "$COMMIT_DOCS" != "false" ]; then
     git add "${QUICK_DIR}/${quick_id}-PLAN.md"
-    git commit --no-verify -m "docs(${quick_id}): pre-dispatch plan for ${DESCRIPTION}" -- "${QUICK_DIR}/${quick_id}-PLAN.md" || true
+    # No-op skip if nothing actually staged (idempotent re-runs).
+    if git diff --cached --quiet -- "${QUICK_DIR}/${quick_id}-PLAN.md"; then
+      echo "ℹ Pre-dispatch PLAN.md commit skipped (no staged changes)"
+    else
+      # Run hooks normally (#2924). If a project opts out via
+      # workflow.worktree_skip_hooks=true, honor that opt-in only.
+      SKIP_HOOKS=$(gsd-sdk query config-get workflow.worktree_skip_hooks 2>/dev/null || echo "false")
+      if [ "$SKIP_HOOKS" = "true" ]; then
+        git commit --no-verify -m "docs(${quick_id}): pre-dispatch plan for ${DESCRIPTION}" -- "${QUICK_DIR}/${quick_id}-PLAN.md" \
+          || { echo "ERROR: pre-dispatch PLAN.md commit failed (--no-verify path). Aborting before executor dispatch." >&2; exit 1; }
+      else
+        git commit -m "docs(${quick_id}): pre-dispatch plan for ${DESCRIPTION}" -- "${QUICK_DIR}/${quick_id}-PLAN.md" \
+          || { echo "ERROR: pre-dispatch PLAN.md commit failed — likely a pre-commit hook failure. Fix the hook output above (or set workflow.worktree_skip_hooks=true to bypass) and re-run." >&2; exit 1; }
+      fi
+    fi
   fi
 fi
 ```
@@ -588,6 +685,7 @@ fi
 **Step 6: Spawn executor**
 
 Capture current HEAD before spawning (used for worktree branch check):
+
 ```bash
 EXPECTED_BASE=$(git rev-parse HEAD)
 ```
@@ -601,12 +699,31 @@ Execute quick task ${quick_id}.
 
 ${USE_WORKTREES !== "false" ? `
 <worktree_branch_check>
-FIRST ACTION before any other work: verify this worktree branch is based on the correct commit.
-Run: git merge-base HEAD ${EXPECTED_BASE}
-If the result differs from ${EXPECTED_BASE}, hard-reset to the correct base (safe — runs before any agent work):
-  git reset --hard ${EXPECTED_BASE}
-Then verify: if [ "$(git rev-parse HEAD)" != "${EXPECTED_BASE}" ]; then echo "ERROR: Could not correct worktree base"; exit 1; fi
-This corrects a known issue where EnterWorktree creates branches from main instead of the feature branch HEAD (affects all platforms).
+FIRST ACTION before any other work: verify this worktree's HEAD is bound to a per-agent
+branch and that the branch is based on the correct commit.
+
+Step 1 — HEAD attachment assertion (MANDATORY, runs before any reset/commit):
+  HEAD_REF=$(git symbolic-ref --quiet HEAD || echo "DETACHED")
+  ACTUAL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+  if [ "$HEAD_REF" = "DETACHED" ] || echo "$ACTUAL_BRANCH" | grep -Eq '^(main|master|develop|trunk|release/.*)$'; then
+    echo "FATAL: worktree HEAD is on '$ACTUAL_BRANCH' (expected per-agent branch like worktree-agent-*)." >&2
+    echo "Refusing to commit/reset on a protected ref. DO NOT self-recover via 'git update-ref refs/heads/$ACTUAL_BRANCH' — that destroys concurrent work (#2924)." >&2
+    echo "Aborting before any commits. Surface as a blocker for human review." >&2
+    exit 1
+  fi
+  if ! echo "$ACTUAL_BRANCH" | grep -Eq '^worktree-agent-[A-Za-z0-9._/-]+$'; then
+    echo "FATAL: worktree HEAD '$ACTUAL_BRANCH' is not in the worktree-agent-* namespace (Claude Code's per-agent worktree branch namespace)." >&2
+    echo "Refusing to commit; surface as blocker (#2924)." >&2
+    exit 1
+  fi
+
+Step 2 — Base correctness (only after Step 1 passes):
+  Run: git merge-base HEAD ${EXPECTED_BASE}
+  If the result differs from ${EXPECTED_BASE}, hard-reset to the correct base (safe — Step 1 confirmed HEAD is on a per-agent branch and the worktree is fresh):
+    git reset --hard ${EXPECTED_BASE}
+  Then verify: if [ "$(git rev-parse HEAD)" != "${EXPECTED_BASE}" ]; then echo "ERROR: Could not correct worktree base"; exit 1; fi
+
+This corrects a known issue where EnterWorktree creates branches from main instead of the feature branch HEAD (#2015) and prevents the destructive HEAD-on-master self-recovery path (#2924).
 </worktree_branch_check>
 ` : ''}
 
@@ -619,9 +736,44 @@ This corrects a known issue where EnterWorktree creates branches from main inste
 
 ${AGENT_SKILLS_EXECUTOR}
 
+<submodule_commit_guard>
+SUBMODULE_PATHS for this project: ${SUBMODULE_PATHS}
+
+If SUBMODULE_PATHS is non-empty, you MUST run this fail-loud guard immediately
+before EVERY git commit you create during this quick task (after \`git add\`,
+before \`git commit\`). Quick mode does not have a pre-declared files_modified
+list, so the guard runs at commit time:
+
+\`\`\`bash
+SUBMODULE_PATHS=\"${SUBMODULE_PATHS}\"
+if [ -n \"\$SUBMODULE_PATHS\" ]; then
+  STAGED=\$(git diff --cached --name-only)
+  for sm_raw in \$SUBMODULE_PATHS; do
+    sm=\"\${sm_raw#./}\"
+    sm=\"\${sm%/}\"
+    [ -z \"\$sm\" ] && continue
+    for f_raw in \$STAGED; do
+      f=\"\${f_raw#./}\"
+      f=\"\${f%/}\"
+      case \"\$f\" in
+        \"\$sm\"|\"\$sm\"/*)
+          echo \"ABORT: staged path \$f_raw falls inside submodule \$sm — worktree-isolated commits cannot safely span submodule boundaries. Re-run with workflow.use_worktrees=false.\" >&2
+          exit 1 ;;
+      esac
+    done
+  done
+fi
+\`\`\`
+
+If the guard aborts, do NOT attempt the commit, do NOT remove the staged files,
+and do NOT continue subsequent tasks. Surface the abort message in your
+SUMMARY.md and stop — the user must rerun with worktrees disabled.
+</submodule_commit_guard>
+
 <constraints>
 - Execute all tasks in the plan
 - Commit each task atomically (code changes only)
+- Run the <submodule_commit_guard> bash block before every \`git commit\` if SUBMODULE_PATHS is non-empty
 - Create summary at: ${QUICK_DIR}/${quick_id}-SUMMARY.md
 - Do NOT commit docs artifacts (SUMMARY.md, STATE.md, PLAN.md) — the orchestrator handles the docs commit in Step 8
 - Do NOT update ROADMAP.md (quick tasks are separate from planned phases)
@@ -634,12 +786,23 @@ ${AGENT_SKILLS_EXECUTOR}
 )
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 After executor returns:
+
 1. **Worktree cleanup:** If the executor ran with `isolation="worktree"`, merge the worktree branch back and clean up:
+
    ```bash
-   # Find worktrees created by the executor
-   WORKTREES=$(git worktree list --porcelain | grep "^worktree " | grep -v "$(pwd)$" | sed 's/^worktree //')
-   for WT in $WORKTREES; do
+   # Find worktrees created by the executor.
+   # Inclusion-based filter (#2774): match ONLY agent-spawned worktrees under
+   # `.claude/worktrees/agent-` (the namespace Claude Code's `isolation="worktree"`
+   # uses). The previous exclusion filter (`grep -v "$(pwd)$"`) destroyed the parent
+   # workspace's `.git` whenever the workspace itself was a worktree (multi-workspace
+   # setups, and the cross-drive Windows case where `git worktree list` reports the
+   # registry path on a different drive than `$(pwd)`).
+   # Read line-by-line so worktree paths containing whitespace are preserved (#2774).
+   while IFS= read -r WT; do
+     [ -z "$WT" ] && continue
      WT_BRANCH=$(git -C "$WT" rev-parse --abbrev-ref HEAD 2>/dev/null)
      if [ -n "$WT_BRANCH" ] && [ "$WT_BRANCH" != "HEAD" ]; then
        # --- Orchestrator file protection (#1756) ---
@@ -691,14 +854,20 @@ After executor returns:
          fi
        fi
 
-       # Safety net: rescue uncommitted SUMMARY.md before worktree removal (#2296, mirrors #2070)
-       UNCOMMITTED_SUMMARY=$(git -C "$WT" ls-files --modified --others --exclude-standard -- "*SUMMARY.md" 2>/dev/null || true)
-       if [ -n "$UNCOMMITTED_SUMMARY" ]; then
-         echo "⚠ SUMMARY.md was not committed by executor — committing now to prevent data loss"
-         git -C "$WT" add -- "*SUMMARY.md" 2>/dev/null || true
-         git -C "$WT" commit --no-verify -m "docs(recovery): rescue uncommitted SUMMARY.md before worktree removal (#2070)" 2>/dev/null || true
-         git merge "$WT_BRANCH" --no-edit -m "chore: merge rescued SUMMARY.md from executor worktree ($WT_BRANCH)" 2>/dev/null || true
-       fi
+       # Safety net: rescue uncommitted SUMMARY.md before worktree removal (#2296, mirrors #2070, #2838).
+       # Filesystem-level (find + cp) bypasses git's --exclude-standard filter, which silently
+       # drops .planning/SUMMARY.md when projects gitignore .planning/ — the rescue's prior
+       # `git ls-files --exclude-standard` form returned empty in that case and the SUMMARY
+       # was lost on `git worktree remove --force`.
+       while IFS= read -r SUMMARY; do
+         [ -z "$SUMMARY" ] && continue
+         REL_PATH="${SUMMARY#$WT/}"
+         if [ ! -f "$REL_PATH" ] || ! cmp -s "$SUMMARY" "$REL_PATH"; then
+           mkdir -p "$(dirname "$REL_PATH")"
+           cp "$SUMMARY" "$REL_PATH"
+           echo "⚠ Rescued $REL_PATH from worktree before removal"
+         fi
+       done < <(find "$WT/.planning" -name "*SUMMARY.md" 2>/dev/null)
 
        if ! git worktree remove "$WT" --force; then
          WT_NAME=$(basename "$WT")
@@ -715,9 +884,11 @@ After executor returns:
        fi
        git branch -D "$WT_BRANCH" 2>/dev/null || true
      fi
-   done
+   done < <(git worktree list --porcelain | grep "^worktree " | grep "\.claude/worktrees/agent-" | sed 's/^worktree //')
    ```
+
    If `workflow.use_worktrees` is `false`, skip this step.
+
 2. Verify summary exists at `${QUICK_DIR}/${quick_id}-SUMMARY.md`
 3. Extract commit hash from executor output
 4. Report completion status
@@ -735,12 +906,15 @@ Note: For quick tasks producing multiple plans (rare), spawn executors in parall
 Skip this step entirely if `$FULL_MODE` is false.
 
 **Config gate:**
+
 ```bash
 CODE_REVIEW_ENABLED=$(gsd-sdk query config-get workflow.code_review 2>/dev/null || echo "true")
 ```
+
 If `"false"`, skip with message "Code review skipped (workflow.code_review=false)".
 
 **Scope files from executor's commits:**
+
 ```bash
 # Find the diff base: last commit before quick task started
 # Use git log to find commits referencing the quick task id, then take the parent of the oldest
@@ -764,6 +938,7 @@ fi
 If `CHANGED_FILES` is empty, skip with "No source files changed — skipping code review."
 
 **Invoke review:**
+
 ```
 Task(
   prompt="Review these files for bugs, security issues, and code quality.
@@ -775,6 +950,8 @@ Task(
 )
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 If review produces findings, display advisory message. **Error handling:** Failures are non-blocking — catch and proceed.
 
 ---
@@ -784,6 +961,7 @@ If review produces findings, display advisory message. **Error handling:** Failu
 Skip this step entirely if NOT `$VALIDATE_MODE`.
 
 Display banner:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► VERIFYING RESULTS
@@ -811,18 +989,21 @@ Check must_haves against actual codebase. Create VERIFICATION.md at ${QUICK_DIR}
 )
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 Read verification status:
+
 ```bash
 grep "^status:" "${QUICK_DIR}/${quick_id}-VERIFICATION.md" | cut -d: -f2 | tr -d ' '
 ```
 
 Store as `$VERIFICATION_STATUS`.
 
-| Status | Action |
-|--------|--------|
-| `passed` | Store `$VERIFICATION_STATUS = "Verified"`, continue to step 7 |
-| `human_needed` | Display items needing manual check, store `$VERIFICATION_STATUS = "Needs Review"`, continue |
-| `gaps_found` | Display gap summary, offer: 1) Re-run executor to fix gaps, 2) Accept as-is. Store `$VERIFICATION_STATUS = "Gaps"` |
+| Status         | Action                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `passed`       | Store `$VERIFICATION_STATUS = "Verified"`, continue to step 7                                                      |
+| `human_needed` | Display items needing manual check, store `$VERIFICATION_STATUS = "Needs Review"`, continue                        |
+| `gaps_found`   | Display gap summary, offer: 1) Re-run executor to fix gaps, 2) Accept as-is. Store `$VERIFICATION_STATUS = "Gaps"` |
 
 ---
 
@@ -839,19 +1020,21 @@ Read STATE.md and check for `### Quick Tasks Completed` section.
 Insert after `### Blockers/Concerns` section:
 
 **If `$VALIDATE_MODE`:**
+
 ```markdown
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Status | Directory |
-|---|-------------|------|--------|--------|-----------|
+| #   | Description | Date | Commit | Status | Directory |
+| --- | ----------- | ---- | ------ | ------ | --------- |
 ```
 
 **If NOT `$VALIDATE_MODE`:**
+
 ```markdown
 ### Quick Tasks Completed
 
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
+| #   | Description | Date | Commit | Directory |
+| --- | ----------- | ---- | ------ | --------- |
 ```
 
 **Note:** If the table already exists, match its existing column format. If adding `--validate` (or `--full`) to a project that already has quick tasks without a Status column, add the Status column to the header and separator rows, and leave Status empty for the new row's predecessors.
@@ -861,11 +1044,13 @@ Insert after `### Blockers/Concerns` section:
 Use `date` from init:
 
 **If `$VALIDATE_MODE` (or table has Status column):**
+
 ```markdown
 | ${quick_id} | ${DESCRIPTION} | ${date} | ${commit_hash} | ${VERIFICATION_STATUS} | [${quick_id}-${slug}](./quick/${quick_id}-${slug}/) |
 ```
 
 **If NOT `$VALIDATE_MODE` (and table has no Status column):**
+
 ```markdown
 | ${quick_id} | ${DESCRIPTION} | ${date} | ${commit_hash} | [${quick_id}-${slug}](./quick/${quick_id}-${slug}/) |
 ```
@@ -873,6 +1058,7 @@ Use `date` from init:
 **7d. Update "Last activity" line:**
 
 Use `date` from init:
+
 ```
 Last activity: ${date} - Completed quick task ${quick_id}: ${DESCRIPTION}
 ```
@@ -886,6 +1072,7 @@ Use Edit tool to make these changes atomically
 Stage and commit quick task artifacts. This step MUST always run — even if the executor already committed some files (e.g. when running without worktree isolation). The `gsd-sdk query commit` command (or legacy `gsd-tools.cjs` commit) handles already-committed files gracefully.
 
 Build file list:
+
 - `${QUICK_DIR}/${quick_id}-PLAN.md`
 - `${QUICK_DIR}/${quick_id}-SUMMARY.md`
 - `.planning/STATE.md`
@@ -905,10 +1092,11 @@ if [ "$COMMIT_DOCS" = "false" ]; then
 else
   git add ${file_list} 2>/dev/null
 fi
-gsd-sdk query commit "docs(quick-${quick_id}): ${DESCRIPTION}" ${file_list}
+gsd-sdk query commit "docs(quick-${quick_id}): ${DESCRIPTION}" --files ${file_list}
 ```
 
 Get final commit hash:
+
 ```bash
 commit_hash=$(git rev-parse --short HEAD)
 ```
@@ -916,6 +1104,7 @@ commit_hash=$(git rev-parse --short HEAD)
 Display completion output:
 
 **If `$VALIDATE_MODE`:**
+
 ```
 ---
 
@@ -934,6 +1123,7 @@ Ready for next task: /gsd-quick ${GSD_WS}
 ```
 
 **If NOT `$VALIDATE_MODE`:**
+
 ```
 ---
 
@@ -953,6 +1143,7 @@ Ready for next task: /gsd-quick ${GSD_WS}
 </process>
 
 <success_criteria>
+
 - [ ] ROADMAP.md validation passes
 - [ ] User provides task description
 - [ ] `--full`, `--validate`, `--discuss`, and `--research` flags parsed from arguments when present
@@ -968,4 +1159,4 @@ Ready for next task: /gsd-quick ${GSD_WS}
 - [ ] (--validate) `${quick_id}-VERIFICATION.md` created by verifier
 - [ ] STATE.md updated with quick task row (Status column when --validate)
 - [ ] Artifacts committed
-</success_criteria>
+      </success_criteria>

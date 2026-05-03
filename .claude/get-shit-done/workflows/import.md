@@ -93,10 +93,12 @@ Store loaded context for conflict detection in the next step.
 Read the imported file at FILEPATH.
 
 Determine the format:
+
 - **GSD PLAN.md format**: Has YAML frontmatter with `phase:`, `plan:`, `type:` fields
 - **Freeform document**: Any other format (markdown spec, design doc, task list, etc.)
 
 Extract from the imported content:
+
 - **Phase target**: Which phase this plan belongs to (from frontmatter or inferred from content)
 - **Plan objectives**: What the plan aims to accomplish
 - **Tasks listed**: Individual work items described in the plan
@@ -137,6 +139,7 @@ Render the full Conflict Detection Report using the format in `references/doc-co
 **Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
 
 Ask via AskUserQuestion using the approve-revise-abort pattern (see `references/gate-prompts.md`):
+
 - question: "Review the warnings above. Proceed with import?"
 - header: "Approve?"
 - options: Approve | Abort
@@ -150,11 +153,12 @@ If user selects "Abort": exit cleanly with message "Import cancelled."
 Convert the imported content to GSD PLAN.md format.
 
 Ensure the PLAN.md has all required frontmatter fields:
+
 ```yaml
 ---
-phase: "{NN}-{slug}"
-plan: "{NN}-{MM}"
-type: "feature|refactor|config|test|docs"
+phase: '{NN}-{slug}'
+plan: '{NN}-{MM}'
+type: 'feature|refactor|config|test|docs'
 wave: 1
 depends_on: []
 files_modified: []
@@ -169,16 +173,19 @@ must_haves:
 If the imported plan references PBR plan naming (e.g., `PLAN-01.md`, `plan-01.md`), rename all references to GSD `{NN}-{MM}-PLAN.md` convention during conversion.
 
 Apply GSD naming convention for the output filename:
+
 - Format: `{NN}-{MM}-PLAN.md` (e.g., `04-01-PLAN.md`)
 - NEVER use `PLAN-01.md`, `plan-01.md`, or any other format
 - NN = phase number (zero-padded), MM = plan number within the phase (zero-padded)
 
 Determine the target directory:
+
 ```
 .planning/phases/{NN}-{slug}/
 ```
 
 If the directory does not exist, create it:
+
 ```bash
 mkdir -p ".planning/phases/{NN}-{slug}/"
 ```
@@ -198,12 +205,16 @@ Task({
 })
 ```
 
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+
 If the checker returns errors:
+
 - Display the errors to the user
 - Ask the user to resolve issues before the plan is considered imported
 - Do not delete the written file — the user can fix and re-validate manually
 
 If the checker returns clean:
+
 - Display: "Plan validation passed"
 
 </step>
@@ -211,17 +222,20 @@ If the checker returns clean:
 <step name="plan_finalize">
 
 Update `.planning/ROADMAP.md` to reflect the new plan:
+
 - Add the plan to the Plans list under the correct phase section
 - Include the plan name and description
 
 Update `.planning/STATE.md` if appropriate (e.g., increment total plan count).
 
 Commit the imported plan and updated files:
+
 ```bash
-gsd-sdk query commit "docs({phase}): import plan from {basename FILEPATH}" .planning/phases/{phase}/{plan}-PLAN.md .planning/ROADMAP.md
+gsd-sdk query commit "docs({phase}): import plan from {basename FILEPATH}" --files .planning/phases/{phase}/{plan}-PLAN.md .planning/ROADMAP.md
 ```
 
 Display completion:
+
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► IMPORT COMPLETE
@@ -237,6 +251,7 @@ Show: plan filename written, phase directory, validation result, next steps.
 ## Anti-Patterns
 
 Do NOT:
+
 - Violate the shared conflict-engine contract in `references/doc-conflict-engine.md` (no markdown tables, no new severity labels, no bypass of the BLOCKER gate)
 - Write PLAN.md files as `PLAN-01.md` or `plan-01.md` — always use `{NN}-{MM}-PLAN.md`
 - Use `pbr:plan-checker` or `pbr:planner` — use `gsd-plan-checker` and `gsd-planner`

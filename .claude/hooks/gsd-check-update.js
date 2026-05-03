@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// gsd-hook-version: 1.38.5
+// gsd-hook-version: 1.40.0
 // Check for GSD updates in background, write result to cache
 // Called by SessionStart hook - runs once per session
 
@@ -19,7 +19,14 @@ function detectConfigDir(baseDir) {
   if (envDir && fs.existsSync(path.join(envDir, 'get-shit-done', 'VERSION'))) {
     return envDir;
   }
-  for (const dir of ['.claude', '.gemini', '.config/kilo', '.kilo', '.config/opencode', '.opencode']) {
+  for (const dir of [
+    '.claude',
+    '.gemini',
+    '.config/kilo',
+    '.kilo',
+    '.config/opencode',
+    '.opencode',
+  ]) {
     if (fs.existsSync(path.join(baseDir, dir, 'get-shit-done', 'VERSION'))) {
       return path.join(baseDir, dir);
     }
@@ -52,7 +59,7 @@ const workerPath = path.join(__dirname, 'gsd-check-update-worker.js');
 const child = spawn(process.execPath, [workerPath], {
   stdio: 'ignore',
   windowsHide: true,
-  detached: true,  // Required on Windows for proper process detachment
+  detached: true, // Required on Windows for proper process detachment
   env: {
     ...process.env,
     GSD_CACHE_FILE: cacheFile,
