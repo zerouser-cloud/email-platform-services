@@ -22,11 +22,14 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ['CMD', 'wget', '-qO/dev/null', 'http://127.0.0.1:3000/health/live']
+      # Gateway HTTP healthcheck per ADR-001 §Decision (c.1) — F-04 closure
+      # Path: /health/ready (readiness probe semantics for compose orchestration)
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health/ready']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      # start_period bumped 10s → 30s per RESEARCH §11.2 OQ-08 (distroless cold-start ≈ 28s)
+      start_period: 30s
     networks: [services, infra]
 
   auth:

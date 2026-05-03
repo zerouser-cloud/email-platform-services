@@ -21,6 +21,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pre-build contract generation setup (Placement A per ADR-001 §Decision (d) — F-12 V2 closure)
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Pre-build contract generation (Placement A per ADR-001 §Decision (d))
+      # Runs once per matrix shard before docker buildx; gen output baked into Docker context.
+      # Sequencing: F-24 (Wave 1 — pnpm-lock.yaml in turbo.json tasks.generate.inputs) closure
+      # MUST precede this step per RESEARCH §10.1 R-05 to prevent stale cache restoration.
+      - name: Pre-build contract generation
+        run: pnpm generate:contracts
+
+      # Drift-check gate (per RESEARCH §7.3 + ADR-001 §Decision (d))
+      # Exits non-zero IF generated outputs diverged from committed state, failing CI before docker build.
+      - name: Drift-check gate
+        run: git diff --exit-code packages/contracts/src/generated/
+
+      # Multi-arch emulation setup (per ADR-001 implicit-fifth — F-08 closure)
+      - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v4
 
       - uses: docker/login-action@v4
@@ -43,6 +68,8 @@ jobs:
         with:
           context: .
           file: infra/docker/app.Dockerfile
+          # Multi-arch build (per ADR-001 implicit-fifth — F-08 closure)
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
