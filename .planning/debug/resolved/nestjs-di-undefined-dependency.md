@@ -1,8 +1,9 @@
 ---
-status: investigating
-trigger: "NestJS UndefinedDependencyException in sender (and likely auth, parser, audience, notifier) services when running in Docker images from GHCR. Gateway works fine. Services work locally."
+status: abandoned
+trigger: 'NestJS UndefinedDependencyException in sender (and likely auth, parser, audience, notifier) services when running in Docker images from GHCR. Gateway works fine. Services work locally.'
 created: 2026-04-05T00:00:00Z
-updated: 2026-04-05T00:02:00Z
+updated: 2026-05-03T00:00:00Z
+abandoned_reason: 'Coolify deploy path superseded by GitLab+K8s migration plan (see memory project_gitlab_migration / project_hosting_infra). Coolify env-var sub-hypothesis never verified — diagnostic data was never gathered. Re-open as fresh session if issue resurfaces under K8s deploy.'
 ---
 
 ## Current Focus
@@ -16,7 +17,7 @@ next_action: CHECKPOINT — request user to run diagnostics on Coolify
 
 expected: All 6 NestJS microservices start successfully in Docker containers (from GHCR images built by GHA)
 actual: Gateway starts fine. Sender crashes with "Nest can't resolve dependencies of the CreateCampaignUseCase (?). Argument at index [0] is available in the current module." Other services (auth, parser, audience, notifier) have similar DI errors.
-errors: UndefinedDependencyException for CreateCampaignUseCase — argument at index [0] (CAMPAIGN_REPOSITORY_PORT -> PgCampaignRepository which @Inject(DRIZZLE)). The circular import from module files was already fixed (tokens moved to *.constants.ts), and locally `docker run` with the SAME ghcr.io image works fine.
+errors: UndefinedDependencyException for CreateCampaignUseCase — argument at index [0] (CAMPAIGN_REPOSITORY_PORT -> PgCampaignRepository which @Inject(DRIZZLE)). The circular import from module files was already fixed (tokens moved to \*.constants.ts), and locally `docker run` with the SAME ghcr.io image works fine.
 reproduction: Deploy via Coolify Docker Compose or pull ghcr.io/zerouser-cloud/email-platform-sender:dev-latest. Gateway works, sender/others crash. BUT running `docker run` locally with the same image and proper env vars — sender starts successfully!
 started: First deployment attempt. These services never ran in Docker before.
 
