@@ -885,11 +885,13 @@ Plans:
 
 ### Phase 999.18.1: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
+**Goal:** Ship 5 documents that lock the build-system architecture for 999.18.2 implementation: ADR (MADR-light per CONTEXT D-14 with one orchestrator finalist + 4 coupled cross-cutting choices) + DOCKERFILE-REFERENCE (canonical Dockerfile reference shape with per-Step rationale + 22 invariants + multi-arch + k8s-ready callouts) + MIGRATION-RUNBOOK (wave-based step-by-step plan for 999.18.2 with rollback anchors + dual-mode smoke gates) + RE-EVAL-TRIGGERS (binding contract with 19 T-NN triggers across 5 categories) + RESEARCH (already authored). User approval of ADR (D-16 trigger) unblocks 999.18.2 phase creation.
+**Requirements**: REQ-PROCESS-01, REQ-PROCESS-02, REQ-PROCESS-03, REQ-PROCESS-04 (phase-internal IDs per RESEARCH §11.2)
 **Depends on:** Phase 999.18
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 999.18.1 to break down)
+- [ ] 999.18.1-01-PLAN.md — ADR authoring (MADR-light per CONTEXT D-14): Status / Context / Decision Drivers (C-01..C-13) / Considered Options (6 D-17 candidates) / Decision (1 finalist + 4 coupled choices + F-NN coverage table) / Consequences / Alternatives (skill cross-check matrix per rejected option) / References
+- [ ] 999.18.1-02-PLAN.md — DOCKERFILE-REFERENCE.md authoring: Stage 0 (build args + F-05 PROTO_DIR kill) + Stage 1 (Builder per ADR finalist) + Stage 2 (Runner per ADR Decision (a)+(c)) + Per-Step Invariant Cross-Ref Matrix (22 I-SN.M invariants) + 3 appendices (build determinism proof / multi-arch CI / RE-EVAL cross-reference)
+- [ ] 999.18.1-03-PLAN.md — MIGRATION-RUNBOOK.md (5 Waves with rollback anchors + dual-mode smoke gate per wave + canonical GSD flow) + RE-EVAL-TRIGGERS.md (19 T-NN triggers + 5-step re-evaluation contract + worked example)
