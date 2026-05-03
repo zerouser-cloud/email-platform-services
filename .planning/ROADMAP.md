@@ -882,3 +882,14 @@ Plans:
 - [ ] 999.18-04-PLAN.md — Wave 2 inline fixes: multi-arch CI build (linux/amd64,linux/arm64) + compose healthcheck swap /health/live → /health/ready × 6 services
 - [ ] 999.18-05-PLAN.md — Wave 3 inline fix (CONDITIONAL): D-12 contract generation pipeline relocation per user-approved variant (V1 no-op / V2 commit-time / V3 layer-share / V4 untrack)
 - [ ] 999.18-06-PLAN.md — Wave 4 closure: BACKLOG.md catalogue + Plan 08 SUMMARY drift fix + gsd-flow-guard skill update (conditional) + final dual-mode smoke + VERIFICATION.md
+
+### Phase 999.18.1: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.18
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 999.18.1 to break down)
