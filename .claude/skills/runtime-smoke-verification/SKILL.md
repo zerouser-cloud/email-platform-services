@@ -253,5 +253,5 @@ When in doubt about which flows the project currently supports, which ports the 
 ## See Also
 
 - `.claude/skills/infrastructure-guard/SKILL.md` — never change ports / docker-compose without approval (smoke verification must respect this — don't fix infra issues, report them)
-- `.claude/skills/gsd-flow-guard/SKILL.md` — route smoke through the GSD workflow that owns it (e.g., execute-phase verification step)
+- `.claude/skills/ai-framework-flow-guard/SKILL.md` — route smoke through the GSD workflow that owns it (e.g., execute-phase verification step)
 - Memory: `feedback_use_package_scripts` — codifies the "always use pnpm scripts" rule

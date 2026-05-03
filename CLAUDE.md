@@ -447,7 +447,7 @@ Every `{svc}.module.ts` root imports feature modules only (never individual cont
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
 
-**CRITICAL: Before EVERY file-changing action (Edit, Write, Bash with side-effects), run the gsd-flow-guard checkpoint.** See `.claude/skills/gsd-flow-guard/SKILL.md` for the full decision tree.
+**CRITICAL: Before EVERY file-changing action (Edit, Write, Bash with side-effects), run the ai-framework-flow-guard checkpoint.** See `.claude/skills/ai-framework-flow-guard/SKILL.md` for the full decision tree.
 
 **Self-check before any edit:**
 1. Am I inside a GSD workflow right now? → YES: continue. NO: go to 2.

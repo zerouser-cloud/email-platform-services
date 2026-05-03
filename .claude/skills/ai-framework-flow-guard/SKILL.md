@@ -1,5 +1,5 @@
 ---
-name: gsd-flow-guard
+name: ai-framework-flow-guard
 description: Route every action through GSD workflow before executing. Triggers on any file-changing operation (Edit, Write, Bash with file side-effects). Apply BEFORE making any change to repo files — code, config, planning artifacts, docs. Prevents ad-hoc edits that bypass GSD tracking, atomic commits, and state management.
 ---
 

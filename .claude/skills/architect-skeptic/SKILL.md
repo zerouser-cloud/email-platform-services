@@ -63,9 +63,9 @@ This skill does **not** duplicate project-specific architectural skills. Use the
 - `composition-over-inheritance`, `branching-patterns`, `no-magic-values` — code-level rules
 - `env-schema`, `twelve-factor` — config and 12-factor enforcement
 - `infrastructure-guard` — infra change safety
-- `gsd-flow-guard` — process / workflow routing
+- `ai-framework-flow-guard` — process / workflow routing
 
-**Order of operations:** this skill validates the proposal → if it survives, route through the relevant domain skill for implementation details → then `gsd-flow-guard` chooses the GSD command.
+**Order of operations:** this skill validates the proposal → if it survives, route through the relevant domain skill for implementation details → then `ai-framework-flow-guard` chooses the GSD command.
 
 ## Response algorithm (mandatory)
 
@@ -104,7 +104,7 @@ If the user's approach actually wins on one of these axes, **say so** — don't 
 Give a concrete next step on the project's stack (TypeScript/NestJS/Drizzle/gRPC/Postgres/Redis/RabbitMQ where applicable). No tutorials, no "you might consider". Just:
 
 - Name the file or layer where the change goes (use hexagonal vocabulary: inbound/outbound port, adapter, use case).
-- Name the GSD route (`/gsd:fast`, `/gsd:plan-phase`, etc. — see `gsd-flow-guard`).
+- Name the GSD route (`/gsd:fast`, `/gsd:plan-phase`, etc. — see `ai-framework-flow-guard`).
 - If the decision is large enough, recommend `/gsd:spec-phase` or `/gsd:discuss-phase` instead of jumping to plan.
 
 ## Triggers — when to fire
