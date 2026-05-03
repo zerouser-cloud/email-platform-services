@@ -4,7 +4,7 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.18 context gathered
-last_updated: '2026-05-03T09:12:59.179Z'
+last_updated: '2026-05-03T09:57:55.181Z'
 last_activity: 2026-05-03
 progress:
   total_phases: 47
@@ -325,6 +325,7 @@ Progress: [██████████] 95%
 - [Phase ?]: Phase 999.17.2-01: OQ-5 fingerprints retained for both c638e69 + 382fc1f despite empirical 1-fire reality (gitleaks deduplicates by introducing-commit; only c638e69 fires). Defensive coverage per PLAN must_haves.
 - [Phase ?]: [Phase 999.17.2-02]: D-08 + OQ-3 + D-10 native env override + D-11 DEVOPS-HANDOFF complete; Plan 02 follow-up — 20 D-08 fingerprint suppressions added to .gitleaksignore (Rule-1 deviation; gitleaks git mode scans history). Tasks 4a + 6 manual-UAT checkpoints deferred awaiting user one-time-permission.
 - [Phase ?]: Phase 999.18 Plan 01: AUDIT.md authored — 24 F-NN findings (3 BLOCKER + 8 MAJOR + 4 MINOR + 10 INFO) across 9 dims; 7 of 8 skills cross-checked; K8s Constraints Checklist as D8 deliverable per CONTEXT D-13 (NOT manifests per D-14)
+- [Phase 999.18]: Phase 999.18 paused at Plan 02 checkpoint; 12 findings deferred to new Phase 999.19 for build-system architectural redesign
 
 ### Pending Todos
 
