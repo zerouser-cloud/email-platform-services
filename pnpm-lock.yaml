@@ -3,7 +3,6 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
-  injectWorkspacePackages: true
 
 importers:
 
@@ -47,13 +46,13 @@ importers:
     dependencies:
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../../packages/config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@email-platform/foundation':
         specifier: workspace:*
-        version: file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)
+        version: link:../../packages/foundation
       '@grpc/grpc-js':
         specifier: ^1.14.3
         version: 1.14.3
@@ -120,13 +119,13 @@ importers:
     dependencies:
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../../packages/config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@email-platform/foundation':
         specifier: workspace:*
-        version: file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)
+        version: link:../../packages/foundation
       '@grpc/grpc-js':
         specifier: ^1.14.3
         version: 1.14.3
@@ -193,13 +192,13 @@ importers:
     dependencies:
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../../packages/config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@email-platform/foundation':
         specifier: workspace:*
-        version: file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)
+        version: link:../../packages/foundation
       '@grpc/grpc-js':
         specifier: ^1.14.3
         version: 1.14.3
@@ -275,13 +274,13 @@ importers:
     dependencies:
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../../packages/config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@email-platform/foundation':
         specifier: workspace:*
-        version: file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)
+        version: link:../../packages/foundation
       '@nestjs/common':
         specifier: ^11.1.19
         version: 11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -336,13 +335,13 @@ importers:
     dependencies:
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../../packages/config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@email-platform/foundation':
         specifier: workspace:*
-        version: file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)
+        version: link:../../packages/foundation
       '@grpc/grpc-js':
         specifier: ^1.14.3
         version: 1.14.3
@@ -409,13 +408,13 @@ importers:
     dependencies:
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../../packages/config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
       '@email-platform/foundation':
         specifier: workspace:*
-        version: file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)
+        version: link:../../packages/foundation
       '@grpc/grpc-js':
         specifier: ^1.14.3
         version: 1.14.3
@@ -534,7 +533,7 @@ importers:
         version: 2.12.0
       '@email-platform/config':
         specifier: workspace:*
-        version: file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: link:../config
       '@email-platform/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -812,27 +811,6 @@ packages:
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
-
-  '@email-platform/config@file:packages/config':
-    resolution: {directory: packages/config, type: directory}
-    peerDependencies:
-      '@nestjs/common': ^11.1.19
-
-  '@email-platform/contracts@file:packages/contracts':
-    resolution: {directory: packages/contracts, type: directory}
-    peerDependencies:
-      '@bufbuild/protobuf': ^2.2.3
-
-  '@email-platform/foundation@file:packages/foundation':
-    resolution: {directory: packages/foundation, type: directory}
-    peerDependencies:
-      '@nestjs/common': ^11.1.19
-      '@nestjs/core': ^11.1.19
-      '@nestjs/microservices': ^11.1.19
-      '@nestjs/terminus': ^11.1.1
-      nestjs-cls: ^6.2.0
-      nestjs-pino: ^4.6.0
-      rxjs: ^7.8.1
 
   '@esbuild-kit/core-utils@3.3.2':
     resolution: {integrity: sha512-sPRAnw9CdSsRmEtnsl2WXWdyquogVpB3yZ3dgwJfe8zrOzTsV7cJvmwrKVa+0ma5BoiGJ+BoqkMvawbayKUsqQ==}
@@ -4557,71 +4535,6 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.9
 
   '@drizzle-team/brocli@0.10.2': {}
-
-  '@email-platform/config@file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
-    dependencies:
-      '@nestjs/common': 11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      zod: 4.4.1
-
-  '@email-platform/contracts@file:packages/contracts(@bufbuild/protobuf@2.12.0)':
-    dependencies:
-      '@bufbuild/protobuf': 2.12.0
-
-  '@email-platform/foundation@file:packages/foundation(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(@nestjs/terminus@11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@types/pg@8.20.0)(nestjs-cls@6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2))(nestjs-pino@4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2))(rxjs@7.8.2)':
-    dependencies:
-      '@aws-sdk/client-s3': 3.1040.0
-      '@aws-sdk/lib-storage': 3.1040.0(@aws-sdk/client-s3@3.1040.0)
-      '@bufbuild/protobuf': 2.12.0
-      '@email-platform/config': file:packages/config(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
-      '@email-platform/contracts': file:packages/contracts(@bufbuild/protobuf@2.12.0)
-      '@grpc/grpc-js': 1.14.3
-      '@nestjs/common': 11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 11.1.19(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@11.1.19)(@nestjs/platform-express@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/microservices': 11.1.19(@grpc/grpc-js@1.14.3)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(ioredis@5.10.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/terminus': 11.1.1(@grpc/grpc-js@1.14.3)(@grpc/proto-loader@0.8.0)(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(@nestjs/microservices@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
-      grpc-health-check: 2.1.0
-      ioredis: 5.10.1
-      nestjs-cls: 6.2.0(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      nestjs-pino: 4.6.1(@nestjs/common@11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(pino-http@11.0.0)(pino@10.3.1)(rxjs@7.8.2)
-      opossum: 9.0.0
-      pg: 8.20.0
-      pino: 10.3.1
-      pino-http: 11.0.0
-      rxjs: 7.8.2
-      zod: 4.4.1
-    transitivePeerDependencies:
-      - '@aws-sdk/client-rds-data'
-      - '@cloudflare/workers-types'
-      - '@electric-sql/pglite'
-      - '@libsql/client'
-      - '@libsql/client-wasm'
-      - '@neondatabase/serverless'
-      - '@op-engineering/op-sqlite'
-      - '@opentelemetry/api'
-      - '@planetscale/database'
-      - '@prisma/client'
-      - '@tidbcloud/serverless'
-      - '@types/better-sqlite3'
-      - '@types/pg'
-      - '@types/sql.js'
-      - '@upstash/redis'
-      - '@vercel/postgres'
-      - '@xata.io/client'
-      - aws-crt
-      - better-sqlite3
-      - bun-types
-      - expo-sqlite
-      - gel
-      - knex
-      - kysely
-      - mysql2
-      - pg-native
-      - postgres
-      - prisma
-      - sql.js
-      - sqlite3
-      - supports-color
 
   '@esbuild-kit/core-utils@3.3.2':
     dependencies:
