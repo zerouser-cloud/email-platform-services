@@ -4,8 +4,8 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.18.1 context gathered
-last_updated: '2026-05-03T18:52:22.475Z'
-last_activity: 2026-05-03 -- Phase 999.18.2 execution started
+last_updated: '2026-05-03T19:40:00.000Z'
+last_activity: 2026-05-03 -- Phase 999.18.2 Plan 03 (Wave 2) complete — Wave 2 anchor a647f51 + USER-APPROVED inline healthcheck swap (Rule 1+4)
 progress:
   total_phases: 49
   completed_phases: 32
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.18.2 (implementation-cluster-execute-migration-runbook-from-phase-) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 999.18.2
-Last activity: 2026-05-03 -- Phase 999.18.2 execution started
+Plan: 3 of 5 (Wave 2 anchor a647f51 — Dockerfile rewrite + transport-aligned cleanup + grpc_health_probe healthcheck swap inline)
+Status: Executing Phase 999.18.2 — Wave 2 complete; ready for Wave 3 (Plan 04)
+Last activity: 2026-05-03 -- Wave 2 anchor commit a647f51 + rollback drill PASSED + SUMMARY written
 
 D-16 review outcome:
 
