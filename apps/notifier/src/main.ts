@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { SERVICE, type NotifierEnv } from '@email-platform/config';
-import { createGrpcServerOptions, SERVER, BOOTSTRAP } from '@email-platform/foundation';
+import { createGrpcServerOptions, BOOTSTRAP } from '@email-platform/foundation';
 import { NOTIFIER_CONFIG } from './infrastructure/bootstrap/config/notifier-config.constants';
 import { NotifierModule } from './notifier.module';
 
@@ -18,7 +18,8 @@ async function bootstrap() {
   );
 
   await app.startAllMicroservices();
-  await app.listen(config.NOTIFIER_PORT, SERVER.DEFAULT_HOST);
+  // HTTP server dropped per Phase 999.18.1 ADR-001 §Decision (c.3) — gRPC Health-only service.
+  // gRPC Health protocol registered via createGrpcServerOptions factory wiring (foundation, Path A).
 }
 bootstrap().catch((err) => {
   console.error(BOOTSTRAP.FAILED_MESSAGE, err);

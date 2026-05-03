@@ -1,84 +1,109 @@
 # syntax=docker/dockerfile:1
-ARG NODE_VERSION=22-alpine
+# Phase 999.18.2 Wave 2 — applied form of Phase 999.18.1 ADR-001 §Decision (a) drop pnpm-deploy
+# + (b) M3 architectural-eliminate (injectWorkspacePackages OFF) + (c) distroless runner
+# + transport-aligned healthcheck protocol (c.1)+(c.2)+(c.3).
+# All 27 invariants I-S0.1..I-S2.9 grep-verifiable per 999.18.1-DOCKERFILE-REFERENCE
+# Per-Step Invariant Cross-Ref Matrix.
 
-# ─── Stage 1: Builder ─────────────────────────────────────────
-FROM node:${NODE_VERSION} AS builder
-
-RUN apk add --no-cache libc6-compat
-
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-
-WORKDIR /app
-
-# Step 1: Copy manifests only (layer cache for dependencies)
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
-COPY packages/contracts/package.json packages/contracts/package.json
-COPY packages/config/package.json packages/config/package.json
-COPY packages/foundation/package.json packages/foundation/package.json
-
+# ─── Stage 0: Build args ──────────────────────────────────────
+# I-S0.2: APP_NAME has NO default (fail-loud — build MUST fail если caller forgets --build-arg APP_NAME=<svc>)
 ARG APP_NAME
-COPY apps/${APP_NAME}/package.json apps/${APP_NAME}/package.json
+# I-S0.3: NODE_VERSION default = 22-alpine для builder stages
+ARG NODE_VERSION=22-alpine
+# I-S2.1.6: pinned grpc_health_probe version для security re-pinning per advisory
+ARG GRPC_HEALTH_PROBE_VERSION=v0.4.24
+# I-S0.4 + I-S0.5: NO `ENV PROTO_DIR=...` directive — F-05 closure (single source of truth in .env.docker via env_file)
 
-# Step 2: Install with BuildKit cache mount
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-# Step 3: Copy source code (changes here don't bust install cache)
-COPY tsconfig.base.json ./
-COPY packages ./packages
-COPY apps/${APP_NAME} ./apps/${APP_NAME}
-
-# Step 4a: Generate proto TypeScript, then build shared packages in dependency order.
-# These build into packages/*/dist/ in source workspace.
-RUN pnpm --filter @email-platform/contracts run generate \
-    && pnpm --filter @email-platform/contracts run build \
-    && pnpm --filter @email-platform/config run build \
-    && pnpm --filter @email-platform/foundation run build
-
-# Step 4b: Refresh injected workspace dependencies before app build.
-# pnpm 11 with injectWorkspacePackages=true snapshots workspace package contents
-# at install time. After Step 4a fills source dist/, injected copies in
-# node_modules/.pnpm/@email-platform+* remain stale. `pnpm install --force` does
-# NOT refresh them (verified empirically — pnpm reports "already up to date"
-# even with new dist/). The only refresh path: remove node_modules entirely
-# and reinstall, which forces fresh injection from current source.
-# Content-addressable pnpm store at /pnpm/store survives this so re-resolve
-# is fast (no network fetches). This is the canonical pattern for pnpm 11
-# multi-stage Docker builds with injectWorkspacePackages.
-RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-# Step 4c: Now build the app — its node_modules contain re-injected dist/ from packages.
-RUN pnpm --filter @email-platform/${APP_NAME} run build
-
-# Step 4d: Refresh once more so deploy bundles the just-built app dist/.
-RUN rm -rf node_modules apps/*/node_modules packages/*/node_modules
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-# Step 5: Deploy production bundle
-RUN pnpm deploy --filter @email-platform/${APP_NAME} --prod /prod/app
-
-# Step 6: Ensure proto files are available
-COPY packages/contracts/proto /prod/app/proto
-
-# ─── Stage 2: Runner ──────────────────────────────────────────
-FROM node:${NODE_VERSION} AS runner
-
-RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
-
+# ─── Stage 1.1: Pruner ────────────────────────────────────────
+# I-S1.1: COPY . . accepted as cache-invalidating by design — pruner stage requires full workspace
+# для compute the dependency graph slice; pruner output (out/json/ + out/full/) feeds downstream stages.
+FROM node:${NODE_VERSION} AS pruner
 WORKDIR /app
+# I-S1.2: corepack enable MUST precede pnpm dlx invocations (pnpm 11 ships via corepack)
+RUN corepack enable
+COPY . .
+# Re-declare APP_NAME for pruner stage scope per Docker multi-stage ARG rules
+ARG APP_NAME
+# I-S1.7 (pruner half): turborepo prune carves the dep-closure slice
+RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
 
-COPY --from=builder /prod/app ./
+# ─── Stage 1.1.5: Fetcher (M3 mechanism per ADR (b)) ──────────
+# I-S1.2.5 + I-S1.2.6: prod-only fetch populates virtual store from manifests + lockfile only;
+# cache-id 'pnpm-fetch' separate from installer's 'pnpm-install' (lockfile bump invalidates fetcher,
+# install layer cache survives if resolved deps unchanged).
+FROM node:${NODE_VERSION} AS fetcher
+WORKDIR /app
+RUN corepack enable
+COPY --from=pruner /app/out/json/ ./
+RUN --mount=type=cache,id=pnpm-fetch,target=/pnpm/store \
+    pnpm fetch --prod
 
+# ─── Stage 1.2: Installer (offline install) ───────────────────
+# I-S1.3: COPY ONLY package.json + lockfile from /app/out/json/ — NEVER source code (pruner-anchor cache discipline).
+# I-S1.4 + I-S1.5: --offline + --frozen-lockfile required because injectWorkspacePackages: false
+# (M3 architectural-eliminate landed в Wave 1 b8d4fa0); install layer survives source-code commits (manifests-only key).
+FROM node:${NODE_VERSION} AS installer
+WORKDIR /app
+RUN corepack enable
+COPY --from=pruner /app/out/json/ ./
+RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
+    --mount=type=cache,id=pnpm-fetch,target=/pnpm/fetch-store,ro \
+    pnpm install --offline --frozen-lockfile
+
+# Download grpc_health_probe binary per-arch (I-S2.1.5 + I-S2.1.6)
+# apk --print-arch returns x86_64/aarch64 (Alpine convention); transformer maps к amd64/arm64
+# (GitHub release naming). BuildKit handles per-platform leg automatically когда
+# `docker buildx build --platform linux/amd64,linux/arm64` invoked в Wave 3.
+ARG GRPC_HEALTH_PROBE_VERSION
+RUN apk add --no-cache wget \
+    && wget -qO/usr/local/bin/grpc_health_probe \
+        "https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-$(apk --print-arch | sed 's/x86_64/amd64/;s/aarch64/arm64/')" \
+    && chmod +x /usr/local/bin/grpc_health_probe
+
+# ─── Stage 1.3: Builder ───────────────────────────────────────
+# I-S1.6: COPY --from=pruner /app/out/full/ (pruner output) — NOT `COPY . .` — pruner already filtered к dep-closure.
+# I-S1.7: pnpm exec turbo run build (NOT pnpm --filter ... run build — bypasses turbo cache, F-03 root cause).
+# I-S1.8: NO node-modules-purge cycle (F-02 closure under M3 architectural-eliminate).
+# I-S1.9: NO `pnpm generate:contracts` invocation (F-12 closure — Decision (d) Placement A pre-build CI).
+FROM installer AS builder
+WORKDIR /app
+COPY --from=pruner /app/out/full/ ./
+ARG APP_NAME
+RUN pnpm exec turbo run build --filter=@email-platform/${APP_NAME}
+
+# Build metadata (preserved from pre-W2 Dockerfile lines 74-76)
 ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
 
-USER appuser
+# ─── Stage 2: Runner (distroless, non-root) ───────────────────
+# I-S2.1 + I-S2.2: distroless base image pre-bakes uid 65532 (no /etc/passwd → numeric USER form mandatory).
+# I-S2.4 + I-S2.5: manual COPY closure (no install-step variability, no deploy bundle) → byte-deterministic given same builder output (F-20).
+# I-S2.9: exec-form CMD (JSON array) — node = PID 1, receives SIGTERM directly для NestJS OnApplicationShutdown lifecycle.
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
+WORKDIR /app
 
-# Ecosystem-level: V8/Express runtime optimizations (NOT read by app config)
+# I-S2.1.5: grpc_health_probe binary в /usr/local/bin/ для (c.2)+(c.3) services compose healthcheck
+# `["CMD", "grpc_health_probe", "-addr=:<grpc-port>"]` invocation (Wave 3 task #3 owns compose healthcheck swap).
+COPY --from=installer /usr/local/bin/grpc_health_probe /usr/local/bin/grpc_health_probe
+
+# I-S2.3: Manual COPY closure replaces deploy bundle (per ADR (a)). Order matters —
+# packages/ COPY MUST land BEFORE node_modules symlinks resolve at runtime (Docker COPY preserves
+# symlinks as symlinks under M3 architectural-eliminate — `link:../../packages/*` references).
+ARG APP_NAME
+COPY --from=builder /app/apps/${APP_NAME}/dist ./dist
+COPY --from=builder /app/apps/${APP_NAME}/node_modules ./node_modules
+COPY --from=builder /app/packages /app/packages
+COPY --from=builder /app/node_modules/.modules.yaml /app/node_modules/.modules.yaml
+COPY --from=builder /app/build-info.json /app/build-info.json
+
+# I-S0.4: NO `ENV PROTO_DIR=...` line (F-05 closure — value lives only в .env.docker).
+# V8/Express runtime optimization preserved.
 ENV NODE_ENV=production
-ENV PROTO_DIR=/app/proto
 
+# I-S2.8: USER MUST be LAST non-CMD directive.
+# I-S2.2: numeric form mandatory (distroless без /etc/passwd для name resolution).
+USER 65532:65532
+
+# I-S2.9: exec-form CMD (JSON array) — node = PID 1, receives SIGTERM directly.
 CMD ["node", "dist/main.js"]

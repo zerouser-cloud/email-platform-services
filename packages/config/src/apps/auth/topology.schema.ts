@@ -5,8 +5,9 @@
 // no infra/ imports, no identity.config.ts imports (RESEARCH §Pitfall 1).
 import { z } from 'zod';
 
+// AUTH_PORT field dropped в Phase 999.18.2 Wave 2 per ADR-001 §Decision (c.2) —
+// auth = gRPC-only service; HTTP server removed from main.ts.
 export const AuthTopologyShape = {
-  AUTH_PORT: z.coerce.number().positive(),
   AUTH_GRPC_PORT: z.coerce.number().positive(),
   AUTH_GRPC_URL: z.string().min(1),
 } as const;

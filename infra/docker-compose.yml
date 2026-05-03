@@ -2,14 +2,13 @@ include:
   - docker-compose.infra.yml
 
 services:
-
   gateway:
     build:
       context: ../
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: gateway
-    ports: ["4000:3000"]
+    ports: ['4000:3000']
     env_file: ../.env.docker
     depends_on:
       auth:
@@ -23,7 +22,7 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3000/health/live"]
+      test: ['CMD', 'wget', '-qO/dev/null', 'http://127.0.0.1:3000/health/live']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +35,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: auth
-    expose: ["3001", "50051"]
+    expose: ['50051']
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -44,11 +43,11 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3001/health/live"]
+      test: ['CMD', 'grpc_health_probe', '-addr=:50051']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     networks: [services, infra]
 
   sender:
@@ -57,7 +56,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: sender
-    expose: ["3002", "50052"]
+    expose: ['50052']
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -69,11 +68,11 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3002/health/live"]
+      test: ['CMD', 'grpc_health_probe', '-addr=:50052']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     networks: [services, infra]
 
   parser:
@@ -82,7 +81,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: parser
-    expose: ["3003", "50053"]
+    expose: ['50053']
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -94,11 +93,11 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3003/health/live"]
+      test: ['CMD', 'grpc_health_probe', '-addr=:50053']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     networks: [services, infra]
 
   audience:
@@ -107,7 +106,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: audience
-    expose: ["3004", "50054"]
+    expose: ['50054']
     env_file: ../.env.docker
     depends_on:
       postgres:
@@ -117,11 +116,11 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3004/health/live"]
+      test: ['CMD', 'grpc_health_probe', '-addr=:50054']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     networks: [services, infra]
 
   notifier:
@@ -130,7 +129,7 @@ services:
       dockerfile: infra/docker/app.Dockerfile
       args:
         APP_NAME: notifier
-    expose: ["3005"]
+    expose: ['50055']
     env_file: ../.env.docker
     depends_on:
       rabbitmq:
@@ -140,11 +139,11 @@ services:
     restart: unless-stopped
     init: true
     healthcheck:
-      test: ["CMD", "wget", "-qO/dev/null", "http://127.0.0.1:3005/health/live"]
+      test: ['CMD', 'grpc_health_probe', '-addr=:50055']
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s
     networks: [services, infra]
 
 networks:
