@@ -50,7 +50,7 @@ Directory-level link for the factory's enclosing directory: `packages/foundation
 - Allowed imports: `zod`, `@email-platform/config` global schema primitives, `@nestjs/common` (for `@Global()` + DynamicModule), the foundation config factory.
 - **Forbidden imports:** proto types, `@nestjs/microservices`, Drizzle, `application/`, `domain/`.
 
-Full treatment: `.agents/skills/infrastructure-client-layering/SKILL.md` §Config.
+Full treatment: `.claude/skills/infrastructure-client-layering/SKILL.md` §Config.
 
 ### `bootstrap/health/`
 
@@ -378,7 +378,7 @@ export const DO_OTHER_PORT   = Symbol('DoOtherPort');
 
 Why `Symbol()` not `Symbol.for()`: per-service scope means no global registry collision risk, and plain `Symbol()` creates a unique-per-declaration token that cannot be fabricated by a consumer who happens to know the string key.
 
-See `.agents/skills/no-magic-values/SKILL.md` for the general rule.
+See `.claude/skills/no-magic-values/SKILL.md` for the general rule.
 
 ### Composition-root-only services
 
@@ -462,5 +462,5 @@ This skeleton is the canonical pattern — concrete deviations inside the slots 
 ## See Also
 
 - CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" — project-level authoritative file-path matrix (paired doc).
-- `.agents/skills/infrastructure-client-layering/SKILL.md` §Config — the config-factory principle's client-side counterpart.
+- `.claude/skills/infrastructure-client-layering/SKILL.md` §Config — the config-factory principle's client-side counterpart.
 - `references/NAMING.md` §Field Naming Rules — naming conventions for DI-injected fields referenced throughout this document.

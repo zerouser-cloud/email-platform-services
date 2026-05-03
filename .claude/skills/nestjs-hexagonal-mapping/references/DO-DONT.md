@@ -343,4 +343,4 @@ grep -rE "private readonly \w+Port: \w+Port" apps/*/src/infrastructure/inbound/g
 
 Returns empty after Phase 999.10.1 — any match is a regression.
 
-**See also:** `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules (Phase 999.10.1)".
+**See also:** `.claude/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules (Phase 999.10.1)".

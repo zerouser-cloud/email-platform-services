@@ -244,7 +244,7 @@ For the current core module, subpath export, and per-namespace factories, see `p
 6. Token symbols use Symbol.for() when derived from catalog identity
                                                         ─→ Same identity string = same symbol everywhere
 7. Document the new infra in this skill                 ─→ Add a subsection under §Application by Infra Type
-8. Composition over inheritance, no per-method wrappers ─→ Client facade gets dependencies via DI; does NOT extend a foundation base class. For Observable-returning interfaces, use a generic promisified proxy at the foundation level rather than writing one wrapper class per upstream with one method per RPC. Adding a new RPC automatically becomes consumer-callable; no manual wrapper code needed. See `.agents/skills/composition-over-inheritance/SKILL.md`.
+8. Composition over inheritance, no per-method wrappers ─→ Client facade gets dependencies via DI; does NOT extend a foundation base class. For Observable-returning interfaces, use a generic promisified proxy at the foundation level rather than writing one wrapper class per upstream with one method per RPC. Adding a new RPC automatically becomes consumer-callable; no manual wrapper code needed. See `.claude/skills/composition-over-inheritance/SKILL.md`.
 ```
 
 ## Anti-Patterns
@@ -331,11 +331,11 @@ When the answer is unclear, follow the decision tree top-to-bottom. If the new i
 
 ## See Also
 
-- `.agents/skills/no-magic-values/SKILL.md` — DI tokens use `Symbol()` / `Symbol.for()`, not strings.
-- `.agents/skills/clean-ddd-hexagonal/SKILL.md` — apps' Clean / Hexagonal architecture (language-agnostic).
-- `.agents/skills/composition-over-inheritance/SKILL.md` — universal rule forbidding inheritance outside narrow exceptions; this skill concretises the rule for infra-client facades.
-- `.agents/skills/twelve-factor/SKILL.md` — config from env via `@email-platform/config`, not direct `process.env`.
-- `.agents/skills/nestjs-hexagonal-mapping/SKILL.md` — server-side counterpart. Places Controller / Service / UseCase / Port / Adapter / Domain inside `apps/{svc}/src/` for server-side inbound / outbound / bootstrap adapters.
+- `.claude/skills/no-magic-values/SKILL.md` — DI tokens use `Symbol()` / `Symbol.for()`, not strings.
+- `.claude/skills/clean-ddd-hexagonal/SKILL.md` — apps' Clean / Hexagonal architecture (language-agnostic).
+- `.claude/skills/composition-over-inheritance/SKILL.md` — universal rule forbidding inheritance outside narrow exceptions; this skill concretises the rule for infra-client facades.
+- `.claude/skills/twelve-factor/SKILL.md` — config from env via `@email-platform/config`, not direct `process.env`.
+- `.claude/skills/nestjs-hexagonal-mapping/SKILL.md` — server-side counterpart. Places Controller / Service / UseCase / Port / Adapter / Domain inside `apps/{svc}/src/` for server-side inbound / outbound / bootstrap adapters.
 - CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" — project-level authoritative file-path matrix and paired doc (the current canonical directory layout for this project).
 - `.planning/phases/999.7.x` — reference phases: gRPC client layer migration (foundation factory + generic promisified proxy).
 - `.planning/phases/999.11.1` — reference phase: Canonical Config Access Contract (per-service config token + narrow foundation configs).

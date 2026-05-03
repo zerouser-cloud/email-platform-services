@@ -225,4 +225,4 @@ Historical note: the field-naming convention described above was locked during t
 
 - CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" — project-level authoritative file-path matrix and paired doc.
 - `references/LAYERS.md` — layer-by-layer artefact-role descriptions referenced throughout this document.
-- `.agents/skills/no-magic-values/SKILL.md` — Symbol DI token rule referenced in the Class Name Rules section.
+- `.claude/skills/no-magic-values/SKILL.md` — Symbol DI token rule referenced in the Class Name Rules section.

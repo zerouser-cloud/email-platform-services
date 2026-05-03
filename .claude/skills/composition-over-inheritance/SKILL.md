@@ -316,9 +316,9 @@ Pattern-level output (role-based): most hits should cluster around framework-req
 
 ## See Also
 
-- `.agents/skills/infrastructure-client-layering/SKILL.md` — concretization of this rule for infra-client facades (catalog / foundation / apps three-layer rule). Reference when designing a new infra-client.
-- `.agents/skills/clean-ddd-hexagonal/SKILL.md` — `apps/` Clean/DDD/Hexagonal architecture; DDD tactical-pattern bases (`AggregateRoot` / `Entity` / `ValueObject`) — when/if adopted — add a documented exception to this skill.
-- `.agents/skills/no-magic-values/SKILL.md` — related rule: prefer named constants over magic literals. Often applies alongside composition (helpers store constants that were previously hardcoded in base classes).
-- `.agents/skills/branching-patterns/SKILL.md` — related rule: prefer polymorphism via composition (Record dispatch / Map fallback / canHandle chain) over `switch/case` or `if/else` chains. Complementary to this skill — both aim at replacing behavior-via-inheritance with behavior-via-collaboration.
+- `.claude/skills/infrastructure-client-layering/SKILL.md` — concretization of this rule for infra-client facades (catalog / foundation / apps three-layer rule). Reference when designing a new infra-client.
+- `.claude/skills/clean-ddd-hexagonal/SKILL.md` — `apps/` Clean/DDD/Hexagonal architecture; DDD tactical-pattern bases (`AggregateRoot` / `Entity` / `ValueObject`) — when/if adopted — add a documented exception to this skill.
+- `.claude/skills/no-magic-values/SKILL.md` — related rule: prefer named constants over magic literals. Often applies alongside composition (helpers store constants that were previously hardcoded in base classes).
+- `.claude/skills/branching-patterns/SKILL.md` — related rule: prefer polymorphism via composition (Record dispatch / Map fallback / canHandle chain) over `switch/case` or `if/else` chains. Complementary to this skill — both aim at replacing behavior-via-inheritance with behavior-via-collaboration.
 - `.planning/phases/999.7.2-*/` — first canonical reference implementation: inheritance → injected helper composition.
 - `.planning/phases/999.7.3-*/` — second canonical reference: per-method wrapper classes eliminated via generic promisified-proxy primitive in foundation. Demonstrates that wrapper classes are a sibling form of over-engineering to inheritance — both create abstractions whose only value is mechanical mediation.

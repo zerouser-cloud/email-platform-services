@@ -121,10 +121,10 @@ Full Don't / Do / Why / Detected-by block for each in `references/DO-DONT.md`.
 ## See Also
 
 - CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" — project-level authoritative file-path matrix and paired doc (the current canonical directory layout for this project).
-- `.agents/skills/clean-ddd-hexagonal/SKILL.md` — general Hexagonal philosophy + DDD tactical patterns (language-agnostic).
-- `.agents/skills/infrastructure-client-layering/SKILL.md` — paired skill (client-side gRPC layering across catalog/foundation/apps) + §Config subsection with the `bootstrap/config/` placement rule.
-- `.agents/skills/composition-over-inheritance/SKILL.md` — services compose use cases, they do not extend them.
-- `.agents/skills/no-magic-values/SKILL.md` — Symbol DI tokens (never string tokens); every inbound/outbound port gets a `Symbol('XxxPort')`.
+- `.claude/skills/clean-ddd-hexagonal/SKILL.md` — general Hexagonal philosophy + DDD tactical patterns (language-agnostic).
+- `.claude/skills/infrastructure-client-layering/SKILL.md` — paired skill (client-side gRPC layering across catalog/foundation/apps) + §Config subsection with the `bootstrap/config/` placement rule.
+- `.claude/skills/composition-over-inheritance/SKILL.md` — services compose use cases, they do not extend them.
+- `.claude/skills/no-magic-values/SKILL.md` — Symbol DI tokens (never string tokens); every inbound/outbound port gets a `Symbol('XxxPort')`.
 
 ## References
 
