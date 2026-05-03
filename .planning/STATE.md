@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.18.1 context gathered
-last_updated: '2026-05-03T12:59:08.076Z'
-last_activity: 2026-05-03 -- Phase 999.18.1 execution started
+stopped_at: Phase 999.18.1 awaiting Plan 04 amendments after D-16 review (2 deviations)
+last_updated: '2026-05-03T17:00:00.000Z'
+last_activity: 2026-05-03 -- Phase 999.18.1 D-16 review complete, gaps_found, amendments needed
 progress:
   total_phases: 48
   completed_phases: 31
@@ -25,10 +25,23 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 
 ## Current Position
 
-Phase: 999.18.1 (architectural-cluster-eliminate-pnpm-injection-model-debt-vi) — EXECUTING
-Plan: 1 of 3
-Status: Executing Phase 999.18.1
-Last activity: 2026-05-03 -- Phase 999.18.1 execution started
+Phase: 999.18.1 (architectural-cluster-eliminate-pnpm-injection-model-debt-vi) — AWAITING AMENDMENTS
+Plan: 3 of 3 executed; Plan 04 (amendments) pending creation via /gsd:plan-phase --gaps
+Status: Phase 999.18.1 D-16 review complete, gaps_found (2 architectural deviations)
+Last activity: 2026-05-03 -- 3 plans executed, verifier ran, D-16 review held, 2 gaps recorded; phase NOT marked complete pending amendments
+
+D-16 review outcome:
+
+- 6 architectural decisions ratified без правок (Turborepo finalist, Decision a/d, multi-arch, all 4 RE-EVAL thresholds, Wave 4 rollback drill)
+- 2 deviations recorded (Decision b М2→М3, Decision c alpine+two-phase→distroless+transport-aligned healthcheck)
+- 4 documents need amendments (ADR + DOCKERFILE-REFERENCE + MIGRATION-RUNBOOK + RE-EVAL-TRIGGERS)
+- ADR Status sentinel STILL `☑ Proposed` — будет flipped to `☑ Accepted` после amendments + re-verification
+
+Next workflow steps (separate slots):
+
+1. /gsd:plan-phase 999.18.1 --gaps — create Plan 04 amendments
+2. /gsd:execute-phase 999.18.1 --gaps-only — execute Plan 04
+3. Re-verify → phase complete → unblock 999.18.2 phase creation
 
 Progress: [██████████] 95%
 
