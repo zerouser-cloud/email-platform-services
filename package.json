@@ -38,6 +38,10 @@
     "security:verify-if-changed": "bash scripts/security/verify-if-changed.sh",
     "hygiene:env-parity": "bash scripts/check-env-parity.sh",
     "hygiene:check": "pnpm run hygiene:env-parity",
+    "verify:image-determinism": "bash scripts/verify-image-determinism.sh",
+    "verify:injection-extinct": "bash scripts/verify-injection-extinct.sh",
+    "verify:multiarch": "bash scripts/verify-multiarch-manifests.sh",
+    "verify:per-service-smoke": "bash scripts/verify-per-service-smoke.sh",
     "prepare": "husky"
   },
   "devDependencies": {
