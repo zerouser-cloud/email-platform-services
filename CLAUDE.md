@@ -129,13 +129,13 @@
 - Type aliases in PascalCase: `LogFormat`, `LogLevel`, `GlobalEnv`
 - Discriminator types use readonly properties for immutability: `readonly port: number`
 ## Code Style
-- **No magic values (unnamed literals).** Extract to named `as const` objects in `*-constants.ts`. DI tokens use `Symbol()` (not strings). Allowed: type literals, import paths, 0/1/-1 idioms, log messages, `process.exit(0|1)`. See `.agents/skills/no-magic-values/SKILL.md` for decision tree and patterns.
-- **No switch/case, no if/else chains (3+ branches)** for behavior selection. Use Record dispatch, Map + fallback, canHandle chain, or polymorphic classes. Guard clauses and null checks are fine. See `.agents/skills/branching-patterns/SKILL.md` for decision tree and patterns.
-- **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.agents/skills/twelve-factor/SKILL.md` for 12-Factor rules.
-- **No infrastructure changes without user approval.** Never change ports, docker-compose, .env files, credentials, or connection strings without explicit confirmation. Standard ports must be preserved (5432, 6379, 5672, 9000). See `.agents/skills/infrastructure-guard/SKILL.md` for pre-change checklist.
-- **No defaults or optionals in env schemas.** Zod env schemas must not use `.default()` or `.optional()`. No `z.coerce.boolean()` (use `z.string().transform(v => v === 'true')`). No fallbacks in consumer code (`?? value`, `|| value`). Every env var required, every value from `.env` files. See `.agents/skills/env-schema/SKILL.md` for rules.
-- **Infrastructure-client layering.** Identity → catalog (`packages/config`). Mechanisms → foundation (`packages/foundation`). Assembly + naming → apps. Catalog stays transport-agnostic (no `*Token` for grpc/http/rmq). Foundation stays service-agnostic (no `auth`/`sender` references). Single-instance infra (DB/Redis/S3) → token in foundation. Multi-instance with catalog identity (gRPC) → derive token in foundation, name in apps. Multi-instance without catalog (HTTP) → per-app constants. Reference: Phase 999.7.x (gRPC). See `.agents/skills/infrastructure-client-layering/SKILL.md` for decision tree. Tier 1/2/3 framework + layer-name axis convention defined in same skill (Tier 1 = layer-name abstractions, Tier 2 = raw lib instances, Tier 3 = library defaults; see skill for decision tree and rename-test).
-- **Runtime smoke verification.** After completing a GSD phase or non-trivial code edits, verify the project starts via `package.json` scripts ONLY — never invent commands like `start:infra:native`. If a needed verification step has no script, ASK the user to add one or grant one-time permission for a concrete command. Test ALL local startup flows the project supports (this project: `pnpm start:native` and `pnpm start:isolated`, with `stop:*`/`reset:*` counterparts). Per flow: stop → build → lint → start → wait for boot → curl `/health/ready` → stop. See `.agents/skills/runtime-smoke-verification/SKILL.md` for the full recipe.
+- **No magic values (unnamed literals).** Extract to named `as const` objects in `*-constants.ts`. DI tokens use `Symbol()` (not strings). Allowed: type literals, import paths, 0/1/-1 idioms, log messages, `process.exit(0|1)`. See `.claude/skills/no-magic-values/SKILL.md` for decision tree and patterns.
+- **No switch/case, no if/else chains (3+ branches)** for behavior selection. Use Record dispatch, Map + fallback, canHandle chain, or polymorphic classes. Guard clauses and null checks are fine. See `.claude/skills/branching-patterns/SKILL.md` for decision tree and patterns.
+- **No environment branching in app code.** Never read `NODE_ENV` or check `isDev`/`isProd`. App consumes config values (LOG_LEVEL, DATABASE_URL), not environment identities. All config through `@email-platform/config`, no direct `process.env`. See `.claude/skills/twelve-factor/SKILL.md` for 12-Factor rules.
+- **No infrastructure changes without user approval.** Never change ports, docker-compose, .env files, credentials, or connection strings without explicit confirmation. Standard ports must be preserved (5432, 6379, 5672, 9000). See `.claude/skills/infrastructure-guard/SKILL.md` for pre-change checklist.
+- **No defaults or optionals in env schemas.** Zod env schemas must not use `.default()` or `.optional()`. No `z.coerce.boolean()` (use `z.string().transform(v => v === 'true')`). No fallbacks in consumer code (`?? value`, `|| value`). Every env var required, every value from `.env` files. See `.claude/skills/env-schema/SKILL.md` for rules.
+- **Infrastructure-client layering.** Identity → catalog (`packages/config`). Mechanisms → foundation (`packages/foundation`). Assembly + naming → apps. Catalog stays transport-agnostic (no `*Token` for grpc/http/rmq). Foundation stays service-agnostic (no `auth`/`sender` references). Single-instance infra (DB/Redis/S3) → token in foundation. Multi-instance with catalog identity (gRPC) → derive token in foundation, name in apps. Multi-instance without catalog (HTTP) → per-app constants. Reference: Phase 999.7.x (gRPC). See `.claude/skills/infrastructure-client-layering/SKILL.md` for decision tree. Tier 1/2/3 framework + layer-name axis convention defined in same skill (Tier 1 = layer-name abstractions, Tier 2 = raw lib instances, Tier 3 = library defaults; see skill for decision tree and rename-test).
+- **Runtime smoke verification.** After completing a GSD phase or non-trivial code edits, verify the project starts via `package.json` scripts ONLY — never invent commands like `start:infra:native`. If a needed verification step has no script, ASK the user to add one or grant one-time permission for a concrete command. Test ALL local startup flows the project supports (this project: `pnpm start:native` and `pnpm start:isolated`, with `stop:*`/`reset:*` counterparts). Per flow: stop → build → lint → start → wait for boot → curl `/health/ready` → stop. See `.claude/skills/runtime-smoke-verification/SKILL.md` for the full recipe.
 - Prettier configured with:
 - Format and check: `pnpm lint:fix` for workspace
 - Individual app linting: `eslint src/ --ext .ts`
@@ -329,7 +329,7 @@
 
 ## NestJS↔Hexagonal Layer Mapping (gRPC microservices — auth, sender, parser, audience)
 
-**Canonical 3-layer server-side stack per Phase 999.10, refined per Phase 999.11.2 into inbound/outbound/bootstrap sub-partitioning. See `.agents/skills/nestjs-hexagonal-mapping/` for the full pattern, anti-patterns, and worked examples. This section is the surface reference; the skill is the source of truth.**
+**Canonical 3-layer server-side stack per Phase 999.10, refined per Phase 999.11.2 into inbound/outbound/bootstrap sub-partitioning. See `.claude/skills/nestjs-hexagonal-mapping/` for the full pattern, anti-patterns, and worked examples. This section is the surface reference; the skill is the source of truth.**
 
 ### Direction split inside `infrastructure/` (Phase 999.11.2)
 
@@ -375,14 +375,14 @@ Dependency-injected field names reflect **runtime identity** — what DI actuall
 | Service → use case | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class ref) | `VerifyCredentialsUseCase` |
 | UseCase → outbound port | `userRepository` | `UserRepositoryPort` | `USER_REPOSITORY_PORT` | `PgUserRepository` |
 
-**Domain-role suffixes** (`Repository`, `Factory`, `Policy`, `Sender` — ubiquitous language) ARE mirrored on the field. **Architectural-role suffixes** (`Port`, `Adapter`, `UseCase`, `Boundary` — hexagonal jargon) are NOT. Full treatment: `.agents/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules".
+**Domain-role suffixes** (`Repository`, `Factory`, `Policy`, `Sender` — ubiquitous language) ARE mirrored on the field. **Architectural-role suffixes** (`Port`, `Adapter`, `UseCase`, `Boundary` — hexagonal jargon) are NOT. Full treatment: `.claude/skills/nestjs-hexagonal-mapping/references/NAMING.md` §"Field Naming Rules".
 
 ### Proto visibility rules (refined paths)
 
 - `@email-platform/contracts` (generated proto types) is imported ONLY in `infrastructure/inbound/grpc/*.controller.ts` (server-side inbound adapter) AND in `infrastructure/outbound/grpc-clients/{upstream}/{upstream}-client.module.ts` + `*-notification.adapter.ts` (client-side outbound adapter). Enforced by ESLint Override 9 in `.eslintrc.js`.
 - `@nestjs/microservices` (`GrpcMethod` / `MessagePattern` decorators, `RpcException`) is a transport concern — infrastructure only. Enforced by Override 9.
 - `domain/` is pure TypeScript — no `@nestjs/*`, no `@grpc/*`, no proto, no `drizzle-orm`, no `pg`. Enforced by ESLint Override 8.
-- Full visibility matrix: `.agents/skills/nestjs-hexagonal-mapping/references/PROTO-VISIBILITY.md`.
+- Full visibility matrix: `.claude/skills/nestjs-hexagonal-mapping/references/PROTO-VISIBILITY.md`.
 
 ### Call flow (canonical)
 
@@ -442,12 +442,12 @@ Every `{svc}.module.ts` root imports feature modules only (never individual cont
 
 **Scope:** this mapping covers the four gRPC microservices (auth, sender, parser, audience) + gateway (REST facade with outbound grpc-clients + bootstrap/throttle) + notifier (RMQ consumer with outbound http-clients + storage). Gateway and notifier now share the same infrastructure-tree shape as the gRPC services; the distinction is which inbound adapter (grpc vs rest vs rmq) they host.
 
-**Skill reference:** `.agents/skills/nestjs-hexagonal-mapping/SKILL.md` — full pattern with the decision tree for adding a new RPC method, anti-patterns, and worked examples.
+**Skill reference:** `.claude/skills/nestjs-hexagonal-mapping/SKILL.md` — full pattern with the decision tree for adding a new RPC method, anti-patterns, and worked examples.
 
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
 
-**CRITICAL: Before EVERY file-changing action (Edit, Write, Bash with side-effects), run the gsd-flow-guard checkpoint.** See `.agents/skills/gsd-flow-guard/SKILL.md` for the full decision tree.
+**CRITICAL: Before EVERY file-changing action (Edit, Write, Bash with side-effects), run the gsd-flow-guard checkpoint.** See `.claude/skills/gsd-flow-guard/SKILL.md` for the full decision tree.
 
 **Self-check before any edit:**
 1. Am I inside a GSD workflow right now? → YES: continue. NO: go to 2.
