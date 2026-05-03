@@ -1,13 +1,13 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-02T11:21:35.255Z",
-  "phase": "999.17.3",
-  "phase_name": "vulnerability-remediation-direct-dep-upgrades",
-  "phase_dir": ".planning/phases/999.17.3-vulnerability-remediation-direct-dep-upgrades",
-  "plan": "post-verify",
-  "task": "carve-out-999.18",
-  "total_tasks": 5,
-  "status": "paused_for_audit_carve_out",
+  "timestamp": "2026-05-03T10:37:46.982Z",
+  "phase": "999.18",
+  "phase_name": "post-pnpm-11-migration-system-audit",
+  "phase_dir": ".planning/phases/999.18-post-pnpm-11-migration-system-audit",
+  "plan": 2,
+  "task": "carve-out-999.18.1",
+  "total_tasks": 6,
+  "status": "paused_for_architectural_carve_out",
   "carve_out_chain": [
     {
       "level": 1,
@@ -32,10 +32,30 @@
       "level": 3,
       "phase": "999.18",
       "phase_name": "post-pnpm-11-migration-system-audit",
-      "status": "pending_promotion_from_backlog",
-      "scope_summary": "7 dimensions in current backlog entry + 2 to be added in discuss-phase: (8) Coolify → Kubernetes migration impact, (9) Architectural good-practices review",
-      "absorbs": ["999.17.3 Issue #2 (foundation tsc workspace-inject regression)"],
-      "resume_after": "this is the active level — no further nesting"
+      "status": "paused_at_plan_02_checkpoint_pending_999.18.1",
+      "promoted_at": "2026-05-02 (commit e207b80)",
+      "discussed_at": "commit b7025eb (CONTEXT.md D-01..D-14 locked)",
+      "planned_at": "Plan 01 + Plan 02 authored",
+      "executed_through": "Plan 01 done (commit 1c22cdc with F-24 amendment), Plan 02 done (commit a0a47a7 SOLUTIONS.md, 7cd9be9 SUMMARY.md)",
+      "checkpoint_resolved_via": "Mass deferral to 999.18.1 — all 12 BLOCKER+MAJOR findings flipped to ☒ Deferred (commit 05c2640); CONTEXT.md amended D-15..D-19 (commit 266ceb2); STATE.md decision recorded (commit 823274a)",
+      "absorbs": [
+        "999.17.3 Issue #2 (foundation tsc workspace-inject regression — F-01 in 999.18 AUDIT.md)"
+      ],
+      "scope_summary": "9 dimensions audited (D1..D9); 25 findings catalogued (3 BLOCKER + 9 MAJOR + 4 MINOR + 10 INFO incl. F-24 inline amendment)",
+      "remaining_plans": "03 (Wave 1 fixes), 04 (Wave 2 fixes), 05 (Wave 3 fixes), 06 (Wave 4 closure) — all DEFERRED until 999.18.1 ships, then SOLUTIONS.md re-evaluation per D-18 contract",
+      "resume_after": "999.18.1 ships + /gsd:resume-work returns control + per-finding re-evaluation (closed-by-999.18.1 vs re-pick-variant)"
+    },
+    {
+      "level": 4,
+      "phase": "999.18.1",
+      "phase_name": "(pending creation)",
+      "status": "pending_creation_via_gsd_phase_insert",
+      "trigger": "999.18 Plan 02 user discussion 2026-05-03 surfaced architectural cluster: 8 of 12 BLOCKER+MAJOR findings (F-01/F-02/F-03/F-12/F-14/F-15/F-20/F-24) couple around pnpm injection model + monorepo build orchestrator + container build pattern + contract-generation placement",
+      "user_intent_locked": "«правильно, без костылей» — eliminate architectural debt class via dedicated full-cycle sub-phase (research + design + remediation), not patch the symptom via canonical pnpm 11 mitigation that perpetuates injection-model foot gun (pnpm Discussion #3938)",
+      "scope": "Comparative deep-dive of monorepo orchestrators (Turborepo / Nx / Bazel / Buck2 / Pants v2 / plain pnpm scripts) + MAANG-grade enterprise practices (Google Bazel internal, Meta Buck2, Vercel Turborepo, Microsoft Rush, Netflix Atlas) + container build patterns. Output: ADR + Dockerfile reference + migration runbook + re-evaluation triggers.",
+      "depends_on_field_required": "Depends on: 999.18 (KEY auto-load lever per workflows/plan-phase.md:795 — without this, plan-phase 999.18.1 will not auto-load 999.18 CONTEXT.md/SOLUTIONS.md/SUMMARY.md as prerequisite context)",
+      "next_action": "/gsd:phase --insert 999.18 \"Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings\"",
+      "resume_after": "this is the new active level — no further nesting yet"
     }
   ],
   "completed_tasks": [
@@ -88,38 +108,67 @@
       "status": "done",
       "commit": "caaad40",
       "progress": "Closes Issue #1 (host packages/*/node_modules + apps/*/node_modules leak via COPY); empirically verified contracts generate now passes — Issue #2 surfaces at next layer (foundation tsc)"
+    },
+    {
+      "id": "999.18 Plan 01",
+      "name": "AUDIT.md authoring (9-dim findings catalogue + F-24 inline amendment turbo cache hash blind to ts-proto version)",
+      "status": "done",
+      "commit": "1c22cdc"
+    },
+    {
+      "id": "999.18 Plan 02 Task 1",
+      "name": "SOLUTIONS.md authoring (12 F-NN sections, 7-col trade-off tables, Recommended picks)",
+      "status": "done",
+      "commit": "a0a47a7 7cd9be9 2a41083"
+    },
+    {
+      "id": "999.18 Plan 02 Task 2 gate (mass deferral resolution)",
+      "name": "Per-finding user discussion 2026-05-03 → mass deferral to 999.18.1; SOLUTIONS.md DEFERRAL NOTICE + 11 Status flips + Approval table updated; CONTEXT.md amended D-15..D-19 [deferred to 999.18.1]; STATE.md decision recorded",
+      "status": "done",
+      "commit": "05c2640 823274a 266ceb2",
+      "progress": "Plan 02 Task 2 (checkpoint:human-verify gate=blocking) resolved per Plan 02 design — Status placeholders flipped to ☒ Deferred. Pending count = 0. Plans 03-06 paused until 999.18.1 ships."
     }
   ],
   "remaining_tasks": [
     {
-      "id": "999.18-promote",
-      "name": "/gsd:review-backlog → promote 999.18 from BACKLOG to active milestone",
+      "id": "999.18.1-create",
+      "name": "/gsd:phase --insert 999.18 \"Architectural cluster — eliminate pnpm injection model debt via deep research...\" — creates Phase 999.18.1 sub-decimal entry",
       "status": "not_started"
     },
     {
-      "id": "999.18-discuss",
-      "name": "/gsd:discuss-phase 999.18 — fold expanded scope: Issue #2 empirical input + dim 8 (Coolify→k8s) + dim 9 (architectural good-practices); decide audit-only vs audit-and-fix mode",
+      "id": "999.18.1-set-depends-on",
+      "name": "/gsd:phase --edit 999.18.1 → set Depends on: 999.18 (KEY auto-load lever per workflows/plan-phase.md:795)",
       "status": "not_started"
     },
     {
-      "id": "999.18-plan",
-      "name": "/gsd:plan-phase 999.18 — likely 4-plan audit pattern (research → audit findings → SOLUTIONS variants → synthesis) per 999.1 precedent",
+      "id": "999.18.1-discuss",
+      "name": "/gsd:discuss-phase 999.18.1 — auto-loads 999.18 CONTEXT.md/SOLUTIONS.md via Depends-on; spans D-15..D-19 deferred decisions; user defines: turbo vs nx vs bazel vs buck2 research scope, audit-only vs audit-and-design mode for 999.18.1, Dockerfile rewrite shape, MAANG references mandatory",
       "status": "not_started"
     },
     {
-      "id": "999.18-execute",
-      "name": "/gsd:execute-phase 999.18 — auto-creates branch via per-phase branching",
+      "id": "999.18.1-plan",
+      "name": "/gsd:plan-phase 999.18.1 — researcher (MAANG-grade enterprise practices comparison) + planner; PR #2611 gate enforces D-NN coverage",
       "status": "not_started"
     },
     {
-      "id": "999.18-verify",
-      "name": "/gsd:verify-work 999.18",
+      "id": "999.18.1-execute",
+      "name": "/gsd:execute-phase 999.18.1 — auto-creates branch gsd/phase-999.18.1-architectural-redesign-build-system",
       "status": "not_started"
+    },
+    {
+      "id": "999.18.1-verify",
+      "name": "/gsd:verify-work 999.18.1",
+      "status": "not_started"
+    },
+    {
+      "id": "999.18-resume-and-reevaluate",
+      "name": "/gsd:resume-work — returns to 999.18 parent; per D-18 contract: re-evaluate 12 deferred F-NN under new architecture (closed-by-999.18.1 vs re-pick-variant); Plans 03-06 execute surviving variants OR 999.18 closes outright via VERIFICATION.md citing 999.18.1 as resolution",
+      "status": "blocked_by_999.18.1"
     },
     {
       "id": "post-999.18 resume",
       "name": "Resume 999.17.3 closure path: handle uncommitted generated/* + sub-phase merge → 999.17.1 V-08/V-09 → continue 999.17.1 Wave 3+4 (Plans 05-10)",
-      "status": "blocked_by_999.18"
+      "status": "blocked_by_999.18_then_999.17.3"
     }
   ],
   "blockers": [
@@ -153,6 +202,16 @@
   ],
   "decisions": [
     {
+      "decision": "Defer all 12 BLOCKER+MAJOR findings of Phase 999.18 to new sub-phase 999.18.1 for architectural redesign",
+      "rationale": "2026-05-03 per-finding user discussion of F-01 V1 (`syncInjectedDepsAfterScripts: [build]`) revealed it is canonical pnpm 11 mitigation BUT operates within injection-model architecture which is community-flagged 'foot gun' (pnpm Discussion #3938). User intent locked: «правильно, без костылей» — eliminate architectural debt class via dedicated full-cycle sub-phase. 8 findings (F-01/F-02/F-03/F-12/F-14/F-15/F-20/F-24) form coupled architectural cluster; 4 orthogonal (F-04/F-04-d8/F-05/F-08) co-deferred to avoid partial-state merge friction. Audit trail: SOLUTIONS.md DEFERRAL NOTICE preamble (commit 05c2640) + CONTEXT.md D-15..D-19 [deferred to 999.18.1] (commit 266ceb2) + STATE.md decision (commit 823274a). Per phase-completeness rule (memory feedback_phase_completeness: «systemic gap → full-cycle sub-phase»). Per researched canonical GSD v1.40.0 pattern (workflows/plan-phase.md:795 Depends-on contract + discussion #535 sub-decimal pattern + PR #2611 decision-coverage gate).",
+      "phase": "999.18"
+    },
+    {
+      "decision": "Sub-decimal numbering 999.18.1 (NOT top-level 999.19)",
+      "rationale": "Per discussion #535 maintainer + FEATURES.md REQ-PHASE-02: decimal sub-phase (999.18.1) = 'urgent insertion between existing phases of current milestone, immediately discussable/planable/executable'. Top-level 999.X via --backlog is 'candidate for later milestone'. Our case is the former — closure pass on parent 999.18 awaits child 999.18.1.",
+      "phase": "999.18"
+    },
+    {
       "decision": "Promote Phase 999.18 (post-pnpm-11-migration-system-audit) from backlog to active",
       "rationale": "Existing backlog scope already covers 7 dims of build-system / dependency / build-artifact / runtime / security / tech-debt / architectural-debt. User-expanded scope adds 2 more dims (Coolify→k8s migration impact, architectural good-practices review). 999.17.3 W5 isolated-mode regression Issue #2 is a natural empirical input for dim 1 (Build-system audit). Carve-out pattern mirrors 999.17.2 → 999.17.1 and 999.17.3 → 999.17.1.",
       "phase": "999.18"
@@ -178,11 +237,7 @@
       "phase": "999.17.1"
     }
   ],
-  "uncommitted_files": [
-    "packages/contracts/src/generated/notifier.ts",
-    "packages/contracts/src/generated/parser.ts",
-    ".claude/scheduled_tasks.lock"
-  ],
-  "next_action": "USER ONLY TYPES SLASH COMMANDS — NO MANUAL git commands. Sequence: (1) `/gsd:review-backlog` — promote 999.18 from BACKLOG to active milestone (writes ROADMAP.md + STATE.md). (2) `/gsd:discuss-phase 999.18` — interactive context-gathering; user feeds in: Issue #2 as empirical input (cite UAT.md Gaps section + diagnosis), dim 8 (Coolify→k8s migration impact), dim 9 (architectural good-practices review), audit-only vs audit-and-fix decision, scope deferrals. (3) `/gsd:plan-phase 999.18`. (4) `/gsd:execute-phase 999.18` — auto-creates branch `gsd/phase-999.18-...` via per-phase strategy. (5) `/gsd:verify-work 999.18`. (6) `/gsd:resume-work` — re-reads THIS HANDOFF.json, sees 999.18 verified, presents 999.17.3 closure options: handle generated/* uncommitted, then sub-phase merge to 999.17.1 (or alternative path if 999.18 surfaces blockers).",
-  "context_notes": "Three-level carve-out chain. Top frame: 999.17.1 paused since 2026-05-01 awaiting clean audit baseline for V-08/V-09. Middle frame: 999.17.3 vulnerability remediation completed today (5 waves, 21/22 advisories closed under Path A1, esbuild residual to 999.17.5). Bottom frame: 999.18 audit about to start, absorbs 999.17.3 post-close findings + broader build-system/k8s-migration questions. /gsd:verify-work 999.17.3 UAT is partial — Test 1 marked issue (Issue #1 closed today by caaad40, but T1 stays issue until isolated mode fully boots after Issue #2 lands), Tests 2-7 pending (re-test post-999.18 fixes if any), Test 8 blocked. UAT.md Gaps section is the formal handoff document for 999.18 discuss-phase to consume verbatim — root_cause + artifacts + missing all filled. Expect 999.18 discuss-phase to broaden the existing backlog 7-dim scope to 9 dims. After 999.18 closes (audit-only or audit-and-fix mode TBD), come back here, decide on uncommitted generated/* files, then sub-phase merge to 999.17.1, then resume 999.17.1 V-08/V-09. Mental model: 'Issue #1 was the ts-proto plugin not found error from /gsd:verify-work — fixed via 1-line .dockerignore. Issue #2 is the next-layer foundation tsc cannot resolve @email-platform/config — surfaced after Issue #1 fix, deferred to 999.18.' Memory anchors: feedback_phase_completeness (sized recovery), feedback_per_phase_branching (each phase own branch), feedback_no_guessing (research before acting), feedback_report_dont_fix (report architectural decisions, don't silently patch)."
+  "uncommitted_files": [],
+  "next_action": "USER ONLY TYPES SLASH COMMANDS — NO MANUAL git commands. Sequence: (1) `/gsd:phase --insert 999.18 \"Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings\"` — creates Phase 999.18.1 sub-decimal entry in ROADMAP.md + phase directory. (2) `/gsd:phase --edit 999.18.1` interactively → choose 'Edit specific fields' → field 'depends_on' → enter '999.18'. KEY auto-load lever per workflows/plan-phase.md:795 — without this, plan-phase 999.18.1 will not auto-load 999.18 CONTEXT.md/SOLUTIONS.md/SUMMARY.md. (3) `/clear`. (4) `/gsd:discuss-phase 999.18.1` — auto-reads STATE.md decisions + 999.18 CONTEXT.md (D-01..D-19 incl. D-15..D-19 deferral block) + 999.18 SOLUTIONS.md via Depends-on; spawns adaptive questions about: turbo vs nx vs bazel vs buck2 vs pants vs plain-pnpm research scope, audit-only vs audit-and-design mode, Dockerfile rewrite shape, MAANG references mandatory (per D-17). (5) `/clear`. (6) `/gsd:plan-phase 999.18.1` — researcher (MAANG-grade comparative deep-dive) + planner; PR #2611 gate enforces D-NN coverage in plans. (7) `/clear`. (8) `/gsd:execute-phase 999.18.1` — auto-creates branch gsd/phase-999.18.1-...; wave-based execution. (9) `/gsd:verify-work 999.18.1`. (10) `/gsd:resume-work` — returns to 999.18 parent; per D-18 contract: re-evaluate 12 deferred F-NN under new architecture (closed-by-999.18.1 vs re-pick-variant); Plans 03-06 execute surviving variants OR 999.18 closes outright. (11) After 999.18 closes — same /gsd:resume-work picks up 999.17.3 → 999.17.1 chain.",
+  "context_notes": "FOUR-level carve-out chain (extended 2026-05-03). Level 1: 999.17.1 paused since 2026-05-01 awaiting clean audit baseline for V-08/V-09. Level 2: 999.17.3 vulnerability remediation done with post-close regression. Level 3: 999.18 system audit STRUCTURALLY COMPLETE (AUDIT.md 25 findings catalogued, SOLUTIONS.md 12 BLOCKER+MAJOR variants drafted, CONTEXT.md D-01..D-19 locked) but Plans 03-06 PAUSED for level-4 carve-out. Level 4: 999.18.1 architectural redesign about to be created. WHY level 4: 2026-05-03 per-finding discussion of F-01 V1 (`syncInjectedDepsAfterScripts: [build]`) revealed user intent «правильно, без костылей» — F-01 V1 is canonical pnpm 11 mitigation BUT operates within injection-model architecture (foot gun per pnpm Discussion #3938). 8 of 12 findings cluster around build-system architecture (pnpm injection + monorepo orchestrator + container build pattern + contract-gen placement); 4 orthogonal co-deferred to avoid merge friction with 999.18.1 holistic Dockerfile/CI rewrite. Audit trail across 3 commits (05c2640 SOLUTIONS.md DEFERRAL NOTICE, 823274a STATE.md decision, 266ceb2 CONTEXT.md D-15..D-19 [deferred] tags). 999.18.1 research scope MANDATORY per D-17: comparative deep-dive of Turborepo/Nx/Bazel/Buck2/Pants v2/plain-pnpm + MAANG-grade enterprise practices (Google Bazel internal, Meta Buck2, Vercel Turborepo, Microsoft Rush, Netflix Atlas) + conference talks (BazelCon, Nx Conf, monorepo.tools). Output: ADR + Dockerfile reference + migration runbook + re-evaluation triggers. Re-evaluation contract per D-18: when 999.18.1 ships, for each of 12 deferred F-NN evaluate validity under new architecture, flip Status to Closed-by-999.18.1 OR re-pick-variant. Memory anchors: feedback_phase_completeness (sized recovery — systemic gap → full-cycle sub-phase), feedback_per_phase_branching (each phase own branch), feedback_no_guessing (researched canonical GSD v1.40.0 mechanism BEFORE acting — workflows/plan-phase.md:795 Depends-on contract + discussion #535 sub-decimal pattern + PR #2611 decision-coverage gate), feedback_report_dont_fix (architectural decision deferred to research+design phase, not silently patched via canonical mitigation that perpetuates foot gun)."
 }
