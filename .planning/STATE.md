@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: milestone_complete
+status: Plans ready
 stopped_at: Phase 999.18.1 context gathered
-last_updated: '2026-05-03T16:38:26.357Z'
-last_activity: 2026-05-03 -- Phase 999.18.1 execution started
+last_updated: '2026-05-03T18:49:07.041Z'
+last_activity: 2026-05-03
 progress:
-  total_phases: 48
+  total_phases: 49
   completed_phases: 32
-  total_plans: 186
-  completed_plans: 176
-  percent: 67
+  total_plans: 191
+  completed_plans: 177
+  percent: 93
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.18.1 — architectural-cluster-eliminate-pnpm-injection-model-debt-vi
+**Current focus:** Phase 999.18.2 — implementation cluster (Plans 01-05 ready: Wave 0..4)
 
 ## Current Position
 
-Phase: 999.18.1
+Phase: 999.18.2
 Plan: Not started
-Status: Milestone complete
+Status: Plans ready
 Last activity: 2026-05-03
 
 D-16 review outcome:
@@ -376,6 +376,7 @@ Progress: [██████████] 95%
 - Phase 999.17.2 inserted after Phase 999.17: DevSecOps Hardening + Secrets Rotation (URGENT)
 - Phase 999.17.3 inserted after Phase 999.17: vulnerability-remediation-direct-dep-upgrades — clean direct-dep upgrades to close 22 pnpm-audit findings (1 critical / 8 high / 13 moderate) surfaced when pnpm 9->11 fixed audit HTTP 410. NO pnpm.overrides workarounds. Carve-out from 999.17.1 Plan 04 Task 4 (mirrors 999.17.2 sub-phase pattern). Returns to 999.17.1 V-08/V-09 on clean baseline. (URGENT)
 - Phase 999.18.1 inserted after Phase 999.18: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (URGENT)
+- Phase 999.18.2 inserted after Phase 999.18: Implementation of MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05); ADR-001 Accepted by user (D-16 trigger) unblocks impl phase creation (URGENT)
 
 ## Session Continuity
 
