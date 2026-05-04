@@ -77,6 +77,16 @@ ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
 
+# I-S1.Y (NEW invariant per 999.18.3 D-04): post-`nest build` MANDATORY pnpm prune --prod
+# Strips devDeps in-place; runs AFTER `nest build` (devDeps were available при invocation)
+# и AFTER build-info.json materialised (per RESEARCH OQ-2 recommendation — prune AFTER metadata commit).
+# Cache mount reuses pnpm-install cache-id для write-coherent removal of devDep symlinks.
+# Workspace symlinks (link:../../packages/*) preserved — pnpm prune --prod removes только registered
+# devDeps, не workspace links (per pnpm CLI docs https://pnpm.io/11.x/cli/prune).
+# Reference: ADR-001 §Decision (b) M3 sub-pattern clarification (post-999.18.3 amendment).
+RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
+    pnpm prune --prod
+
 # ─── Stage 2: Runner (distroless, non-root) ───────────────────
 # I-S2.1 + I-S2.2: distroless base image pre-bakes uid 65532 (no /etc/passwd → numeric USER form mandatory).
 # I-S2.4 + I-S2.5: manual COPY closure (no install-step variability, no deploy bundle) → byte-deterministic given same builder output (F-20).
