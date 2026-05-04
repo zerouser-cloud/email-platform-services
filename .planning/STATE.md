@@ -382,24 +382,52 @@ Progress: [██████████] 95%
 
 ## Session Continuity
 
-Last session: 2026-05-04T16:40:00.000Z
-Stopped at: Phase 999.18.3 — fresh first-principles research complete (post 6-iteration empirical falsification cycle)
-Resume file: .planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p/999.18.3-RESEARCH.md
-Predecessor research: .planning/phases/999.18.3-\*/999.18.3-RESEARCH-PRE-D08.md (Variant 2 framing, archived as audit trail via git mv)
+Last session: 2026-05-04T17:30:00.000Z
+Stopped at: Phase 999.18.3 — TWO research artifacts complete (substrate Path 3 + layer architecture N=5)
+Resume files:
 
-**Researcher verdict (Path 3 — pnpm deploy --legacy --prod):**
+- .planning/phases/999.18.3-\*/999.18.3-RESEARCH.md (substrate research, Path 3)
+- .planning/phases/999.18.3-\*/999.18.3-LAYER-ARCHITECTURE.md (layer architecture, design-mode, MAANG canon)
+- .planning/phases/999.18.3-\*/999.18.3-RESEARCH-PRE-D08.md (Variant 2 framing, archived audit trail)
 
-- Q3 framing correction: Pattern E (D-09) is NOT a workaround — it's canonical refactor matching Vercel `examples/basic` 1-to-1. Only D-10 + proposed `--ignore-scripts` were prune-symptoms.
-- Q4 missed canonical: pnpm 10.2.1+ `--legacy` flag for `pnpm deploy` removes `injectWorkspacePackages: true` requirement; verified locally in pnpm@11.0.0. ADR Decision (a) DROP `pnpm deploy --prod` was based on outdated premise (pnpm Discussion #9015 foot-gun, since remediated by `--legacy`).
-- Q5 husky containment: `ENV HUSKY=0` is author-canonical (typicode/husky how-to docs) — NOT `--ignore-scripts` workaround.
-- Single recommendation: re-open ADR Decision (a) DROP → ADOPT WITH `--legacy`; re-open D-01 (Variant 2 prune) as superseded; auto-supersede D-10; preserve D-08 + D-09 + ADR (b)/(c)/(d); add `ENV HUSKY=0`.
-- Estimated scope: 1 implementation plan (~8-10 atomic commits) + 1 verifier plan; sub-pattern-level revision (small drift size per `feedback_phase_completeness`), NOT systemic-gap full-cycle.
+**Researcher #2 verdict (LAYER-ARCHITECTURE):**
 
-**4 pending user decisions** (researcher cannot resolve):
+User-supplied hypothesis amended empirically (researcher used `architect-skeptic` discipline):
 
-1. Re-open ADR Decision (a)? (yes = full Path 3; no = ship workarounds + tech debt remains)
-2. Drop ENV CI=true after auto-superseding D-10?
-3. Husky on host: keep + HUSKY=0 containment / drop / replace with lefthook
-4. Plan structure: single Plan 07 implementation + Plan 08 verifier (recommended) vs 3-plan split
+- N=5 layers canonical (NOT N=6 from my draft):
+  - L1 Source (workspace + host-dev lifecycle sub-concern with HUSKY=0 fence to L3)
+  - L2 Orchestration (turbo / Bazel / Buck2 / Nx — current: Turborepo pragmatic-accepted)
+  - L3 Packaging (Dockerfile / rules_oci — current: Docker BuildKit; Path 3 substrate inherits)
+  - L4 Pipeline (CI/CD — GitHub Actions → GitLab CI per project_gitlab_migration)
+  - L5 Verification (scripts/verify-\* runtime smoke gates)
+
+- 6 decoupling criteria (NOT user's 4-hypothesis):
+  - C-01 Substitutability (Liskov-flavored contract preservation)
+  - C-02 Hermeticity (declared inputs only)
+  - C-03 Reproducibility (bit-identical output)
+  - C-04 Failure Containment (blast radius isolation)
+  - C-05 Concern Atomicity (one layer = one named concern)
+  - C-06 Lifecycle Independence (each layer's clock independent)
+
+- All 5 historical iteration failures (3-orphan fetcher, 4-TS5083, 5-TTY abort, 6-husky lifecycle) classified as L1↔L3 boundary leaks, NOT layer-shape failures. Architecture structurally sound; current implementation needs explicit fences.
+
+- Predecessor 999.18.3-RESEARCH.md (Path 3 substrate) holds entirely. Layer architecture validates Path 3 as canonical, not just one option among many. Substrate decision and layer architecture are orthogonal axes that compose.
+
+- Pragmatic couplings explicitly accepted: Turborepo at L2 (vs Bazel/Buck2 at N=6-20), GitHub Actions specificity at L4 (one-time GitLab migration cost budgeted), 4 LOW hermeticity items deferred.
+
+- Transition scope: 12-15 atomic commits across 3 plans (Plan 07 L1+L3 substrate fix; Plan 08 L4→L5 verification integration; Plan 09 ADR + DOCKERFILE-REFERENCE + RE-EVAL-OUTCOME). Medium-sized recovery per `feedback_phase_completeness`.
+
+**3 pending user decisions** (researcher cannot resolve, surfaced for discuss-phase):
+
+- P-01: Apply OPTIONAL L1-side `.husky/install.mjs` CI-gate alongside L3 fence? (researcher leans yes — defense-in-depth, ~3 LOC)
+- P-02: Defer 6 LOW hardening items (digest-pin base, drop dlx, SOURCE_DATE_EPOCH, --chown, etc.) to phase 999.18.4? (researcher leans yes)
+- P-03: GitHub→GitLab L4 substitutability empirical PoC NOW or DEFER to migration phase? (researcher leans defer)
+
+**2 surfaced tensions in §O** (acknowledged not papered over):
+
+- Principle 3 (concept stability): this IS conceptual change vs current state — justified by 5 empirical failure modes per `feedback_phase_completeness` systemic-gap rule
+- Principle 6 (decompose into responsible layers): current impl HAS L1↔L3 leaks (proven empirically); architecture FIXES via Path 3 + HUSKY=0 fence
+
+**5 honestly-surfaced assumptions in §T** (Etsy/GitHub citations reputation-based; 3 horizon-scaling thresholds reasoned; Bazel/Turborepo hermeticity comparison reasoned not measured)
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
