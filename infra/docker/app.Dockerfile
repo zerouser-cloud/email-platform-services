@@ -48,9 +48,13 @@ ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 COPY --from=pruner /app/out/json/ ./
-RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
-    --mount=type=cache,id=pnpm-fetch,target=/pnpm/fetch-store,ro \
-    pnpm install --offline --frozen-lockfile
+# I-S1.AA (NEW per 999.18.3 D-08): single pnpm install per pnpm.io canonical pattern.
+# Drop --offline (no fetch/offline split — over-engineering per 999.18.3-SYSTEM-RESEARCH.md §1 +
+# §6: Vercel Turborepo canonical + fintlabs cookbook + pnpm.io official все используют single install).
+# Cache-mount target=/pnpm/store aligned to ENV PNPM_HOME=/pnpm; cache-id renamed
+# pnpm-install → pnpm-store для consistency с pnpm.io Example 1 naming.
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
 # Download grpc_health_probe binary per-arch (I-S2.1.5 + I-S2.1.6)
 # apk --print-arch returns x86_64/aarch64 (Alpine convention); transformer maps к amd64/arm64
@@ -82,14 +86,13 @@ ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
 
-# I-S1.Y (NEW invariant per 999.18.3 D-04): post-`nest build` MANDATORY pnpm prune --prod
-# Strips devDeps in-place; runs AFTER `nest build` (devDeps were available при invocation)
-# и AFTER build-info.json materialised (per RESEARCH OQ-2 recommendation — prune AFTER metadata commit).
-# Cache mount reuses pnpm-install cache-id для write-coherent removal of devDep symlinks.
-# Workspace symlinks (link:../../packages/*) preserved — pnpm prune --prod removes только registered
-# devDeps, не workspace links (per pnpm CLI docs https://pnpm.io/11.x/cli/prune).
-# Reference: ADR-001 §Decision (b) M3 sub-pattern clarification (post-999.18.3 amendment).
-RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
+# I-S1.Y (PRESERVED per D-01 invariant; cache-id renamed pnpm-install → pnpm-store
+# per 999.18.3 D-08 alignment с installer stage cache-mount).
+# Substance preserved verbatim: post-`nest build` MANDATORY devDeps strip
+# in-place; runs AFTER `nest build` AND AFTER `build-info.json` materialised.
+# Workspace symlinks preserved (link:../../packages/*; only registered
+# devDeps removed per pnpm CLI docs https://pnpm.io/11.x/cli/prune).
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm prune --prod
 
 # ─── Stage 2: Runner (distroless, non-root) ───────────────────
