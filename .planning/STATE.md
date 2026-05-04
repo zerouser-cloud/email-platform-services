@@ -382,8 +382,24 @@ Progress: [██████████] 95%
 
 ## Session Continuity
 
-Last session: 2026-05-03T11:23:53.497Z
-Stopped at: Phase 999.18.1 context gathered
-Resume file: .planning/phases/999.18.1-architectural-cluster-eliminate-pnpm-injection-model-debt-vi/999.18.1-CONTEXT.md
+Last session: 2026-05-04T16:40:00.000Z
+Stopped at: Phase 999.18.3 — fresh first-principles research complete (post 6-iteration empirical falsification cycle)
+Resume file: .planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p/999.18.3-RESEARCH.md
+Predecessor research: .planning/phases/999.18.3-\*/999.18.3-RESEARCH-PRE-D08.md (Variant 2 framing, archived as audit trail via git mv)
+
+**Researcher verdict (Path 3 — pnpm deploy --legacy --prod):**
+
+- Q3 framing correction: Pattern E (D-09) is NOT a workaround — it's canonical refactor matching Vercel `examples/basic` 1-to-1. Only D-10 + proposed `--ignore-scripts` were prune-symptoms.
+- Q4 missed canonical: pnpm 10.2.1+ `--legacy` flag for `pnpm deploy` removes `injectWorkspacePackages: true` requirement; verified locally in pnpm@11.0.0. ADR Decision (a) DROP `pnpm deploy --prod` was based on outdated premise (pnpm Discussion #9015 foot-gun, since remediated by `--legacy`).
+- Q5 husky containment: `ENV HUSKY=0` is author-canonical (typicode/husky how-to docs) — NOT `--ignore-scripts` workaround.
+- Single recommendation: re-open ADR Decision (a) DROP → ADOPT WITH `--legacy`; re-open D-01 (Variant 2 prune) as superseded; auto-supersede D-10; preserve D-08 + D-09 + ADR (b)/(c)/(d); add `ENV HUSKY=0`.
+- Estimated scope: 1 implementation plan (~8-10 atomic commits) + 1 verifier plan; sub-pattern-level revision (small drift size per `feedback_phase_completeness`), NOT systemic-gap full-cycle.
+
+**4 pending user decisions** (researcher cannot resolve):
+
+1. Re-open ADR Decision (a)? (yes = full Path 3; no = ship workarounds + tech debt remains)
+2. Drop ENV CI=true after auto-superseding D-10?
+3. Husky on host: keep + HUSKY=0 containment / drop / replace with lefthook
+4. Plan structure: single Plan 07 implementation + Plan 08 verifier (recommended) vs 3-plan split
 
 **Planned Phase:** 999.12 (redis-canonical-alignment) — 11 plans — 2026-04-27T08:05:55.061Z
