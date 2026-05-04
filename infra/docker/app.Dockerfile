@@ -27,17 +27,10 @@ ARG APP_NAME
 # I-S1.7 (pruner half): turborepo prune carves the dep-closure slice
 RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
 
-# ─── Stage 1.1.5: Fetcher (M3 sub-pattern per ADR (b) post-999.18.3 amendment) ──────────
-# I-S1.X (UPDATED per 999.18.3 D-04): pnpm fetch (NO --prod) — caches FULL dep tree включая devDeps;
-# полный набор требуется Stage 1.2 installer для Stage 1.3 builder needs (typescript, @nestjs/cli, ts-proto, ESLint plugins).
-# I-S1.2.6 PRESERVED: cache-id 'pnpm-fetch' separate from installer's 'pnpm-install' (lockfile bump invalidates fetcher,
-# install layer cache survives if resolved deps unchanged).
-FROM node:${NODE_VERSION} AS fetcher
-WORKDIR /app
-RUN corepack enable
-COPY --from=pruner /app/out/json/ ./
-RUN --mount=type=cache,id=pnpm-fetch,target=/pnpm/store \
-    pnpm fetch
+# ─── Stage 1.1.5: REMOVED per 999.18.3 Plan 03 (D-08) ──────────────
+# Pre-amendment fetcher orphan-stage retired — BuildKit DAG-pruning
+# skipped it (no COPY --from=fetcher anywhere). See ADR-001
+# §"Implementation Path & Amendments" Iteration 5 + 999.18.3-SYSTEM-RESEARCH.md §6.
 
 # ─── Stage 1.2: Installer (offline install) ───────────────────
 # I-S1.3: COPY ONLY package.json + lockfile from /app/out/json/ — NEVER source code (pruner-anchor cache discipline).
