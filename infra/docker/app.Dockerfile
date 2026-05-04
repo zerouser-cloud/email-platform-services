@@ -27,17 +27,10 @@ ARG APP_NAME
 # I-S1.7 (pruner half): turborepo prune carves the dep-closure slice
 RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
 
-# ─── Stage 1.1.5: Fetcher (M3 sub-pattern per ADR (b) post-999.18.3 amendment) ──────────
-# I-S1.X (UPDATED per 999.18.3 D-04): pnpm fetch (NO --prod) — caches FULL dep tree включая devDeps;
-# полный набор требуется Stage 1.2 installer для Stage 1.3 builder needs (typescript, @nestjs/cli, ts-proto, ESLint plugins).
-# I-S1.2.6 PRESERVED: cache-id 'pnpm-fetch' separate from installer's 'pnpm-install' (lockfile bump invalidates fetcher,
-# install layer cache survives if resolved deps unchanged).
-FROM node:${NODE_VERSION} AS fetcher
-WORKDIR /app
-RUN corepack enable
-COPY --from=pruner /app/out/json/ ./
-RUN --mount=type=cache,id=pnpm-fetch,target=/pnpm/store \
-    pnpm fetch
+# ─── Stage 1.1.5: REMOVED per 999.18.3 Plan 03 (D-08) ──────────────
+# Pre-amendment fetcher orphan-stage retired — BuildKit DAG-pruning
+# skipped it (no COPY --from=fetcher anywhere). See ADR-001
+# §"Implementation Path & Amendments" Iteration 5 + 999.18.3-SYSTEM-RESEARCH.md §6.
 
 # ─── Stage 1.2: Installer (offline install) ───────────────────
 # I-S1.3: COPY ONLY package.json + lockfile from /app/out/json/ — NEVER source code (pruner-anchor cache discipline).
@@ -45,11 +38,23 @@ RUN --mount=type=cache,id=pnpm-fetch,target=/pnpm/store \
 # (M3 architectural-eliminate landed в Wave 1 b8d4fa0); install layer survives source-code commits (manifests-only key).
 FROM node:${NODE_VERSION} AS installer
 WORKDIR /app
+# I-S1.Z (NEW per 999.18.3 D-08): canonical pnpm.io ENV PNPM_HOME = /pnpm
+# → устраняет pnpm-11 default store-dir mismatch (/root/.local/share/pnpm/store/v11
+#   ignores cache-mount target=/pnpm/store без явной конфигурации).
+# Reference: pnpm.io/docker (Example 1) + depot.dev/...optimal-dockerfiles/node-pnpm-dockerfile.
+# Empirical validation: probe m3-pnpmhome 10s cold / 0s warm-cached PASS
+# (999.18.3-SYSTEM-RESEARCH.md §3 + /tmp/probes/m3-pnpmhome/).
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 COPY --from=pruner /app/out/json/ ./
-RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
-    --mount=type=cache,id=pnpm-fetch,target=/pnpm/fetch-store,ro \
-    pnpm install --offline --frozen-lockfile
+# I-S1.AA (NEW per 999.18.3 D-08): single pnpm install per pnpm.io canonical pattern.
+# Drop --offline (no fetch/offline split — over-engineering per 999.18.3-SYSTEM-RESEARCH.md §1 +
+# §6: Vercel Turborepo canonical + fintlabs cookbook + pnpm.io official все используют single install).
+# Cache-mount target=/pnpm/store aligned to ENV PNPM_HOME=/pnpm; cache-id renamed
+# pnpm-install → pnpm-store для consistency с pnpm.io Example 1 naming.
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
 
 # Download grpc_health_probe binary per-arch (I-S2.1.5 + I-S2.1.6)
 # apk --print-arch returns x86_64/aarch64 (Alpine convention); transformer maps к amd64/arm64
@@ -68,6 +73,10 @@ RUN apk add --no-cache wget \
 # I-S1.9: NO `pnpm generate:contracts` invocation (F-12 closure — Decision (d) Placement A pre-build CI).
 FROM installer AS builder
 WORKDIR /app
+# PNPM_HOME inherited from installer FROM; explicit re-declaration для grep-discoverability
+# + защита от accidental Stage 1.3 base swap в future amendments.
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 COPY --from=pruner /app/out/full/ ./
 ARG APP_NAME
 RUN pnpm exec turbo run build --filter=@email-platform/${APP_NAME}
@@ -77,14 +86,13 @@ ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
 
-# I-S1.Y (NEW invariant per 999.18.3 D-04): post-`nest build` MANDATORY pnpm prune --prod
-# Strips devDeps in-place; runs AFTER `nest build` (devDeps were available при invocation)
-# и AFTER build-info.json materialised (per RESEARCH OQ-2 recommendation — prune AFTER metadata commit).
-# Cache mount reuses pnpm-install cache-id для write-coherent removal of devDep symlinks.
-# Workspace symlinks (link:../../packages/*) preserved — pnpm prune --prod removes только registered
-# devDeps, не workspace links (per pnpm CLI docs https://pnpm.io/11.x/cli/prune).
-# Reference: ADR-001 §Decision (b) M3 sub-pattern clarification (post-999.18.3 amendment).
-RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
+# I-S1.Y (PRESERVED per D-01 invariant; cache-id renamed pnpm-install → pnpm-store
+# per 999.18.3 D-08 alignment с installer stage cache-mount).
+# Substance preserved verbatim: post-`nest build` MANDATORY devDeps strip
+# in-place; runs AFTER `nest build` AND AFTER `build-info.json` materialised.
+# Workspace symlinks preserved (link:../../packages/*; only registered
+# devDeps removed per pnpm CLI docs https://pnpm.io/11.x/cli/prune).
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm prune --prod
 
 # ─── Stage 2: Runner (distroless, non-root) ───────────────────
