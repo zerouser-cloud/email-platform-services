@@ -27,16 +27,17 @@ ARG APP_NAME
 # I-S1.7 (pruner half): turborepo prune carves the dep-closure slice
 RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
 
-# ─── Stage 1.1.5: Fetcher (M3 mechanism per ADR (b)) ──────────
-# I-S1.2.5 + I-S1.2.6: prod-only fetch populates virtual store from manifests + lockfile only;
-# cache-id 'pnpm-fetch' separate from installer's 'pnpm-install' (lockfile bump invalidates fetcher,
+# ─── Stage 1.1.5: Fetcher (M3 sub-pattern per ADR (b) post-999.18.3 amendment) ──────────
+# I-S1.X (UPDATED per 999.18.3 D-04): pnpm fetch (NO --prod) — caches FULL dep tree включая devDeps;
+# полный набор требуется Stage 1.2 installer для Stage 1.3 builder needs (typescript, @nestjs/cli, ts-proto, ESLint plugins).
+# I-S1.2.6 PRESERVED: cache-id 'pnpm-fetch' separate from installer's 'pnpm-install' (lockfile bump invalidates fetcher,
 # install layer cache survives if resolved deps unchanged).
 FROM node:${NODE_VERSION} AS fetcher
 WORKDIR /app
 RUN corepack enable
 COPY --from=pruner /app/out/json/ ./
 RUN --mount=type=cache,id=pnpm-fetch,target=/pnpm/store \
-    pnpm fetch --prod
+    pnpm fetch
 
 # ─── Stage 1.2: Installer (offline install) ───────────────────
 # I-S1.3: COPY ONLY package.json + lockfile from /app/out/json/ — NEVER source code (pruner-anchor cache discipline).
@@ -75,6 +76,16 @@ RUN pnpm exec turbo run build --filter=@email-platform/${APP_NAME}
 ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
+
+# I-S1.Y (NEW invariant per 999.18.3 D-04): post-`nest build` MANDATORY pnpm prune --prod
+# Strips devDeps in-place; runs AFTER `nest build` (devDeps were available при invocation)
+# и AFTER build-info.json materialised (per RESEARCH OQ-2 recommendation — prune AFTER metadata commit).
+# Cache mount reuses pnpm-install cache-id для write-coherent removal of devDep symlinks.
+# Workspace symlinks (link:../../packages/*) preserved — pnpm prune --prod removes только registered
+# devDeps, не workspace links (per pnpm CLI docs https://pnpm.io/11.x/cli/prune).
+# Reference: ADR-001 §Decision (b) M3 sub-pattern clarification (post-999.18.3 amendment).
+RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
+    pnpm prune --prod
 
 # ─── Stage 2: Runner (distroless, non-root) ───────────────────
 # I-S2.1 + I-S2.2: distroless base image pre-bakes uid 65532 (no /etc/passwd → numeric USER form mandatory).

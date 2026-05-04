@@ -4,8 +4,8 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.18.1 context gathered
-last_updated: '2026-05-04T09:09:07.733Z'
-last_activity: 2026-05-04 -- Phase 999.18.3 planning complete
+last_updated: '2026-05-04T09:15:02.222Z'
+last_activity: 2026-05-04 -- Phase 999.18.3 execution started
 progress:
   total_phases: 50
   completed_phases: 33
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.18.3 — sub-phase closing 999.18.2 Wave 2 fetcher/installer scope mismatch via pnpm prune --prod
+**Current focus:** Phase 999.18.3 — sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p
 
 ## Current Position
 
-Phase: 999.18.2 (implementation-cluster-execute-migration-runbook-from-phase-) — EXECUTING
-Plan: 3 of 4 (Wave 2 anchor a647f51 — Dockerfile rewrite + transport-aligned cleanup + grpc_health_probe healthcheck swap inline)
-Status: Ready to execute
-Last activity: 2026-05-04 -- Phase 999.18.3 planning complete
+Phase: 999.18.3 (sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 999.18.3
+Last activity: 2026-05-04 -- Phase 999.18.3 execution started
 
 D-16 review outcome:
 
