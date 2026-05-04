@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: executing
+status: verifying
 stopped_at: Phase 999.18.1 context gathered
-last_updated: '2026-05-03T19:40:00.000Z'
-last_activity: 2026-05-03 -- Phase 999.18.2 Plan 03 (Wave 2) complete — Wave 2 anchor a647f51 + USER-APPROVED inline healthcheck swap (Rule 1+4)
+last_updated: '2026-05-04T07:29:29.981Z'
+last_activity: 2026-05-03 -- Wave 2 anchor commit a647f51 + rollback drill PASSED + SUMMARY written
 progress:
-  total_phases: 49
-  completed_phases: 32
+  total_phases: 50
+  completed_phases: 33
   total_plans: 191
-  completed_plans: 177
-  percent: 93
+  completed_plans: 182
+  percent: 95
 ---
 
 # Project State
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.18.2 — implementation-cluster-execute-migration-runbook-from-phase-
+**Current focus:** Phase 999.18.2.1 — sub-phase closing 999.18.2 Wave 2 fetcher/installer scope mismatch via pnpm prune --prod
 
 ## Current Position
 
 Phase: 999.18.2 (implementation-cluster-execute-migration-runbook-from-phase-) — EXECUTING
 Plan: 3 of 5 (Wave 2 anchor a647f51 — Dockerfile rewrite + transport-aligned cleanup + grpc_health_probe healthcheck swap inline)
-Status: Executing Phase 999.18.2 — Wave 2 complete; ready for Wave 3 (Plan 04)
+Status: Sub-phase 999.18.2.1 inserted (URGENT) — closes 999.18.2 VERIFICATION gaps 1-4; ready for /gsd-discuss-phase or /gsd-plan-phase
 Last activity: 2026-05-03 -- Wave 2 anchor commit a647f51 + rollback drill PASSED + SUMMARY written
 
 D-16 review outcome:
@@ -377,6 +377,7 @@ Progress: [██████████] 95%
 - Phase 999.17.3 inserted after Phase 999.17: vulnerability-remediation-direct-dep-upgrades — clean direct-dep upgrades to close 22 pnpm-audit findings (1 critical / 8 high / 13 moderate) surfaced when pnpm 9->11 fixed audit HTTP 410. NO pnpm.overrides workarounds. Carve-out from 999.17.1 Plan 04 Task 4 (mirrors 999.17.2 sub-phase pattern). Returns to 999.17.1 V-08/V-09 on clean baseline. (URGENT)
 - Phase 999.18.1 inserted after Phase 999.18: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (URGENT)
 - Phase 999.18.2 inserted after Phase 999.18: Implementation of MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05); ADR-001 Accepted by user (D-16 trigger) unblocks impl phase creation (URGENT)
+- Phase 999.18.2.1 inserted after Phase 999.18.2: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (URGENT)
 
 ## Session Continuity
 

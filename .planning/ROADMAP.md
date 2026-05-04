@@ -898,6 +898,17 @@ Plans:
 - [x] 999.18.2-04-PLAN.md — Wave 3: CI multi-arch (QEMU + linux/amd64,linux/arm64 per ADR implicit-fifth) + Placement A pre-build contract-gen + drift-check gate (F-12 V2) + compose healthcheck swap (gateway HTTP wget; 5 services grpc_health_probe) + start_period 30s
 - [x] 999.18.2-05-PLAN.md — Wave 4: final verification — full dual-mode smoke + 4 Wave 0 verifier suite en bloc + rollback drill on temporary branch (revert all 4 wave anchors + byte-for-byte Dockerfile match + restore via git reset --hard) + Wave 4 anchor commit + handoff to /gsd:resume-work 999.18
 
+### Phase 999.18.2.1: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (Variant 2 per session 2026-05-04); amend ADR-001 §Decision (b) M3 to clarify full-fetch + prune-after-build sub-pattern; update DOCKERFILE-REFERENCE Stage 1 invariants; document Turborepo two-install (Variant 1) as Considered Alternative; re-run 4 verifier suite (image-determinism + injection-extinct + multiarch + per-service-smoke) + dual-mode smoke + rollback drill on phase branch — closes 999.18.2 VERIFICATION.md gaps 1-4 + T-PROC-03 trigger fired (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.18.2
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 999.18.2.1 to break down)
+
 ### Phase 999.18.1: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (INSERTED)
 
 **Goal:** Ship 5 documents that lock the build-system architecture for 999.18.2 implementation: ADR (MADR-light per CONTEXT D-14 with one orchestrator finalist + 4 coupled cross-cutting choices) + DOCKERFILE-REFERENCE (canonical Dockerfile reference shape with per-Step rationale + 22 invariants + multi-arch + k8s-ready callouts) + MIGRATION-RUNBOOK (wave-based step-by-step plan for 999.18.2 with rollback anchors + dual-mode smoke gates) + RE-EVAL-TRIGGERS (binding contract with 19 T-NN triggers across 5 categories) + RESEARCH (already authored). User approval of ADR (D-16 trigger) unblocks 999.18.2 phase creation.
