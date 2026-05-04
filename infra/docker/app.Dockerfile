@@ -38,6 +38,14 @@ RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
 # (M3 architectural-eliminate landed в Wave 1 b8d4fa0); install layer survives source-code commits (manifests-only key).
 FROM node:${NODE_VERSION} AS installer
 WORKDIR /app
+# I-S1.Z (NEW per 999.18.3 D-08): canonical pnpm.io ENV PNPM_HOME = /pnpm
+# → устраняет pnpm-11 default store-dir mismatch (/root/.local/share/pnpm/store/v11
+#   ignores cache-mount target=/pnpm/store без явной конфигурации).
+# Reference: pnpm.io/docker (Example 1) + depot.dev/...optimal-dockerfiles/node-pnpm-dockerfile.
+# Empirical validation: probe m3-pnpmhome 10s cold / 0s warm-cached PASS
+# (999.18.3-SYSTEM-RESEARCH.md §3 + /tmp/probes/m3-pnpmhome/).
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 COPY --from=pruner /app/out/json/ ./
 RUN --mount=type=cache,id=pnpm-install,target=/pnpm/store \
@@ -61,6 +69,10 @@ RUN apk add --no-cache wget \
 # I-S1.9: NO `pnpm generate:contracts` invocation (F-12 closure — Decision (d) Placement A pre-build CI).
 FROM installer AS builder
 WORKDIR /app
+# PNPM_HOME inherited from installer FROM; explicit re-declaration для grep-discoverability
+# + защита от accidental Stage 1.3 base swap в future amendments.
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 COPY --from=pruner /app/out/full/ ./
 ARG APP_NAME
 RUN pnpm exec turbo run build --filter=@email-platform/${APP_NAME}
