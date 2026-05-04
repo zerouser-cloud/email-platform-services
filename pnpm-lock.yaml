@@ -96,6 +96,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.1
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig-base
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@20.19.39)(prettier@3.8.3)
@@ -169,6 +172,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.1
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig-base
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@20.19.39)(prettier@3.8.3)
@@ -254,6 +260,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.1
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig-base
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@20.19.39)(prettier@3.8.3)
@@ -315,6 +324,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.2
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig-base
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@20.19.39)(prettier@3.8.3)
@@ -385,6 +397,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.2
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig-base
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@20.19.39)(prettier@3.8.3)
@@ -458,6 +473,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.2
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig-base
       '@nestjs/cli':
         specifier: ^11.0.21
         version: 11.0.21(@types/node@20.19.39)(prettier@3.8.3)
@@ -483,6 +501,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.2
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../tsconfig-base
       '@nestjs/common':
         specifier: ^11.1.19
         version: 11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -498,6 +519,9 @@ importers:
       '@bufbuild/protobuf':
         specifier: ^2.2.3
         version: 2.12.0
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../tsconfig-base
       '@grpc/grpc-js':
         specifier: ^1.12.6
         version: 1.14.3
@@ -565,6 +589,9 @@ importers:
         specifier: ^4.3.6
         version: 4.4.2
     devDependencies:
+      '@email-platform/tsconfig-base':
+        specifier: workspace:*
+        version: link:../tsconfig-base
       '@nestjs/common':
         specifier: ^11.1.19
         version: 11.1.19(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -601,6 +628,8 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
+
+  packages/tsconfig-base: {}
 
 packages:
 
