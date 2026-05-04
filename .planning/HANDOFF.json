@@ -1,31 +1,31 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-04T13:15:48.449Z",
+  "timestamp": "2026-05-04T18:30:00.000Z",
   "phase": "999.18.3",
   "phase_name": "sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p",
   "phase_dir": ".planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p",
   "plan": null,
   "task": null,
   "total_tasks": null,
-  "status": "paused_pending_architecture_research",
+  "status": "paused_pending_discuss_phase",
   "completed_tasks": [
     {
       "plan": 1,
       "status": "done",
       "summary": "999.18.3-01-SUMMARY.md",
-      "note": "Variant 2 fix к dead-code fetcher (исторический audit trail)"
+      "note": "Variant 2 fix (audit trail; superseded by final architecture)"
     },
     {
       "plan": 3,
       "status": "done",
       "summary": "999.18.3-03-SUMMARY.md",
-      "note": "D-08 install-layer fix WORKS — все 4 prior failure modes устранены"
+      "note": "D-08 install-layer fix (foundation preserved in final architecture)"
     },
     {
       "plan": 5,
       "status": "done",
       "summary": "999.18.3-05-SUMMARY.md",
-      "note": "Pattern E (workspace tsconfig package) + D-10 (ENV CI=true) + ADR Iteration 6 forensic chain"
+      "note": "Pattern E (D-09) preserved in final architecture; D-10 ENV CI=true superseded"
     }
   ],
   "blocked_tasks": [
@@ -33,93 +33,114 @@
       "plan": 2,
       "status": "blocked_as_evidence",
       "summary": "999.18.3-02-SUMMARY.md",
-      "reason": "Iteration 3: exposed orphan fetcher dead-code + pnpm 11 store-dir mismatch"
+      "reason": "Iteration 3 evidence: orphan fetcher + store-dir mismatch"
     },
     {
       "plan": 4,
       "status": "blocked_as_evidence",
       "summary": "999.18.3-04-SUMMARY.md",
-      "reason": "Iteration 4: exposed missing tsconfig.base.json (TS5083 + 52× TS1259 cascade)"
+      "reason": "Iteration 4 evidence: missing tsconfig.base.json (TS5083 cascade)"
     },
     {
       "plan": 6,
       "status": "blocked_as_evidence",
       "summary": "999.18.3-06-SUMMARY.md",
-      "reason": "Iteration 6: exposed husky lifecycle conflict on pnpm prune --prod (5th failure layer)"
+      "reason": "Iteration 6 evidence: husky lifecycle conflict (root cause: prepare script + pnpm bug #7068)"
+    }
+  ],
+  "research_artifacts": [
+    {
+      "file": "999.18.3-RESEARCH.md",
+      "topic": "Path 3 substrate decision (pnpm deploy --legacy --prod)",
+      "status": "SUPERSEDED — final decision is two-install Vercel canonical (no --legacy)",
+      "commit": "66b19f1"
+    },
+    {
+      "file": "999.18.3-LAYER-ARCHITECTURE.md",
+      "topic": "5-layer architecture + 6 decoupling criteria",
+      "status": "RATIFIED — layer model holds; substrate decisions amended per session 2026-05-04",
+      "commit": "a4de7ff"
+    },
+    {
+      "file": "999.18.3-RESEARCH-PRE-D08.md",
+      "topic": "Original Variant 2 (pnpm prune --prod) framing",
+      "status": "ARCHIVED — pre-D-08 era audit trail",
+      "commit": "66b19f1"
     }
   ],
   "remaining_tasks": [
     {
-      "description": "Architecture re-verification from first principles via gsd-phase-researcher",
-      "type": "research",
+      "description": "discuss-phase 999.18.3 — ratify final architecture + plan structure (Plan 07 L1+L3 / Plan 08 L4+L5 / Plan 09 docs+ADR)",
+      "type": "discuss",
       "blocking": true
     },
     {
-      "description": "Final architectural decision (Path 1/Path 2/Path N) — depends on research outcome",
-      "type": "decision",
+      "description": "plan-phase 999.18.3 — Plan 07/08/09 task breakdown",
+      "type": "plan",
       "blocking": true
     },
     {
-      "description": "Plan 07/08 (or similar) — implementation + verifier suite per chosen path",
+      "description": "execute-phase 999.18.3 — implementation",
       "type": "execute",
       "blocking": true
     }
   ],
-  "blockers": [
-    {
-      "description": "Husky lifecycle conflict at pnpm prune --prod (Stage 1.3 builder) — sh: husky: not found",
-      "type": "technical",
-      "workaround": "--ignore-scripts flag would fix locally but workaround per user meta-principles; researcher must decide Path"
-    },
-    {
-      "description": "User explicitly observed pattern: 'строим урода на костылях' — 3 workarounds accumulated (D-09 Pattern E, D-10 CI=true, proposed --ignore-scripts) all bypass consequences of single locked decision (D-01 pnpm prune --prod)",
-      "type": "architectural",
-      "workaround": "Re-evaluate D-01 lock — possibly switch к pnpm.io two-stage architecture; researcher must propose from first principles"
-    }
-  ],
+  "blockers": [],
   "human_actions_pending": [
     {
-      "action": "Decide architecture path after researcher re-validation",
-      "context": "User wants MAANG-grade clean architecture, not patches. After re-research, present Path options with first-principles analysis.",
-      "blocking": true
+      "action": "Approve final architecture in discuss-phase",
+      "context": "Final architecture ratified by user 2026-05-04. discuss-phase only needs to finalize plan structure (3-plan split) and confirm deferring 6 LOW hardening items + GitLab PoC to phase 999.18.4. All architectural decisions locked.",
+      "blocking": false
     }
   ],
-  "decisions": [
+  "decisions_ratified": [
     {
-      "decision": "M3 architectural-eliminate (no pnpm deploy, no injectWorkspacePackages)",
-      "rationale": "ADR Decision (b) 999.18.1 — scale-out N=15-20 horizon",
-      "phase": "999.18.1",
-      "status": "LOCKED, may re-open during research"
+      "decision": "5-layer architecture: L1 Source / L2 Orchestration (Turborepo) / L3 Packaging (Docker BuildKit) / L4 Pipeline (GitLab CI to Kubernetes) / L5 Verification",
+      "rationale": "MAANG canon convergence per 999.18.3-LAYER-ARCHITECTURE.md §E.1; user-ratified 2026-05-04",
+      "phase": "999.18.3"
     },
     {
-      "decision": "Variant 2 sub-pattern (pnpm prune --prod post-build)",
-      "rationale": "CONTEXT 999.18.3 D-01 — single-service-per-build, +30-60s build-time vs Variant 1",
-      "phase": "999.18.3",
-      "status": "LOCKED, may re-open per Iteration 6 evidence"
+      "decision": "6 decoupling criteria: Substitutability, Hermeticity, Reproducibility, Failure Containment, Concern Atomicity, Lifecycle Independence",
+      "rationale": "Empirically extracted from 8+ MAANG sources per 999.18.3-LAYER-ARCHITECTURE.md §D",
+      "phase": "999.18.3"
     },
     {
-      "decision": "D-08 — drop fetcher + ENV PNPM_HOME=/pnpm + single install",
-      "rationale": "Wave 3 SYSTEM-RESEARCH empirically validated",
+      "decision": "L1 host-dev: drop husky, drop prepare script, drop .husky/. Use .githooks/ + explicit pnpm setup-hooks (matches React/Astro public repos pattern)",
+      "rationale": "Empirical evidence (verified 2026-05-04 via raw github.com WebFetches): React (Meta) has NO husky, NO prepare, NO .husky/. Astro has NO husky, NO prepare, NO .husky/. They rely entirely on CI for security enforcement. This is the most MAANG-aligned pattern (React + Astro public repos = ground truth). pnpm bug #7068 (prepare runs on --prod install) and husky lifecycle re-run on prune become irrelevant — there is no prepare script to leak into Docker.",
       "phase": "999.18.3",
-      "status": "LOCKED, holds"
+      "supersedes": [
+        "husky containment via ENV HUSKY=0",
+        "prepare script with shell-trick conditional"
+      ]
     },
     {
-      "decision": "D-09 Pattern E — workspace tsconfig package",
-      "rationale": "PATTERN-E-PROBE empirically validated 4/4 services; canonical Vercel Turborepo examples/basic",
+      "decision": "L3 substrate: two-install pattern (Vercel turborepo canonical). Stage 1.2 prod-deps = pnpm install --prod --frozen-lockfile. Stage 1.3 builder = pnpm install --frozen-lockfile + turbo build. NO pnpm prune --prod, NO --legacy flag, NO ENV CI=true, NO ENV HUSKY=0",
+      "rationale": "Without prepare script in root package.json (per L1 decision above), two-install pattern works clean. pnpm bug #7068 becomes irrelevant. Two-install is canonical Vercel turborepo pattern. +30-60s build time accepted as cost of architectural cleanliness (zero flags, zero env-var workarounds).",
       "phase": "999.18.3",
-      "status": "LOCKED, architecturally clean (not workaround)"
+      "supersedes": ["D-01 Variant 2 pnpm prune --prod", "Path 3 pnpm deploy --legacy --prod"]
     },
     {
-      "decision": "D-10 — ENV CI=true in builder stage",
-      "rationale": "PRUNE-VERIFY source-code verified canonical pnpm flag for non-TTY context",
-      "phase": "999.18.3",
-      "status": "LOCKED, but workaround-class — may revert if D-01 re-opened"
+      "decision": "L4 platform: GitLab CI (per project_gitlab_migration memory + user confirmation 2026-05-04). Deploy target: Kubernetes (per project_hosting_infra memory). Enforcement layer: GitLab required pipelines + branch protection. security:* scripts from Phase 999.17 already integrated.",
+      "rationale": "Server-side CI enforcement is canonical MAANG-aligned security layer. Local hooks = convenience only. 'Dev forgot setup' does NOT compromise security because GitLab CI runs same checks (gitleaks, semgrep, audit, trivy, env-parity, lint, typecheck) on every MR.",
+      "phase": "999.18.3"
+    },
+    {
+      "decision": "ADR (a) DROP pnpm deploy --prod — HOLDS. ADR (b) M3 architectural-eliminate — HOLDS. ADR (c) distroless — HOLDS. ADR (d) Placement A — HOLDS. D-08 PNPM_HOME — preserved (now in two install stages). D-09 Pattern E (workspace tsconfig) — HOLDS verbatim. D-01 Variant 2 prune — SUPERSEDED. D-10 ENV CI=true — SUPERSEDED",
+      "rationale": "Layer architecture composes orthogonally with substrate decision. Most ADR locks survive; only sub-pattern within L3 packaging changed.",
+      "phase": "999.18.3"
     }
   ],
+  "future_phase_seed": {
+    "topic": "L1 setup-hooks marker-file enforcement",
+    "description": "pnpm setup-hooks generates marker file (e.g. .git/hooks-installed). Dev runtime scripts (pnpm dev, pnpm start, etc) check marker on startup. If marker missing → fail fast with actionable message: 'Run pnpm setup-hooks first to install git hooks'. Catches 'dev forgot setup' at runtime entry point, not just at server-side. Separate phase from 999.18.3 — ergonomics enhancement, not core architecture.",
+    "scope": "small (1 setup script + 1 check helper + integrate into dev:* npm scripts)",
+    "blocking": false,
+    "user_intent_quote_2026-05-04": "Потом мы поставим на него защиту, можно им генерировать какой-то файл-код, который будет проверяться, если его нет то и проект не будем запускать а будем показывать что нужно установить"
+  },
   "uncommitted_files": [],
-  "next_action": "After /clear: invoke /gsd:resume-work to load handoff, then /gsd:plan-phase 999.18.3 --research-phase 999.18.3 to spawn researcher for re-validation. Researcher MUST propose architecture from first principles, NOT trust prior model Path 1/Path 2 framing.",
-  "context_notes": "Phase has 6 plans attempted (3 PASSED, 3 BLOCKED-as-evidence). Each BLOCKED state preserved as forensic anchor in git history. ADR-001 'Implementation Path & Amendments' section contains 6 forensic Iterations. Latest model session ended with user observation that we are patching symptoms instead of fixing root architecture. Model Path 1 (restructure to pnpm.io two-stage) vs Path 2 (--ignore-scripts patch) framing is TENTATIVE — researcher should survey wider production canon (Discord, Stripe, Linear, Shopify, Cloudflare, not just Vercel) and propose from first principles. User 9 meta-principles in .continue-here.md anchor any proposal.",
+  "next_action": "After /clear: invoke /gsd:resume-work to load this handoff. Then /gsd:discuss-phase 999.18.3 to finalize 3-plan split (architecture already ratified). Then /gsd:plan-phase 999.18.3 for Plan 07/08/09 task breakdown. Do NOT re-spawn researcher — both research artifacts (RESEARCH.md + LAYER-ARCHITECTURE.md) committed and complete. Architecture empirically ratified against React/Astro public repos.",
+  "context_notes": "Phase 999.18.3 closure path grounded empirically after 7 iterations. Iteration 7 (this session, 2026-05-04) corrections vs prior: (1) Pattern E NOT a workaround — canonical refactor preserved. (2) ENV HUSKY=0 IS a kostyl — rejected per user mandate; replaced by drop husky entirely (React/Astro pattern). (3) --legacy flag IS escape hatch — rejected per user; replaced by two-install (Vercel canonical, no flags). (4) GitLab CI is security enforcement layer — security:* scripts from Phase 999.17 already integrated. All 5 historical failure modes (3-orphan fetcher, 4-TS5083, 5-TTY abort, 6-husky lifecycle, 7-pnpm prune lifecycle re-run) addressed structurally — zero env-var workarounds, zero shell tricks, zero --legacy flags. Ratified empirically against React (Meta), Astro public package.json files. discuss-phase scope is now narrow: confirm 3-plan split + defer 6 LOW hardening items to 999.18.4. No further research, no architecture re-evaluation.",
   "branch": "gsd/phase-999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p",
-  "head_at_pause": "677b90e",
+  "head_at_pause": "a4de7ff",
   "primary_handoff_doc": ".planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p/.continue-here.md"
 }
