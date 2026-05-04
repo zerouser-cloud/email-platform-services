@@ -1,28 +1,29 @@
 {
-    "name": "@email-platform/contracts",
-    "version": "0.0.1",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "files": [
-        "dist",
-        "proto"
-    ],
-    "scripts": {
-        "generate": "sh scripts/generate.sh",
-        "build": "tsc -p tsconfig.json",
-        "typecheck": "tsc --noEmit"
-    },
-    "peerDependencies": {
-        "@bufbuild/protobuf": "^2.2.3"
-    },
-    "devDependencies": {
-        "@bufbuild/protobuf": "^2.2.3",
-        "@grpc/grpc-js": "^1.12.6",
-        "@nestjs/microservices": "^11.1.19",
-        "@types/node": "^20.0.0",
-        "grpc-tools": "^1.13.1",
-        "rxjs": "^7.8.1",
-        "ts-proto": "^2.6.0",
-        "typescript": "^5.0.0"
-    }
+  "name": "@email-platform/contracts",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "proto"
+  ],
+  "scripts": {
+    "generate": "sh scripts/generate.sh",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@bufbuild/protobuf": "^2.2.3"
+  },
+  "devDependencies": {
+    "@email-platform/tsconfig-base": "workspace:*",
+    "@bufbuild/protobuf": "^2.2.3",
+    "@grpc/grpc-js": "^1.12.6",
+    "@nestjs/microservices": "^11.1.19",
+    "@types/node": "^20.0.0",
+    "grpc-tools": "^1.13.1",
+    "rxjs": "^7.8.1",
+    "ts-proto": "^2.6.0",
+    "typescript": "^5.0.0"
+  }
 }

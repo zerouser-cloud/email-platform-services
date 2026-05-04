@@ -1,21 +1,22 @@
 {
-    "name": "@email-platform/config",
-    "version": "0.0.1",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "scripts": {
-        "build": "tsc -p tsconfig.json",
-        "typecheck": "tsc --noEmit"
-    },
-    "dependencies": {
-        "zod": "^4.3.6"
-    },
-    "peerDependencies": {
-        "@nestjs/common": "^11.1.19"
-    },
-    "devDependencies": {
-        "@nestjs/common": "^11.1.19",
-        "@types/node": "^20.0.0",
-        "typescript": "^5.7.3"
-    }
+  "name": "@email-platform/config",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.1.19"
+  },
+  "devDependencies": {
+    "@email-platform/tsconfig-base": "workspace:*",
+    "@nestjs/common": "^11.1.19",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.7.3"
+  }
 }

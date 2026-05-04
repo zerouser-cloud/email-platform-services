@@ -35,6 +35,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@email-platform/tsconfig-base": "workspace:*",
     "@nestjs/cli": "^11.0.21",
     "@nestjs/schematics": "^11.1.0",
     "@types/node": "^20.0.0",
