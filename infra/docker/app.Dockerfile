@@ -77,6 +77,16 @@ WORKDIR /app
 # + защита от accidental Stage 1.3 base swap в future amendments.
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+# I-S1.BB (NEW per 999.18.3 D-10): следующий ENV directive устраняет pnpm 11
+# ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY в `pnpm prune --prod` step
+# (non-TTY Docker BuildKit context). Source-code canonical:
+# pnpm/installing/deps-installer/src/install/validateModules.ts:149-154
+# throws когда `!process.stdin.isTTY && opts.confirmModulesPurge`;
+# install/index.ts:317 wires `confirmModulesPurge: opts.confirmModulesPurge && !opts.ci`
+# — opts.ci=true → confirmModulesPurge short-circuits к false → throw skipped.
+# Reference: pnpm error-hint in-product documentation; Issue #9966 maintainer endorse
+# (Zoltan Kochan + tjenkinson). 999.18.3-PRUNE-VERIFY.md §2 verbatim source verification.
+ENV CI=true
 COPY --from=pruner /app/out/full/ ./
 ARG APP_NAME
 RUN pnpm exec turbo run build --filter=@email-platform/${APP_NAME}
