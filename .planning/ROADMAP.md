@@ -883,6 +883,17 @@ Plans:
 - [ ] 999.18-05-PLAN.md — Wave 3 inline fix (CONDITIONAL): D-12 contract generation pipeline relocation per user-approved variant (V1 no-op / V2 commit-time / V3 layer-share / V4 untrack)
 - [ ] 999.18-06-PLAN.md — Wave 4 closure: BACKLOG.md catalogue + Plan 08 SUMMARY drift fix + gsd-flow-guard skill update (conditional) + final dual-mode smoke + VERIFICATION.md
 
+### Phase 999.18.3: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (Variant 2 per session 2026-05-04); amend ADR-001 §Decision (b) M3 to clarify full-fetch + prune-after-build sub-pattern; update DOCKERFILE-REFERENCE Stage 1 invariants; document Turborepo two-install (Variant 1) as Considered Alternative; re-run 4 verifier suite + dual-mode smoke + rollback drill on phase branch — closes 999.18.2 VERIFICATION.md gaps 1-4 + T-PROC-03 trigger fired (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.18
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 999.18.3 to break down)
+
 ### Phase 999.18.2: Implementation cluster — execute MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05): foundation verifier scripts (image-determinism + injection-extinct + multiarch + per-service smoke) + Turborepo orchestrator scaffolding with injectWorkspacePackages drop + F-24 cache-hash closure + Dockerfile rewrite (distroless runner + grpc_health_probe COPY + pnpm fetch+offline install per ADR Decision (b)M3) + transport-aligned cleanup (drop HTTP server in 4 gRPC services + notifier; register grpc.health.v1.Health per ADR Decision (c.2)+(c.3); remove debug HTTP ports 3001-3004 from compose) + multi-arch CI (linux/amd64,linux/arm64 via QEMU per CONTEXT D-09+D-11) + contract-gen Placement A pre-build CI step (F-12 V2) + compose healthcheck swap to transport-aligned protocol (gateway HTTP wget / 5 services grpc_health_probe) + dual-mode smoke gate per wave + Wave 4 image-determinism verify + rollback drill; closes 999.18.1 ADR-001 §Decision (a)+(b)M3+(c)distroless+(d) per F-NN coverage table; consumes ADR.md + DOCKERFILE-REFERENCE.md + MIGRATION-RUNBOOK.md + RE-EVAL-TRIGGERS.md verbatim per CONTEXT D-16 trigger ratification (INSERTED)
 
 **Goal:** Ship build-system migration по 5-Wave plan из 999.18.1-MIGRATION-RUNBOOK.md (consumes ADR + DOCKERFILE-REFERENCE + RE-EVAL-TRIGGERS verbatim per CONTEXT D-16). Closes 11 F-NN findings (F-01/F-02/F-03/F-04/F-04-d8/F-05/F-08/F-12/F-15/F-20/F-24) via Dockerfile rewrite (distroless runner + pnpm fetch + offline install), transport-aligned cleanup (drop HTTP server в 5 services + register gRPC Health), multi-arch CI (linux/amd64+linux/arm64 via QEMU), Placement A pre-build contract-gen, и compose healthcheck swap. Final gate: dual-mode smoke + 4 verifier suite + rollback drill on temporary branch.
@@ -897,17 +908,6 @@ Plans:
 - [x] 999.18.2-03-PLAN.md — Wave 2 (most invasive): Dockerfile rewrite (Stage 0 + Stage 1 pruner+fetcher+installer+builder + Stage 2 distroless runner + grpc_health_probe COPY) + transport-aligned cleanup (drop app.listen в 5 services + verify gRPC Health Path A + remove HTTP debug ports 3001-3005 + drop \_PORT env vars + 5 Zod schema cleanup) + atomic commit + dual-mode smoke + image-determinism verify + rollback drill
 - [x] 999.18.2-04-PLAN.md — Wave 3: CI multi-arch (QEMU + linux/amd64,linux/arm64 per ADR implicit-fifth) + Placement A pre-build contract-gen + drift-check gate (F-12 V2) + compose healthcheck swap (gateway HTTP wget; 5 services grpc_health_probe) + start_period 30s
 - [x] 999.18.2-05-PLAN.md — Wave 4: final verification — full dual-mode smoke + 4 Wave 0 verifier suite en bloc + rollback drill on temporary branch (revert all 4 wave anchors + byte-for-byte Dockerfile match + restore via git reset --hard) + Wave 4 anchor commit + handoff to /gsd:resume-work 999.18
-
-### Phase 999.18.2.1: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (Variant 2 per session 2026-05-04); amend ADR-001 §Decision (b) M3 to clarify full-fetch + prune-after-build sub-pattern; update DOCKERFILE-REFERENCE Stage 1 invariants; document Turborepo two-install (Variant 1) as Considered Alternative; re-run 4 verifier suite (image-determinism + injection-extinct + multiarch + per-service-smoke) + dual-mode smoke + rollback drill on phase branch — closes 999.18.2 VERIFICATION.md gaps 1-4 + T-PROC-03 trigger fired (INSERTED)
-
-**Goal:** [Urgent work - to be planned]
-**Requirements**: TBD
-**Depends on:** Phase 999.18.2
-**Plans:** 0 plans
-
-Plans:
-
-- [ ] TBD (run /gsd-plan-phase 999.18.2.1 to break down)
 
 ### Phase 999.18.1: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (INSERTED)
 

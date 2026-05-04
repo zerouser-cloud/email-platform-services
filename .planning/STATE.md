@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: verifying
+status: Sub-phase 999.18.3 inserted (URGENT) + CONTEXT.md authored with locked decisions; ready for /gsd-plan-phase 999.18.3
 stopped_at: Phase 999.18.1 context gathered
-last_updated: '2026-05-04T07:29:29.981Z'
+last_updated: '2026-05-04T07:39:09.161Z'
 last_activity: 2026-05-03 -- Wave 2 anchor commit a647f51 + rollback drill PASSED + SUMMARY written
 progress:
   total_phases: 50
@@ -21,13 +21,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.18.2.1 — sub-phase closing 999.18.2 Wave 2 fetcher/installer scope mismatch via pnpm prune --prod
+**Current focus:** Phase 999.18.3 — sub-phase closing 999.18.2 Wave 2 fetcher/installer scope mismatch via pnpm prune --prod
 
 ## Current Position
 
 Phase: 999.18.2 (implementation-cluster-execute-migration-runbook-from-phase-) — EXECUTING
-Plan: 3 of 5 (Wave 2 anchor a647f51 — Dockerfile rewrite + transport-aligned cleanup + grpc_health_probe healthcheck swap inline)
-Status: Sub-phase 999.18.2.1 inserted (URGENT) — closes 999.18.2 VERIFICATION gaps 1-4; ready for /gsd-discuss-phase or /gsd-plan-phase
+Plan: 3 of 4 (Wave 2 anchor a647f51 — Dockerfile rewrite + transport-aligned cleanup + grpc_health_probe healthcheck swap inline)
+Status: Sub-phase 999.18.3 inserted (URGENT) + CONTEXT.md authored with locked decisions; ready for /gsd-plan-phase 999.18.3
 Last activity: 2026-05-03 -- Wave 2 anchor commit a647f51 + rollback drill PASSED + SUMMARY written
 
 D-16 review outcome:
@@ -378,6 +378,7 @@ Progress: [██████████] 95%
 - Phase 999.18.1 inserted after Phase 999.18: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (URGENT)
 - Phase 999.18.2 inserted after Phase 999.18: Implementation of MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05); ADR-001 Accepted by user (D-16 trigger) unblocks impl phase creation (URGENT)
 - Phase 999.18.2.1 inserted after Phase 999.18.2: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (URGENT)
+- Phase 999.18.3 inserted after Phase 999.18: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (Variant 2 per session 2026-05-04) (URGENT)
 
 ## Session Continuity
 
