@@ -22,6 +22,17 @@ ARG GRPC_HEALTH_PROBE_VERSION=v0.4.24
 # ENTRYPOINT is /ko-app/grpc-health-probe; image is built via `ko` in GitHub Actions).
 FROM ghcr.io/grpc-ecosystem/grpc-health-probe:${GRPC_HEALTH_PROBE_VERSION} AS health-probe
 
+# ─── Stage 1.0.5: busybox (multi-call binary used as wget in Stage 2 runner) ────
+# I-S2.1.7: pinned busybox version per supply-chain hardening.
+# The distroless runner (gcr.io/distroless/nodejs22-debian12:nonroot) ships no
+# shell/curl/wget. The gateway compose healthcheck invokes `wget -qO- http://...`
+# — restoring that capability requires ONE binary. busybox is multi-call: when
+# invoked under the name `wget`, it dispatches the wget applet via argv[0].
+# musl variant chosen (NOT glibc) — busybox:1.37.0-glibc requires GLIBC_2.38
+# which is newer than debian-12's glibc; the musl variant is statically linked
+# and runs anywhere. Verified empirically by docker build on 2026-05-05.
+FROM busybox:1.37.0-musl AS busybox
+
 # ─── Stage 1.1: Pruner ────────────────────────────────────────
 # I-S1.1: pruner stage requires full workspace для compute the dep-closure slice.
 FROM node:${NODE_VERSION} AS pruner
@@ -70,6 +81,14 @@ RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built
 
 # ─── Stage 2: Runner (distroless, non-root — FR-07 + FR-11) ───
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
+
+# I-S2.1.7: busybox-as-wget — distroless runner has no shell/curl/wget; the
+# gateway compose healthcheck `test: [CMD, wget, -qO-, http://...]` needs an
+# actual wget binary. busybox is a single ~1MB static binary; multi-call →
+# invoked under name `wget` it dispatches the wget applet via argv[0]. This
+# is a deliberate, scoped, audited point compromise on distroless minimalism
+# (Plan 02 of Phase 999.18.4). Plan 04 may tighten this to a digest pin.
+COPY --from=busybox /bin/busybox /usr/local/bin/wget
 
 # I-S2.1.5 + I-S2.1.6: grpc_health_probe binary (sourced from dedicated stage,
 # bypasses builder — no apk+wget transient dependency, no GitHub release CDN
