@@ -11,7 +11,7 @@
 # I-S0.4 + I-S0.5: NO `ENV PROTO_DIR=...` — single source of truth in .env.docker.
 ARG APP_NAME
 ARG NODE_VERSION=22-alpine
-ARG GRPC_HEALTH_PROBE_VERSION=v0.4.24
+ARG GRPC_HEALTH_PROBE_VERSION=v0.4.48
 
 # ─── Stage 1.0: gRPC health probe (binary extraction, no apk+wget) ────
 # I-S2.1.6: pinned grpc_health_probe version per security advisory.
