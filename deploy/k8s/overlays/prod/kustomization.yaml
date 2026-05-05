@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: email-platform-prod
+
+resources:
+  - ../../base
+
+images:
+  - name: registry.example.com/email-platform-gateway
+    newTag: latest # CI updates per release tag
+  - name: registry.example.com/email-platform-auth
+    newTag: latest
+  - name: registry.example.com/email-platform-sender
+    newTag: latest
+  - name: registry.example.com/email-platform-parser
+    newTag: latest
+  - name: registry.example.com/email-platform-audience
+    newTag: latest
+  - name: registry.example.com/email-platform-notifier
+    newTag: latest
+
+# Prod: 2 replicas per service for HA (patches base replicas)
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment
