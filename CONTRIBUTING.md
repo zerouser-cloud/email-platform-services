@@ -12,6 +12,44 @@ and `pre-push` gates. Without it, security and quality checks won't run
 locally — CI will still enforce them on every MR, but local feedback
 loop becomes painful.
 
+### Existing clones — repair `core.hooksPath`
+
+If you cloned the repo BEFORE phase 999.18.3 (when `husky` was still
+in use), your local `.git/config` may still contain an absolute path
+to the now-removed `.husky/` directory. As a result, `pre-commit` and
+`pre-push` hooks **don't fire locally** — security gates run only in
+CI.
+
+Check current state:
+
+```sh
+git config --local --get core.hooksPath
+# If output contains '.husky' or an absolute path — repair needed.
+# If output == '.githooks' — you're already good.
+```
+
+Repair (one-shot, per existing clone):
+
+```sh
+git config --local --unset core.hooksPath || true
+pnpm setup-hooks
+```
+
+The `--unset` step is defensive: it clears any relict value from the
+old husky `prepare`-script lifecycle so `pnpm setup-hooks` writes a
+clean `core.hooksPath = .githooks` entry.
+
+Verify:
+
+```sh
+git config --local --get core.hooksPath
+# Expected: .githooks
+```
+
+This is a one-time fix per existing working copy. Fresh clones get
+the correct value the first time `pnpm setup-hooks` runs after
+`pnpm install`.
+
 ## Development workflow
 
 All non-trivial changes go through the GSD planning workflow:
