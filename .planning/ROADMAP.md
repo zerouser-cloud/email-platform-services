@@ -898,7 +898,7 @@ Plans:
 - [ ] 999.18.4-04-PLAN.md — Replace tag pin with digest pin @sha256:… for grpc-health-probe AND busybox (placeholder — created in next /gsd:plan-phase 999.18.4)
 - [ ] 999.18.4-05-PLAN.md — k8s manifests: replace exec.command grpc_health_probe with declarative `grpc:` probe (k8s 1.24+) (placeholder — created in next /gsd:plan-phase 999.18.4)
 - [ ] 999.18.4-06-PLAN.md — Extract shared `base` stage (DRY node + pnpm setup) (placeholder — created in next /gsd:plan-phase 999.18.4)
-- [ ] 999.18.4-07-PLAN.md — Docker cache + image bloat investigation/remediation (100+ GB observed on local host) — diagnostic + scoped one-time cleanup + long-term hygiene; seed: .planning/notes/docker-cache-bloat.md (placeholder — created in next /gsd:plan-phase 999.18.4)
+- [ ] 999.18.4-07-PLAN.md — Docker cache + image bloat: diagnostic + `pnpm clean:docker:*` scripts + BuildKit GC policy V2-A in `/etc/docker/daemon.json` (auto-GC closing 100+ GB accumulation root cause)
 
 ### Phase 999.18.3: Architectural closure — 5-layer build architecture (drop husky + two-install Vercel canonical pattern) (INSERTED, ratified iter 7 = 2026-05-04)
 
