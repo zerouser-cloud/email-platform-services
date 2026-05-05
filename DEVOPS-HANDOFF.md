@@ -445,3 +445,37 @@ is just the Trivy invocation above.
 
 *Phase 999.17 — devsecops-shift-left-security-tooling*
 *See `.planning/phases/999.17-devsecops-shift-left-security-tooling/` for decision context.*
+
+---
+
+## Branch protection (Phase 999.18.3 FR-15)
+
+**Required server-side configuration в GitLab Project Settings → Repository → Protected branches:**
+
+- **`main` branch:**
+  - Allowed to merge: Maintainer or Owner role only
+  - Allowed to push: NO direct push (force MR-only flow)
+  - Required: «Pipelines must succeed» = ON
+  - Required: «All threads must be resolved» = ON
+  - Required approvers: 1 (or per team policy)
+
+- **Pipeline rule (FR-14):** all 8 security jobs (`secret-detection`, `sast`, `env-parity`, `audit`, `container-config`, `container-cve`, `license-scan`, `sbom`) MUST be `allow_failure: false` (verified в `.gitlab-ci.yml`).
+
+**Why server-side enforcement matters (per Phase 999.18.3 LAYER-ARCHITECTURE §E.4 L4):**
+
+Local pre-commit/pre-push hooks (`.githooks/pre-commit` + `.githooks/pre-push`) provide convenience-layer feedback. They CAN be bypassed via `git commit --no-verify`. The actual security enforcement layer = **GitLab CI required pipelines + branch protection** (canonical MAANG-aligned pattern per Atlassian + GitHub Engineering documentation, verified iter 7 of Phase 999.18.3).
+
+**Empirical convergence:** N=5/7 verified public repos (React + Astro + Remix + Nuxt + SvelteKit) rely on CI-only enforcement; none use husky/prepare-script gating because that pattern was empirically broken (pnpm bug #7068 — see Phase 999.18.3 Iteration 6 BLOCKED state и forensic chain в 999.18.1-ADR.md Iteration 7 entry once Plan 09 lands).
+
+**Verification post-migration:** after GitLab self-hosted migration completes (per memory `project_gitlab_migration`), validate branch protection:
+
+```bash
+# Try direct push к main — MUST fail
+git push origin main:main 2>&1 | grep -qi "protected"   # expect denial
+
+# Try MR без passing pipeline — MUST be unmergeable until pipeline green
+# (Manual UI verification — no CLI gate.)
+```
+
+*Phase 999.18.3 — sub-phase Wave 2 — Plan 08*
+*See `.planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p/` for decision context.*
