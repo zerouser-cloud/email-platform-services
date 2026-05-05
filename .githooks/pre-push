@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Phase 999.18.3 — migrated from .husky/pre-push (FR-03 drop husky).
+# Phase 999.17.1 origin (D-14 parallel orchestrator). Stdin (4-tuple per ref)
+# is forwarded to the orchestrator via inherited fd 0.
+# Delete-only push detection (D-19) lives INSIDE the orchestrator.
+exec bash scripts/security/pre-push-orchestrator.sh
