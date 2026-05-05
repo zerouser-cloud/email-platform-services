@@ -883,16 +883,21 @@ Plans:
 - [ ] 999.18-05-PLAN.md — Wave 3 inline fix (CONDITIONAL): D-12 contract generation pipeline relocation per user-approved variant (V1 no-op / V2 commit-time / V3 layer-share / V4 untrack)
 - [ ] 999.18-06-PLAN.md — Wave 4 closure: BACKLOG.md catalogue + Plan 08 SUMMARY drift fix + gsd-flow-guard skill update (conditional) + final dual-mode smoke + VERIFICATION.md
 
-### Phase 999.18.4: Dockerfile + build infra hardening (iterative refactor) (INSERTED)
+### Phase 999.18.4: Dockerfile + healthcheck infra hardening (iterative refactor) (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
+**Goal:** Iterative hardening + readability cleanup of `infra/docker/app.Dockerfile` plus the healthcheck contracts that surround it (compose `healthcheck.test`, k8s `livenessProbe`/`readinessProbe`). Each concern lands as one atomic Plan = one revertable commit. Open seeded scope (Plans 07+ added on discovery): (1) replace fragile `apk + wget + sed-arch` delivery of `grpc_health_probe` with `COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe` (BuildKit multi-arch via `$TARGETPLATFORM`, no GitHub release CDN dep at build time); (2) gateway compose `healthcheck.test: ['CMD','wget',…]` → working probe (current `wget` is missing in distroless `gcr.io/distroless/nodejs22-debian12:nonroot`, so the healthcheck has been silently failing — pre-existing gap surfaced during Plan 01 smoke); (3) bump `GRPC_HEALTH_PROBE_VERSION` v0.4.24 → v0.4.48; (4) tag-pin → digest-pin (`@sha256:…`) for supply-chain hardening; (5) k8s manifests `exec.command: [/usr/local/bin/grpc_health_probe, -addr=:NNNN]` → declarative `grpc: { port: NNNN }` (k8s 1.24+ native gRPC probe — kubelet calls `grpc.health.v1.Health` directly, no in-image binary needed for production); (6) extract a shared `base` stage (consolidate `WORKDIR /app` + `ENV PNPM_HOME=/pnpm` + `ENV PATH` + `RUN corepack enable` duplicated across `prod-deps` and `builder` stages — DRY, canonical Vercel/Next pattern). Server-side `grpc.health.v1.Health` registration (HealthImplementation from `grpc-health-check` npm) is unaffected across all plans. Out-of-scope across all Plans: `apps/*` source, `packages/*` source, runtime contracts (binary destination `/usr/local/bin/grpc_health_probe`, distroless `nonroot` user, ENTRYPOINT/CMD shape) — preserved as Phase 999.18.3 ratified invariants. Phase closes when no further Dockerfile/healthcheck improvements remain.
 **Requirements**: TBD
 **Depends on:** Phase 999.18
-**Plans:** 0 plans
+**Plans:** 6 plans (open — Plans 07+ may be added on discovery)
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 999.18.4 to break down)
+- [ ] 999.18.4-01-PLAN.md — Replace apk+wget+sed with COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe (tag pin v0.4.24 retained)
+- [ ] 999.18.4-02-PLAN.md — Gateway compose healthcheck: replace wget (missing in distroless) with working probe — closes silent compose-unhealthy state surfaced in Plan 01 smoke (placeholder — created in next /gsd:plan-phase 999.18.4)
+- [ ] 999.18.4-03-PLAN.md — Bump GRPC_HEALTH_PROBE_VERSION v0.4.24 → v0.4.48 (placeholder — created in next /gsd:plan-phase 999.18.4)
+- [ ] 999.18.4-04-PLAN.md — Replace tag pin with digest pin @sha256:… (placeholder — created in next /gsd:plan-phase 999.18.4)
+- [ ] 999.18.4-05-PLAN.md — k8s manifests: replace exec.command grpc_health_probe with declarative `grpc:` probe (k8s 1.24+) (placeholder — created in next /gsd:plan-phase 999.18.4)
+- [ ] 999.18.4-06-PLAN.md — Extract shared `base` stage (DRY node + pnpm setup) (placeholder — created in next /gsd:plan-phase 999.18.4)
 
 ### Phase 999.18.3: Architectural closure — 5-layer build architecture (drop husky + two-install Vercel canonical pattern) (INSERTED, ratified iter 7 = 2026-05-04)
 

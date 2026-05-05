@@ -13,6 +13,15 @@ ARG APP_NAME
 ARG NODE_VERSION=22-alpine
 ARG GRPC_HEALTH_PROBE_VERSION=v0.4.24
 
+# ─── Stage 1.0: gRPC health probe (binary extraction, no apk+wget) ────
+# I-S2.1.6: pinned grpc_health_probe version per security advisory.
+# BuildKit resolves the right arch via $TARGETPLATFORM against upstream multi-arch
+# manifest (linux/amd64, linux/arm/v7, linux/arm64/v8, linux/ppc64le, linux/s390x).
+# Binary path inside upstream image: /ko-app/grpc-health-probe (verified empirically by
+# `docker pull ghcr.io/grpc-ecosystem/grpc-health-probe:v0.4.24` + filesystem inspect —
+# ENTRYPOINT is /ko-app/grpc-health-probe; image is built via `ko` in GitHub Actions).
+FROM ghcr.io/grpc-ecosystem/grpc-health-probe:${GRPC_HEALTH_PROBE_VERSION} AS health-probe
+
 # ─── Stage 1.1: Pruner ────────────────────────────────────────
 # I-S1.1: pruner stage requires full workspace для compute the dep-closure slice.
 FROM node:${NODE_VERSION} AS pruner
@@ -59,18 +68,13 @@ ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
 
-# Download grpc_health_probe binary per-arch (I-S2.1.5 + I-S2.1.6 preserved)
-ARG GRPC_HEALTH_PROBE_VERSION
-RUN apk add --no-cache wget \
-    && wget -qO/usr/local/bin/grpc_health_probe \
-        "https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-$(apk --print-arch | sed 's/x86_64/amd64/;s/aarch64/arm64/')" \
-    && chmod +x /usr/local/bin/grpc_health_probe
-
 # ─── Stage 2: Runner (distroless, non-root — FR-07 + FR-11) ───
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 
-# I-S2.1.5: grpc_health_probe binary
-COPY --from=builder /usr/local/bin/grpc_health_probe /usr/local/bin/grpc_health_probe
+# I-S2.1.5 + I-S2.1.6: grpc_health_probe binary (sourced from dedicated stage,
+# bypasses builder — no apk+wget transient dependency, no GitHub release CDN
+# dependency at build time, no sed-based arch mapping fragility).
+COPY --from=health-probe /ko-app/grpc-health-probe /usr/local/bin/grpc_health_probe
 
 ARG APP_NAME
 # pnpm-workspace runtime closure (Vercel two-install canonical):
