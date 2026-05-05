@@ -1,13 +1,13 @@
 {
   "version": "1.0",
-  "timestamp": "2026-05-04T18:30:00.000Z",
+  "timestamp": "2026-05-05T05:38:06Z",
   "phase": "999.18.3",
-  "phase_name": "sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p",
-  "phase_dir": ".planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p",
+  "phase_name": "architectural-closure-5-layer-drop-husky-two-install",
+  "phase_dir": ".planning/phases/999.18.3-architectural-closure-5-layer-drop-husky-two-install",
   "plan": null,
   "task": null,
   "total_tasks": null,
-  "status": "paused_pending_discuss_phase",
+  "status": "completed",
   "completed_tasks": [
     {
       "plan": 1,
@@ -26,6 +26,24 @@
       "status": "done",
       "summary": "999.18.3-05-SUMMARY.md",
       "note": "Pattern E (D-09) preserved in final architecture; D-10 ENV CI=true superseded"
+    },
+    {
+      "plan": 7,
+      "status": "done",
+      "summary": "999.18.3-07-SUMMARY.md",
+      "note": "L1+L3 implementation: drop husky + Dockerfile rewrite на two-install Vercel canonical (FR-01..FR-11 + FR-19)"
+    },
+    {
+      "plan": 8,
+      "status": "done",
+      "summary": "999.18.3-08-SUMMARY.md",
+      "note": "L4+L5 wiring: .gitlab-ci.yml + Kustomize K8s + verify-k8s-rollout (FR-12..FR-18 + FR-20)"
+    },
+    {
+      "plan": 9,
+      "status": "in_progress",
+      "summary": "999.18.3-09-SUMMARY.md",
+      "note": "Docs+audit-trail closure: ROADMAP rewrite + folder rename + 999.18.1 RUNBOOK/ADR/RE-EVAL-TRIGGERS amendments"
     }
   ],
   "blocked_tasks": [
@@ -68,31 +86,9 @@
       "commit": "66b19f1"
     }
   ],
-  "remaining_tasks": [
-    {
-      "description": "discuss-phase 999.18.3 — ratify final architecture + plan structure (Plan 07 L1+L3 / Plan 08 L4+L5 / Plan 09 docs+ADR)",
-      "type": "discuss",
-      "blocking": true
-    },
-    {
-      "description": "plan-phase 999.18.3 — Plan 07/08/09 task breakdown",
-      "type": "plan",
-      "blocking": true
-    },
-    {
-      "description": "execute-phase 999.18.3 — implementation",
-      "type": "execute",
-      "blocking": true
-    }
-  ],
+  "remaining_tasks": [],
   "blockers": [],
-  "human_actions_pending": [
-    {
-      "action": "Approve final architecture in discuss-phase",
-      "context": "Final architecture ratified by user 2026-05-04. discuss-phase only needs to finalize plan structure (3-plan split) and confirm deferring 6 LOW hardening items + GitLab PoC to phase 999.18.4. All architectural decisions locked.",
-      "blocking": false
-    }
-  ],
+  "human_actions_pending": [],
   "decisions_ratified": [
     {
       "decision": "5-layer architecture: L1 Source / L2 Orchestration (Turborepo) / L3 Packaging (Docker BuildKit) / L4 Pipeline (GitLab CI to Kubernetes) / L5 Verification",
@@ -138,9 +134,9 @@
     "user_intent_quote_2026-05-04": "Потом мы поставим на него защиту, можно им генерировать какой-то файл-код, который будет проверяться, если его нет то и проект не будем запускать а будем показывать что нужно установить"
   },
   "uncommitted_files": [],
-  "next_action": "After /clear: invoke /gsd:resume-work to load this handoff. Then /gsd:discuss-phase 999.18.3 to finalize 3-plan split (architecture already ratified). Then /gsd:plan-phase 999.18.3 for Plan 07/08/09 task breakdown. Do NOT re-spawn researcher — both research artifacts (RESEARCH.md + LAYER-ARCHITECTURE.md) committed and complete. Architecture empirically ratified against React/Astro public repos.",
-  "context_notes": "Phase 999.18.3 closure path grounded empirically after 7 iterations. Iteration 7 (this session, 2026-05-04) corrections vs prior: (1) Pattern E NOT a workaround — canonical refactor preserved. (2) ENV HUSKY=0 IS a kostyl — rejected per user mandate; replaced by drop husky entirely (React/Astro pattern). (3) --legacy flag IS escape hatch — rejected per user; replaced by two-install (Vercel canonical, no flags). (4) GitLab CI is security enforcement layer — security:* scripts from Phase 999.17 already integrated. All 5 historical failure modes (3-orphan fetcher, 4-TS5083, 5-TTY abort, 6-husky lifecycle, 7-pnpm prune lifecycle re-run) addressed structurally — zero env-var workarounds, zero shell tricks, zero --legacy flags. Ratified empirically against React (Meta), Astro public package.json files. discuss-phase scope is now narrow: confirm 3-plan split + defer 6 LOW hardening items to 999.18.4. No further research, no architecture re-evaluation.",
-  "branch": "gsd/phase-999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p",
+  "next_action": "Phase 999.18.3 complete. Next: invoke /gsd:plan-phase 999.18.4 для 6 deferred LOW-priority hardening items + GitLab PoC (per CONTEXT.md deferred-к-999.18.4 list).",
+  "context_notes": "Phase 999.18.3 closed 2026-05-05 после Plan 09 docs+audit-trail commits. Final ratified architecture: 5-layer build (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Iteration 7 chain documented в 999.18.1-ADR.md §Implementation Path & Amendments + T-LIFECYCLE-01 trigger registered fired→resolved by FR-03 drop-husky. Folder renamed via git mv (preserves git log --follow history). Plans 01-06 audit-trail preserved.",
+  "branch": "gsd/phase-999.18.3-architectural-closure-5-layer-drop-husky-two-install",
   "head_at_pause": "a4de7ff",
-  "primary_handoff_doc": ".planning/phases/999.18.3-sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p/.continue-here.md"
+  "primary_handoff_doc": ".planning/phases/999.18.3-architectural-closure-5-layer-drop-husky-two-install/.continue-here.md"
 }
