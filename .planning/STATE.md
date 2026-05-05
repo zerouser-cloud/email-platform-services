@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.18.3 Plan 11 executed (VERIFICATION.md Gap 2 closed — core.hooksPath = .githooks applied locally + CONTRIBUTING.md repair subsection added; commit 1b3a04d; Task 1 per-clone state change not commit-able by nature)
-last_updated: '2026-05-05T06:51:33.975Z'
+stopped_at: Phase 999.18.3 Plan 13 executed (VERIFICATION.md Gap 4 closed — verify-injection-extinct CR-06 + verify-multiarch CR-07 fixed in .gitlab-ci.yml; verify gate functional 5-cycle docker build verification + IMAGE positional arg; commit 5393276; 24/24 static gates PASS)
+last_updated: '2026-05-05T06:58:44.262Z'
 last_activity: 2026-05-05
 progress:
   total_phases: 50
-  completed_phases: 33
+  completed_phases: 34
   total_plans: 204
-  completed_plans: 194
-  percent: 95
+  completed_plans: 195
+  percent: 96
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.18.3 (architectural-closure-5-layer-drop-husky-two-install) — EXECUTING (gap-closure waves)
-Plan: 12 of 13 (Gaps 1+2 closure complete; L1 closure end-to-end ratified)
+Plan: 13 of 13 (Gaps 1+2+3+4 closure complete; L1+L4+L5 closure end-to-end ratified)
 Status: Ready to execute
 Last activity: 2026-05-05
 
@@ -69,7 +69,7 @@ Last activity: 2026-05-05
 
 **Memory anchors triggered:** `feedback_analysis_over_agreement`, `feedback_phase_completeness`, `feedback_security_verification`.
 
-Progress: [██████████] 95%
+Progress: [██████████] 96%
 
 ## Performance Metrics
 
@@ -207,6 +207,7 @@ Progress: [██████████] 95%
 | Phase 999.18.3 P10 | 2min | 1 task (2 atomic commits) | 1 file (.gitignore) + .husky/ untracked dir removed |
 | Phase 999.18.3 P11 | 3min | 2 tasks (1 atomic commit + 1 per-clone state change) | 1 file (CONTRIBUTING.md) + .git/config core.hooksPath rewritten |
 | Phase 999.18.3 P12 | 3min | 2 tasks | 3 files |
+| Phase 999.18.3 P13 | 4min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -372,6 +373,7 @@ Progress: [██████████] 95%
 - [Phase 999.18.3]: Plan 10 (Gap 1 closure) — `.husky/` runtime-shims residue (17 untracked `.husky/_/` files from husky 9 prepare-script lifecycle) physically removed via plain `rm -rf` (not `git rm` — files were untracked); `.gitignore` defense rule `.husky/` added under new `# Husky residue` section as defense-in-depth against accidental re-install of husky devDep on legacy branch checkout. 2 atomic commits (57876ce empty-allow physical removal + 1ef7e69 .gitignore patch) per gap-closure inline-amendment pattern; emits forensic trail в git log. Plan 07 must-have «`.husky/` отсутствует в репозитории» теперь end-to-end ratified (git index + filesystem + pattern-protected).
 - [Phase 999.18.3]: Plan 11 (Gap 2 closure) — `core.hooksPath` фактически применён локально (`git config --local --unset core.hooksPath || true && pnpm setup-hooks`) — рабочая копия теперь имеет `[core] hooksPath = .githooks` вместо реликтового абсолютного пути `/home/mr/.../.husky` от husky 9 prepare-script; CONTRIBUTING.md получил подраздел «Existing clones — repair `core.hooksPath`» с full diagnostic/repair/verify triad для разработчиков с тем же реликтовым состоянием. 1 atomic commit (1b3a04d, docs) — Task 1 (per-clone state change) не commit-able по природе. Empirical proof: pre-commit hook (lint-staged + gitleaks staged) фактически отработал при создании Task 2 commit'а — `.githooks/pre-commit` теперь active locally, не только в CI. **L1 husky drop end-to-end ratified:** Plan 07 (code) + Plan 10 (filesystem) + Plan 11 (runtime state + onboarding docs).
 - [Phase ?]: Plan 12 (Gap 3 closure): CR-01..CR-04 устранены — Kustomize overlays на fail-loud placeholders с CI substitution loop, deploy jobs apt-get/Debian + KUBE_NAMESPACE inject + direct bash invocation
+- [Phase ?]: Plan 13: Gap 4 closure — verify-injection-extinct (CR-06) + verify-multiarch (CR-07)
 
 ### Pending Todos
 
@@ -414,7 +416,7 @@ Progress: [██████████] 95%
 
 ## Session Continuity
 
-Last session: 2026-05-05T06:51:29.950Z
+Last session: 2026-05-05T06:58:24.842Z
 Stopped at: Phase 999.18.3 Plan 11 executed (VERIFICATION.md Gap 2 closed — core.hooksPath = .githooks applied locally + CONTRIBUTING.md repair subsection added; commit 1b3a04d; Task 1 per-clone state change not commit-able by nature)
 Resume files:
 
