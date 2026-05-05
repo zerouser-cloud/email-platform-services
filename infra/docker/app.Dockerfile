@@ -68,17 +68,37 @@ RUN apk add --no-cache wget \
 
 # ─── Stage 2: Runner (distroless, non-root — FR-07 + FR-11) ───
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
-WORKDIR /app
 
 # I-S2.1.5: grpc_health_probe binary
 COPY --from=builder /usr/local/bin/grpc_health_probe /usr/local/bin/grpc_health_probe
 
-# Manual COPY closure — node_modules from prod-deps (NOT builder) per FR-04 two-install.
 ARG APP_NAME
-COPY --from=builder /app/apps/${APP_NAME}/dist ./dist
-COPY --from=prod-deps /app/node_modules ./node_modules
-COPY --from=prod-deps /app/packages /app/packages
+# pnpm-workspace runtime closure (Vercel two-install canonical):
+# pnpm install --prod creates a hoisted .pnpm store at the workspace root
+# /app/node_modules/, and per-app /app/apps/${APP_NAME}/node_modules/ with
+# the symlinks the app actually consumes. Both must travel together; the
+# resolver walks up from cwd (/app/apps/${APP_NAME}) finding the app-local
+# node_modules first then the root store.
+#
+# - /app/node_modules                from prod-deps (shared .pnpm store)
+# - /app/apps/${APP_NAME}/node_modules from prod-deps (per-app symlinks)
+# - /app/packages                    from builder   (compiled dist/ from turbo build)
+# - /app/apps/${APP_NAME}/dist       from builder   (the app's compiled output)
+# - /app/build-info.json             from builder   (CI metadata)
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=prod-deps /app/apps/${APP_NAME}/node_modules /app/apps/${APP_NAME}/node_modules
+COPY --from=builder /app/packages /app/packages
+COPY --from=builder /app/apps/${APP_NAME}/dist /app/apps/${APP_NAME}/dist
 COPY --from=builder /app/build-info.json /app/build-info.json
+# /app/proto/ — runtime proto-loader path per .env.docker `PROTO_DIR=/app/proto`.
+# F-05 single-source-of-truth (PROTO_DIR value in .env.docker only) preserved;
+# physical files MUST exist at /app/proto for ts-proto/grpc-js loader at runtime.
+COPY --from=builder /app/packages/contracts/proto /app/proto
+
+# WORKDIR last — Node module resolution starts from cwd; setting WORKDIR to
+# the app dir means require() walks /app/apps/${APP_NAME}/node_modules then
+# /app/apps/node_modules then /app/node_modules.
+WORKDIR /app/apps/${APP_NAME}
 
 # I-S0.4: NO `ENV PROTO_DIR=...` — F-05 preserved
 ENV NODE_ENV=production
@@ -86,5 +106,7 @@ ENV NODE_ENV=production
 # I-S2.8 + I-S2.2: USER LAST + numeric form (distroless без /etc/passwd)
 USER 65532:65532
 
-# I-S2.9: exec-form CMD — node = PID 1 (NestJS OnApplicationShutdown lifecycle)
-CMD ["node", "dist/main.js"]
+# I-S2.9: exec-form CMD — distroless nodejs ENTRYPOINT is `/nodejs/bin/node`,
+# so CMD passes ONLY the script path (no leading "node" — that resolves as
+# module-name lookup → MODULE_NOT_FOUND). Distroless canonical form.
+CMD ["dist/main.js"]
