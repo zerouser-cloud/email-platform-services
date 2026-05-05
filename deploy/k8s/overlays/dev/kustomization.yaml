@@ -6,18 +6,30 @@ namespace: email-platform-dev
 resources:
   - ../../base
 
+# Image references: placeholder names matching base/*.yaml `image:` fields.
+# CI overrides via `kustomize edit set image registry.example.com/email-platform-{svc}=${CI_REGISTRY_IMAGE}/email-platform-{svc}:${CI_COMMIT_SHORT_SHA}`
+# (see .gitlab-ci.yml deploy-dev script for substitution loop).
+# Manual local apply requires running the same command before `kubectl apply -k`.
+# `dev-placeholder` tag (NOT `latest`) is fail-loud canary: deploy without CI
+# substitution → manifest references non-existent tag → fast ImagePullBackOff.
 images:
   - name: registry.example.com/email-platform-gateway
-    newTag: latest # CI replaces with $CI_COMMIT_SHORT_SHA via `kustomize edit set image`
+    newName: registry.example.com/email-platform-gateway
+    newTag: dev-placeholder
   - name: registry.example.com/email-platform-auth
-    newTag: latest
+    newName: registry.example.com/email-platform-auth
+    newTag: dev-placeholder
   - name: registry.example.com/email-platform-sender
-    newTag: latest
+    newName: registry.example.com/email-platform-sender
+    newTag: dev-placeholder
   - name: registry.example.com/email-platform-parser
-    newTag: latest
+    newName: registry.example.com/email-platform-parser
+    newTag: dev-placeholder
   - name: registry.example.com/email-platform-audience
-    newTag: latest
+    newName: registry.example.com/email-platform-audience
+    newTag: dev-placeholder
   - name: registry.example.com/email-platform-notifier
-    newTag: latest
+    newName: registry.example.com/email-platform-notifier
+    newTag: dev-placeholder
 
 # Dev: 1 replica per service (default base value preserved)
