@@ -888,7 +888,7 @@ Plans:
 **Goal:** Закрытие architectural debt цепочки 999.18 → 999.18.1 → 999.18.2 через каноническую 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Финальная ratified архитектура после 7 итераций провалов, эмпирически verified против React (Meta) + Astro + 5 других public repos (Remix / Nuxt / SvelteKit confirm pattern). Phase делает 3 атомарных impl-плана (Plan 07/08/09) — ~12-15 commits total. Plans 01-06 preserved as audit trail (Iter 1-6 forensic chain).
 **Requirements**: FR-01..FR-20 (LAYER-ARCHITECTURE.md §1 ratified inventory; supersedes D-01..D-10); CONSISTENCY-AUDIT 12 superseded + 13 kostyls structurally removed.
 **Depends on:** Phase 999.18 (and 999.18.2 Wave 2 anchor a647f51 as audit baseline)
-**Plans:** 10/13 plans executed
+**Plans:** 11/13 plans executed
 
 Plans:
 
@@ -902,6 +902,7 @@ Plans:
 - [x] 999.18.3-08-PLAN.md — L4 + L5 wiring: .gitlab-ci.yml + verify-\* gates + Kustomize K8s deploy (~5 commits)
 - [x] 999.18.3-09-PLAN.md — docs + audit trail: ROADMAP rewrite + folder rename + 999.18.1 RUNBOOK/ADR/RE-EVAL-TRIGGERS amendments (~3 commits)
 - [x] 999.18.3-10-PLAN.md — Wave 4 gap-closure: VERIFICATION.md Gap 1 — physical removal of `.husky/` runtime-shims (17 untracked files in `.husky/_/`) + `.gitignore` defense rule (2 atomic commits 57876ce + 1ef7e69)
+- [x] 999.18.3-11-PLAN.md — Wave 4 gap-closure: VERIFICATION.md Gap 2 — `core.hooksPath = .githooks` applied locally + CONTRIBUTING.md «Existing clones — repair `core.hooksPath`» subsection (1 atomic commit 1b3a04d; Task 1 per-clone state change not commit-able by nature). L1 husky drop end-to-end ratified.
 
 ### Phase 999.18.2: Implementation cluster — execute MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05): foundation verifier scripts (image-determinism + injection-extinct + multiarch + per-service smoke) + Turborepo orchestrator scaffolding with injectWorkspacePackages drop + F-24 cache-hash closure + Dockerfile rewrite (distroless runner + grpc_health_probe COPY + pnpm fetch+offline install per ADR Decision (b)M3) + transport-aligned cleanup (drop HTTP server in 4 gRPC services + notifier; register grpc.health.v1.Health per ADR Decision (c.2)+(c.3); remove debug HTTP ports 3001-3004 from compose) + multi-arch CI (linux/amd64,linux/arm64 via QEMU per CONTEXT D-09+D-11) + contract-gen Placement A pre-build CI step (F-12 V2) + compose healthcheck swap to transport-aligned protocol (gateway HTTP wget / 5 services grpc_health_probe) + dual-mode smoke gate per wave + Wave 4 image-determinism verify + rollback drill; closes 999.18.1 ADR-001 §Decision (a)+(b)M3+(c)distroless+(d) per F-NN coverage table; consumes ADR.md + DOCKERFILE-REFERENCE.md + MIGRATION-RUNBOOK.md + RE-EVAL-TRIGGERS.md verbatim per CONTEXT D-16 trigger ratification (INSERTED)
 
