@@ -64,9 +64,21 @@ referenced **directly into Stage 2 runner**, bypassing builder entirely.
 - Official image: `ghcr.io/grpc-ecosystem/grpc-health-probe`
 - Multi-arch manifest covers: `linux/amd64`, `linux/arm/v7`, `linux/arm64/v8`, `linux/ppc64le`, `linux/s390x`
   (BuildKit auto-resolves via `$TARGETPLATFORM`)
-- Binary path inside image: **`/bin/grpc_health_probe`** (verified against upstream Dockerfile —
-  `COPY --from=build /go/bin/grpc-health-probe /bin/grpc_health_probe`).
-  NOT `/ko-app/...` (image is built via regular Dockerfile, not via `ko`).
+- Binary path inside image: **`/ko-app/grpc-health-probe`** (note dash, not underscore —
+  this is the actual filename in the image, not our destination convention).
+  Verified empirically by `docker pull` + filesystem inspection of v0.4.24:
+  - `docker inspect ... --format '{{.Config.Entrypoint}}'` → `[/ko-app/grpc-health-probe]`
+  - `find / -name "grpc*"` inside image → `/ko-app/grpc-health-probe` (only match)
+  - Image base is distroless (no shell), so inspection done via test-build that copies `/` into alpine.
+- **Note on the upstream Dockerfile in master:** the file at
+  `https://github.com/grpc-ecosystem/grpc-health-probe/blob/master/Dockerfile`
+  uses a regular multi-stage build that emits `/bin/grpc_health_probe` (underscore) —
+  but **that Dockerfile is not what the official `ghcr.io` image is built from**.
+  The published container is produced by the project's GitHub Actions release workflow
+  via `ko`, which puts the binary at `/ko-app/<project-name-with-dashes>`. Initial WebFetch
+  on the master Dockerfile led to the wrong assumption; corrected after empirical pull.
+- COPY destination in our runner: `/usr/local/bin/grpc_health_probe` (underscore, our convention,
+  unchanged) — the COPY also performs the dash→underscore rename.
 - Latest version: `v0.4.48` (project currently pins `v0.4.24`)
 
 ### Three concerns (split into three atomic Plans inside Phase 999.18.4)
