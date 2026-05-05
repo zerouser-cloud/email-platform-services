@@ -190,11 +190,18 @@ verify-image-determinism:
 
 verify-injection-extinct:
   stage: verify
-  image: node:22-alpine
+  # CR-06 fix (Plan 13): docker:24 + dind sidecar — script needs docker CLI for 5-cycle build.
+  # Previously ran on a node-only image without docker → SKIP guard exit 0 → gate disabled silently.
+  image: docker:24
+  services:
+    - docker:24-dind
   before_script:
+    # Alpine docker image — apk + nodejs/npm/git/curl needed for pnpm install bootstrap.
+    - apk add --no-cache bash nodejs npm git curl
     - corepack enable && corepack prepare pnpm@11.0.0 --activate
+    - pnpm install --frozen-lockfile
   script:
-    - pnpm verify:injection-extinct
+    - pnpm verify:injection-extinct # Real 5-cycle docker build verification (no longer SKIPped).
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == "main"
@@ -207,10 +214,19 @@ verify-multiarch:
     - docker:24-dind
   before_script:
     - apk add --no-cache bash
+    # CR-07 fix (Plan 13): registry login — manifest inspect requires auth for private images.
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
   script:
-    - pnpm verify:multiarch
+    # CR-07 fix (Plan 13): pass IMAGE as required positional arg (verify-multiarch-manifests.sh
+    # uses ${1:?usage: ...}). Auth chosen as canonical representative — same Dockerfile + buildx
+    # setup applies to all 6 services. Direct bash invocation per FR-16 substitutability rule.
+    - bash scripts/verify-multiarch-manifests.sh "${CI_REGISTRY_IMAGE}/email-platform-auth:${CI_COMMIT_SHORT_SHA}"
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+  needs:
+    # multi-arch images must exist in registry before manifest inspect; explicit dep skips on build failure.
+    - job: build
+      artifacts: false
   allow_failure: false
 
 verify-per-service-smoke:
