@@ -892,13 +892,13 @@ Plans:
 
 Plans:
 
-- [ ] 999.18.4-01-PLAN.md — Replace apk+wget+sed with COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe (tag pin v0.4.24 retained)
-- [ ] 999.18.4-02-PLAN.md — Gateway compose healthcheck: COPY busybox:1.37.0-musl as /usr/local/bin/wget into distroless runner — restores wget without rewriting compose, distroless preserved
+- [x] 999.18.4-01-PLAN.md — Replace apk+wget+sed with COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe (tag pin v0.4.24 retained)
+- [x] 999.18.4-02-PLAN.md — Gateway compose healthcheck: COPY busybox:1.37.0-musl as /usr/local/bin/wget into distroless runner — restores wget without rewriting compose, distroless preserved
 - [ ] 999.18.4-03-PLAN.md — Bump GRPC_HEALTH_PROBE_VERSION v0.4.24 → v0.4.48 (placeholder — created in next /gsd:plan-phase 999.18.4)
 - [ ] 999.18.4-04-PLAN.md — Replace tag pin with digest pin @sha256:… for grpc-health-probe AND busybox (placeholder — created in next /gsd:plan-phase 999.18.4)
 - [ ] 999.18.4-05-PLAN.md — k8s manifests: replace exec.command grpc_health_probe with declarative `grpc:` probe (k8s 1.24+) (placeholder — created in next /gsd:plan-phase 999.18.4)
 - [ ] 999.18.4-06-PLAN.md — Extract shared `base` stage (DRY node + pnpm setup) (placeholder — created in next /gsd:plan-phase 999.18.4)
-- [ ] 999.18.4-07-PLAN.md — Docker cache + image bloat: diagnostic + `pnpm clean:docker:*` scripts + BuildKit GC policy V2-A in `/etc/docker/daemon.json` (auto-GC closing 100+ GB accumulation root cause)
+- [x] 999.18.4-07-PLAN.md — Docker cache + image bloat: diagnostic + `pnpm clean:docker:*` scripts + BuildKit GC policy V2-A in `/etc/docker/daemon.json` (auto-GC closing 100+ GB accumulation root cause)
 
 ### Phase 999.18.3: Architectural closure — 5-layer build architecture (drop husky + two-install Vercel canonical pattern) (INSERTED, ratified iter 7 = 2026-05-04)
 
