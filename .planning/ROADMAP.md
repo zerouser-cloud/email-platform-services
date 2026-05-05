@@ -888,7 +888,7 @@ Plans:
 **Goal:** Закрытие architectural debt цепочки 999.18 → 999.18.1 → 999.18.2 через каноническую 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Финальная ratified архитектура после 7 итераций провалов, эмпирически verified против React (Meta) + Astro + 5 других public repos (Remix / Nuxt / SvelteKit confirm pattern). Phase делает 3 атомарных impl-плана (Plan 07/08/09) — ~12-15 commits total. Plans 01-06 preserved as audit trail (Iter 1-6 forensic chain).
 **Requirements**: FR-01..FR-20 (LAYER-ARCHITECTURE.md §1 ratified inventory; supersedes D-01..D-10); CONSISTENCY-AUDIT 12 superseded + 13 kostyls structurally removed.
 **Depends on:** Phase 999.18 (and 999.18.2 Wave 2 anchor a647f51 as audit baseline)
-**Plans:** 9 (3 substantive — Plan 07/08/09 + 6 audit-trail snapshots — Plans 01-06)
+**Plans:** 9/9 plans complete
 
 Plans:
 
