@@ -234,11 +234,31 @@ verify-per-service-smoke:
 deploy-dev:
   stage: deploy
   image: bitnami/kubectl:1.30
+  variables:
+    KUBE_NAMESPACE: email-platform-dev # CR-04 fix (Plan 12) — required by scripts/verify-k8s-rollout.sh
   before_script:
-    - apk add --no-cache bash
+    # CR-02 fix (Plan 12): bitnami/kubectl is Debian-based — apt-get, not apk.
+    - apt-get update && apt-get install -y --no-install-recommends bash curl ca-certificates
+    # kustomize CLI (substitution-mode) not bundled in bitnami/kubectl image.
+    # One-shot install — version pinned (deterministic). Idempotent via `command -v` guard.
+    - |
+      if ! command -v kustomize >/dev/null 2>&1; then
+        curl -sL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz \
+          | tar -xz -C /usr/local/bin/
+        chmod +x /usr/local/bin/kustomize
+      fi
   script:
+    # CR-01 fix (Plan 12): substitute real registry images per-service before apply.
+    - cd deploy/k8s/overlays/dev/
+    - |
+      for SVC in gateway auth sender parser audience notifier; do
+        kustomize edit set image \
+          "registry.example.com/email-platform-${SVC}=${CI_REGISTRY_IMAGE}/email-platform-${SVC}:${CI_COMMIT_SHORT_SHA}"
+      done
+    - cd "$CI_PROJECT_DIR"
     - kubectl apply -k deploy/k8s/overlays/dev/
-    - pnpm verify:k8s-rollout # FR-20 — kubectl rollout status + readiness probe
+    # CR-03 fix (Plan 12): direct bash invocation — no pnpm dependency in kubectl image.
+    - bash scripts/verify-k8s-rollout.sh # FR-20 — kubectl rollout status + readiness probe
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
   environment:
@@ -248,12 +268,29 @@ deploy-dev:
 deploy-prod:
   stage: deploy
   image: bitnami/kubectl:1.30
+  variables:
+    KUBE_NAMESPACE: email-platform-prod # CR-04 fix (Plan 12) — required by scripts/verify-k8s-rollout.sh
   before_script:
-    - apk add --no-cache bash nodejs npm
-    - corepack enable && corepack prepare pnpm@11.0.0 --activate
+    # CR-02 fix (Plan 12): same Debian apt-get pattern as deploy-dev.
+    - apt-get update && apt-get install -y --no-install-recommends bash curl ca-certificates
+    - |
+      if ! command -v kustomize >/dev/null 2>&1; then
+        curl -sL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.4.3/kustomize_v5.4.3_linux_amd64.tar.gz \
+          | tar -xz -C /usr/local/bin/
+        chmod +x /usr/local/bin/kustomize
+      fi
   script:
+    # CR-01 fix (Plan 12): substitute real registry images per-service before apply.
+    - cd deploy/k8s/overlays/prod/
+    - |
+      for SVC in gateway auth sender parser audience notifier; do
+        kustomize edit set image \
+          "registry.example.com/email-platform-${SVC}=${CI_REGISTRY_IMAGE}/email-platform-${SVC}:${CI_COMMIT_SHORT_SHA}"
+      done
+    - cd "$CI_PROJECT_DIR"
     - kubectl apply -k deploy/k8s/overlays/prod/
-    - pnpm verify:k8s-rollout
+    # CR-03 fix (Plan 12): direct bash invocation — no pnpm dependency in kubectl image.
+    - bash scripts/verify-k8s-rollout.sh
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       when: manual # FR-15 — main = manual gate after MR merge
