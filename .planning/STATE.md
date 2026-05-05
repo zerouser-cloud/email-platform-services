@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.18.3 Plan 11 (Gap 2 closure — core.hooksPath applied locally + CONTRIBUTING.md repair docs) executed
-last_updated: '2026-05-05T06:41:00Z'
-last_activity: 2026-05-05 -- Phase 999.18.3 Plan 11 executed (Gap 2 closed)
+stopped_at: Phase 999.18.3 Plan 11 executed (VERIFICATION.md Gap 2 closed — core.hooksPath = .githooks applied locally + CONTRIBUTING.md repair subsection added; commit 1b3a04d; Task 1 per-clone state change not commit-able by nature)
+last_updated: '2026-05-05T06:51:33.975Z'
+last_activity: 2026-05-05
 progress:
   total_phases: 50
   completed_phases: 33
   total_plans: 204
-  completed_plans: 193
-  percent: 94
+  completed_plans: 194
+  percent: 95
 ---
 
 # Project State
@@ -26,13 +26,13 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 ## Current Position
 
 Phase: 999.18.3 (architectural-closure-5-layer-drop-husky-two-install) — EXECUTING (gap-closure waves)
-Plan: 11 of 13 (Gaps 1+2 closure complete; L1 closure end-to-end ratified)
-Status: Executing Phase 999.18.3 — Plans 10+11 done; Plans 12/13 remaining (Gap 3/4 closures — L4/L5 CI deploy)
-Last activity: 2026-05-05 -- Phase 999.18.3 Plan 11 executed (Gap 2 closed: core.hooksPath = .githooks applied locally + CONTRIBUTING.md repair docs added; L1 husky drop now end-to-end closed)
+Plan: 12 of 13 (Gaps 1+2 closure complete; L1 closure end-to-end ratified)
+Status: Ready to execute
+Last activity: 2026-05-05
 
 ## Phase 999.18.3 — CLOSED (architectural closure 5-layer build architecture)
 
-**Status:** Executing Phase 999.18.3
+**Status:** Ready to execute
 
 **Ratified architecture:** 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Empirically verified против React (Meta) + Astro + 5 других public repos.
 
@@ -206,6 +206,7 @@ Progress: [██████████] 95%
 | Phase 999.18 P01 | 28min | 1 tasks | 1 files |
 | Phase 999.18.3 P10 | 2min | 1 task (2 atomic commits) | 1 file (.gitignore) + .husky/ untracked dir removed |
 | Phase 999.18.3 P11 | 3min | 2 tasks (1 atomic commit + 1 per-clone state change) | 1 file (CONTRIBUTING.md) + .git/config core.hooksPath rewritten |
+| Phase 999.18.3 P12 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -370,6 +371,7 @@ Progress: [██████████] 95%
 - [Phase 999.18]: Phase 999.18 paused at Plan 02 checkpoint; 12 findings deferred to new Phase 999.19 for build-system architectural redesign
 - [Phase 999.18.3]: Plan 10 (Gap 1 closure) — `.husky/` runtime-shims residue (17 untracked `.husky/_/` files from husky 9 prepare-script lifecycle) physically removed via plain `rm -rf` (not `git rm` — files were untracked); `.gitignore` defense rule `.husky/` added under new `# Husky residue` section as defense-in-depth against accidental re-install of husky devDep on legacy branch checkout. 2 atomic commits (57876ce empty-allow physical removal + 1ef7e69 .gitignore patch) per gap-closure inline-amendment pattern; emits forensic trail в git log. Plan 07 must-have «`.husky/` отсутствует в репозитории» теперь end-to-end ratified (git index + filesystem + pattern-protected).
 - [Phase 999.18.3]: Plan 11 (Gap 2 closure) — `core.hooksPath` фактически применён локально (`git config --local --unset core.hooksPath || true && pnpm setup-hooks`) — рабочая копия теперь имеет `[core] hooksPath = .githooks` вместо реликтового абсолютного пути `/home/mr/.../.husky` от husky 9 prepare-script; CONTRIBUTING.md получил подраздел «Existing clones — repair `core.hooksPath`» с full diagnostic/repair/verify triad для разработчиков с тем же реликтовым состоянием. 1 atomic commit (1b3a04d, docs) — Task 1 (per-clone state change) не commit-able по природе. Empirical proof: pre-commit hook (lint-staged + gitleaks staged) фактически отработал при создании Task 2 commit'а — `.githooks/pre-commit` теперь active locally, не только в CI. **L1 husky drop end-to-end ratified:** Plan 07 (code) + Plan 10 (filesystem) + Plan 11 (runtime state + onboarding docs).
+- [Phase ?]: Plan 12 (Gap 3 closure): CR-01..CR-04 устранены — Kustomize overlays на fail-loud placeholders с CI substitution loop, deploy jobs apt-get/Debian + KUBE_NAMESPACE inject + direct bash invocation
 
 ### Pending Todos
 
@@ -412,7 +414,7 @@ Progress: [██████████] 95%
 
 ## Session Continuity
 
-Last session: 2026-05-05T06:41:00Z
+Last session: 2026-05-05T06:51:29.950Z
 Stopped at: Phase 999.18.3 Plan 11 executed (VERIFICATION.md Gap 2 closed — core.hooksPath = .githooks applied locally + CONTRIBUTING.md repair subsection added; commit 1b3a04d; Task 1 per-clone state change not commit-able by nature)
 Resume files:
 
