@@ -38,6 +38,7 @@
     "security:verify-if-changed": "bash scripts/security/verify-if-changed.sh",
     "hygiene:env-parity": "bash scripts/check-env-parity.sh",
     "hygiene:check": "pnpm run hygiene:env-parity",
+    "setup-hooks": "git config core.hooksPath .githooks",
     "verify:image-determinism": "bash scripts/verify-image-determinism.sh",
     "verify:injection-extinct": "bash scripts/verify-injection-extinct.sh",
     "verify:multiarch": "bash scripts/verify-multiarch-manifests.sh",
