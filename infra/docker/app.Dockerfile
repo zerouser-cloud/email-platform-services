@@ -11,27 +11,33 @@
 # I-S0.4 + I-S0.5: NO `ENV PROTO_DIR=...` — single source of truth in .env.docker.
 ARG APP_NAME
 ARG NODE_VERSION=22-alpine
-ARG GRPC_HEALTH_PROBE_VERSION=v0.4.48
 
 # ─── Stage 1.0: gRPC health probe (binary extraction, no apk+wget) ────
-# I-S2.1.6: pinned grpc_health_probe version per security advisory.
-# BuildKit resolves the right arch via $TARGETPLATFORM against upstream multi-arch
-# manifest (linux/amd64, linux/arm/v7, linux/arm64/v8, linux/ppc64le, linux/s390x).
-# Binary path inside upstream image: /ko-app/grpc-health-probe (verified empirically by
-# `docker pull ghcr.io/grpc-ecosystem/grpc-health-probe:v0.4.24` + filesystem inspect —
-# ENTRYPOINT is /ko-app/grpc-health-probe; image is built via `ko` in GitHub Actions).
-FROM ghcr.io/grpc-ecosystem/grpc-health-probe:${GRPC_HEALTH_PROBE_VERSION} AS health-probe
+# I-S2.1.6: pinned grpc_health_probe version per security advisory; pin form is
+# an immutable manifest-list digest (Plan 04) — registry tag substitution attacks
+# neutralised by content-addressable @sha256 reference. Tag-equivalent at harvest
+# time was v0.4.48; full audit trail in infra/docker/PINS.md.
+# BuildKit resolves the right arch via $TARGETPLATFORM against the multi-arch
+# manifest list referenced by this digest (linux/amd64, linux/arm64/v8,
+# linux/arm/v7, linux/s390x, linux/ppc64le — see PINS.md "Platforms covered").
+# Binary path inside upstream image: /ko-app/grpc-health-probe (image built via
+# `ko` in GitHub Actions; path is stable across upstream releases — verified
+# empirically for v0.4.24 in Plan 01 and re-verified for v0.4.48 in Plan 03).
+# Digest harvested 2026-05-05; tag-equivalent: v0.4.48; full audit in infra/docker/PINS.md
+FROM ghcr.io/grpc-ecosystem/grpc-health-probe@sha256:b615f8b80a6796490b91bfe0f7f4d59cf73767d4921968495cb8b4024090e151 AS health-probe
 
 # ─── Stage 1.0.5: busybox (multi-call binary used as wget in Stage 2 runner) ────
-# I-S2.1.7: pinned busybox version per supply-chain hardening.
+# I-S2.1.7: pinned busybox version per supply-chain hardening; pin form is an
+# immutable manifest-list digest (Plan 04). Tag-equivalent at harvest time was
+# 1.37.0-musl (musl variant — NOT glibc, because busybox:1.37.0-glibc requires
+# GLIBC_2.38 which is newer than debian-12's glibc; musl is statically linked
+# and runs anywhere). Full audit trail in infra/docker/PINS.md.
 # The distroless runner (gcr.io/distroless/nodejs22-debian12:nonroot) ships no
 # shell/curl/wget. The gateway compose healthcheck invokes `wget -qO- http://...`
 # — restoring that capability requires ONE binary. busybox is multi-call: when
 # invoked under the name `wget`, it dispatches the wget applet via argv[0].
-# musl variant chosen (NOT glibc) — busybox:1.37.0-glibc requires GLIBC_2.38
-# which is newer than debian-12's glibc; the musl variant is statically linked
-# and runs anywhere. Verified empirically by docker build on 2026-05-05.
-FROM busybox:1.37.0-musl AS busybox
+# Digest harvested 2026-05-05; tag-equivalent: 1.37.0-musl; full audit in infra/docker/PINS.md
+FROM busybox@sha256:19b646668802469d968a05342a601e78da4322a414a7c09b1c9ee25165042138 AS busybox
 
 # ─── Stage 1.1: Pruner ────────────────────────────────────────
 # I-S1.1: pruner stage requires full workspace для compute the dep-closure slice.
