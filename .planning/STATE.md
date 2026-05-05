@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: ready_to_plan
-stopped_at: Phase 999.18.3 Plan 13 executed (VERIFICATION.md Gap 4 closed — verify-injection-extinct CR-06 + verify-multiarch CR-07 fixed in .gitlab-ci.yml; verify gate functional 5-cycle docker build verification + IMAGE positional arg; commit 5393276; 24/24 static gates PASS)
-last_updated: '2026-05-05T06:58:44.262Z'
+status: planning
+stopped_at: Phase 999.18.3 Plan 11 executed (VERIFICATION.md Gap 2 closed — core.hooksPath = .githooks applied locally + CONTRIBUTING.md repair subsection added; commit 1b3a04d; Task 1 per-clone state change not commit-able by nature)
+last_updated: '2026-05-05T09:01:16.918Z'
 last_activity: 2026-05-05
 progress:
-  total_phases: 50
-  completed_phases: 39
+  total_phases: 51
+  completed_phases: 34
   total_plans: 204
   completed_plans: 195
-  percent: 78
+  percent: 96
 ---
 
 # Project State
@@ -416,6 +416,7 @@ Progress: [██████████] 96%
 - Phase 999.18.2 inserted after Phase 999.18: Implementation of MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05); ADR-001 Accepted by user (D-16 trigger) unblocks impl phase creation (URGENT)
 - Phase 999.18.2.1 inserted after Phase 999.18.2: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (URGENT)
 - Phase 999.18.3 inserted after Phase 999.18: Sub-phase — закрыть Wave 2 fetcher/installer scope mismatch via pnpm prune --prod (Variant 2 per session 2026-05-04) (URGENT)
+- Phase 999.18.4 inserted after Phase 999.18: Dockerfile + build infra hardening (iterative refactor) (URGENT)
 
 ## Session Continuity
 

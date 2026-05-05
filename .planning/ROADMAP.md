@@ -883,6 +883,17 @@ Plans:
 - [ ] 999.18-05-PLAN.md — Wave 3 inline fix (CONDITIONAL): D-12 contract generation pipeline relocation per user-approved variant (V1 no-op / V2 commit-time / V3 layer-share / V4 untrack)
 - [ ] 999.18-06-PLAN.md — Wave 4 closure: BACKLOG.md catalogue + Plan 08 SUMMARY drift fix + gsd-flow-guard skill update (conditional) + final dual-mode smoke + VERIFICATION.md
 
+### Phase 999.18.4: Dockerfile + build infra hardening (iterative refactor) (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 999.18
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 999.18.4 to break down)
+
 ### Phase 999.18.3: Architectural closure — 5-layer build architecture (drop husky + two-install Vercel canonical pattern) (INSERTED, ratified iter 7 = 2026-05-04)
 
 **Goal:** Закрытие architectural debt цепочки 999.18 → 999.18.1 → 999.18.2 через каноническую 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Финальная ratified архитектура после 7 итераций провалов, эмпирически verified против React (Meta) + Astro + 5 других public repos (Remix / Nuxt / SvelteKit confirm pattern). Phase делает 3 атомарных impl-плана (Plan 07/08/09) — ~12-15 commits total. Plans 01-06 preserved as audit trail (Iter 1-6 forensic chain).
