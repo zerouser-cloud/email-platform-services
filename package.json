@@ -43,7 +43,12 @@
     "verify:injection-extinct": "bash scripts/verify-injection-extinct.sh",
     "verify:multiarch": "bash scripts/verify-multiarch-manifests.sh",
     "verify:per-service-smoke": "bash scripts/verify-per-service-smoke.sh",
-    "verify:k8s-rollout": "bash scripts/verify-k8s-rollout.sh"
+    "verify:k8s-rollout": "bash scripts/verify-k8s-rollout.sh",
+    "clean:docker:diagnose": "bash scripts/clean-docker.sh diagnose",
+    "clean:docker:dangling": "bash scripts/clean-docker.sh dangling",
+    "clean:docker:builder": "bash scripts/clean-docker.sh builder",
+    "clean:docker:safe": "bash scripts/clean-docker.sh safe",
+    "clean:docker:nuclear": "bash scripts/clean-docker.sh nuclear"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.59.1",
