@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.18.3 context gathered (FR-01..FR-20 ratified, Plan 07/08/09 split locked)
-last_updated: '2026-05-05T04:44:17.153Z'
-last_activity: 2026-05-05 -- Phase 999.18.3 execution started
+stopped_at: Phase 999.18.3 CLOSED (architectural closure 5-layer build architecture; Plans 07/08/09 landed)
+last_updated: '2026-05-05T05:38:06Z'
+last_activity: 2026-05-05 -- Phase 999.18.3 closed via Plan 09 (folder renamed, ROADMAP rewritten, 999.18.1 amendments landed, dual-mode smoke PASS)
 progress:
   total_phases: 50
   completed_phases: 33
@@ -21,27 +21,53 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.18.3 — sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p
+**Current focus:** Phase 999.18.3 — architectural-closure-5-layer-drop-husky-two-install (CLOSED 2026-05-05)
 
 ## Current Position
 
-Phase: 999.18.3 (sub-phase-wave-2-fetcher-installer-scope-mismatch-via-pnpm-p) — EXECUTING
-Plan: 1 of 9
-Status: Executing Phase 999.18.3
-Last activity: 2026-05-05 -- Phase 999.18.3 execution started
+Phase: 999.18.3 (architectural-closure-5-layer-drop-husky-two-install) — CLOSED
+Plan: 9 of 9 (all impl plans landed: 07/08/09)
+Status: Phase 999.18.3 closure complete; ready для phase 999.18.4 (deferred LOW-priority hardening)
+Last activity: 2026-05-05 -- Phase 999.18.3 closed via Plan 09
 
-D-16 review outcome:
+## Phase 999.18.3 — CLOSED (architectural closure 5-layer build architecture)
 
-- 6 architectural decisions ratified без правок (Turborepo finalist, Decision a/d, multi-arch, all 4 RE-EVAL thresholds, Wave 4 rollback drill)
-- 2 deviations recorded (Decision b М2→М3, Decision c alpine+two-phase→distroless+transport-aligned healthcheck)
-- 4 documents need amendments (ADR + DOCKERFILE-REFERENCE + MIGRATION-RUNBOOK + RE-EVAL-TRIGGERS)
-- ADR Status sentinel STILL `☑ Proposed` — будет flipped to `☑ Accepted` после amendments + re-verification
+**Status:** COMPLETE (2026-05-05, Iteration 7 ratification + Plan 07/08/09 implementation).
 
-Next workflow steps (separate slots):
+**Ratified architecture:** 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Empirically verified против React (Meta) + Astro + 5 других public repos.
 
-1. /gsd:plan-phase 999.18.1 --gaps — create Plan 04 amendments
-2. /gsd:execute-phase 999.18.1 --gaps-only — execute Plan 04
-3. Re-verify → phase complete → unblock 999.18.2 phase creation
+**Phase artifacts:**
+
+- 3 substantive plans (07/08/09) executed; 6 audit-trail plans (01-06) preserved as forensic chain Iter 1-6.
+- L1 closure: husky dropped, `.githooks/` + `pnpm setup-hooks` canonical.
+- L3 closure: `infra/docker/app.Dockerfile` two-install Vercel canonical (4 stages, zero kostyls).
+- L4 closure: `.gitlab-ci.yml` source-of-truth + 8 security:\* required jobs + multi-arch buildx.
+- L5 closure: 4 verify:\* invocations post-build + verify:k8s-rollout (FR-20) + Kustomize K8s manifests (6 services × 2 overlays).
+
+**Phase folder:** `.planning/phases/999.18.3-architectural-closure-5-layer-drop-husky-two-install/`
+
+**Cross-phase amendments landed (Plan 09 Task 2):**
+
+- 999.18.1-MIGRATION-RUNBOOK.md → Wave 2 substrate (two-install Vercel canonical)
+- 999.18.1-ADR.md → §Implementation Path & Amendments → Iteration 7 entry (forensic chain)
+- 999.18.1-RE-EVAL-TRIGGERS.md → T-LIFECYCLE-01 (fired→resolved by FR-03 drop-husky)
+
+**Final dual-mode smoke gate (FR-19):**
+
+- `pnpm start:native` → http://localhost:3000/health/ready = 200 OK (8s ready time)
+- `pnpm start:isolated` → http://localhost:4000/health/ready = 200 OK (44s ready time)
+
+**Deferred к 999.18.4 (per CONTEXT.md):**
+
+- Digest-pin base image rotation
+- Drop `pnpm dlx turbo` → install turbo as devDependency
+- `SOURCE_DATE_EPOCH` для reproducible builds
+- `--chown=65532:65532` non-root file ownership
+- Base image preinstall sweep
+- GitLab CI substitutability empirical PoC
+- L1 setup-hooks marker-file enforcement (ergonomics)
+
+**Memory anchors triggered:** `feedback_analysis_over_agreement`, `feedback_phase_completeness`, `feedback_security_verification`.
 
 Progress: [██████████] 95%
 
