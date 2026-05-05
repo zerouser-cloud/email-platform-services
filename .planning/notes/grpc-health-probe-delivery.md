@@ -1,9 +1,15 @@
 # 2026-05-05 — gRPC Health Probe Delivery Hardening
 
-> **Purpose:** Capture the architectural decision and rationale for replacing the
-> `apk add wget + github-release` delivery of `grpc_health_probe` in
-> `infra/docker/app.Dockerfile` with a `COPY --from=ghcr.io/...` pattern.
-> Seed for Phase 999.18.4 Plan 01.
+> **Scope of this Note:** Plan 01 of Phase 999.18.4 — the `grpc_health_probe` binary
+> delivery refactor in `infra/docker/app.Dockerfile`. This is the FIRST seed for the
+> phase, not its full scope.
+>
+> **Phase 999.18.4 (umbrella) — full scope:** iterative hardening + readability of
+> `infra/docker/app.Dockerfile`. Authoritative scope lives in `.planning/ROADMAP.md`
+> Phase 999.18.4 entry (open Plans list — 04 added during execute, 05+ may emerge).
+> Currently planned: (01) grpc-health-probe transport switch, (02) version bump v0.4.24 →
+> v0.4.48, (03) tag → digest pin, (04) extract shared `base` stage (DRY node + pnpm
+> setup across `prod-deps` and `builder`).
 
 ---
 
