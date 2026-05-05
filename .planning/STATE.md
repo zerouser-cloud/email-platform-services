@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
-stopped_at: Phase 999.18.3 CLOSED (architectural closure 5-layer build architecture; Plans 07/08/09 landed)
-last_updated: '2026-05-05T05:38:06Z'
-last_activity: 2026-05-05 -- Phase 999.18.3 closed via Plan 09 (folder renamed, ROADMAP rewritten, 999.18.1 amendments landed, dual-mode smoke PASS)
+stopped_at: Phase 999.18.3 Plan 10 (Gap 1 closure — .husky/ residue removed + .gitignore defense) executed
+last_updated: "2026-05-05T06:36:36Z"
+last_activity: 2026-05-05 -- Phase 999.18.3 Plan 10 executed (Gap 1 closed)
 progress:
   total_phases: 50
   completed_phases: 33
-  total_plans: 200
-  completed_plans: 188
+  total_plans: 204
+  completed_plans: 192
   percent: 94
 ---
 
@@ -21,18 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.18.3 — architectural-closure-5-layer-drop-husky-two-install (CLOSED 2026-05-05)
+**Current focus:** Phase 999.18.3 — architectural-closure-5-layer-drop-husky-two-install
 
 ## Current Position
 
-Phase: 999.18.3 (architectural-closure-5-layer-drop-husky-two-install) — CLOSED
-Plan: 9 of 9 (all impl plans landed: 07/08/09)
-Status: Phase 999.18.3 closure complete; ready для phase 999.18.4 (deferred LOW-priority hardening)
-Last activity: 2026-05-05 -- Phase 999.18.3 closed via Plan 09
+Phase: 999.18.3 (architectural-closure-5-layer-drop-husky-two-install) — EXECUTING (gap-closure waves)
+Plan: 10 of 13 (Gap 1 closure complete)
+Status: Executing Phase 999.18.3 — Plan 10 done; Plans 11/12/13 remaining (Gap 2/3/4 closures)
+Last activity: 2026-05-05 -- Phase 999.18.3 Plan 10 executed (Gap 1 closed: .husky/ runtime residue physically removed + .gitignore defense rule added)
 
 ## Phase 999.18.3 — CLOSED (architectural closure 5-layer build architecture)
 
-**Status:** COMPLETE (2026-05-05, Iteration 7 ratification + Plan 07/08/09 implementation).
+**Status:** Executing Phase 999.18.3
 
 **Ratified architecture:** 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Empirically verified против React (Meta) + Astro + 5 других public repos.
 
@@ -204,6 +204,7 @@ Progress: [██████████] 95%
 | Phase 999.17.2 P01 | 9min | 4 tasks | 4 files |
 | Phase 999.17.2 P02 | 12min | 5 tasks | 12 files |
 | Phase 999.18 P01 | 28min | 1 tasks | 1 files |
+| Phase 999.18.3 P10 | 2min | 1 task (2 atomic commits) | 1 file (.gitignore) + .husky/ untracked dir removed |
 
 ## Accumulated Context
 
@@ -366,6 +367,7 @@ Progress: [██████████] 95%
 - [Phase ?]: [Phase 999.17.2-02]: D-08 + OQ-3 + D-10 native env override + D-11 DEVOPS-HANDOFF complete; Plan 02 follow-up — 20 D-08 fingerprint suppressions added to .gitleaksignore (Rule-1 deviation; gitleaks git mode scans history). Tasks 4a + 6 manual-UAT checkpoints deferred awaiting user one-time-permission.
 - [Phase ?]: Phase 999.18 Plan 01: AUDIT.md authored — 24 F-NN findings (3 BLOCKER + 8 MAJOR + 4 MINOR + 10 INFO) across 9 dims; 7 of 8 skills cross-checked; K8s Constraints Checklist as D8 deliverable per CONTEXT D-13 (NOT manifests per D-14)
 - [Phase 999.18]: Phase 999.18 paused at Plan 02 checkpoint; 12 findings deferred to new Phase 999.19 for build-system architectural redesign
+- [Phase 999.18.3]: Plan 10 (Gap 1 closure) — `.husky/` runtime-shims residue (17 untracked `.husky/_/` files from husky 9 prepare-script lifecycle) physically removed via plain `rm -rf` (not `git rm` — files were untracked); `.gitignore` defense rule `.husky/` added under new `# Husky residue` section as defense-in-depth against accidental re-install of husky devDep on legacy branch checkout. 2 atomic commits (57876ce empty-allow physical removal + 1ef7e69 .gitignore patch) per gap-closure inline-amendment pattern; emits forensic trail в git log. Plan 07 must-have «`.husky/` отсутствует в репозитории» теперь end-to-end ratified (git index + filesystem + pattern-protected).
 
 ### Pending Todos
 
@@ -408,8 +410,8 @@ Progress: [██████████] 95%
 
 ## Session Continuity
 
-Last session: 2026-05-04T17:17:23.061Z
-Stopped at: Phase 999.18.3 context gathered (FR-01..FR-20 ratified, Plan 07/08/09 split locked)
+Last session: 2026-05-05T06:36:36Z
+Stopped at: Phase 999.18.3 Plan 10 executed (VERIFICATION.md Gap 1 closed — .husky/ runtime-shims physically removed + .gitignore defense rule added; commits 57876ce + 1ef7e69)
 Resume files:
 
 - .planning/phases/999.18.3-\*/999.18.3-RESEARCH.md (substrate research, Path 3)
