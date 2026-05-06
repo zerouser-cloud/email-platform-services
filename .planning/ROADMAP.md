@@ -900,6 +900,17 @@ Plans:
 - [x] 999.18.4-06-PLAN.md — Extract shared `base` Dockerfile stage (consolidate WORKDIR + ENV PNPM_HOME + ENV PATH + RUN corepack enable across `prod-deps` + `builder`); pure DRY readability refactor with layer-equivalence proof gate (`docker image inspect` SHA256 diff); planned 2026-05-05, awaiting execute (autonomous=true)
 - [x] 999.18.4-07-PLAN.md — Docker cache + image bloat: diagnostic + `pnpm clean:docker:*` scripts + BuildKit GC policy V2-A in `/etc/docker/daemon.json` (auto-GC closing 100+ GB accumulation root cause)
 
+### Phase 999.18.5: Dockerfile + k8s polish — follow-up to 999.18.4 (5 deferred items) (INSERTED)
+
+**Goal:** Закрытие 5 deferred items, surface'ed verifier'ом при закрытии Phase 999.18.4. Каждый item ландится атомарным Plan = revertable commit, как в Phase 999.18.4. Open seeded scope: (1) end-to-end k8s functional gate — первый реальный `kubectl apply -k` на live k8s ≥ 1.27 cluster (CI `deploy-dev` per `.gitlab-ci.yml` или локальный kind/minikube) — доказательство что declarative grpc:probe из 999.18.4-05 действительно отвечает SERVING с PodIP:NNNN; (2) digest-pin `node:22-alpine` (база Dockerfile FROM в pruner / base / builder стадиях) — supply-chain hardening аналогично 999.18.4-04 для grpc-health-probe + busybox; (3) digest-pin `gcr.io/distroless/nodejs22-debian12:nonroot` (runner стадия) — аналогично; (4) migrate kustomize `commonLabels:` → `labels:` в `deploy/k8s/base/kustomization.yaml` — закрытие deprecation warning, surface'ed Plan 05 schema gate; (5) review pruner-from-base refactor — рассмотреть consolidation pruner stage в общую base stage (если совместимо с turbo prune semantics, иначе закрыть как accepted divergence). Server-side `grpc.health.v1.Health` registration unaffected. Out-of-scope: `apps/*`, `packages/*`, runtime contracts (binary destination, distroless nonroot, ENTRYPOINT/CMD shape).
+**Requirements**: TBD
+**Depends on:** Phase 999.18.4
+**Plans:** TBD (run `/gsd:plan-phase 999.18.5` to break down)
+
+Plans:
+
+- [ ] TBD (run /gsd:plan-phase 999.18.5)
+
 ### Phase 999.18.3: Architectural closure — 5-layer build architecture (drop husky + two-install Vercel canonical pattern) (INSERTED, ratified iter 7 = 2026-05-04)
 
 **Goal:** Закрытие architectural debt цепочки 999.18 → 999.18.1 → 999.18.2 через каноническую 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Финальная ratified архитектура после 7 итераций провалов, эмпирически verified против React (Meta) + Astro + 5 других public repos (Remix / Nuxt / SvelteKit confirm pattern). Phase делает 3 атомарных impl-плана (Plan 07/08/09) — ~12-15 commits total. Plans 01-06 preserved as audit trail (Iter 1-6 forensic chain).
