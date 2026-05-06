@@ -50,13 +50,23 @@ ARG APP_NAME
 # I-S1.7 pruner half: turborepo prune carves the dep-closure slice
 RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
 
-# ─── Stage 1.2: prod-deps (FR-04 — production deps ONLY) ──────
-# This stage's node_modules has NO devDeps → husky never installed → no leak.
-FROM node:${NODE_VERSION} AS prod-deps
+# ─── Stage 1.15: base (DRY consolidation of pnpm setup — Plan 06) ────
+# Shared substrate for prod-deps + builder. Consolidates four directives
+# previously duplicated across both stages: WORKDIR + PNPM_HOME + PATH +
+# corepack-enable. Pruner does NOT inherit from `base` — pruner uses
+# `pnpm dlx` (ephemeral) and does not need the persistent PNPM_HOME store.
+# Runner does NOT inherit from `base` — runner uses distroless (no pnpm,
+# no shell). Canonical Vercel/Next.js Dockerfile pattern.
+FROM node:${NODE_VERSION} AS base
 WORKDIR /app
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+
+# ─── Stage 1.2: prod-deps (FR-04 — production deps ONLY) ──────
+# This stage's node_modules has NO devDeps → husky never installed → no leak.
+# Inherits WORKDIR + PNPM_HOME + PATH + corepack from `base` stage (Plan 06).
+FROM base AS prod-deps
 COPY --from=pruner /app/out/json/ ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
@@ -66,11 +76,8 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
 # NO `pnpm prune --prod` post-build (D-01 Variant 2 kostyl, superseded by FR-04).
 # NO `ENV CI=true` (D-10 kostyl, superseded — no prune step → no validateModules trigger).
 # NO `ENV HUSKY=0` — there is no husky devDep anymore (FR-03 dropped it from L1).
-FROM node:${NODE_VERSION} AS builder
-WORKDIR /app
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# Inherits WORKDIR + PNPM_HOME + PATH + corepack from `base` stage (Plan 06).
+FROM base AS builder
 # Manifests + lockfile FIRST (Vercel canonical) — turbo prune emits lockfile only into out/json/.
 # Two-step COPY enables Docker layer cache for pnpm install when sources change but manifests don't.
 COPY --from=pruner /app/out/json/ ./
