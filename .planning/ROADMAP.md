@@ -411,35 +411,32 @@ Plans:
 
 - [x] ABSORBED — see Phase 999.11.1 Plans 01-09 for implementation; Plan 10 docs-update commit records the absorption
 
-### Phase 999.4: CacheService quality — improve get() type safety and error handling (BACKLOG)
+### Phase 999.4: CacheService quality — ABSORBED INTO Phase 999.3 (2026-05-06)
 
-**Goal:** `CacheService.get<T>()` имеет две проблемы: (1) `JSON.parse(raw) as T` — unchecked type assertion, caller получает typed result без runtime проверки; (2) `catch { return null }` — молча проглатывает ошибку парсинга повреждённых данных, вызывающий код думает что ключа нет. Нужно: либо принимать optional validator/schema, либо логировать ошибку парсинга, либо возвращать raw string при ошибке. Зафиксировано в code review Phase 21 как WR-02.
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** ABSORBED — scope перенесён в Phase 999.3 как Plan 02 (CacheService.get<T>() quality). Оригинальная задача: `JSON.parse(raw) as T` unchecked cast + silent catch повреждённых данных, зафиксировано в code review Phase 21 как WR-02. Аудит 2026-05-06 подтвердил что обе проблемы всё ещё в коде (`packages/foundation/src/external/cache/cache.service.ts:16-26`). Объединено с Phase 999.3 для одного phase ceremony cycle.
 
 Plans:
 
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [x] ABSORBED — see Phase 999.3 Plan 02 for implementation
 
-### Phase 999.3: PersistenceModule — убрать PG_POOL export наружу (BACKLOG)
+### Phase 999.3: backing-services-backlog-cleanup — PG_POOL leak removal + CacheService.get<T>() quality
 
-**Goal:** PG_POOL экспортируется из PersistenceModule и доступен сервисам через DI, но это протечка инфраструктуры — сервисы должны работать через DRIZZLE (ORM абстракция), а не через raw pool. Проверить используется ли PG_POOL в apps/, если нет — убрать из exports. Если да — заменить на ORM операции. Аналогичный принцип применить ко всем infrastructure modules: экспортировать абстракцию, не raw client.
-**Requirements:** TBD
-**Plans:** 0 plans
-
-Plans:
-
-- [ ] TBD (promote with /gsd-review-backlog when ready)
-
-### Phase 999.5: Вынести CacheModule конфигурацию в infrastructure layer сервисов (BACKLOG)
-
-**Goal:** Сейчас `CacheModule.forRootAsync({ namespace: 'sender' })` конфигурируется прямо в root module sender. По согласованному паттерну (как config, storage) конфигурация должна быть в `infrastructure/cache/sender-cache.module.ts`, а root module просто импортирует `SenderCacheModule`. Привести к единому стилю: foundation даёт заготовку, сервис конфигурирует в infrastructure/, root module импортирует готовый модуль.
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** Объединённая cleanup фаза для двух открытых backlog items по backing-services foundation layer. Plan 01: убрать `PG_POOL` Symbol export из `packages/foundation/src/external/persistence/index.ts` + из `PersistenceModule.exports[]` array — это Tier 2 raw lib instance (pg.Pool), не должен быть в публичном API foundation; аудит 2026-05-06 подтвердил что в `apps/*/src/` нет `@Inject(PG_POOL)` потребителей, только JSDoc-комментарии; внутри foundation остаётся как private symbol для `drizzle-shutdown.service.ts` + `postgres.health.ts`. Симметрия с cache layer: `REDIS_CLIENT` (тоже Tier 2) экспортируется ТОЛЬКО с documented narrow-unlock для gateway throttle (Phase 999.12 D-13); persistence не имеет такого narrow-unlock — leak без обоснования. Plan 02: `CacheService.get<T>()` quality (поглощено из Phase 999.4) — fix `JSON.parse(raw) as T` unchecked cast + `catch { return null }` silent swallow повреждённых данных; принять optional Zod schema validator + явное логирование parse-error + либо явный discriminated return type (`{status: absent | corrupt | value, value?: T}`) либо typed `OptionalParseError`. Out-of-scope: any business logic, apps/* code, ESLint rules.
+**Requirements:** TBD (locked via /gsd:discuss-phase 999.3)
+**Depends on:** Phase 999.12.1 (naming convention finalized)
+**Plans:** TBD (run `/gsd:plan-phase 999.3` to break down — expected 2 plans matching above scope)
 
 Plans:
 
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+- [ ] TBD (run /gsd:plan-phase 999.3)
+
+### Phase 999.5: Вынести CacheModule конфигурацию в infrastructure layer сервисов — IMPLICITLY RESOLVED via Phase 999.12 (2026-05-06)
+
+**Goal:** RESOLVED — Phase 999.12 (`redis-canonical-alignment`, 11/11 plans) реализовала полный canonical pattern: каждый из 6 сервисов (auth, sender, parser, audience, notifier, gateway) имеет свой `apps/{svc}/src/infrastructure/outbound/cache/cache.module.ts` с `AppCacheModule` wrapper, который вызывает `CacheModule.forRootAsync({namespace: SERVICE.{svc}.id})`. Root module sender больше не конфигурирует CacheModule напрямую — он импортирует `AppCacheModule` через `bootstrap/health/health.module.ts` (5 gRPC сервисов) или напрямую в root для Redis throttle storage (gateway). Аудит 2026-05-06 подтвердил структуру по всем 6 сервисам.
+
+Plans:
+
+- [x] RESOLVED — see Phase 999.12 Plans 04-09 for per-service AppCacheModule rollout
 
 ### Phase 999.6: Настроить HTTPS для Garage WebUI на Coolify (BACKLOG)
 
