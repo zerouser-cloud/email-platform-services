@@ -33,14 +33,14 @@ spec:
             - secretRef:
                 name: email-platform-secrets
           readinessProbe:
-            exec:
-              command: ["/usr/local/bin/grpc_health_probe", "-addr=:50051"]
+            grpc:
+              port: 50051
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
           livenessProbe:
-            exec:
-              command: ["/usr/local/bin/grpc_health_probe", "-addr=:50051"]
+            grpc:
+              port: 50051
             initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 3
