@@ -4,8 +4,8 @@ milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
 status: executing
 stopped_at: Phase 999.19.1 context gathered
-last_updated: "2026-05-07T10:29:08.114Z"
-last_activity: 2026-05-07 -- Phase 999.19.1 planning complete
+last_updated: "2026-05-07T10:32:47.896Z"
+last_activity: 2026-05-07 -- Phase 999.19.1 execution started
 progress:
   total_phases: 54
   completed_phases: 36
@@ -21,18 +21,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** Each service isolated with clear boundaries, single source of truth, and correct contracts -- reliable foundation for business logic
-**Current focus:** Phase 999.19 — backing-services-canonical-cross-audit-5-layer
+**Current focus:** Phase 999.19.1 — pg-pool-leak-fix
 
 ## Current Position
 
-Phase: 999.19
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-05-07 -- Phase 999.19.1 planning complete
+Phase: 999.19.1 (pg-pool-leak-fix) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 999.19.1
+Last activity: 2026-05-07 -- Phase 999.19.1 execution started
 
 ## Phase 999.18.3 — CLOSED (architectural closure 5-layer build architecture)
 
-**Status:** Ready to execute
+**Status:** Executing Phase 999.19.1
 
 **Ratified architecture:** 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Empirically verified против React (Meta) + Astro + 5 других public repos.
 
