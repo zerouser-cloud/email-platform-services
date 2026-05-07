@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v4.0
 milestone_name: Infrastructure Abstractions & Cross-Cutting
-status: milestone_complete
+status: completed
 stopped_at: Phase 999.19 context gathered
-last_updated: "2026-05-06T11:04:14.746Z"
-last_activity: 2026-05-06 -- Phase 999.19 execution started
+last_updated: "2026-05-07T07:24:03.548Z"
+last_activity: 2026-05-06
 progress:
-  total_phases: 53
+  total_phases: 54
   completed_phases: 36
   total_plans: 215
-  completed_plans: 202
-  percent: 68
+  completed_plans: 207
+  percent: 96
 ---
 
 # Project State
@@ -421,6 +421,7 @@ Progress: [██████████] 96%
 - Phase 999.18.4 inserted after Phase 999.18: Dockerfile + build infra hardening (iterative refactor) (URGENT)
 - Phase 999.19 inserted after Phase 999.18.5: backing-services-canonical-cross-audit-5-layer (docs-only audit per 999.1 template) (URGENT)
 - Phase 999.3 edited: PAUSED — AWAITING 999.19 AUDIT; original PG_POOL+CacheService.get scope preserved as seed-findings F-A/F-B input в 999.19
+- Phase 999.19.1 inserted after Phase 999.19: PG_POOL leak fix per 999.19-SOLUTIONS.md F-02 V1+V2 bundle (URGENT)
 
 ## Session Continuity
 

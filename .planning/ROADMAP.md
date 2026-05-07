@@ -411,17 +411,21 @@ Plans:
 
 - [x] ABSORBED — see Phase 999.11.1 Plans 01-09 for implementation; Plan 10 docs-update commit records the absorption
 
-### Phase 999.4: CacheService quality — ABSORBED INTO Phase 999.3 (2026-05-06)
+### Phase 999.4: CacheService quality — ABSORBED INTO Phase 999.19 (2026-05-07, transitively via 999.3)
 
-**Goal:** ABSORBED — scope перенесён в Phase 999.3 как Plan 02 (CacheService.get<T>() quality). Оригинальная задача: `JSON.parse(raw) as T` unchecked cast + silent catch повреждённых данных, зафиксировано в code review Phase 21 как WR-02. Аудит 2026-05-06 подтвердил что обе проблемы всё ещё в коде (`packages/foundation/src/external/cache/cache.service.ts:16-26`). Объединено с Phase 999.3 для одного phase ceremony cycle.
+**Goal:** ABSORBED transitively — originally absorbed into Phase 999.3 (2026-05-06) as Plan 02 (CacheService.get<T>() quality), then 999.3 itself absorbed into Phase 999.19 (2026-05-07). Final implementation home: Phase 999.19.2 (cache-service-get-quality) per 999.19-SOLUTIONS.md F-01 approved variant.
+
+**Historical Goal (preserved):** scope перенесён в Phase 999.3 как Plan 02 (CacheService.get<T>() quality). Оригинальная задача: `JSON.parse(raw) as T` unchecked cast + silent catch повреждённых данных, зафиксировано в code review Phase 21 как WR-02. Аудит 2026-05-06 подтвердил что обе проблемы всё ещё в коде (`packages/foundation/src/external/cache/cache.service.ts:16-26`). Объединено с Phase 999.3 для одного phase ceremony cycle.
 
 Plans:
 
-- [x] ABSORBED — see Phase 999.3 Plan 02 for implementation
+- [x] ABSORBED — see Phase 999.19.2 (via 999.19-SOLUTIONS.md F-01)
 
-### Phase 999.3: backing-services-backlog-cleanup — PAUSED — AWAITING 999.19 AUDIT (PG_POOL leak + CacheService.get<T>() quality preserved as seed-findings F-A/F-B)
+### Phase 999.3: backing-services-backlog-cleanup — ABSORBED INTO Phase 999.19 (2026-05-07)
 
-**Status:** PAUSED 2026-05-06 — pending Phase 999.19 (backing-services-canonical-cross-audit-5-layer) findings. Original scope (Plan 01: PG_POOL leak removal, Plan 02: CacheService.get<T>() quality) preserved as seed-findings F-A/F-B input в 999.19. После close 999.19: если оба findings промотируются в 999.19.1+999.19.2 — 999.3 помечается ABSORBED INTO 999.19; иначе replanned по canonical decisions из 999.19-DESIGN.md. Текущий `/gsd:discuss-phase 999.3` halted без записи CONTEXT.md / DISCUSSION-LOG.md — scope перенесён в /gsd:discuss-phase 999.19.
+**Status:** ABSORBED INTO Phase 999.19 (closed 2026-05-07). Original scope (Plan 01: PG_POOL leak, Plan 02: CacheService.get<T>() quality) was promoted into Phase 999.19.1 + Phase 999.19.2 via 999.19-SOLUTIONS.md F-02 + F-01 approved variants. No further work in 999.3 — implementation lives in the 999.19.N sub-phases.
+
+**Historical Status (PAUSED 2026-05-06):** PAUSED — pending Phase 999.19 (backing-services-canonical-cross-audit-5-layer) findings. Original scope (Plan 01: PG_POOL leak removal, Plan 02: CacheService.get<T>() quality) preserved as seed-findings F-A/F-B input в 999.19. После close 999.19: если оба findings промотируются в 999.19.1+999.19.2 — 999.3 помечается ABSORBED INTO 999.19; иначе replanned по canonical decisions из 999.19-DESIGN.md. Текущий `/gsd:discuss-phase 999.3` halted без записи CONTEXT.md / DISCUSSION-LOG.md — scope перенесён в /gsd:discuss-phase 999.19.
 
 **Goal (preserved):** Объединённая cleanup фаза для двух открытых backlog items по backing-services foundation layer. Plan 01: убрать `PG_POOL` Symbol export из `packages/foundation/src/external/persistence/index.ts` + из `PersistenceModule.exports[]` array — это Tier 2 raw lib instance (pg.Pool), не должен быть в публичном API foundation; аудит 2026-05-06 подтвердил что в `apps/*/src/` нет `@Inject(PG_POOL)` потребителей, только JSDoc-комментарии; внутри foundation остаётся как private symbol для `drizzle-shutdown.service.ts` + `postgres.health.ts`. Симметрия с cache layer: `REDIS_CLIENT` (тоже Tier 2) экспортируется ТОЛЬКО с documented narrow-unlock для gateway throttle (Phase 999.12 D-13); persistence не имеет такого narrow-unlock — leak без обоснования. Plan 02: `CacheService.get<T>()` quality (поглощено из Phase 999.4) — fix `JSON.parse(raw) as T` unchecked cast + `catch { return null }` silent swallow повреждённых данных; принять optional Zod schema validator + явное логирование parse-error + либо явный discriminated return type (`{status: absent | corrupt | value, value?: T}`) либо typed `OptionalParseError`. Out-of-scope: any business logic, apps/* code, ESLint rules.
 **Requirements:** TBD (locked via /gsd:discuss-phase 999.19, then promoted into 999.19.1+999.19.2 sub-phases per SOLUTIONS.md)
@@ -989,3 +993,21 @@ Plans:
 - [x] 999.19-02-PLAN.md — AUDIT.md (F-NN findings grouped by L1..L5 + mandatory F-01 CacheService.get<T>() + F-02 PG_POOL leak)
 - [x] 999.19-03-PLAN.md — SOLUTIONS.md (variants per F-NN + sub-phase grouping + Backlog Impact for 999.13/999.14/22.5/999.3/999.4/999.5)
 - [x] 999.19-04-PLAN.md — VERIFICATION.md (≥30 V-NN grep-proof rows) + SUMMARY.md (closure handoff) + VALIDATION.md flip
+
+### Phase 999.19.1: pg-pool-leak-fix (INSERTED)
+
+**Goal:** Implement F-02 (PG_POOL Tier-2 leak — blocker) per 999.19-SOLUTIONS.md F-02 V1+V2 bundle (defence-in-depth combo, user-approved 2026-05-07). V1 = remove `PG_POOL` Symbol from public foundation barrel (`packages/foundation/src/external/persistence/index.ts:4`) and from `PersistenceModule.exports[]` (`persistence.module.ts:13`); add narrow-unlock-style comment block in `persistence.module.ts` symmetric to `cache.module.ts:14-18` (REDIS_CLIENT D-13 pattern from Phase 999.12) documenting that `PG_POOL` is kept private with no narrow-unlock approved as of Phase 999.19; foundation-internal-only consumers remain `PostgresHealthIndicator` + `DrizzleShutdownService`. V2 = add ESLint Override 4-style rule blocking `from 'pg'` and `@Inject(PG_POOL)` in `apps/*/src/**` (eslint.config.cjs) symmetric to ioredis ban from Phase 999.12 D-08, regression-proof against accidental future re-export. Total scope: 3 files / 2 atomic commits; behaviour-preserving (zero apps/* consumers of PG_POOL today). Out-of-scope: V3 Tier-1 `QueryRunner` port abstraction (rejected as speculative — no consumer demand).
+
+**Required reading (researcher MUST read before discuss):**
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L2 invariants (I-2.3, I-2.4) + L0 master (I-0.4 narrow-unlock rule + I-0.5 Tier 1/2/3 layering)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` § F-02 — full evidence dossier (`persistence/index.ts:1-12`, `persistence.module.ts:13`, REDIS_CLIENT D-13 exemplar at `cache.module.ts:14-18`)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` § F-02 — V1+V2 trade-off + cross-skill matrix (infrastructure-client-layering / no-magic-values / clean-ddd-hexagonal)
+
+**Requirements**: F-02 V1+V2 closure per 999.19-SOLUTIONS.md (locked decisions; no further discussion needed on variant choice — discuss-phase confirms scope + locks any remaining edge cases).
+
+**Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN invariants + F-02 evidence + V1+V2 variants).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 999.19.1 to break down)
