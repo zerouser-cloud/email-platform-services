@@ -1023,3 +1023,29 @@ Plans:
 Plans:
 - [x] 999.19.1-01-PLAN.md — V1 close foundation public-API surface for PG_POOL + apps JSDoc reality (D-02/D-04, 4 files / 1 atomic commit)
 - [x] 999.19.1-02-PLAN.md — V2 ESLint regression guard: ban `from 'pg'` in apps Override 4 + Override 5 (D-01, 1 file / 1 atomic commit)
+
+### Phase 999.19.2: cache-service-get-quality (INSERTED)
+
+**Goal:** Close F-01 (RedisCacheService.get<T>() quality — major, L1) per 999.19-SOLUTIONS.md F-01. В audit-фазе 999.19 surface'ed: `RedisCacheService.get<T>(key)` склеивает два разных режима отказа — `key absent` и `key present but corrupt JSON / shape-mismatched` — в один `null` return; unchecked `as T` cast отключает runtime type-safety; corrupt entry лежит до TTL потому что `catch { return null }` не делает ни `del()` ни лога. Нарушает DESIGN I-1.6 (CachePort port loses information) каскадно с I-0.5 (Tier 1 abstraction MUST signal protocol failures back to caller). SOLUTIONS.md F-01 предлагает **4 варианта** (cartesian 3×3×3 = 27, picked 4 + ~22 rejected inline). **Вариант не зафиксирован — выбор делается в /gsd:discuss-phase 999.19.2**:
+- V1 (A1+B1+C3) ✅ recommended — discriminated union `{status: 'absent' | 'corrupt' | 'value', value?}` + optional Zod schema на существующем методе + severity-aware log (warn/error) + `del(key)` self-heal
+- V2 (A2+B2+C2) — new method `getValidated<T>(key, schema)` бросает `CacheParseError`, оригинальный `get<T>` без изменений, `del(key)` только в validated-path
+- V3 (A3+B1+C2) — `Result<T | null, CacheParseError>` (требует prerequisite Result utility — scope creep)
+- V4 (A1+B3+C1) — discriminated union + caller-side validation OUTSIDE CachePort, log-only (corrupt key persists till TTL)
+
+\+ ~22 rejected cartesian cells документированы inline per D-10. Out-of-scope: business-logic кеш-консьюмеры (apps/*/src), Redis client mechanism changes, observability metrics (отдельный phase). Behaviour-preserving по существующим callers: foundation-internal only (zero business-cache consumers в apps/* сегодня — verify before discuss).
+
+**Required reading (researcher MUST read before discuss):**
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L1 invariants (I-1.6 CachePort port loses information) + § L0 master (I-0.5 Tier 1/2/3 layering universal)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` § F-01 — full evidence dossier (`cache.service.ts:16-26` — unchecked cast + silent catch + corrupt-key persistence)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` § F-01 — **все 4 variants V1..V4** + ~22 rejected cartesian cells (D-10 audit trail) + cross-skill matrix (`clean-ddd-hexagonal` PRIMARY / `infrastructure-client-layering` / `composition-over-inheritance`)
+- `packages/foundation/src/external/cache/cache.service.ts:16-26` — current implementation (the code being refactored)
+- `packages/foundation/src/external/cache/cache.interfaces.ts` — current `CachePort` interface (will likely change shape)
+
+**Requirements**: F-01 closure per 999.19-SOLUTIONS.md — variant selection (V1 / V2 / V3 / V4 / new combinatorial cell with rationale) делается в /gsd:discuss-phase 999.19.2; researcher должен принести в discuss все 4 варианта + cross-skill compliance check; user в discuss выбирает одно и flip'ает Status в SOLUTIONS.md F-01 на ☑ Approved (→ 999.19.2).
+
+**Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN L1 invariants + F-01 evidence + 4 variants + cartesian rejection trail). Optionally читает Phase 999.19.1 (closed 2026-05-07) PATTERNS.md для understanding narrow-unlock pattern — но cache layer уже имеет свой positive-case exemplar в `cache.module.ts:14-18` (REDIS_CLIENT D-13).
+
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 999.19.2 to break down — после fix variant в discuss-phase)
