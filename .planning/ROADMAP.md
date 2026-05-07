@@ -1045,7 +1045,24 @@ Plans:
 
 **Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN L1 invariants + F-01 evidence + 4 variants + cartesian rejection trail). Optionally читает Phase 999.19.1 (closed 2026-05-07) PATTERNS.md для understanding narrow-unlock pattern — но cache layer уже имеет свой positive-case exemplar в `cache.module.ts:14-18` (REDIS_CLIENT D-13).
 
-**Plans:** 1/1 plans complete
+**Plans:** 1/2 plans complete
 
 Plans:
 - [x] 999.19.2-01-PLAN.md — V1 close F-01 (RedisCacheService.get<T>() discriminated union + opt Zod + severity log + del() self-heal + PinoLogger DI; D-07 verbatim type, D-09 guard-clauses-only, D-10 1 atomic fix commit + 1 docs housekeeping commit; 4 files / 6 tasks)
+- [ ] 999.19.2-02-PLAN.md — Inline-amendment fix (post-review): close BL-01 (TRANSIENT scope bleed-through через factory-inject PinoLogger → reverts singleton via PinoLogger.root.child + TEMP marker) + WR-01 (prefixKey 1×) + WR-04 (stale comment + CacheGetResult JSDoc) + IN-02 (self-heal del() try/catch); per D-11 / 999.19.2-REVIEW.md; 3 files / 1 atomic fix commit; defers logger DI architectural decision to Phase 999.20 placeholder
+
+### Phase 999.20: foundation-logger-port-design (BACKLOG, PLACEHOLDER)
+
+**Goal (TBD, scope locked):** Продумать систему логирования на foundation-уровне как полноценную абстракцию — что логгировать (infrastructure events vs business events vs domain events vs request-correlation), как унифицировать 7 текущих direct-PinoLogger sites (correlation.interceptor / rpc-exception.filter / grpc-to-http.filter / http-timing.interceptor / grpc-logging.interceptor / pino-http-client-logger.adapter / RedisCacheService после 999.19.2 Plan 02), решить вопрос абстракции (LoggerPort Tier-1 token + provider pattern, по аналогии с CACHE_SERVICE / PG_POOL / storage adapter — vs продолжить direct PinoLogger usage с канонизированным pattern). Surfaced 2026-05-07 в Phase 999.19.2 code review (BL-01) — `PinoLogger@nestjs-pino` декорирован `@Injectable({ scope: Scope.TRANSIENT })` → factory-inject ломает singleton, что указало на отсутствие foundation-level logger абстракции. **Variant не зафиксирован — выбор делается в /gsd:discuss-phase 999.20**: V1 (LoggerPort Tier-1 как `CachePort`, token + factory provider) / V2 (canonicalize direct `PinoLogger.root.child({ context })` pattern + ESLint rule запрет factory-inject) / V3 (hybrid — LoggerPort только для structured-payload-heavy sites, direct usage для thin loggers) / TBD-N. Out-of-scope: app-layer logging (use-case internal), business-event sourcing, telemetry/tracing infrastructure (Phase 27 distributed tracing — отдельная категория).
+
+**Required reading (researcher MUST read before discuss):**
+- `.planning/phases/999.19.2-cache-service-get-quality-inserted/999.19.2-REVIEW.md` § BL-01 — TRANSIENT bleed-through evidence + Variant A/B treatment
+- `.planning/phases/999.19.2-cache-service-get-quality-inserted/999.19.2-CONTEXT.md` § D-11 — temporary tactical fix decision-trail + 7-site audit baseline
+- `node_modules/.pnpm/nestjs-pino@4.6.1*/nestjs-pino/PinoLogger.js:123` — empirical evidence что `@Injectable({ scope: Scope.TRANSIENT })` declaration на library side
+- 7 foundation logger sites (audit baseline для unification): `packages/foundation/src/cls/correlation.interceptor.ts`, `packages/foundation/src/errors/rpc-exception.filter.ts`, `packages/foundation/src/errors/grpc-to-http.filter.ts`, `packages/foundation/src/logging/http-timing.interceptor.ts`, `packages/foundation/src/logging/grpc-logging.interceptor.ts`, `packages/foundation/src/logging/pino-http-client-logger.adapter.ts`, `packages/foundation/src/external/cache/cache.service.ts` (after 999.19.2 Plan 02)
+
+**Requirements**: TBD locked via /gsd:discuss-phase 999.20 — researcher должен принести audit 7 sites + cross-skill compliance check + variant matrix; user в discuss выбирает V1..V3 (или новую кость) и flip'ает scope-locked.
+
+**Depends on:** Phase 999.19.2 (cache-service-get-quality, closes 2026-05-07 — provides BL-01 evidence + first formally TEMP-marked PinoLogger consumer + memory anchor `project_logger_port_tbd`).
+
+**Plans:** TBD
