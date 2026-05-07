@@ -760,6 +760,12 @@ Plans:
 ### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
 
 **Goal:** Build RabbitMQ client abstraction following gRPC canonical reference from 999.11 — foundation primitive (connection factory, channel lifecycle, publish/consume helpers), per-service modules in `apps/*/src/infrastructure/messaging/`, Symbol DI tokens, real `RabbitMqHealthIndicator` replacing current stub. Possibly merges with Phase 25 EventModule (or precedes it as canonical-pattern prerequisite). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.13".
+
+**Updated 2026-05-07 by Phase 999.19 audit (backing-services-canonical-cross-audit-5-layer)** — scope unchanged but enriched with concrete L5 findings. Promotion researcher MUST read these before planning:
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L5 invariants (I-5.1..I-5.6) — canonical events-layer rules
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` F-06, F-07, F-08 — concrete skeleton-state findings (MessagingHealthIndicator stub, MESSAGING_CONFIG_PORT pre-declared no impl, EventConsumer NotImplementedException stub) with inline grep evidence
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` F-06, F-07, F-08 — variant trade-offs + cross-skill flags (`branching-patterns` Map/Record dispatch for event handlers)
+- Code currency: artefacts captured at HEAD `231573f` (999.19 closure). Re-grep before planning if commits since changed L5 surface.
 **Requirements:** TBD
 **Plans:** 0 plans
 
@@ -770,6 +776,13 @@ Plans:
 ### Phase 999.14: s3-canonical-audit (BACKLOG)
 
 **Goal:** Audit Phase 22/22.1 S3 StorageModule setup against gRPC canonical reference from 999.11 — confirm S3CoreModule + BucketStorageModule.forBucket + per-bucket health tokens + foundation external/internal encapsulation + ESLint 3-gate protection as "second sibling pattern", or realign minor details. Likely near-no-op (S3 is the most mature infra abstraction), but audit clarifies universal-vs-gRPC-specific canonical pattern. Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.14".
+
+**Updated 2026-05-07 by Phase 999.19 audit (backing-services-canonical-cross-audit-5-layer)** — 999.19 already surfaced one L3 finding (F-05 S3 timeout). At promotion time researcher MUST read upstream artefacts AND make the candidate-redundant decision (per 999.19-SOLUTIONS.md `Backlog Impact`):
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L3 invariants — canonical storage-layer rules
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` F-05 — `S3HealthIndicator` no client-side timeout (parser /health/ready stalls 10s+ on Garage S3)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` F-05 — variant catalog
+- **Scope decision at promotion:** if 999.14's own audit surfaces no NEW L3 findings beyond F-05 → ABSORB INTO 999.19 (F-05 fix lands as a tiny 999.19.N or stays here as scoped). If 999.14 surfaces multi-bucket / protocol abstraction / public-private symmetry findings → keep 999.14 as full canonical audit phase.
+- Code currency: artefacts captured at HEAD `231573f` (999.19 closure). Re-grep before planning if commits since changed L3 surface.
 **Requirements:** TBD
 **Plans:** 0 plans
 
