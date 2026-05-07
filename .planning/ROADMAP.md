@@ -1018,8 +1018,8 @@ Plans:
 
 **Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN invariants + F-02 evidence + V1+V2 variants).
 
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
-- [ ] 999.19.1-01-PLAN.md — V1 close foundation public-API surface for PG_POOL + apps JSDoc reality (D-02/D-04, 4 files / 1 atomic commit)
+- [x] 999.19.1-01-PLAN.md — V1 close foundation public-API surface for PG_POOL + apps JSDoc reality (D-02/D-04, 4 files / 1 atomic commit)
 - [ ] 999.19.1-02-PLAN.md — V2 ESLint regression guard: ban `from 'pg'` in apps Override 4 + Override 5 (D-01, 1 file / 1 atomic commit)
