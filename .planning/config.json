@@ -33,40 +33,73 @@
   },
   "agent_skills": {
     "gsd-researcher": [
+      ".claude/skills/architect-skeptic",
       ".claude/skills/clean-ddd-hexagonal",
-      ".claude/skills/branching-patterns",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
       ".claude/skills/twelve-factor",
       ".claude/skills/infrastructure-guard"
     ],
     "gsd-planner": [
+      ".claude/skills/architect-skeptic",
       ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
       ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
       ".claude/skills/twelve-factor",
       ".claude/skills/infrastructure-guard"
     ],
     "gsd-checker": [
+      ".claude/skills/architect-skeptic",
       ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
       ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
       ".claude/skills/twelve-factor",
       ".claude/skills/infrastructure-guard"
     ],
     "gsd-executor": [
+      ".claude/skills/ai-framework-flow-guard",
+      ".claude/skills/architect-skeptic",
       ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
       ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
       ".claude/skills/twelve-factor",
-      ".claude/skills/infrastructure-guard"
+      ".claude/skills/infrastructure-guard",
+      ".claude/skills/runtime-smoke-verification"
     ],
     "gsd-verifier": [
+      ".claude/skills/ai-framework-flow-guard",
+      ".claude/skills/architect-skeptic",
       ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
       ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
       ".claude/skills/twelve-factor",
-      ".claude/skills/infrastructure-guard"
+      ".claude/skills/infrastructure-guard",
+      ".claude/skills/runtime-smoke-verification"
     ],
     "gsd-architecture-validator": [
+      ".claude/skills/architect-skeptic",
       ".claude/skills/clean-ddd-hexagonal",
-      ".claude/skills/branching-patterns",
-      ".claude/skills/twelve-factor",
-      ".claude/skills/infrastructure-guard"
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/twelve-factor"
     ]
   },
   "mode": "yolo",
