@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import type Redis from 'ioredis';
 import { PinoLogger } from 'nestjs-pino';
 import type { Logger as PinoBaseLogger } from 'pino';
@@ -6,9 +6,9 @@ import type { ZodType } from 'zod';
 import type { CacheGetResult, CachePort } from './cache.interfaces';
 
 @Injectable()
-export class RedisCacheService implements CachePort {
+export class RedisCacheService implements CachePort, OnModuleInit {
   private readonly prefix: string;
-  private _logger?: PinoBaseLogger;
+  private logger!: PinoBaseLogger;
 
   constructor(
     private readonly redis: Redis,
@@ -21,14 +21,18 @@ export class RedisCacheService implements CachePort {
   // 7 foundation sites currently use PinoLogger directly через 3 разных способа
   // (auto-context inference / setContext / root.child). LoggerPort Tier-1 abstraction
   // TBD; current `PinoLogger.root.child(...)` is tactical, not architectural.
-  private get logger(): PinoBaseLogger {
-    if (!this._logger) {
-      this._logger = PinoLogger.root.child({ context: RedisCacheService.name });
+  private ensureInit(): void {
+    if (!this.logger) {
+      this.logger = PinoLogger.root.child({ context: RedisCacheService.name });
     }
-    return this._logger;
+  }
+
+  onModuleInit(): void {
+    this.ensureInit();
   }
 
   async get<T>(key: string, schema?: ZodType<T>): Promise<CacheGetResult<T>> {
+    this.ensureInit();
     const prefixed = this.prefixKey(key);
     const raw = await this.redis.get(prefixed);
     if (raw === null) {
