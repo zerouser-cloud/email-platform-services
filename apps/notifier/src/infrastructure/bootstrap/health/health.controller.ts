@@ -1,5 +1,5 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { HealthCheckService, HealthCheck } from '@nestjs/terminus';
+import { HealthCheckService, HealthCheck, type HealthCheckResult } from '@nestjs/terminus';
 import {
   HEALTH,
   MESSAGING_HEALTH,
@@ -30,7 +30,7 @@ export class HealthController {
 
   @Get(HEALTH.READY)
   @HealthCheck()
-  readiness() {
+  readiness(): Promise<HealthCheckResult> {
     return this.health.check([
       () => this.messaging.isHealthy(HEALTH.INDICATOR.MESSAGING),
       () => this.publicStorage.isHealthy(PUBLIC_HEALTH_KEY),

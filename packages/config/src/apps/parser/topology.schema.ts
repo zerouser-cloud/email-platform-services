@@ -7,8 +7,9 @@
 // Terminal leaf in the module graph: imports ONLY from 'zod' (RESEARCH §Pitfall 1).
 import { z } from 'zod';
 
+// PARSER_PORT field dropped в Phase 999.18.2 Wave 2 per ADR-001 §Decision (c.2) —
+// parser = gRPC-only service; HTTP server removed from main.ts.
 export const ParserTopologyShape = {
-  PARSER_PORT: z.coerce.number().positive(),
   PARSER_GRPC_PORT: z.coerce.number().positive(),
   PARSER_GRPC_URL: z.string().min(1),
 } as const;

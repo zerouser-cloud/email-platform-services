@@ -1,30 +1,30 @@
 {
-    "$schema": "https://turbo.build/schema.json",
-    "tasks": {
-        "generate": {
-            "inputs": ["proto/**/*.proto", "scripts/generate.sh"],
-            "outputs": ["src/generated/**"]
-        },
-        "build": {
-            "dependsOn": ["^build", "generate"],
-            "outputs": ["dist/**"]
-        },
-        "dev": {
-            "cache": false,
-            "persistent": true,
-            "passThroughEnv": ["*"]
-        },
-        "lint": {
-            "dependsOn": ["^lint"]
-        },
-        "typecheck": {
-            "dependsOn": ["^build", "generate"]
-        },
-        "start": {
-            "dependsOn": ["^build"],
-            "cache": false,
-            "persistent": true,
-            "passThroughEnv": ["*"]
-        }
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "generate": {
+      "inputs": ["proto/**/*.proto", "scripts/generate.sh", "$TURBO_ROOT$/pnpm-lock.yaml"],
+      "outputs": ["src/generated/**"]
+    },
+    "build": {
+      "dependsOn": ["^build", "generate"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["*"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "generate"]
+    },
+    "start": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["*"]
     }
+  }
 }

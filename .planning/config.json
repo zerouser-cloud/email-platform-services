@@ -20,8 +20,8 @@
     "auto_advance": false,
     "node_repair": true,
     "node_repair_budget": 2,
-    "ui_phase": true,
-    "ui_safety_gate": true,
+    "ui_phase": false,
+    "ui_safety_gate": false,
     "text_mode": false,
     "research_before_questions": false,
     "discuss_mode": "discuss",
@@ -33,40 +33,73 @@
   },
   "agent_skills": {
     "gsd-researcher": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/architect-skeptic",
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-planner": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/architect-skeptic",
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-checker": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/architect-skeptic",
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard"
     ],
     "gsd-executor": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/ai-framework-flow-guard",
+      ".claude/skills/architect-skeptic",
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard",
+      ".claude/skills/runtime-smoke-verification"
     ],
     "gsd-verifier": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/ai-framework-flow-guard",
+      ".claude/skills/architect-skeptic",
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/branching-patterns",
+      ".claude/skills/no-magic-values",
+      ".claude/skills/env-schema",
+      ".claude/skills/twelve-factor",
+      ".claude/skills/infrastructure-guard",
+      ".claude/skills/runtime-smoke-verification"
     ],
     "gsd-architecture-validator": [
-      ".agents/skills/clean-ddd-hexagonal",
-      ".agents/skills/branching-patterns",
-      ".agents/skills/twelve-factor",
-      ".agents/skills/infrastructure-guard"
+      ".claude/skills/architect-skeptic",
+      ".claude/skills/clean-ddd-hexagonal",
+      ".claude/skills/infrastructure-client-layering",
+      ".claude/skills/nestjs-hexagonal-mapping",
+      ".claude/skills/composition-over-inheritance",
+      ".claude/skills/twelve-factor"
     ]
   },
   "mode": "yolo",

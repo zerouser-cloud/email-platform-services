@@ -54,12 +54,8 @@ export function defineService<const Id extends string>(
   const upperId = input.id.toUpperCase() as Uppercase<Id>;
   return {
     id: input.id,
-    grpc: input.grpc
-      ? { package: input.id, serviceName: input.grpc.serviceName }
-      : undefined,
-    diToken: input.grpc
-      ? Symbol.for(`${upperId}_GRPC_CLIENT`)
-      : Symbol.for(`${upperId}_CLIENT`),
+    grpc: input.grpc ? { package: input.id, serviceName: input.grpc.serviceName } : undefined,
+    diToken: input.grpc ? Symbol.for(`${upperId}_GRPC_CLIENT`) : Symbol.for(`${upperId}_CLIENT`),
   };
 }
 

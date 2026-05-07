@@ -1,5 +1,4 @@
 services:
-
   postgres:
     image: postgres:16-alpine
     environment:
@@ -10,7 +9,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -21,7 +20,7 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -34,7 +33,7 @@ services:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
       interval: 10s
       timeout: 10s
       retries: 5
@@ -49,9 +48,10 @@ services:
       - garage_data:/var/lib/garage/data
     environment:
       GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET} # Phase 999.17.2 D-10 — native Garage v2 env override.
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "/garage", "-c", "/etc/garage.toml", "status"]
+      test: ['CMD', '/garage', '-c', '/etc/garage.toml', 'status']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -68,8 +68,8 @@ services:
   garage-webui:
     image: khairul169/garage-webui:1.1.0
     environment:
-      API_BASE_URL: "http://garage:3903"
-      S3_ENDPOINT_URL: "http://garage:3900"
+      API_BASE_URL: 'http://garage:3903'
+      S3_ENDPOINT_URL: 'http://garage:3900'
       API_ADMIN_KEY: ${GARAGE_ADMIN_TOKEN}
       S3_REGION: garage
     depends_on:

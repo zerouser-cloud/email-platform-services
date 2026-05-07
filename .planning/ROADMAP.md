@@ -66,44 +66,53 @@
 ## Phase Details
 
 ### Phase 20: Config Decomposition
+
 **Goal**: Services validate only the environment variables they actually need, and adding new infrastructure concerns does not require touching a monolithic schema
 **Depends on**: Phase 19 (v3.0 complete)
 **Requirements**: CFG-01, CFG-02, CFG-03, CFG-04
 **Success Criteria** (what must be TRUE):
-  1. Env schema is split into independent Zod sub-schemas per concern (redis, s3, rabbitmq, http, tracing) that can be imported individually
-  2. GlobalEnvSchema composes sub-schemas via spread -- adding a new sub-schema requires only one import line
-  3. Each service's config module validates only the env vars relevant to its imported infrastructure modules, not the full set
-  4. A developer can add a new env var group (e.g., for a new backing service) by creating one sub-schema file without modifying existing schemas
-**Plans**: 2 plans
-Plans:
+
+1. Env schema is split into independent Zod sub-schemas per concern (redis, s3, rabbitmq, http, tracing) that can be imported individually
+2. GlobalEnvSchema composes sub-schemas via spread -- adding a new sub-schema requires only one import line
+3. Each service's config module validates only the env vars relevant to its imported infrastructure modules, not the full set
+4. A developer can add a new env var group (e.g., for a new backing service) by creating one sub-schema file without modifying existing schemas
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 20-01-PLAN.md — Create sub-schemas, composeSchemas(), refactor config-loader & AppConfigModule
 - [x] 20-02-PLAN.md — Migrate all 6 services to per-service schemas
 
 ### Phase 21: Redis CacheModule
+
 **Goal**: Services can use Redis for caching through a DI-injected client with health monitoring and namespace isolation, following the PersistenceModule pattern
 **Depends on**: Phase 20
 **Requirements**: CACHE-01, CACHE-02, CACHE-03, CACHE-04
 **Success Criteria** (what must be TRUE):
-  1. CacheModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook -- structurally matching PersistenceModule
-  2. A service importing CacheModule can inject the Redis client via DI token and perform get/set/del operations against a running Redis instance
-  3. Health endpoint reports real Redis connection status (not a stub returning "up")
-  4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
-**Plans**: 2 plans
-Plans:
+
+1. CacheModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook -- structurally matching PersistenceModule
+2. A service importing CacheModule can inject the Redis client via DI token and perform get/set/del operations against a running Redis instance
+3. Health endpoint reports real Redis connection status (not a stub returning "up")
+4. Keys written by different services are automatically namespaced (e.g., `auth:session:123`, `sender:rate:456`) and cannot collide
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 21-01-PLAN.md — Create CacheModule in foundation (ioredis, DI tokens, health, shutdown, namespace)
 - [x] 21-02-PLAN.md — Integrate CacheModule into sender service
 
 ### Phase 22: S3 StorageModule
+
 **Goal**: Services can store and retrieve files through a DI-injected S3 client that works identically with MinIO (local) and Garage (production) without code changes
 **Depends on**: Phase 20
 **Requirements**: S3-01, S3-02, S3-03, S3-04
 **Success Criteria** (what must be TRUE):
-  1. StorageModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook
-  2. The same client code works against MinIO (local dev) and Garage (production) -- switching requires only env var changes, zero code changes
-  3. All env vars use S3_* prefix (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET) -- no MINIO_* references remain in codebase
-  4. A service importing StorageModule can upload, download, and delete files through the injected client
-**Plans**: 2 plans
-Plans:
+
+1. StorageModule exists in foundation with `forRootAsync()`, Symbol DI tokens, health indicator, and shutdown hook
+2. The same client code works against MinIO (local dev) and Garage (production) -- switching requires only env var changes, zero code changes
+3. All env vars use S3*\* prefix (S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY, S3_BUCKET) -- no MINIO*\* references remain in codebase
+4. A service importing StorageModule can upload, download, and delete files through the injected client
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 22-01-PLAN.md — Create StorageModule + ReportsStorageModule in foundation (AWS SDK v3, DI tokens, health, shutdown)
 - [x] 22-02-PLAN.md — Integrate ParserStorageModule and NotifierStorageModule, add S3 health indicators
 
@@ -115,9 +124,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
+
 - [ ] 22.5-01-PLAN.md — Replace MinIO with Garage v2.1.0 in compose stacks + commit garage.toml + garage-bootstrap.sh + env files + npm script
-- [ ] 22.5-02-PLAN.md — Foundation rename: external/storage/reports/ → public/, REPORTS_* → PUBLIC_* symbols, barrel flip
-- [ ] 22.5-03-PLAN.md — Update parser+notifier storage modules, smoke controllers, and health controllers to PUBLIC_* surface
+- [ ] 22.5-02-PLAN.md — Foundation rename: external/storage/reports/ → public/, REPORTS*\* → PUBLIC*\* symbols, barrel flip
+- [ ] 22.5-03-PLAN.md — Update parser+notifier storage modules, smoke controllers, and health controllers to PUBLIC\_\* surface
 - [ ] 22.5-04-PLAN.md — Rewrite docs/runbooks/bucket-provisioning.md for all 4 envs + live local smoke+readiness acceptance checkpoint
 
 ### Phase 22.4: public-bucket-abstraction (INSERTED)
@@ -128,87 +138,103 @@ Plans:
 **Plans:** 3/3 plans complete
 
 Plans:
+
 - [x] 22.4-01-PLAN.md — Foundation port+factory+deps: NamespacedStoragePort, SharedNamespaceModule.forNamespace, lib-storage multipart, size-limit Transform, env schema extension, remove presigner
-- [x] 22.4-02-PLAN.md — Apps integration: rewire parser+notifier to SHARED_REPORTS, rewrite smoke controllers (Readable + HTTP GET), sync .env* files, remove obsolete PublicStorageModule facade
+- [x] 22.4-02-PLAN.md — Apps integration: rewire parser+notifier to SHARED_REPORTS, rewrite smoke controllers (Readable + HTTP GET), sync .env\* files, remove obsolete PublicStorageModule facade
 - [x] 22.4-03-PLAN.md — Runbook update: anonymous-read policy step, new env vars, Garage URL caveat, private-bucket warning, verify curl step
 
 ### Phase 22.3: storage-smoke-test-endpoints (INSERTED)
+
 **Goal**: Each storage-using service exposes temporary gRPC+REST endpoints that exercise the full StoragePort surface for every bound bucket, enabling end-to-end runtime verification across all deployment environments
 **Depends on**: Phase 22, Phase 22.1, Phase 22.2
 **Requirements**: SSMK-01, SSMK-02, SSMK-03, SSMK-04, SSMK-05
 **Success Criteria** (what must be TRUE):
-  1. Parser exposes smoke endpoints for both PARSER_STORAGE and REPORTS_STORAGE covering upload, download, delete, exists, getSignedUrl
-  2. Notifier exposes smoke endpoints for REPORTS_STORAGE covering the same StoragePort surface
-  3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
-  4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
-  5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
-**Plans**: 3 plans
-Plans:
+
+1. Parser exposes smoke endpoints for both PARSER_STORAGE and REPORTS_STORAGE covering upload, download, delete, exists, getSignedUrl
+2. Notifier exposes smoke endpoints for REPORTS_STORAGE covering the same StoragePort surface
+3. Cross-service shared bucket flow is demonstrably runnable: parser uploads to reports bucket, notifier downloads the same key from reports bucket -- proves shared storage works end-to-end
+4. Endpoints are gated by a required env flag (config value, no NODE_ENV/isDev/isProd reads) -- disabled by default in shipped artifacts
+5. The same endpoint contracts are reachable across all four deployment environments (local-native, local-docker, dev-Coolify, prod-Coolify) so a single test plan validates the entire matrix
+   **Plans**: 3 plans
+   Plans:
+
 - [x] 22.3-01-PLAN.md — Proto definitions (parser.proto smoke rpc + new notifier.proto) + notifier gRPC infrastructure
 - [x] 22.3-02-PLAN.md — Storage smoke gRPC controllers in parser and notifier test/ directories
 - [x] 22.3-03-PLAN.md — Gateway REST proxy controller under /test/ with gRPC clients to parser and notifier
 
 ### Phase 22.2: bucket-provisioning-automation (INSERTED)
+
 **Goal**: Полная процедура создания S3 bucket'ов документирована как операционный runbook, покрывающий все 4 окружения (local-native, local-isolated, dev Coolify/Garage, prod Coolify/Garage). Любой оператор может следовать runbook без предварительных знаний и получить рабочие buckets. Нулевые изменения в коде, docker-compose, env-схемах — единственный deliverable `docs/runbooks/bucket-provisioning.md`.
 **Depends on**: Phase 22, Phase 22.1
 **Requirements**: SPRV-01, SPRV-02, SPRV-03, SPRV-04, SPRV-05
 **Scope change**: Оригинальный scope (code-based auto-provisioning с env flag) был отклонён в `/gsd:discuss-phase` 2026-04-09. Причины зафиксированы в `.planning/phases/22.2-bucket-provisioning-automation/22.2-CONTEXT.md` decisions D-01..D-03 и в Rationale секции самого runbook. Phase 22.3 prerequisite изменён: "выполнить runbook и создать buckets" вместо "auto-provisioning работает".
 **Success Criteria** (what must be TRUE):
-  1. `docs/runbooks/bucket-provisioning.md` существует и покрывает все 4 окружения отдельными self-contained разделами в порядке local-native → local-isolated → dev Coolify/Garage → prod Coolify/Garage
-  2. Новый разработчик с нуля может следовать runbook и получить рабочие buckets в любом из 4 окружений без внешней помощи
-  3. Garage секции (dev, prod) включают шаги создания key binding с подчёркнутым warning блоком — без key binding bucket недоступен приложению
-  4. Каждый раздел включает `curl` verification step против `/health/ready` с примерами OK и DOWN ответов
-  5. Rationale секция объясняет решение не автоматизировать (12-factor separation, Garage key bindings incompatibility, minimal prod permissions, safety против silent misconfig, unified approach)
-  6. Ноль изменений в `apps/`, `packages/`, `infra/` — только в `docs/` и `.planning/`
-**Plans**: 2 plans
-Plans:
+
+1. `docs/runbooks/bucket-provisioning.md` существует и покрывает все 4 окружения отдельными self-contained разделами в порядке local-native → local-isolated → dev Coolify/Garage → prod Coolify/Garage
+2. Новый разработчик с нуля может следовать runbook и получить рабочие buckets в любом из 4 окружений без внешней помощи
+3. Garage секции (dev, prod) включают шаги создания key binding с подчёркнутым warning блоком — без key binding bucket недоступен приложению
+4. Каждый раздел включает `curl` verification step против `/health/ready` с примерами OK и DOWN ответов
+5. Rationale секция объясняет решение не автоматизировать (12-factor separation, Garage key bindings incompatibility, minimal prod permissions, safety против silent misconfig, unified approach)
+6. Ноль изменений в `apps/`, `packages/`, `infra/` — только в `docs/` и `.planning/`
+   **Plans**: 2 plans
+   Plans:
+
 - [x] 22.2-01-PLAN.md — Переписать REQUIREMENTS.md/ROADMAP.md/PROJECT.md под новый docs-only scope
 - [x] 22.2-02-PLAN.md — Создать docs/runbooks/bucket-provisioning.md с 4 env разделами + rationale + known gap
 
 ### Phase 22.1: s3-core-encapsulation (INSERTED)
+
 **Goal**: Per-service composition StorageModule fully owns the S3 client lifecycle — root modules import a single storage module and have no knowledge of underlying S3 infrastructure
 **Depends on**: Phase 22
 **Requirements**: SENC-01, SENC-02, SENC-03, SENC-04
 **Success Criteria** (what must be TRUE):
-  1. parser.module.ts and notifier.module.ts each import exactly one storage-related module (the per-service composition StorageModule)
-  2. S3CoreModule is imported only from within per-service composition StorageModule, never from a root service module
-  3. Adding a new bucket type to an existing service requires only a new per-bucket module plus a composition update -- no changes to the root service module
-  4. pnpm build remains green; all existing storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, *_STORAGE_HEALTH) still resolve correctly after refactor
-**Plans**: 5 plans
-Plans:
+
+1. parser.module.ts and notifier.module.ts each import exactly one storage-related module (the per-service composition StorageModule)
+2. S3CoreModule is imported only from within per-service composition StorageModule, never from a root service module
+3. Adding a new bucket type to an existing service requires only a new per-bucket module plus a composition update -- no changes to the root service module
+4. pnpm build remains green; all existing storage DI tokens (PARSER_STORAGE, REPORTS_STORAGE, \*\_STORAGE_HEALTH) still resolve correctly after refactor
+   **Plans**: 5 plans
+   Plans:
+
 - [x] 22.1-01-PLAN.md — Create external/internal skeletons, relocate storage primitives to internal/storage/, remove @Global(), rewrite ReportsStorageModule with explicit S3CoreModule import
 - [x] 22.1-02-PLAN.md — Relocate non-storage subsystems to external/, flip top-level barrel to one-line re-export, drop S3CoreModule from parser.module.ts and notifier.module.ts
 - [x] 22.1-03-PLAN.md — Add exports field to foundation package.json, upgrade tsconfig.base.json to node16/node16, force rebuild
 - [x] 22.1-04-PLAN.md — Rewrite parser-storage.module.ts with @email-platform/foundation/internal subpath imports, delete Plan 02 BucketStorageModule compat shim
-- [x] 22.1-05-PLAN.md — Add single static ESLint rule (apps/*/src override + apps/*/src/infrastructure override), automated probe verification, human-verified boot smoke tests
+- [x] 22.1-05-PLAN.md — Add single static ESLint rule (apps/_/src override + apps/_/src/infrastructure override), automated probe verification, human-verified boot smoke tests
 
 ### Phase 23: gRPC Client Typed Wrappers
+
 **Goal**: Services communicate via gRPC using type-safe client wrappers that enforce proto contracts at compile time and handle deadlines automatically
 **Depends on**: Phase 20
 **Requirements**: GRPC-01, GRPC-02, GRPC-03, GRPC-04
 **Success Criteria** (what must be TRUE):
-  1. Foundation provides a gRPC client framework that binds to proto-generated TypeScript types -- calling a non-existent method or passing wrong types is a compile error
-  2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
-  3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
-  4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
-**Plans**: 4 plans
-Plans:
+
+1. Foundation provides a gRPC client framework that binds to proto-generated TypeScript types -- calling a non-existent method or passing wrong types is a compile error
+2. Each service registers only the gRPC clients it needs (e.g., sender registers audience client but not auth client)
+3. Gateway creates typed gRPC clients for all five backend services through the same registration pattern
+4. Every gRPC call has a configurable deadline/timeout that propagates through the call chain without manual plumbing
+   **Plans**: 4 plans
+   Plans:
+
 - [x] 23-01-PLAN.md — Migrate SERVICE.diToken to Symbol.for() + delete obsolete GrpcClientModule
 - [x] 23-02-PLAN.md — Foundation AbstractGrpcClient + per-call deadline metadata + health indicator
 - [x] 23-03-PLAN.md — Five per-service client modules (audience, auth, parser, sender, notifier) + barrel
 - [x] 23-04-PLAN.md — Gateway integration: GrpcClientsModule + smoke migration + readiness wiring + sanity probe
 
 ### Phase 24: HTTP Client & Circuit Breaker
+
 **Goal**: Services can call external APIs through a resilient HTTP client with automatic retry, timeout, logging, and circuit breaker protection
 **Depends on**: Phase 20
 **Requirements**: HTTP-01, HTTP-02, HTTP-03, HTTP-04
 **Success Criteria** (what must be TRUE):
-  1. Foundation provides an HTTP client framework with configurable retry, timeout, and structured request/response logging
-  2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
-  3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
-  4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
-**Plans**: 3 plans
-Plans:
+
+1. Foundation provides an HTTP client framework with configurable retry, timeout, and structured request/response logging
+2. Circuit breaker is integrated into the HTTP abstraction -- after N consecutive failures to an external endpoint, calls fail fast without making the request
+3. Per-service adapters exist (or can be created) for AppStoreSpy, Telegram Bot API, and Cloud Functions, each built on the shared framework
+4. Circuit breaker applies only to external HTTP calls -- internal gRPC communication is not affected by circuit breaker state
+   **Plans**: 3 plans
+   Plans:
+
 - [x] 24-01-PLAN.md — Foundation HTTP primitives: opossum + AbstractHttpClient + retry + CB + errors + types, export via foundation barrel
 - [x] 24-02-PLAN.md — Contracts external types (Telegram/AppStoreSpy/CloudFn) + external-apis config sub-schema + per-service env extensions + .env files
 - [x] 24-03-PLAN.md — Three per-service adapters + smoke controllers + notifier stub migration + VALIDATION.md Nyquist flip
@@ -221,42 +247,49 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 24.1-01-PLAN.md — Foundation port+adapter scaffolding: constants split, types, error hierarchy + chain-of-mappers, retry ports, CB port + opossum adapter, logger port + Pino adapter, DI tokens, Wave 0 scripts (check-no-bang.sh, check-env-parity.sh)
 - [x] 24.1-02-PLAN.md — Thin AbstractHttpClient orchestrator (param-bag, ~80-120 lines) + httpClientProvider factory + D-16/D-17 barrel cleanup + delete 6 pre-24.1 root-level files
 - [x] 24.1-03-PLAN.md — Migrate 3 per-vendor clients+modules (telegram/appstorespy/cloudfn) to param-bag + httpClientProvider + getOrThrow; split HttpSmokeClient to infrastructure/; extract HTTP_SMOKE_DEFAULTS + status(code) builder + CircuitState return types; remove HTTP_CLIENT_DEFAULTS compat bridge
 - [x] 24.1-04-PLAN.md — Env hygiene: rotate Telegram token via @BotFather + Coolify prod/dev, git rm --cached .env.docker, create .env.docker.example (variant B), create docs/runbooks/env-setup.md (4-env matrix + rotation + sync rule), final runtime smoke verification
 
 ### Phase 25: RabbitMQ EventModule
+
 **Goal**: Services can publish and consume domain events through typed interfaces with guaranteed delivery semantics, dead letter handling, and health monitoring
 **Depends on**: Phase 20
 **Requirements**: EVENT-01, EVENT-02, EVENT-03, EVENT-04, EVENT-05
 **Success Criteria** (what must be TRUE):
-  1. EventModule exists in foundation with publisher/consumer abstraction, Symbol DI tokens, health indicator, and shutdown hook
-  2. Consumed messages use manual acknowledgment by default -- a message is not removed from the queue until the handler explicitly acks it
-  3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
-  4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
-  5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
-**Plans**: 0 plans (not yet planned)
+
+1. EventModule exists in foundation with publisher/consumer abstraction, Symbol DI tokens, health indicator, and shutdown hook
+2. Consumed messages use manual acknowledgment by default -- a message is not removed from the queue until the handler explicitly acks it
+3. Failed messages are routed to a Dead Letter Queue without additional per-service configuration
+4. Each service declares its publishers and consumers through a declarative configuration (routing keys, exchange, queue names) without touching EventModule internals
+5. A service can publish a typed event and another service can consume it through a typed handler interface -- type mismatches are compile errors
+   **Plans**: 0 plans (not yet planned)
 
 ### Phase 26: Graceful Shutdown
+
 **Goal**: When a service receives SIGTERM, all in-flight work completes and all connections close in the correct order before the process exits
 **Depends on**: Phase 21, Phase 22, Phase 23, Phase 24, Phase 25
 **Requirements**: SHUT-01, SHUT-02, SHUT-03
 **Success Criteria** (what must be TRUE):
-  1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
-  2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
-  3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
-**Plans**: 0 plans (not yet planned)
+
+1. A centralized ShutdownOrchestrator coordinates teardown of all registered modules in a defined order
+2. In-flight HTTP and gRPC requests complete before connections are closed -- no abrupt termination mid-request
+3. Shutdown order is enforced: stop accepting new requests, drain in-flight work, then close connections in reverse dependency order (RabbitMQ, Redis, PostgreSQL)
+   **Plans**: 0 plans (not yet planned)
 
 ### Phase 27: Distributed Tracing
+
 **Goal**: A single correlation ID follows a request from gateway entry through all downstream gRPC calls and RabbitMQ event chains, visible in every log line
 **Depends on**: Phase 23, Phase 25
 **Requirements**: TRACE-01, TRACE-02, TRACE-03
 **Success Criteria** (what must be TRUE):
-  1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
-  2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
-  3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
-**Plans**: 0 plans (not yet planned)
+
+1. Correlation ID is automatically injected into gRPC metadata on outgoing calls and extracted on incoming calls -- no manual plumbing in service code
+2. Correlation ID is automatically injected into RabbitMQ message headers on publish and extracted on consume
+3. A request entering gateway produces logs across all downstream services (gRPC and event-driven) that share the same correlation ID
+   **Plans**: 0 plans (not yet planned)
 
 ## Progress
 
@@ -265,52 +298,53 @@ Phases execute in numeric order: 20 -> 21 -> 22 -> 23 -> 24 -> 25 -> 26 -> 27
 
 Note: Phases 21-24 depend only on Phase 20 and could theoretically run in any order, but sequential execution is recommended for pattern refinement (simplest module first).
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Contract Consolidation | v1.0 | 1/1 | Complete | 2026-04-04 |
-| 2. Configuration Management | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 3. Error Handling & Safety | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 4. Architecture Reference Implementation | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 5. Architecture Replication & Boundaries | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 6. Health & Resilience | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 7. Logging, Security & Operations | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 8. Verification | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 9. Config & MongoDB Cleanup | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 10. Foundation DrizzleModule & Health | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 11. Docker Infrastructure | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 12. Auth Schema & Repository (Reference) | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 13. Remaining Services Schema & Repository | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 14. Verification & Documentation | v2.0 | 1/1 | Complete | 2026-04-04 |
-| 15. Docker Compose Split & Environment | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 16. CI Pipeline | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 16.1. Docker Port Isolation | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 17. Docker Image Build & Push | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 17.1. Fix DI Double Registration | v3.0 | 1/1 | Complete | 2026-04-04 |
-| 17.2. No Magic Values Skill & Audit | v3.0 | 3/3 | Complete | 2026-04-04 |
-| 18. Deployment via Coolify | v3.0 | 3/3 | Complete | 2026-04-06 |
-| 18.1. Deployment Polish | v3.0 | 2/2 | Complete | 2026-04-08 |
-| 19. Verification | v3.0 | 0/0 | Complete | 2026-04-08 |
-| 20. Config Decomposition | v4.0 | 2/2 | Complete    | 2026-04-08 |
-| 21. Redis CacheModule | v4.0 | 2/2 | Complete    | 2026-04-08 |
-| 22. S3 StorageModule | v4.0 | 3/3 | Complete    | 2026-04-09 |
-| 22.3. Storage Smoke Test Endpoints | v4.0 | 4/4 | Complete    | 2026-04-14 |
-| 23. gRPC Client Typed Wrappers | v4.0 | 4/4 | Complete    | 2026-04-15 |
-| 24. HTTP Client & Circuit Breaker | v4.0 | 3/3 | Complete    | 2026-04-15 |
-| 24.1. HTTP client foundation hardening | v4.0 | 4/4 | Complete    | 2026-04-16 |
-| 25. RabbitMQ EventModule | v4.0 | 0/0 | Not started | - |
-| 26. Graceful Shutdown | v4.0 | 0/0 | Not started | - |
-| 27. Distributed Tracing | v4.0 | 0/0 | Not started | - |
+| Phase                                      | Milestone | Plans Complete | Status      | Completed  |
+| ------------------------------------------ | --------- | -------------- | ----------- | ---------- |
+| 1. Contract Consolidation                  | v1.0      | 1/1            | Complete    | 2026-04-04 |
+| 2. Configuration Management                | v1.0      | 3/3            | Complete    | 2026-04-04 |
+| 3. Error Handling & Safety                 | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 4. Architecture Reference Implementation   | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 5. Architecture Replication & Boundaries   | v1.0      | 3/3            | Complete    | 2026-04-04 |
+| 6. Health & Resilience                     | v1.0      | 3/3            | Complete    | 2026-04-04 |
+| 7. Logging, Security & Operations          | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 8. Verification                            | v1.0      | 2/2            | Complete    | 2026-04-04 |
+| 9. Config & MongoDB Cleanup                | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 10. Foundation DrizzleModule & Health      | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 11. Docker Infrastructure                  | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 12. Auth Schema & Repository (Reference)   | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 13. Remaining Services Schema & Repository | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 14. Verification & Documentation           | v2.0      | 1/1            | Complete    | 2026-04-04 |
+| 15. Docker Compose Split & Environment     | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 16. CI Pipeline                            | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 16.1. Docker Port Isolation                | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 17. Docker Image Build & Push              | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 17.1. Fix DI Double Registration           | v3.0      | 1/1            | Complete    | 2026-04-04 |
+| 17.2. No Magic Values Skill & Audit        | v3.0      | 3/3            | Complete    | 2026-04-04 |
+| 18. Deployment via Coolify                 | v3.0      | 3/3            | Complete    | 2026-04-06 |
+| 18.1. Deployment Polish                    | v3.0      | 2/2            | Complete    | 2026-04-08 |
+| 19. Verification                           | v3.0      | 0/0            | Complete    | 2026-04-08 |
+| 20. Config Decomposition                   | v4.0      | 2/2            | Complete    | 2026-04-08 |
+| 21. Redis CacheModule                      | v4.0      | 2/2            | Complete    | 2026-04-08 |
+| 22. S3 StorageModule                       | v4.0      | 3/3            | Complete    | 2026-04-09 |
+| 22.3. Storage Smoke Test Endpoints         | v4.0      | 4/4            | Complete    | 2026-04-14 |
+| 23. gRPC Client Typed Wrappers             | v4.0      | 4/4            | Complete    | 2026-04-15 |
+| 24. HTTP Client & Circuit Breaker          | v4.0      | 3/3            | Complete    | 2026-04-15 |
+| 24.1. HTTP client foundation hardening     | v4.0      | 4/4            | Complete    | 2026-04-16 |
+| 25. RabbitMQ EventModule                   | v4.0      | 0/0            | Not started | -          |
+| 26. Graceful Shutdown                      | v4.0      | 0/0            | Not started | -          |
+| 27. Distributed Tracing                    | v4.0      | 0/0            | Not started | -          |
 
 ## Backlog
 
 ### Phase 999.1: Config System Audit (audit-only phase) (PROMOTED)
 
-**Goal:** Провести **полный audit** системы конфигов проекта с трассировкой usage по всей кодовой базе — не только где конфиги объявляются, но и где/как используются, куда проистекают, какие архитектурные инварианты нарушаются. **Фаза docs-only** — никакого кода не трогаем. Deliverables: **`999.1-AUDIT.md`** (inventory + categorized findings по 5 слоям) + **`999.1-SOLUTIONS.md`** (2-4 варианта фикса per finding с trade-offs и recommended pick). После завершения — user review checkpoint вне фазы: по каждому approved solution создаётся своя sub-phase (999.1.1, 999.1.2, ...) через `/gsd:insert-phase`. Audit scope: **(Layer 1 Definition & Loading)** packages/config/*, apps/*/bootstrap/config/*, drizzle.config.ts, foundation narrow-config; **(Layer 2 Usage tracing)** все `@Inject({SVC}_CONFIG)` callsites, narrow config port consumers, SERVICE catalog reads, main.ts bootstrap reads, CLI/scripts; **(Layer 3 Violations)** direct `process.env` outside legal zones, hardcoded magic values that should be config, non-null assertions, type casts на config surface; **(Layer 4 Propagation)** app→foundation slice factory boundaries, cross-service via catalog, RMQ inbound, documentation drift (CLAUDE.md + infrastructure-client-layering SKILL + env-schema SKILL + twelve-factor SKILL); **(Layer 5 Missing configs)** env-значения упоминаемые но не в схеме, .env.example vs фактическое usage, infrastructure config (docker-compose, Coolify, CI) vs app config coherence. Принцип фазы: verify-against-reality — каждое finding'а бэкапится grep/Read выдачей, чтобы не было спекуляций о текущем состоянии. Precedent для audit-only phase: Phase 999.11.3 (docs-only skill refresh).
+**Goal:** Провести **полный audit** системы конфигов проекта с трассировкой usage по всей кодовой базе — не только где конфиги объявляются, но и где/как используются, куда проистекают, какие архитектурные инварианты нарушаются. **Фаза docs-only** — никакого кода не трогаем. Deliverables: **`999.1-AUDIT.md`** (inventory + categorized findings по 5 слоям) + **`999.1-SOLUTIONS.md`** (2-4 варианта фикса per finding с trade-offs и recommended pick). После завершения — user review checkpoint вне фазы: по каждому approved solution создаётся своя sub-phase (999.1.1, 999.1.2, ...) через `/gsd:insert-phase`. Audit scope: **(Layer 1 Definition & Loading)** packages/config/_, apps/_/bootstrap/config/\*, drizzle.config.ts, foundation narrow-config; **(Layer 2 Usage tracing)** все `@Inject({SVC}_CONFIG)` callsites, narrow config port consumers, SERVICE catalog reads, main.ts bootstrap reads, CLI/scripts; **(Layer 3 Violations)** direct `process.env` outside legal zones, hardcoded magic values that should be config, non-null assertions, type casts на config surface; **(Layer 4 Propagation)** app→foundation slice factory boundaries, cross-service via catalog, RMQ inbound, documentation drift (CLAUDE.md + infrastructure-client-layering SKILL + env-schema SKILL + twelve-factor SKILL); **(Layer 5 Missing configs)** env-значения упоминаемые но не в схеме, .env.example vs фактическое usage, infrastructure config (docker-compose, Coolify, CI) vs app config coherence. Принцип фазы: verify-against-reality — каждое finding'а бэкапится grep/Read выдачей, чтобы не было спекуляций о текущем состоянии. Precedent для audit-only phase: Phase 999.11.3 (docs-only skill refresh).
 **Requirements:** D-01..D-20 (locked decisions in 999.1-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md; docs-only audit phase)
-**Depends on:** Phase 999.11.3 (latest config-related architectural state — {SVC}_CONFIG Symbol contract from 999.11.1 D-08, bootstrap/config placement from 999.11.2, refreshed skill from 999.11.3 — audit measures against this baseline)
+**Depends on:** Phase 999.11.3 (latest config-related architectural state — {SVC}\_CONFIG Symbol contract from 999.11.1 D-08, bootstrap/config placement from 999.11.2, refreshed skill from 999.11.3 — audit measures against this baseline)
 **Plans:** 5/4 plans complete
 
 Plans:
+
 - [x] 999.1-01-PLAN.md — Lock canonical config system design (DESIGN.md: 7-level taxonomy + 29 invariants + cross-ref matrix)
 - [x] 999.1-02-PLAN.md — Audit config system against canonical design (AUDIT.md: 5-layer findings catalog with F-NN template)
 - [x] 999.1-03-PLAN.md — Propose migration variants + backlog impact (SOLUTIONS.md: 2-4 variants per F-NN + sub-phase groupings)
@@ -324,6 +358,7 @@ Plans:
 **Plans:** 11/11 plans complete
 
 Plans:
+
 - [x] 999.1.9-01-PLAN.md — W1: Package structure setup (infra/ + apps/ skeletons, 8 shared schemas moved, coexistence with legacy)
 - [x] 999.1.9-02-PLAN.md — W2: Env vars addition — 5× `{SVC}_GRPC_PORT` in 4 env files (D-15) [infrastructure-guard gate]
 - [x] 999.1.9-03-PLAN.md — W3: Audience canary migration + foundation factories (createConfigModule D-10, grpc-server.factory D-16) + dual-mode smoke [canary gate]
@@ -344,6 +379,7 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.1.8-01-PLAN.md — Re-audit Phase 999.1: inline amend AUDIT/SOLUTIONS/DESIGN/SUMMARY/VERIFICATION (add F-15 + F-16 findings, reword I-0.1 without CLI exception, add I-3.5 foundation owns config DI factory, 29 → 30 invariants) + flip 999.1-VALIDATION.md to in_progress.
 - [x] 999.1.8-02-PLAN.md — Research (NO-OP — research already captured in 999.1.8-RESEARCH.md; metadata-only placeholder for plan numbering).
 - [x] 999.1.8-03-PLAN.md — Foundation side: create `packages/foundation/src/external/config/{load-config.ts, create-config-module.ts, index.ts}`, amend `external/index.ts` barrel, add zod runtime dep to foundation package.json (consumer-first D-04 — add without removing config side).
@@ -358,6 +394,7 @@ Plans:
 **Outcome realised by 999.11.1:** per-service `{SVC}_CONFIG` Symbol pattern (Canonical Config Access Contract per D-08..D-12), foundation narrow config interfaces (D-10), full `@nestjs/config` replace (D-11), 18 callsites migrated across 10 files + cascade through 3 HTTP vendor modules. All known occurrences listed below — `gateway/health/health.controller.ts`, `gateway/throttle/throttle.module.ts`, foundation cache/persistence/logging/storage/grpc/http — resolved in Phase 999.11.1 Plans 01-09.
 
 **Original known occurrences (all closed by 999.11.1):**
+
 - `gateway/health/health.controller.ts` — closed via D-05 relocation (Plan 02, commit `6dc6279`) + D-12 migration
 - `gateway/throttle/throttle.module.ts` — closed via Plan 03 (commit `c1672a0`, IC-09 resolved)
 - Все 6 `main.ts` — `loadConfig(XxxEnvSchema) as XxxEnv` касты remain (scheduled for separate Phase 999.1 — TopologySchema Static Refactor, not absorbed)
@@ -371,34 +408,41 @@ Plans:
 **Plans:** 0 plans (scope folded into 999.11.1)
 
 Plans:
+
 - [x] ABSORBED — see Phase 999.11.1 Plans 01-09 for implementation; Plan 10 docs-update commit records the absorption
 
-### Phase 999.4: CacheService quality — improve get() type safety and error handling (BACKLOG)
+### Phase 999.4: CacheService quality — ABSORBED INTO Phase 999.19 (2026-05-07, transitively via 999.3)
 
-**Goal:** `CacheService.get<T>()` имеет две проблемы: (1) `JSON.parse(raw) as T` — unchecked type assertion, caller получает typed result без runtime проверки; (2) `catch { return null }` — молча проглатывает ошибку парсинга повреждённых данных, вызывающий код думает что ключа нет. Нужно: либо принимать optional validator/schema, либо логировать ошибку парсинга, либо возвращать raw string при ошибке. Зафиксировано в code review Phase 21 как WR-02.
-**Requirements:** TBD
-**Plans:** 0 plans
+**Goal:** ABSORBED transitively — originally absorbed into Phase 999.3 (2026-05-06) as Plan 02 (CacheService.get<T>() quality), then 999.3 itself absorbed into Phase 999.19 (2026-05-07). Final implementation home: Phase 999.19.2 (cache-service-get-quality) per 999.19-SOLUTIONS.md F-01 approved variant.
 
-Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
-
-### Phase 999.3: PersistenceModule — убрать PG_POOL export наружу (BACKLOG)
-
-**Goal:** PG_POOL экспортируется из PersistenceModule и доступен сервисам через DI, но это протечка инфраструктуры — сервисы должны работать через DRIZZLE (ORM абстракция), а не через raw pool. Проверить используется ли PG_POOL в apps/, если нет — убрать из exports. Если да — заменить на ORM операции. Аналогичный принцип применить ко всем infrastructure modules: экспортировать абстракцию, не raw client.
-**Requirements:** TBD
-**Plans:** 0 plans
+**Historical Goal (preserved):** scope перенесён в Phase 999.3 как Plan 02 (CacheService.get<T>() quality). Оригинальная задача: `JSON.parse(raw) as T` unchecked cast + silent catch повреждённых данных, зафиксировано в code review Phase 21 как WR-02. Аудит 2026-05-06 подтвердил что обе проблемы всё ещё в коде (`packages/foundation/src/external/cache/cache.service.ts:16-26`). Объединено с Phase 999.3 для одного phase ceremony cycle.
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
 
-### Phase 999.5: Вынести CacheModule конфигурацию в infrastructure layer сервисов (BACKLOG)
+- [x] ABSORBED — see Phase 999.19.2 (via 999.19-SOLUTIONS.md F-01)
 
-**Goal:** Сейчас `CacheModule.forRootAsync({ namespace: 'sender' })` конфигурируется прямо в root module sender. По согласованному паттерну (как config, storage) конфигурация должна быть в `infrastructure/cache/sender-cache.module.ts`, а root module просто импортирует `SenderCacheModule`. Привести к единому стилю: foundation даёт заготовку, сервис конфигурирует в infrastructure/, root module импортирует готовый модуль.
-**Requirements:** TBD
-**Plans:** 0 plans
+### Phase 999.3: backing-services-backlog-cleanup — ABSORBED INTO Phase 999.19 (2026-05-07)
+
+**Status:** ABSORBED INTO Phase 999.19 (closed 2026-05-07). Original scope (Plan 01: PG_POOL leak, Plan 02: CacheService.get<T>() quality) was promoted into Phase 999.19.1 + Phase 999.19.2 via 999.19-SOLUTIONS.md F-02 + F-01 approved variants. No further work in 999.3 — implementation lives in the 999.19.N sub-phases.
+
+**Historical Status (PAUSED 2026-05-06):** PAUSED — pending Phase 999.19 (backing-services-canonical-cross-audit-5-layer) findings. Original scope (Plan 01: PG_POOL leak removal, Plan 02: CacheService.get<T>() quality) preserved as seed-findings F-A/F-B input в 999.19. После close 999.19: если оба findings промотируются в 999.19.1+999.19.2 — 999.3 помечается ABSORBED INTO 999.19; иначе replanned по canonical decisions из 999.19-DESIGN.md. Текущий `/gsd:discuss-phase 999.3` halted без записи CONTEXT.md / DISCUSSION-LOG.md — scope перенесён в /gsd:discuss-phase 999.19.
+
+**Goal (preserved):** Объединённая cleanup фаза для двух открытых backlog items по backing-services foundation layer. Plan 01: убрать `PG_POOL` Symbol export из `packages/foundation/src/external/persistence/index.ts` + из `PersistenceModule.exports[]` array — это Tier 2 raw lib instance (pg.Pool), не должен быть в публичном API foundation; аудит 2026-05-06 подтвердил что в `apps/*/src/` нет `@Inject(PG_POOL)` потребителей, только JSDoc-комментарии; внутри foundation остаётся как private symbol для `drizzle-shutdown.service.ts` + `postgres.health.ts`. Симметрия с cache layer: `REDIS_CLIENT` (тоже Tier 2) экспортируется ТОЛЬКО с documented narrow-unlock для gateway throttle (Phase 999.12 D-13); persistence не имеет такого narrow-unlock — leak без обоснования. Plan 02: `CacheService.get<T>()` quality (поглощено из Phase 999.4) — fix `JSON.parse(raw) as T` unchecked cast + `catch { return null }` silent swallow повреждённых данных; принять optional Zod schema validator + явное логирование parse-error + либо явный discriminated return type (`{status: absent | corrupt | value, value?: T}`) либо typed `OptionalParseError`. Out-of-scope: any business logic, apps/* code, ESLint rules.
+**Requirements:** TBD (locked via /gsd:discuss-phase 999.19, then promoted into 999.19.1+999.19.2 sub-phases per SOLUTIONS.md)
+**Depends on:** Phase 999.19 (NEW — pending audit findings); Phase 999.12.1 (naming convention finalized)
+**Plans:** TBD (run `/gsd:plan-phase 999.3` ONLY после close 999.19 + ABSORBED-or-replanned decision)
 
 Plans:
-- [ ] TBD (promote with /gsd-review-backlog when ready)
+
+- [ ] TBD (run `/gsd:plan-phase 999.3` ONLY после close 999.19)
+
+### Phase 999.5: Вынести CacheModule конфигурацию в infrastructure layer сервисов — IMPLICITLY RESOLVED via Phase 999.12 (2026-05-06)
+
+**Goal:** RESOLVED — Phase 999.12 (`redis-canonical-alignment`, 11/11 plans) реализовала полный canonical pattern: каждый из 6 сервисов (auth, sender, parser, audience, notifier, gateway) имеет свой `apps/{svc}/src/infrastructure/outbound/cache/cache.module.ts` с `AppCacheModule` wrapper, который вызывает `CacheModule.forRootAsync({namespace: SERVICE.{svc}.id})`. Root module sender больше не конфигурирует CacheModule напрямую — он импортирует `AppCacheModule` через `bootstrap/health/health.module.ts` (5 gRPC сервисов) или напрямую в root для Redis throttle storage (gateway). Аудит 2026-05-06 подтвердил структуру по всем 6 сервисам.
+
+Plans:
+
+- [x] RESOLVED — see Phase 999.12 Plans 04-09 for per-service AppCacheModule rollout
 
 ### Phase 999.6: Настроить HTTPS для Garage WebUI на Coolify (BACKLOG)
 
@@ -407,6 +451,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.7: Перенести gRPC client modules из foundation в infrastructure layer сервисов (BACKLOG)
@@ -417,6 +462,7 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 999.7-01-PLAN.md — Foundation defineGrpcClient() factory + barrel update
 - [x] 999.7-02-PLAN.md — Gateway: 5 per-upstream client dirs + rewire consumers
 - [x] 999.7-03-PLAN.md — Cross-service: sender->audience, parser->notifier, audience->parser + root modules
@@ -430,6 +476,7 @@ Plans:
 **Plans:** 5/5 plans complete
 
 Plans:
+
 - [x] 999.7.1-01-PLAN.md — Wave 0: pre-refactor inventory audit (D-11) + install eslint-plugin-check-file@^2.8.0
 - [x] 999.7.1-02-PLAN.md — Wave 1: foundation `defineGrpcClient` signature change + internal token derivation (D-01..D-03)
 - [x] 999.7.1-03-PLAN.md — Wave 2: refactor 5 gateway gRPC upstreams (auth/sender/parser/audience/notifier) atomically (D-04..D-09)
@@ -447,13 +494,13 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.7.2-01-PLAN.md — Wave 1: foundation GrpcCaller helper + defineGrpcClient 2-arg build signature + barrel type export (D-01..D-09)
 - [x] 999.7.2-02-PLAN.md — Wave 2: pilot AuthClient composition migration + runtime smoke checkpoint (D-11 + D-12)
 - [x] 999.7.2-03a-PLAN.md — Wave 3: sweep 4 gateway-side clients (sender/parser/audience/notifier) — atomic commit per upstream (D-13 + D-14)
 - [x] 999.7.2-03b-PLAN.md — Wave 4: sweep 3 cross-service clients (sender→audience, parser→notifier, audience→parser) — atomic commit per upstream (D-13 + D-14)
 - [x] 999.7.2-04-PLAN.md — Wave 5: delete AbstractGrpcClient + update infrastructure-client-layering skill + append ESLint ClassDeclaration[superClass] guard (D-10 + D-15 + D-16)
 - [x] 999.7.2-05-PLAN.md — Wave 6: create composition-over-inheritance universal skill + final runtime smoke BOTH start:native + start:isolated (D-17 + final D-12/D-14)
-
 
 ### Phase 999.7.3: gRPC client promisify proxy — replace per-method wrappers (INSERTED)
 
@@ -463,6 +510,7 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.7.3-01-PLAN.md — Wave 1: foundation create promisify-grpc-client.ts + delete grpc-caller.ts + simplify defineGrpcClient (D-02..D-10)
 - [x] 999.7.3-02-PLAN.md — Wave 2: pilot AuthClient migration to Promisified Proxy + runtime smoke checkpoint (D-09 + D-11 + D-15) — code complete; runtime smoke gate DEFERRED to Plan 03 (gateway compile-blocked by 4 unmigrated upstreams)
 - [x] 999.7.3-03-PLAN.md — Wave 3: sweep 4 gateway upstreams (sender/parser/audience/notifier) — atomic commit per upstream (D-14 + D-15 + D-19) — gateway typecheck FULLY GREEN; deferred Plan-02 BLOCKING runtime smoke executed: structural design validated (gateway boots, /health/ready reaches all 5 upstreams), strict 5/5-up criterion deferred to Plan 04 (cross-service services blocked from boot)
@@ -478,6 +526,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.9: gRPC client RxJS leakage refinements (open discussion) (BACKLOG)
@@ -485,6 +534,7 @@ Plans:
 **Goal:** Open-for-discussion polish on `AbstractGrpcClient` (RxJS surface). Surfaced during Phase 999.7.1 retrospective. NO commitment to implement until reviewed — items 1/2/4 are minor polish; item 3 is conditional on adding streaming RPCs.
 
 **Items to evaluate:**
+
 1. Replace `lastValueFrom` with `firstValueFrom` in `AbstractGrpcClient.call()` — semantically tighter for unary
 2. Add `AbortSignal` cancellation support to `CallOpts` (client-side cancel via `takeUntil(fromEvent(signal, 'abort'))`)
 3. Streaming RPC adapter (`callStream`/`callIterable` returning `AsyncIterable<T>`) — only if streaming RPCs added later
@@ -495,6 +545,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd-review-backlog when ready)
 
 ### Phase 999.10: Application architecture — add Service layer + restructure Hexagonal stack across all microservices (ARCHITECTURALLY COMPLETE — awaiting /gsd:verify-work)
@@ -504,6 +555,7 @@ Plans:
 **Why this phase:** обсуждение между user и agent 2026-04-18 после Phase 999.7.3 (server-side gRPC pattern audit). Auth — Hexagonal reference impl, но НЕТ Application Service слоя (use cases имплементируют inbound ports напрямую). Naming inconsistency: `AuthGrpcServer` vs `HealthController`. HealthController в outlier `apps/{service}/src/health/` вместо `infrastructure/controllers/rest/`. Pattern не зафиксирован skill'ом → drift риск. Все architectural decisions уже зафиксированы в pre-discussion notes (999.10-NOTES.md, 12 D-LOCKED entries).
 
 **Locked decisions (D-LOCKED-01..D-LOCKED-12 in NOTES.md):**
+
 1. Унифицированный 3-слойный stack (Controller→Service→UseCase везде, всегда)
 2. Per-feature service granularity (LoginService, RegisterService — не один большой)
 3. Use case всегда отдельный класс (даже если pure delegation сегодня)
@@ -527,7 +579,8 @@ Plans:
 **Plans:** 7/7 plans complete
 
 Plans:
-- [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md; no code)
+
+- [x] 999.10-01-PLAN.md — Skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/\*.md; no code)
 - [x] 999.10-02-PLAN.md — Auth pilot (full Controller → Service → UseCase refactor + 6 inbound ports + 6 services + 8 use cases per D-23 audit)
 - [x] 999.10-03-PLAN.md — Sender sweep (11 RPCs → 10 services + shared TransitionCampaignStatusUseCase)
 - [x] 999.10-04-PLAN.md — Parser sweep (8 RPCs via canonical stack — Pitfall 3 resolved via Option A canonicalise; StorageSmokeController deleted, smoke logic in 3 real-I/O use cases; atomic commit 22fcb5e)
@@ -552,11 +605,11 @@ Plans:
 
 **Конкретные правила per слой:**
 
-| Слой | Field name | Type | DI token | Runtime class |
-|------|-----------|------|----------|---------------|
-| Controller injects inbound port | `listGroupsService` | `ListGroupsPort` | `LIST_GROUPS_PORT` | `ListGroupsService` |
-| Service injects use case | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class reference) | `VerifyCredentialsUseCase` |
-| UseCase injects outbound port | `userRepository` | `UserRepositoryPort` | `USER_REPOSITORY_PORT` | `PgUserRepository` |
+| Слой                            | Field name          | Type                       | DI token               | Runtime class              |
+| ------------------------------- | ------------------- | -------------------------- | ---------------------- | -------------------------- |
+| Controller injects inbound port | `listGroupsService` | `ListGroupsPort`           | `LIST_GROUPS_PORT`     | `ListGroupsService`        |
+| Service injects use case        | `verifyCredentials` | `VerifyCredentialsUseCase` | — (class reference)    | `VerifyCredentialsUseCase` |
+| UseCase injects outbound port   | `userRepository`    | `UserRepositoryPort`       | `USER_REPOSITORY_PORT` | `PgUserRepository`         |
 
 **Pre-discussion artifact:** `.planning/phases/999.10.1-hexagonal-naming-convention-refactor/999.10.1-NOTES.md` (full dialogue snapshot + 2 research reports + locked decisions + open questions)
 
@@ -566,11 +619,12 @@ Plans:
 **Plans:** 5/5 plans complete
 
 Plans:
+
 - [x] 999.10.1-01-PLAN.md — auth pilot (6 controller + 4 use-case Repository field renames; services 6/6 already compliant) — PASSED (2 atomic commits 16c52f3 + e6ab119; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 13/13 structural grep invariants PASS on auth slice)
 - [x] 999.10.1-02-PLAN.md — sender sweep (10 controller + 4 use-case Repository + 10 service UseCase field renames per D-19) — PASSED (3 atomic commits 06f6889 + 4ceaf24 + 11235dd; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 18/18 structural grep invariants PASS; D-19 strict composed rule validated — pause/resume both use transitionCampaignStatus)
 - [x] 999.10.1-03-PLAN.md — parser sweep (7 controller incl. 2 edge-case type-stem derivations + 3 use-case Repository + 7 service UseCase incl. 1 dual-field service) — PASSED (3 atomic commits d532800 + 6aa600e + 8e3b417; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up + `/test/parser/storage-service` `allPassed:true` both buckets; 29/29 structural grep invariants PASS on parser slice; D-01 A.edge rule first empirically validated — runStorageSmokeService/cleanupStorageSmokeService derived from TYPE STEM, NOT short form; D-19 strict dual-field rule second application on run-storage-smoke.service.ts)
 - [x] 999.10.1-04-PLAN.md — audience sweep (8 controller collision-showcase + 7 use-case Repository with D-20 atomic underscore drop + 8 service UseCase incl. shared TransitionRecipientsStatusUseCase) — PASSED (3 atomic commits 20a758b + fd61e45 + 071e96b; dual-mode runtime smoke native + isolated HTTP 200 5/5 upstreams up; 32/32 structural grep invariants PASS on audience slice + phase-level rollup; D-16 collision showcase validated — `listGroupsService: ListGroupsPort` resolves method↔field clash; D-20 atomic underscore drop realised — 0 `_\w+` fields in audience application layer; D-19 strict third real-world application — mark-as-sent + reset-send-status both use `transitionRecipientsStatus` from shared TransitionRecipientsStatusUseCase; PHASE-LEVEL INVARIANTS ALL GREEN: 0 Port-fields / 31 Service-fields / 18 Repository-fields / 0 underscores workspace-wide)
-- [x] 999.10.1-05-PLAN.md — docs finalization (atomic 6-file commit 58ea450 per D-13/D-14/D-22: CLAUDE.md + ARCHITECTURE.md + NAMING.md + EXAMPLES.md + DO-DONT.md + SKILL.md; NAMING.md gains ~170-line "## Field Naming Rules (Phase 999.10.1)" section with 7 sub-blocks a-g incl. 3 worked examples + 6-author reference split table + Clean Code ch.2 Hungarian anti-pattern citation; DO-DONT.md adds anti-pattern #10 with grep detector; SKILL.md D-22 mini-update; 12 Task 1 grep invariants + 4 phase-level D-01/D-02/D-04/D-20 invariants all PASS; pnpm lint 7/7 + pnpm build 10/10 cached green; Task 2 human-verify deferred to /gsd:verify-work 999.10.1; PHASE 999.10.1 ARCHITECTURALLY COMPLETE — all 22 D-* decisions D-01..D-22 realised)
+- [x] 999.10.1-05-PLAN.md — docs finalization (atomic 6-file commit 58ea450 per D-13/D-14/D-22: CLAUDE.md + ARCHITECTURE.md + NAMING.md + EXAMPLES.md + DO-DONT.md + SKILL.md; NAMING.md gains ~170-line "## Field Naming Rules (Phase 999.10.1)" section with 7 sub-blocks a-g incl. 3 worked examples + 6-author reference split table + Clean Code ch.2 Hungarian anti-pattern citation; DO-DONT.md adds anti-pattern #10 with grep detector; SKILL.md D-22 mini-update; 12 Task 1 grep invariants + 4 phase-level D-01/D-02/D-04/D-20 invariants all PASS; pnpm lint 7/7 + pnpm build 10/10 cached green; Task 2 human-verify deferred to /gsd:verify-work 999.10.1; PHASE 999.10.1 ARCHITECTURALLY COMPLETE — all 22 D-\* decisions D-01..D-22 realised)
 
 ### Phase 999.11: infra-abstraction-audit-smoke-cleanup
 
@@ -580,6 +634,7 @@ Plans:
 **Plans:** 4/4 plans complete
 
 Plans:
+
 - [x] 999.11-01-PLAN.md — Gateway smoke removal (3 atomic commits: storage-smoke + http-smoke + grpc-client-sanity; OQ-1 resolution deletes infrastructure/clients/http-smoke/ atomically)
 - [x] 999.11-02-PLAN.md — Parser backend smoke hexagonal slice deletion (1 atomic commit d5db160: 9 application files + 3 infrastructure edits — 12 file ops; parser.controller.ts keeps throwing stubs until Plan 04 regenerates ParserProto.ParserServiceController; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10; bisect-safe)
 - [x] 999.11-03-PLAN.md — Notifier backend smoke deletion (1 atomic commit f78d74e: 2 file changes — 1 edit + 1 delete; asymmetric scope confirmed empirically pre-edit — no hexagonal slice existed to remove per RESEARCH.md Pitfall 2; StorageSmokeController + @GrpcMethod handlers for NotifierService.RunStorageSmoke/CleanupStorageSmoke gone from runtime; TelegramSmokeController preserved per D-03; D-06 per-commit gate green pnpm lint 7/7 + pnpm build 10/10)
@@ -593,7 +648,8 @@ Plans:
 **Plans:** 6/5 plans complete
 
 Plans:
-- [x] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/*/{phase}-CONTEXT.md and *-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1) ✅ 2026-04-22 (419 decisions across 22 phases + 227 orphans)
+
+- [x] 999.11.4-00-PLAN.md — Phase-decision index build: parse all D-XX patterns from .planning/phases/_/{phase}-CONTEXT.md and _-SUMMARY.md across ~35 phases; group by skill topic-area; flag orphan decisions (D-04/D-05/D-06; Wave 1) ✅ 2026-04-22 (419 decisions across 22 phases + 227 orphans)
 - [x] 999.11.4-01-PLAN.md — AUTH batch: 6 parallel sub-agents audit no-magic-values, twelve-factor, env-schema, infrastructure-guard, gsd-flow-guard, branching-patterns via grep-against-rules methodology; 7 atomic commits (1 scaffold + 6 per-skill); Wave 2 ✅ 2026-04-22 (4 findings: 2 nmv + 2 ig; 4 skills aligned)
 - [x] 999.11.4-02-PLAN.md — DESC batch: 2 parallel sub-agents audit nestjs-hexagonal-mapping, infrastructure-client-layering via skill-vs-phase-decisions methodology using PHASE-DECISIONS-INDEX; 3 atomic commits (2 per-skill + 1 SUMMARY); Wave 3 ✅ 2026-04-22 (4 findings: nhm-F-03..04 + icl-F-01..02, all refresh-skill, 13 sanctioned D-XX xref, 0 ad-hoc drift)
 - [x] 999.11.4-03-PLAN.md — HYBRID batch: 3 skills audited (rsv + coi + cdh) via per-section combo methodology; 4 atomic commits (3 per-skill + 1 SUMMARY); Wave 4 ✅ 2026-04-22 (8 findings: 2 rsv + 3 coi + 3 cdh, all DESC-section, 29 sanctioned D-XX xref + 1 ad-hoc drift; sequential-fallback Rule 3 deviation — Task tool unavailable in context, identical output contract preserved)
@@ -607,6 +663,7 @@ Plans:
 **Plans:** 6/6 plans complete
 
 Plans:
+
 - [x] 999.11.4.1-01-PLAN.md — Refactor `nestjs-hexagonal-mapping` SKILL.md + references (LAYERS.md + NAMING.md); close nhm-F-03 + nhm-F-04; DRAFTS the D-4 header-block wording + the abstract config-factory wording that Plans 02..06 reuse verbatim per D-10a (Wave 1, 3 tasks, 3 atomic commits + newcomer test) ✅ 2026-04-24
 - [x] 999.11.4.1-02-PLAN.md — Refactor `infrastructure-client-layering` SKILL.md; reuse Plan 01's D-4 wording + config-factory wording byte-for-byte (D-10a pairing); close icl-F-01 (hand-rolled @Global() @Module({}) example replaced with abstract factory description) + icl-F-02 (split single-instance vs multi-instance-per-namespace sections) (Wave 2, 2 tasks, 2 atomic commits) ✅ 2026-04-24
 - [x] 999.11.4.1-03-PLAN.md — Refactor `infrastructure-guard` SKILL.md; close ig-F-01 + ig-F-02 by DELETING the Standard Ports inventory table and replacing with role-based identifier-governance section pointing at tracked env templates + tracked compose infra configuration per D-5 + D-8 (Wave 3, 2 tasks, 2 atomic commits) ✅ 2026-04-24
@@ -616,23 +673,25 @@ Plans:
 
 ### Phase 999.11.3: nestjs-hexagonal-mapping skill refresh for inbound/outbound/bootstrap tree (INSERTED)
 
-**Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
+**Goal:** Обновить skill `nestjs-hexagonal-mapping` (SKILL.md + 6 references/\*.md) под канонический `infrastructure/{inbound,outbound,bootstrap}/` tree, зафиксированный в Phase 999.11.2. Plan 09 из 999.11.2 обновил только sibling-skill `infrastructure-client-layering`, этот скил пропустили — в результате CLAUDE.md указывает на `nestjs-hexagonal-mapping` как source of truth, но сам скил ссылается на устаревшие пути (`infrastructure/controllers/grpc/`, `infrastructure/persistence/`, `infrastructure/config/`, `infrastructure/clients/`). Scope: переписать пути по всем 7 файлам скила под 999.11.2 D-01..D-17, обновить §"Canonical Tree" и §"Composition Root" в LAYERS.md, актуализировать PROTO-VISIBILITY.md + DO-DONT.md #7 и #8, добавить gateway D-11a exception (нет root `{svc}.constants.ts`), cross-ref на `infrastructure-client-layering` §"Phase 999.11.2 refinement". **Принцип фазы:** каждое утверждение скила верифицируется grep/Read против текущего кода перед тем как считать рядом green — skill не должен расходиться с реальной структурой.
 **Requirements**: D-01..D-08 (locked decisions in 999.11.3-CONTEXT.md serve as requirement surface — no REQ-IDs in REQUIREMENTS.md per CONTEXT.md frontmatter)
 **Depends on:** Phase 999.11.2 (канонический tree landed) + Phase 999.11.1 D-08 (bootstrap/config slice shape)
 **Plans:** 2/2 plans complete
 
 Plans:
+
 - [x] 999.11.3-01-PLAN.md — Refresh core skill surface: SKILL.md + LAYERS.md with canonical inbound/outbound/bootstrap paths, full §Canonical Tree rewrite, 3 new parent sections (§Bootstrap, §Inbound, §Outbound), gateway D-11a exception documented (Wave 1, atomic commit)
-- [ ] 999.11.3-02-PLAN.md — Refresh 5 references/*.md + bidirectional cross-ref with infrastructure-client-layering + write 999.11.3-VERIFICATION.md + flip VALIDATION.md nyquist_compliant flag (Wave 2, atomic commit)
+- [ ] 999.11.3-02-PLAN.md — Refresh 5 references/\*.md + bidirectional cross-ref with infrastructure-client-layering + write 999.11.3-VERIFICATION.md + flip VALIDATION.md nyquist_compliant flag (Wave 2, atomic commit)
 
 ### Phase 999.11.2: infrastructure-tree-canonical-split (INSERTED)
 
-**Goal:** Refactor `apps/{svc}/src/infrastructure/` across all 6 microservices into canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4 + Graca Explicit Architecture. Feature-slicing per direction (per aggregate / upstream / vendor / cross-cutting concern). Create HealthModule across all 6 services (D-08). Move {SVC}_CONFIG into bootstrap/config/ (D-10). Delete empty gateway.constants.ts (D-11a). Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping + .eslintrc.js Override 6/7/9 paths + infrastructure-client-layering skill. D-14 dual-mode smoke gate at phase end per 999.11.1 precedent. Behavior-preserving — no business logic, no tests. ~65 file moves + ~36 creates + 1 delete + 5 empty-dir cleanups.
+**Goal:** Refactor `apps/{svc}/src/infrastructure/` across all 6 microservices into canonical `inbound/`/`outbound/`/`bootstrap/` split per Cockburn primary/secondary adapters + Uncle Bob Ring 3/Ring 4 + Graca Explicit Architecture. Feature-slicing per direction (per aggregate / upstream / vendor / cross-cutting concern). Create HealthModule across all 6 services (D-08). Move {SVC}\_CONFIG into bootstrap/config/ (D-10). Delete empty gateway.constants.ts (D-11a). Refine CLAUDE.md §NestJS↔Hexagonal Layer Mapping + .eslintrc.js Override 6/7/9 paths + infrastructure-client-layering skill. D-14 dual-mode smoke gate at phase end per 999.11.1 precedent. Behavior-preserving — no business logic, no tests. ~65 file moves + ~36 creates + 1 delete + 5 empty-dir cleanups.
 **Requirements**: D-01..D-17 (locked decisions in 999.11.2-CONTEXT.md serve as primary requirement surface — no new REQ-IDs in REQUIREMENTS.md)
 **Depends on:** Phase 999.11
 **Plans:** 10/10 plans complete
 
 Plans:
+
 - [ ] 999.11.2-01-PLAN.md — Migrate auth service (template for plans 02-06; 1 aggregate, 1 proto, 0 cross-app clients; Commit 1)
 - [ ] 999.11.2-02-PLAN.md — Migrate audience service (2 aggregates, 1 gRPC upstream; first multi-sub persistence composer; Commit 2)
 - [ ] 999.11.2-03-PLAN.md — Migrate sender service (1 aggregate, 1 gRPC upstream, 1 HTTP vendor; three outbound composer categories; Commit 3)
@@ -652,7 +711,8 @@ Plans:
 **Plans:** 10/10 plans complete
 
 Plans:
-- [x] 999.11.1-01-PLAN.md — Register {SVC}_CONFIG Symbols + providers in all 6 services (dormant, D-08)
+
+- [x] 999.11.1-01-PLAN.md — Register {SVC}\_CONFIG Symbols + providers in all 6 services (dormant, D-08)
 - [x] 999.11.1-02-PLAN.md — Relocate 2 health controllers (gateway + notifier) to infrastructure/controllers/rest (D-05)
 - [x] 999.11.1-03-PLAN.md — Relocate ThrottleModule to infrastructure/throttle + migrate to GATEWAY_CONFIG (D-06, first real consumer)
 - [x] 999.11.1-04-PLAN.md — Foundation narrow-config migration: cache + persistence + logging + storage (D-10, IC-01..IC-03, IC-07, IC-08)
@@ -663,7 +723,6 @@ Plans:
 - [x] 999.11.1-09-PLAN.md — Remove @nestjs/config — delete AppConfigModule + scrub deps across workspace (D-11)
 - [x] 999.11.1-10-PLAN.md — Update ROADMAP + skill docs; mark 999.2 absorbed; D-15 dual-mode smoke gate
 
-
 ### Phase 999.12: redis-canonical-alignment
 
 **Goal:** Align Redis CacheModule with the canonical infra-client pattern (symmetry with gRPC post-999.7.x + persistence) and roll the structural cache adapter into all 6 services (auth, sender, audience, parser, notifier, gateway). Sender migrates `CacheModule.forRootAsync` from `bootstrap/health/` to a new `outbound/cache/cache.module.ts` thin app-level wrapper; the other 5 services receive the same wrapper + env schema spread + CACHE_CONFIG_PORT slice + REDIS_HEALTH inject. Gateway gains the single concrete business binding — `@nestjs/throttler` storage migrated from in-memory to Redis-backed via `@nest-lab/throttler-storage-redis@^1.2.0`, closing the distributed rate-limit gap. ESLint Override 4 forbids raw `ioredis` import in `apps/*/src/**`. CLAUDE.md §"NestJS↔Hexagonal Layer Mapping" matrix gets a new Cache adapter row (D-09); Phase 21 D-02 receives an inline rate-limit-partial-unlock amendment in CONTEXT.md (D-16). Full context in `999.12-CONTEXT.md` (20 D-decisions); research and pattern map in `999.12-RESEARCH.md` + `999.12-PATTERNS.md`.
@@ -671,7 +730,8 @@ Plans:
 **Plans:** 11 plans
 
 Plans:
-- [x] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/*/src/** (D-08)
+
+- [x] 999.12-01-PLAN.md — ESLint Override 4 forbids raw ioredis import in apps/\*/src/\*\* (D-08)
 - [x] 999.12-02-PLAN.md — Foundation REDIS_CLIENT export amendment for D-13 throttle storage (Phase 21 D-04 narrowly amended; D-07/D-13)
 - [x] 999.12-03-PLAN.md — Compose RedisSchema.shape into 5 env schemas (auth/audience/parser/notifier/gateway, D-15)
 - [x] 999.12-04-PLAN.md — Sender migration: CacheModule from bootstrap/health/ to outbound/cache/ (D-02/D-03/D-04/D-05)
@@ -691,6 +751,7 @@ Plans:
 **Plans:** 8/8 plans complete
 
 Plans:
+
 - [x] 999.12.1-01-PLAN.md — Cache token rename: REDIS_HEALTH → CACHE_HEALTH + 6 health.controllers field redis → cache (D-04)
 - [x] 999.12.1-02-PLAN.md — Persistence token+type rename: DATABASE_HEALTH → PERSISTENCE_HEALTH + DatabaseHealthIndicator → PersistenceHealthIndicator + field db → persistence in 4 controllers (D-05)
 - [x] 999.12.1-03-PLAN.md — Storage token rename: PUBLIC_BUCKET_HEALTH → PUBLIC_STORAGE_HEALTH + notifier field publicBucket → publicStorage (D-06)
@@ -703,19 +764,34 @@ Plans:
 ### Phase 999.13: rabbitmq-canonical-abstraction (BACKLOG)
 
 **Goal:** Build RabbitMQ client abstraction following gRPC canonical reference from 999.11 — foundation primitive (connection factory, channel lifecycle, publish/consume helpers), per-service modules in `apps/*/src/infrastructure/messaging/`, Symbol DI tokens, real `RabbitMqHealthIndicator` replacing current stub. Possibly merges with Phase 25 EventModule (or precedes it as canonical-pattern prerequisite). Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.13".
+
+**Updated 2026-05-07 by Phase 999.19 audit (backing-services-canonical-cross-audit-5-layer)** — scope unchanged but enriched with concrete L5 findings. Promotion researcher MUST read these before planning:
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L5 invariants (I-5.1..I-5.6) — canonical events-layer rules
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` F-06, F-07, F-08 — concrete skeleton-state findings (MessagingHealthIndicator stub, MESSAGING_CONFIG_PORT pre-declared no impl, EventConsumer NotImplementedException stub) with inline grep evidence
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` F-06, F-07, F-08 — variant trade-offs + cross-skill flags (`branching-patterns` Map/Record dispatch for event handlers)
+- Code currency: artefacts captured at HEAD `231573f` (999.19 closure). Re-grep before planning if commits since changed L5 surface.
 **Requirements:** TBD
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.14: s3-canonical-audit (BACKLOG)
 
 **Goal:** Audit Phase 22/22.1 S3 StorageModule setup against gRPC canonical reference from 999.11 — confirm S3CoreModule + BucketStorageModule.forBucket + per-bucket health tokens + foundation external/internal encapsulation + ESLint 3-gate protection as "second sibling pattern", or realign minor details. Likely near-no-op (S3 is the most mature infra abstraction), but audit clarifies universal-vs-gRPC-specific canonical pattern. Full context in `.planning/notes/2026-04-19-infra-consistency-discussion.md` §"Phase 999.14".
+
+**Updated 2026-05-07 by Phase 999.19 audit (backing-services-canonical-cross-audit-5-layer)** — 999.19 already surfaced one L3 finding (F-05 S3 timeout). At promotion time researcher MUST read upstream artefacts AND make the candidate-redundant decision (per 999.19-SOLUTIONS.md `Backlog Impact`):
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L3 invariants — canonical storage-layer rules
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` F-05 — `S3HealthIndicator` no client-side timeout (parser /health/ready stalls 10s+ on Garage S3)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` F-05 — variant catalog
+- **Scope decision at promotion:** if 999.14's own audit surfaces no NEW L3 findings beyond F-05 → ABSORB INTO 999.19 (F-05 fix lands as a tiny 999.19.N or stays here as scoped). If 999.14 surfaces multi-bucket / protocol abstraction / public-private symmetry findings → keep 999.14 as full canonical audit phase.
+- Code currency: artefacts captured at HEAD `231573f` (999.19 closure). Re-grep before planning if commits since changed L3 surface.
 **Requirements:** TBD
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.15: production-health-contract-ci-smoke (BACKLOG)
@@ -725,6 +801,7 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.16: s3-garage-connectivity-isolated-mode-fix (BACKLOG)
@@ -734,13 +811,259 @@ Plans:
 **Plans:** 0 plans
 
 Plans:
+
 - [ ] TBD (promote with /gsd:review-backlog when ready)
 
 ### Phase 999.17: devsecops-shift-left-security-tooling (BACKLOG)
 
 **Goal:** Внедрить трёхслойную систему security-проверок проекта на разных стадиях разработки. **Слой 1 — pre-commit (husky + lint-staged):** быстрая (<5s) проверка на staged файлах — gitleaks (secrets), ESLint+Prettier (lint+format). **Слой 2 — pre-push:** инкрементальные проверки (10-30s) на изменения относительно origin/main — Semgrep (SAST для NestJS/TS), `pnpm audit` при изменении lock-файла, Trivy config при изменении Dockerfile/compose. **Слой 3 — CI required gate (GitHub Actions, branch protection):** полный прогон gitleaks + Semgrep + Trivy fs (SCA + license) + Trivy config (Dockerfile + docker-compose) + Trivy image (после build) + Syft (SBOM artifact). Quality Gate с thresholds: HIGH/CRITICAL CVE → block merge, new secret detected → block, SAST HIGH+ → block. Принцип: hooks дают разработчику быстрый фидбек (можно обойти `--no-verify`), CI работает как обязательный gate (нельзя обойти при включённой branch protection). **Lean stack:** gitleaks, Semgrep, Trivy (3 режима — fs/config/image), Syft, husky 9, lint-staged. **Rejected during analysis:** SonarQube (80%+ overlap с Semgrep, тяжёлая инфраструктура — своя БД/сервер/лицензия для приватных репо), отдельный SCA tool помимо Trivy (Trivy fs покрывает npm SCA + license check). **Scope (in):** dev hooks (pre-commit, pre-push), CI workflows (`.github/workflows/security.yml`), Quality Gate config с thresholds, husky setup, документация локального запуска проверок. **Scope (out, devops layer):** continuous Trivy rescan продакшен-образов по cron (CVE feed обновляется ежедневно — нужен scheduled scanner), runtime security (Falco/Wiz/Aqua), DAST (ZAP/Burp), secrets management в проде (Vault/SOPS), WAF/IDS/IPS, k8s admission controllers. **Scope (deferred to separate phase):** Renovate/Dependabot для автоматических dep updates (это про процесс мерджа автоПР, не про сами scanners). **Open questions для discuss-phase:** (1) husky уже стоит в репо или ставим с нуля (проверить package.json + .husky/); (2) Renovate vs Dependabot — нативный для GitHub vs гибче для monorepo; (3) точные thresholds Quality Gate — только CRITICAL block или HIGH+ тоже; (4) pre-commit hook нужен или только CI (локальные hooks ловят секреты до push, но требуют дисциплины разработчика). Discovered 2026-04-28 после завершения Phase 999.12.1 в discussion на тему DevSecOps practices for the project.
 **Requirements:** TBD
-**Plans:** 0 plans
+**Plans:** 12/12 plans complete
 
 Plans:
-- [ ] TBD (promote with /gsd:review-backlog when ready)
+
+- [x] 999.17-01-PLAN.md — pnpm 9 → 11 bump (D-11 prerequisite)
+- [x] 999.17-02-PLAN.md — lint-staged install + .lintstagedrc.json (D-01, D-12)
+- [x] 999.17-03-PLAN.md — .gitleaks.toml + .gitleaksignore (D-03, D-09, D-14, D-16)
+- [x] 999.17-04-PLAN.md — .semgrep.yml + .semgrepignore (D-13, D-09, D-14, D-16)
+- [x] 999.17-05-PLAN.md — .trivyignore (D-09, D-14, D-16)
+- [x] 999.17-06-PLAN.md — pre-commit hook + security:secrets-staged (D-01, D-02, D-03)
+- [x] 999.17-07-PLAN.md — pre-push hook + security:\* chain (D-01, D-02, D-06, D-10, D-13)
+- [x] 999.17-08-PLAN.md — renovate.json (D-08)
+- [x] 999.17-09-PLAN.md — DEVOPS-HANDOFF.md + .gitlab-ci-security.yml.example (D-04, D-05, D-07, D-15)
+- [x] 999.17-10-PLAN.md — End-to-end smoke + STATE.md closure
+- [x] 999.17-11-PLAN.md — GAP-CLOSURE: restore working build-script trust gate (CR-01 — strictDepBuilds:true + exhaustive allowBuilds + Plan 02 SUMMARY correction)
+- [x] 999.17-12-PLAN.md — GAP-CLOSURE: fix gitleaks allowlist regex blind spot (CR-02 — delete unanchored allowlist; rely on useDefault path exclusions)
+
+### Phase 999.17.3: vulnerability-remediation-direct-dep-upgrades (INSERTED)
+
+**Goal:** Sub-phase carve-out из 999.17.1 Plan 04 Task 4. Закрыть `pnpm audit` baseline (22 findings: 1 critical / 8 high / 13 moderate) через **direct-dep upgrades только** (никаких `pnpm.overrides`, никаких `pnpm.auditConfig.ignoreCves`) — strict zero per D-01. 5 ordered waves: (W1) `@grpc/proto-loader` 0.7.15 → 0.8.0 закрывает protobufjs critical в 5 apps; (W2) NestJS family ^11.0.1 → ^11.1.19 (microservices/core/common/platform-express) + `@aws-sdk/client-s3` ^3.1030.0 → ^3.1040.0 в foundation закрывает 7 DoS/Tampering advisories через 6 apps + foundation peerDeps; (W3) ESLint 8 → 9.39.4 + @typescript-eslint v7 → v8.59.1 + plugin family + **full flat config rewrite** (`.eslintrc.js` → `eslint.config.cjs`, NOT FlatCompat shim per D-09; 9 architectural override blocks preserved verbatim per PATTERNS.md Pattern C; drop `--ext .ts` from 7 lint scripts) закрывает 5 ReDoS/DoS advisories; (W4) `@nestjs/cli` + `@nestjs/schematics` 11.0.0 → 11.0.21/11.1.0 + `grpc-tools` → ^1.13.1 + `turbo` → ^2.9.7 + **drizzle-kit 0.31.10 → 1.0.0-rc.1** (USER-LOCKED RC PATH per CONTEXT.md escalation, NOT ACCEPTED-RISKS.md path; 4 DB services × `db:generate` empirical verification) + `ts-node-dev` removal (D-03 carry-along) закрывает 8 advisories включая esbuild moderate; (W5) canonical lockfile lock-in via `mv pnpm-lock.yaml /tmp/ && pnpm install` + D-12 idempotence verification + final dual-mode smoke. Per-bump D-06 gate (build/lint/typecheck/audit-delta) + per-wave D-08 dual-mode smoke (`pnpm start:native` + `pnpm start:isolated` + curl `/health/ready` 200 + 5/5 upstreams up + 0 ERROR/WARN/FATAL). Atomic commit per direct-dep upgrade (~12-13 commits total). Plan ends at "ready for sub-phase merge" — D-15 merge `999.17.3 → 999.17.1 (--no-ff)` happens в `/gsd:resume-work` AFTER `/gsd:verify-work 999.17.3` PASS (mirrors 999.17.2 → 999.17.1 pattern, parent commit `78296c0`). 999.17.3-ACCEPTED-RISKS.md NOT created (strict-zero achieved). Discovered 2026-05-01 mid-999.17.1 Plan 04 Task 4 V-08 UAT.
+**Requirements**: none — sub-phase, uses CONTEXT.md decision IDs (D-01..D-15) in lieu of REQ-IDs
+**Depends on:** Phase 999.17.1 (paused at Plan 04 Task 4 V-08/V-09)
+**Plans:** 5/5 plans complete
+
+Plans:
+
+- [x] 999.17.3-01-PLAN.md — Wave 1 Critical (gRPC): `@grpc/proto-loader` 0.7.15 → 0.8.0 across 5 apps (notifier excluded — RMQ-only) + dual-mode smoke (closes protobufjs critical GHSA-xq3m-2v4x-88gg)
+- [x] 999.17.3-02-PLAN.md — Wave 2 Runtime (NestJS family + AWS SDK): @nestjs/{microservices,core,common,platform-express} ^11.0.1 → ^11.1.19 across 6 apps + foundation peerDeps/devDeps + @aws-sdk/{client-s3,lib-storage} ^3.1030.0 → ^3.1040.0 (5 atomic commits, closes 7 advisories: DoS handleData, Output Neutralization, path-to-regexp×2, file-type×2, fast-xml-parser)
+- [x] 999.17.3-03-PLAN.md — Wave 3 ESLint flat config: eslint v8 → v9.39.4 + @typescript-eslint v7 → v8.59.1 + eslint-config-prettier v9 → v10 + eslint-plugin-prettier v5.5.5 + eslint-plugin-check-file v2 → v3 (MAJOR — flat-config-only) + .eslintrc.js → eslint.config.cjs full rewrite (9 architectural overrides preserved verbatim per Pattern C) + drop --ext .ts from 7 lint scripts (atomic transition per Pitfall 5; closes flatted×2, picomatch v2×2, brace-expansion v1+v2)
+- [x] 999.17.3-04-PLAN.md — Wave 4 Dev tooling: @nestjs/cli + @nestjs/schematics 11.0.0 → 11.0.21/11.1.0 (closes ajv, picomatch v4×2, brace-expansion v5, lodash×2 via @angular-devkit chain) + grpc-tools 1.12.4 → 1.13.1 (closes tar high) + turbo 2.8.14 → 2.9.7 (hygiene) + **drizzle-kit 0.31.10 → 1.0.0-rc.1 USER-LOCKED RC PATH** (closes esbuild moderate; 4 DB services × db:generate verified) + ts-node-dev removal (D-03) — 5 atomic commits
+- [x] 999.17.3-05-PLAN.md — Wave 5 Lockfile lock-in: canonical regen via `mv pnpm-lock.yaml /tmp/ && pnpm install` (D-11) + D-12 idempotence verification + final dual-mode smoke (D-08) + sub-phase merge readiness assertion (D-15 merge NOT executed — happens in /gsd:resume-work after /gsd:verify-work PASS) — 1 atomic commit, strict zero `pnpm audit` exit 0 sealed
+
+### Phase 999.17.2: DevSecOps Hardening + Secrets Rotation (INSERTED)
+
+**Goal:** Close shift-left coverage gaps surfaced by 999.17.1 Plan 04 empirical UAT (4 real config bugs + 1 tracked-secret pattern). Sub-phase fixes scanner config (`.gitleaksignore` invalid glob → AM-01; `secrets-full.sh` `dir`→`git` → AM-02; two anchored top-level `[[allowlists]]` → D-05 fixtures + D-06 manifest shape), one-time content cleanup of 23 gitleaks findings to D-07 redacted format (D-08), AI-discipline rule in CLAUDE.md (D-09), 12-Factor Garage `rpc_secret` via NATIVE `GARAGE_RPC_SECRET` env override (D-10 — research-amended path; no envsubst, no template, no `.gitignore` for tracked config), `999.17.2-DEVOPS-HANDOFF.md` with rotation+CI+k8s+history+GitLab-migration coordination (D-11). Defense principle (locked): one standard for everything in git — defense via format (redacted examples), not via path. Two narrow exceptions justified independently: D-05 test infrastructure (industry-standard self-tests) + D-06 manifest shape-allowlist (idiomatic gitleaks v8 pattern, discriminates by shape not path). Discovered 2026-04-30 after 999.17.1 Plan 04 setup-push UAT exposed 142 raw findings → drilled to 4 real bugs + 1 tracked secret + 1 GSD-framework false-positive.
+**Requirements**: none — sub-phase, uses CONTEXT.md decision IDs (D-03..D-13, AM-01, AM-02, OQ-3, OQ-5)
+**Depends on:** Phase 999.17.1 (paused at Plan 04 Task 4 manual UAT — D-12 unblock)
+**Plans:** 2/2 plans complete
+
+Plans:
+
+- [x] 999.17.2-01-PLAN.md — Wave 1: scanner config (AM-01 invalid glob removal, AM-02 git-mode, D-05 fixture path-allowlist, D-06 manifest shape-allowlist) + D-09 CLAUDE.md AI rule + OQ-5 historical-Telegram-token fingerprint suppressions
+- [x] 999.17.2-02-PLAN.md — Wave 2: D-08 content cleanup (19 findings across 8 files) + OQ-3 strict-D-09 (5 non-firing literals in 24.1-04-PLAN.md) + D-10 Garage native env override (3 infra files) + D-11 DEVOPS-HANDOFF.md (6 sections incl. §6 GitLab migration coordination) + final acceptance smoke (BOTH start flows)
+
+### Phase 999.17.1: quality-security-decouple-and-prove-fixtures (INSERTED, DEFERRED 2026-05-07)
+
+**Status:** DEFERRED INTO BACKLOG (2026-05-07). Work paused mid-Wave-2 after Plans 01-03 completed; Wave 2 transitioned to Phase 999.17.2 (DevSecOps Hardening + Secrets Rotation) which closed first. Plans 04-10 (pre-push orchestrator + custom Semgrep rules + gitleaks/trivy/pnpm-audit fixtures + verify dispatcher + final VERIFICATION) remain unfinished — security tooling work that is important but not blocking current milestone closure. Re-promote into a future milestone when security-fixtures hardening is the active priority. Project memory note: `project_devsecops_state.md`.
+
+**Goal (preserved):** Закрыть systemic gap фазы 999.17 ("tooling installed, not proven" — D-6 meta-finding). Phase 999.17 структурно завершена (12/12 plans, 14/14 verifier truths), но операционная posture слабее заявленной цели — из 5 security gates 3 имели silent fail-open на момент сдачи. Per skill `feedback_phase_completeness` это systemic gap размером full-cycle sub-phase, не inline patch. **Primary input: `.planning/phases/999.17-devsecops-shift-left-security-tooling/deferred-items.md` D-2..D-6** — discuss/research/plan агенты ОБЯЗАНЫ прочитать его как основной источник scope. **Scope (in):** (1) **D-2 Quality/Security/Hygiene decoupling** — split `package.json#scripts` namespaces (`quality:*` / `security:*` / `hygiene:*`), независимая `.husky/pre-{commit,push}` orchestration, Docker-граница для security tooling (full Docker для security — image-pinned/reproducible; native node_modules для quality — IDE-shared), patterns для `--no-verify`-friendly delete-only push; (2) **D-3 Semgrep ruleset gap** — закрыть silent fail-open #3 (текущие 5 рулсетов / 79 правил пропускают `eval(input.code)` direct call; решить между `p/security-audit` (broader) / `--config auto` (registry curated set) / project-specific rules для Email-Platform injection sinks); (3) **D-4 Semgrep non-determinism** — устранить расхождение exit code между pre-push hook (exit 2) и manual run (exit 0): `--metrics=off`, husky→pnpm→bash→docker env propagation, optional Docker image pre-pull в setup hook; (4) **D-5 cosmetic counter bug** — fix `${#RULESET_FLAGS[@]} / 2` или restructure в `scripts/security/semgrep-diff.sh` (рапорт "10 ruleset(s)" при 5 configured); (5) **D-6 self-test harness** — positive+negative fixtures per security gate (gitleaks/semgrep/trivy fs/trivy config/pnpm-audit/build-trust); empirical proof что каждый gate ловит то что заявлено (project-fixtures-in-code, isolated vuln-sandbox subdir для trivy fs); execution-phase verifier должен прогонять fixtures, не только config grep. **Architectural framing (locked):** Quality axis (ESLint/Prettier/tsc) — IDE-bound, native node_modules; Security axis (gitleaks/semgrep/trivy/audit/build-trust) — fail-closed by design, Docker-pinned images, independent of quality; Hygiene axis (env-parity и пр.) — третья ось, не смешивается; Layer 3 (CI) — duplicates everything (un-bypassable server-side). **Scope (out):** изменения в существующих security tools без empirical evidence (не "поправить ради красоты"); расширение coverage за пределы 999.17 (новые scanners, runtime security, DAST); изменения в CI workflow (`.gitlab-ci-security.yml.example` остаётся template до отдельной DevOps-фазы). **Acceptance:** все 6 security gates имеют positive+negative fixture, прогон fixtures завязан на execution-phase verifier; pre-push chain decoupled — quality failure НЕ блокирует security gates; semgrep deterministic между pre-push и manual; bash counter показывает корректное число; CR-01/CR-02/D-3 fail-open закрыты с empirical proof. Discovered 2026-04-29 после manual smoke testing /gsd:fast TS2742 follow-up phase 999.17.
+**Requirements**: TBD
+**Depends on:** Phase 999.17
+**Plans:** 3/11 plans executed
+
+Plans:
+
+- [x] 999.17.1-01-PLAN.md — Wave 1: package.json namespace split (quality:_ / security:_ / hygiene:\*) + scripts/security/\_versions.sh constants (D-13, D-17, D-18)
+- [x] 999.17.1-02-PLAN.md — Wave 1: semgrep-diff.sh fixes (D-4 --metrics=off + D-5 parallel RULESET_IDS array + D-10 .semgrep/rules/ discovery) + .semgrep.yml adds p/security-audit (D-08)
+- [x] 999.17.1-03-PLAN.md — Wave 1: .gitleaksignore / .semgrepignore / .trivyignore path-block scripts/security/fixtures/\*\* (D-07) + Wave 0 sanity: apps/auth/src/test/ confirmed absent
+- [ ] 999.17.1-04-PLAN.md — Wave 2: pre-push-orchestrator.sh (parallel collect-all + 40-zero SHA delete-detection + LINE_COUNT > 0 husky-stdin guard) + .husky/pre-push + .husky/pre-commit refactor (D-14, D-16, D-19, D-20)
+- [ ] 999.17.1-05-PLAN.md — Wave 3: gitleaks fixtures + verify-gitleaks.sh (AKIA + QYLPMN5HEXAMPLE2 verified non-allowlisted literal per RESEARCH §Pitfall 1)
+- [ ] 999.17.1-06a-PLAN.md — Wave 3: Custom Semgrep Rule 1 (.semgrep/rules/no-raw-env-outside-config.yml) + positive fixture clean.ts + Rule 1 negative fixture raw-process-env.ts + test-fixture symlink (split from original Plan 06 per checker BLOCKER #3)
+- [ ] 999.17.1-06b-PLAN.md — Wave 3: Custom Semgrep Rule 2 (.semgrep/rules/grpc-controller-missing-filter.yml with W4 fallback escalation) + eval-injection.ts D-3 reproducer + grpc-no-filter.ts + verify-semgrep.sh (D-09, D-10, D-3 closure proof; depends on 06a)
+- [ ] 999.17.1-07-PLAN.md — Wave 3: trivy-config + trivy-fs fixtures + verify scripts (D-05 vuln-sandbox subdir verify-only; preserves 999.17 D-06 no-SCA invariant; CVE feed cache mount)
+- [ ] 999.17.1-08-PLAN.md — Wave 3: pnpm-audit + build-trust fixtures + verify scripts (two-pass install with sentinel pnpm-workspace.yaml for fixture isolation)
+- [ ] 999.17.1-09-PLAN.md — Wave 3: verify.sh dispatcher (declare -A 6-gate iteration) + verify-if-changed.sh predicate (project-canonical git diff --quiet idiom)
+- [ ] 999.17.1-10-PLAN.md — Wave 4: 999.17.1-VERIFICATION.md (gsd-verifier truth list per D-02) + 999.17.1-DEVOPS-HANDOFF.md + runtime-smoke-verification (start:native + start:isolated)
+
+### Phase 999.18: post-pnpm-11-migration system audit (PROMOTED, ABSORBED 2026-05-07)
+
+**Status:** ABSORBED INTO 999.18.1 + 999.18.2 + 999.18.3 + 999.18.4 chain (closed 2026-05-07). The audit's open plans 03-06 were each absorbed into a downstream sub-phase that delivered the same scope:
+
+- Plan 03 (pnpm injection fix via `syncInjectedDepsAfterScripts`) → **999.18.1** "eliminate pnpm injection model debt" (4/4 plans done, VERIFICATION.md present).
+- Plan 04 (multi-arch CI build linux/amd64+arm64 + healthcheck swap to /health/ready × 6 services) → **999.18.2** "execute MIGRATION-RUNBOOK" (5/5 plans done, multi-arch CI shipped via Wave 0 verifier scripts + transport-aligned healthcheck swap delivered).
+- Plan 05 (D-12 contract generation pipeline relocation) → **999.18.2** Plan 03 (Placement A pre-build CI step F-12 V2).
+- Plan 06 (BACKLOG.md + closure) → **999.18.3** + **999.18.4** (10/10 + 6/6 plans done, both with VERIFICATION.md). The catalogue of accumulated tech debt was distilled into 999.19 audit findings rather than a separate BACKLOG.md per 999.18.
+
+The original audit (Plans 01-02) produced the AUDIT.md + SOLUTIONS.md that seeded the 999.18.1 chain — those documents are the lasting deliverable; the inline-fix plans were superseded by the dedicated sub-phases that gave each variant proper scope.
+
+**Goal (preserved):** Full system re-audit после серии infrastructure changes в 999.17.x cycle (особенно 999.17.2 с 8 Dockerfile/pnpm-workspace.yaml/.npmrc/lockfile follow-up commits для completion of 999.17-01 D-11 pnpm 9→11 migration that left Docker chain unfinished). Re-evaluate architectural integrity и tech debt после большого набора правок. **Scope (in):** (1) **Build-system audit** — re-validate Dockerfile pattern `rm -rf node_modules + pnpm install` (used 2x в Step 4b/4d для refresh injection после build), оценить overhead (~30-60s × 6 apps parallel) vs alternative architectures (e.g., refactor away from `pnpm deploy` к manual COPY pattern в runner stage); document canonical pnpm 11 monorepo Docker pattern для future reference; (2) **Dependency tree review** — pnpm-lock.yaml regenerated dvy раза (999.17-01 c3807cc + 999.17.2 c3c01e0), verify нет version drift, peer-deps satisfied, transitive deps audit clean; (3) **Build artifact parity** — confirm `dist/` content idential между native (`pnpm dev`) и isolated (Docker container) flows для всех 6 apps; (4) **Runtime smoke extended** — beyond `/health/ready` (gRPC service-to-service connectivity, RabbitMQ message round-trip, Garage S3 read/write через `STORAGE_*` env vars); (5) **Security posture re-validation** — full `pnpm security:scan` chain (gitleaks + semgrep + trivy + audit), все 5 gates exit 0; verify D-05 fixture allowlist + D-06 manifest shape allowlist behavior empirically; (6) **Tech debt cleanup map** — 22 fingerprint suppressions в `.gitleaksignore` (2 OQ-5 historical Telegram + 20 Dev-1 D-08 historical) coordinated с GitLab migration (full-history vs fresh-repo scenarios); document timeline и cleanup trigger; (7) **Architectural debt** — assess if `injectWorkspacePackages: true` is the right paradigm long-term или migration к alternate pattern (e.g., turbo/nx orchestrated builds, Docker `pnpm fetch` + offline install, abandoning `pnpm deploy`). **Scope (out):** изменения в established patterns без empirical evidence; expansion of 999.17.x scope (новые scanners, runtime security); GitLab migration execution itself (DevOps zone, separate phase). **Acceptance:** scored audit document covering все 7 dimensions с verdicts (PASS / NEEDS-WORK / TECH-DEBT-LOG); concrete tech-debt items с priorities (HIGH / MEDIUM / LOW) и proposed remediation paths; updated `.planning/intel/` documents для actual current state; runtime smoke baseline для future regression detection. Discovered 2026-04-30 in conversation после completion of 999.17.2 — accumulated changes from 999.17.x cycle warrant systemic re-evaluation rather than per-phase incremental verification. **Triggered by:** 999.17.2 inline pnpm 11 migration completion (8 commits), dual lockfile regeneration in 999.17.x cycle, 22 fingerprint suppressions accumulated, infrastructure-level Dockerfile changes affecting all 6 microservices builds. **Promoted 2026-05-02** via /gsd:review-backlog after /gsd:verify-work 999.17.3 UAT discovered post-close isolated-mode Dockerfile regression — Issue #1 (`.dockerignore` nested-glob bug) closed via /gsd:fast (commit `caaad40`); Issue #2 (foundation tsc workspace-inject `error TS2307: Cannot find module '@email-platform/config'` at Step 4a) deferred into this audit as natural empirical input for dim 1. **User-expanded scope** (formal lock during /gsd:discuss-phase): adds dim 8 (Coolify → Kubernetes migration impact assessment — what's portable, what needs rework, k8s-friendly Dockerfile patterns), dim 9 (architectural good-practices review with DO / DEFER / DECLINE classification per finding — explicit guard against "не делать ради того чтобы делать").
+**Requirements:** D-01..D-13 (CONTEXT.md decision IDs in lieu of REQ-IDs per audit-only convention from 999.1)
+**Depends on:** Phase 999.17.3 (closed 2026-05-02)
+**Plans:** 6/6 (2 executed natively in 999.18; 4 absorbed into 999.18.1/2/3/4 sub-phases — see status header)
+
+Plans:
+
+- [x] 999.18-01-PLAN.md — AUDIT.md authoring: 9-dim findings catalogue (D1..D9) with verdicts/priorities, evidence-backed F-NN, skill cross-check, K8s constraints checklist
+- [x] 999.18-02-PLAN.md — SOLUTIONS.md authoring: 2-4 variants per BLOCKER/MAJOR finding, 7-col trade-off tables, user variant approval gate
+- [x] 999.18-03-PLAN.md — ABSORBED INTO 999.18.1 (eliminate pnpm injection model debt — `syncInjectedDepsAfterScripts` canonical pnpm 11 pattern delivered there)
+- [x] 999.18-04-PLAN.md — ABSORBED INTO 999.18.2 (multi-arch CI linux/amd64+arm64 + transport-aligned healthcheck swap shipped via MIGRATION-RUNBOOK Plans 01+02)
+- [x] 999.18-05-PLAN.md — ABSORBED INTO 999.18.2 Plan 03 (Placement A pre-build CI contract-generation step, F-12 V2)
+- [x] 999.18-06-PLAN.md — ABSORBED INTO 999.18.3 + 999.18.4 (closure deliverables distilled into the chain's VERIFICATION.md + 999.19 audit findings)
+
+### Phase 999.18.4: Dockerfile + healthcheck infra hardening (iterative refactor) (INSERTED)
+
+**Goal:** Iterative hardening + readability cleanup of `infra/docker/app.Dockerfile` plus the healthcheck contracts that surround it (compose `healthcheck.test`, k8s `livenessProbe`/`readinessProbe`) plus build-time cache hygiene. Each concern lands as one atomic Plan = one revertable commit. Open seeded scope (Plans 08+ added on discovery): (1) replace fragile `apk + wget + sed-arch` delivery of `grpc_health_probe` with `COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe` (BuildKit multi-arch via `$TARGETPLATFORM`, no GitHub release CDN dep at build time); (2) gateway compose `healthcheck.test: ['CMD','wget',…]` works again — done via `COPY busybox:1.37.0-musl` rename to `/usr/local/bin/wget` in distroless runner (multi-call binary dispatches wget applet via argv[0]), compose unchanged, distroless contract preserved; (3) bump `GRPC_HEALTH_PROBE_VERSION` v0.4.24 → v0.4.48; (4) tag-pin → digest-pin (`@sha256:…`) for supply-chain hardening (busybox + grpc-health-probe both); (5) k8s manifests `exec.command: [/usr/local/bin/grpc_health_probe, -addr=:NNNN]` → declarative `grpc: { port: NNNN }` (k8s 1.24+ native gRPC probe — kubelet calls `grpc.health.v1.Health` directly, no in-image binary needed for production); (6) extract a shared `base` stage (consolidate `WORKDIR /app` + `ENV PNPM_HOME=/pnpm` + `ENV PATH` + `RUN corepack enable` duplicated across `prod-deps` and `builder` stages — DRY, canonical Vercel/Next pattern); (7) Docker cache + image bloat investigation/remediation (local host accumulated 100+ GB anomalously — root-cause likely BuildKit cache mounts not GC'd, dangling layers, buildx cache hoarding; deliver diagnostic + one-time cleanup + long-term hygiene per seed Note `.planning/notes/docker-cache-bloat.md`). Server-side `grpc.health.v1.Health` registration (HealthImplementation from `grpc-health-check` npm) is unaffected across all plans. Out-of-scope across all Plans: `apps/*` source, `packages/*` source, runtime contracts (binary destination `/usr/local/bin/grpc_health_probe`, distroless `nonroot` user, ENTRYPOINT/CMD shape) — preserved as Phase 999.18.3 ratified invariants. Phase closes when no further Dockerfile/healthcheck/cache improvements remain.
+**Requirements**: TBD
+**Depends on:** Phase 999.18
+**Plans:** 7/7 plans complete
+
+Plans:
+
+- [x] 999.18.4-01-PLAN.md — Replace apk+wget+sed with COPY --from=ghcr.io/grpc-ecosystem/grpc-health-probe (tag pin v0.4.24 retained)
+- [x] 999.18.4-02-PLAN.md — Gateway compose healthcheck: COPY busybox:1.37.0-musl as /usr/local/bin/wget into distroless runner — restores wget without rewriting compose, distroless preserved
+- [x] 999.18.4-03-PLAN.md — Bump GRPC_HEALTH_PROBE_VERSION v0.4.24 → v0.4.48
+- [x] 999.18.4-04-PLAN.md — Replace tag pin with digest pin @sha256:… for grpc-health-probe AND busybox
+- [x] 999.18.4-05-PLAN.md — k8s manifests: replace exec.command grpc_health_probe with declarative `grpc:` probe (k8s 1.27 GA / 1.24 beta floor); 4 base manifests × 2 probes = 8 probe-block migrations; in-image binary RETAINED for compose contract (Plans 01/03/04); planned 2026-05-05, awaiting execute (autonomous=false: human-verify checkpoint for cluster-version + `service:` field policy)
+- [x] 999.18.4-06-PLAN.md — Extract shared `base` Dockerfile stage (consolidate WORKDIR + ENV PNPM_HOME + ENV PATH + RUN corepack enable across `prod-deps` + `builder`); pure DRY readability refactor with layer-equivalence proof gate (`docker image inspect` SHA256 diff); planned 2026-05-05, awaiting execute (autonomous=true)
+- [x] 999.18.4-07-PLAN.md — Docker cache + image bloat: diagnostic + `pnpm clean:docker:*` scripts + BuildKit GC policy V2-A in `/etc/docker/daemon.json` (auto-GC closing 100+ GB accumulation root cause)
+
+### Phase 999.18.5: Dockerfile + k8s polish — follow-up to 999.18.4 (5 deferred items) (INSERTED)
+
+**Goal:** Закрытие 5 deferred items, surface'ed verifier'ом при закрытии Phase 999.18.4. Каждый item ландится атомарным Plan = revertable commit, как в Phase 999.18.4. Open seeded scope: (1) end-to-end k8s functional gate — первый реальный `kubectl apply -k` на live k8s ≥ 1.27 cluster (CI `deploy-dev` per `.gitlab-ci.yml` или локальный kind/minikube) — доказательство что declarative grpc:probe из 999.18.4-05 действительно отвечает SERVING с PodIP:NNNN; (2) digest-pin `node:22-alpine` (база Dockerfile FROM в pruner / base / builder стадиях) — supply-chain hardening аналогично 999.18.4-04 для grpc-health-probe + busybox; (3) digest-pin `gcr.io/distroless/nodejs22-debian12:nonroot` (runner стадия) — аналогично; (4) migrate kustomize `commonLabels:` → `labels:` в `deploy/k8s/base/kustomization.yaml` — закрытие deprecation warning, surface'ed Plan 05 schema gate; (5) review pruner-from-base refactor — рассмотреть consolidation pruner stage в общую base stage (если совместимо с turbo prune semantics, иначе закрыть как accepted divergence). Server-side `grpc.health.v1.Health` registration unaffected. Out-of-scope: `apps/*`, `packages/*`, runtime contracts (binary destination, distroless nonroot, ENTRYPOINT/CMD shape).
+**Requirements**: TBD
+**Depends on:** Phase 999.18.4
+**Plans:** TBD (run `/gsd:plan-phase 999.18.5` to break down)
+
+Plans:
+
+- [ ] TBD (run /gsd:plan-phase 999.18.5)
+
+### Phase 999.18.3: Architectural closure — 5-layer build architecture (drop husky + two-install Vercel canonical pattern) (INSERTED, ratified iter 7 = 2026-05-04)
+
+**Goal:** Закрытие architectural debt цепочки 999.18 → 999.18.1 → 999.18.2 через каноническую 5-layer build architecture (L1 Source / L2 Orchestration / L3 Packaging / L4 Pipeline / L5 Verification). Финальная ratified архитектура после 7 итераций провалов, эмпирически verified против React (Meta) + Astro + 5 других public repos (Remix / Nuxt / SvelteKit confirm pattern). Phase делает 3 атомарных impl-плана (Plan 07/08/09) — ~12-15 commits total. Plans 01-06 preserved as audit trail (Iter 1-6 forensic chain).
+**Requirements**: FR-01..FR-20 (LAYER-ARCHITECTURE.md §1 ratified inventory; supersedes D-01..D-10); CONSISTENCY-AUDIT 12 superseded + 13 kostyls structurally removed.
+**Depends on:** Phase 999.18 (and 999.18.2 Wave 2 anchor a647f51 as audit baseline)
+**Plans:** 13/13 plans complete
+
+Plans:
+
+- [x] 999.18.3-01-PLAN.md — Iter 3 audit-trail (Variant 2 fix; superseded by FR-04 two-install)
+- [~] 999.18.3-02-PLAN.md — Iter 3 evidence (BLOCKED — orphan fetcher empirical falsification)
+- [x] 999.18.3-03-PLAN.md — Iter 5 audit-trail (D-08 install-layer fix; preserved as foundation для FR-08)
+- [~] 999.18.3-04-PLAN.md — Iter 4 evidence (BLOCKED — TS5083 cascade revealed Pattern E need)
+- [x] 999.18.3-05-PLAN.md — Iter 6 audit-trail (Pattern E ratified = FR-08; D-10 ENV CI=true superseded)
+- [~] 999.18.3-06-PLAN.md — Iter 6 evidence (BLOCKED — husky lifecycle conflict revealed FR-03 need)
+- [x] 999.18.3-07-PLAN.md — L1 + L3 code: drop husky / .githooks/ / Dockerfile rewrite на two-install Vercel canonical (~7 commits)
+- [x] 999.18.3-08-PLAN.md — L4 + L5 wiring: .gitlab-ci.yml + verify-\* gates + Kustomize K8s deploy (~5 commits)
+- [x] 999.18.3-09-PLAN.md — docs + audit trail: ROADMAP rewrite + folder rename + 999.18.1 RUNBOOK/ADR/RE-EVAL-TRIGGERS amendments (~3 commits)
+- [x] 999.18.3-10-PLAN.md — Wave 4 gap-closure: VERIFICATION.md Gap 1 — physical removal of `.husky/` runtime-shims (17 untracked files in `.husky/_/`) + `.gitignore` defense rule (2 atomic commits 57876ce + 1ef7e69)
+- [x] 999.18.3-11-PLAN.md — Wave 4 gap-closure: VERIFICATION.md Gap 2 — `core.hooksPath = .githooks` applied locally + CONTRIBUTING.md «Existing clones — repair `core.hooksPath`» subsection (1 atomic commit 1b3a04d; Task 1 per-clone state change not commit-able by nature). L1 husky drop end-to-end ratified.
+- [x] 999.18.3-12-PLAN.md — Wave 5 gap-closure: VERIFICATION.md Gap 3 — `.gitlab-ci.yml` deploy stage CR-01..CR-04 (registry placeholder → `kustomize edit set image` loop; apk → apt-get; pnpm → direct bash; KUBE_NAMESPACE inject) + Kustomize overlays fail-loud placeholder теги (3 atomic commits 316ebb0 + 617a285 + b0ce380). L4/L5 deploy slice functional.
+- [x] 999.18.3-13-PLAN.md — Wave 6 gap-closure: VERIFICATION.md Gap 4 — `.gitlab-ci.yml` verify stage CR-06 (verify-injection-extinct: node:22-alpine → docker:24 + dind + apk-bootstrap + pnpm install; SKIP guard в скрипте больше не triggers — реальный 5-cycle docker build verification) + CR-07 (verify-multiarch: pnpm wrapper → `bash scripts/verify-multiarch-manifests.sh` с IMAGE positional arg + docker login + `needs: build`) (1 atomic commit 5393276; 24/24 static gates PASS). L5 verification gates функциональны end-to-end.
+
+### Phase 999.18.2: Implementation cluster — execute MIGRATION-RUNBOOK from Phase 999.18.1 (Waves 0-4 → Plans 01-05): foundation verifier scripts (image-determinism + injection-extinct + multiarch + per-service smoke) + Turborepo orchestrator scaffolding with injectWorkspacePackages drop + F-24 cache-hash closure + Dockerfile rewrite (distroless runner + grpc_health_probe COPY + pnpm fetch+offline install per ADR Decision (b)M3) + transport-aligned cleanup (drop HTTP server in 4 gRPC services + notifier; register grpc.health.v1.Health per ADR Decision (c.2)+(c.3); remove debug HTTP ports 3001-3004 from compose) + multi-arch CI (linux/amd64,linux/arm64 via QEMU per CONTEXT D-09+D-11) + contract-gen Placement A pre-build CI step (F-12 V2) + compose healthcheck swap to transport-aligned protocol (gateway HTTP wget / 5 services grpc_health_probe) + dual-mode smoke gate per wave + Wave 4 image-determinism verify + rollback drill; closes 999.18.1 ADR-001 §Decision (a)+(b)M3+(c)distroless+(d) per F-NN coverage table; consumes ADR.md + DOCKERFILE-REFERENCE.md + MIGRATION-RUNBOOK.md + RE-EVAL-TRIGGERS.md verbatim per CONTEXT D-16 trigger ratification (INSERTED)
+
+**Goal:** Ship build-system migration по 5-Wave plan из 999.18.1-MIGRATION-RUNBOOK.md (consumes ADR + DOCKERFILE-REFERENCE + RE-EVAL-TRIGGERS verbatim per CONTEXT D-16). Closes 11 F-NN findings (F-01/F-02/F-03/F-04/F-04-d8/F-05/F-08/F-12/F-15/F-20/F-24) via Dockerfile rewrite (distroless runner + pnpm fetch + offline install), transport-aligned cleanup (drop HTTP server в 5 services + register gRPC Health), multi-arch CI (linux/amd64+linux/arm64 via QEMU), Placement A pre-build contract-gen, и compose healthcheck swap. Final gate: dual-mode smoke + 4 verifier suite + rollback drill on temporary branch.
+**Requirements**: F-01, F-02, F-03, F-04, F-04-d8, F-05, F-08, F-12, F-15, F-20, F-24, I-S0.1..I-S2.9 (27 invariants)
+**Depends on:** Phase 999.18
+**Plans:** 5/5 plans complete
+
+Plans:
+
+- [x] 999.18.2-01-PLAN.md — Wave 0: foundation prep + 4 verifier scripts (image-determinism / injection-extinct / multiarch / per-service-smoke) + package.json wiring (no runtime change)
+- [x] 999.18.2-02-PLAN.md — Wave 1: orchestrator scaffolding — drop injectWorkspacePackages from pnpm-workspace.yaml (ADR (b) M3) + F-24 cache-hash closure (turbo.json tasks.generate.inputs += pnpm-lock.yaml) + native smoke gate
+- [x] 999.18.2-03-PLAN.md — Wave 2 (most invasive): Dockerfile rewrite (Stage 0 + Stage 1 pruner+fetcher+installer+builder + Stage 2 distroless runner + grpc_health_probe COPY) + transport-aligned cleanup (drop app.listen в 5 services + verify gRPC Health Path A + remove HTTP debug ports 3001-3005 + drop \_PORT env vars + 5 Zod schema cleanup) + atomic commit + dual-mode smoke + image-determinism verify + rollback drill
+- [x] 999.18.2-04-PLAN.md — Wave 3: CI multi-arch (QEMU + linux/amd64,linux/arm64 per ADR implicit-fifth) + Placement A pre-build contract-gen + drift-check gate (F-12 V2) + compose healthcheck swap (gateway HTTP wget; 5 services grpc_health_probe) + start_period 30s
+- [x] 999.18.2-05-PLAN.md — Wave 4: final verification — full dual-mode smoke + 4 Wave 0 verifier suite en bloc + rollback drill on temporary branch (revert all 4 wave anchors + byte-for-byte Dockerfile match + restore via git reset --hard) + Wave 4 anchor commit + handoff to /gsd:resume-work 999.18
+
+### Phase 999.18.1: Architectural cluster — eliminate pnpm injection model debt via deep research of monorepo orchestrators (turbo/nx/bazel/buck2/pants) + container build patterns + MAANG-grade enterprise practices; resolves 12 deferred 999.18 BLOCKER+MAJOR findings (INSERTED)
+
+**Goal:** Ship 5 documents that lock the build-system architecture for 999.18.2 implementation: ADR (MADR-light per CONTEXT D-14 with one orchestrator finalist + 4 coupled cross-cutting choices) + DOCKERFILE-REFERENCE (canonical Dockerfile reference shape with per-Step rationale + 22 invariants + multi-arch + k8s-ready callouts) + MIGRATION-RUNBOOK (wave-based step-by-step plan for 999.18.2 with rollback anchors + dual-mode smoke gates) + RE-EVAL-TRIGGERS (binding contract with 19 T-NN triggers across 5 categories) + RESEARCH (already authored). User approval of ADR (D-16 trigger) unblocks 999.18.2 phase creation.
+**Requirements**: REQ-PROCESS-01, REQ-PROCESS-02, REQ-PROCESS-03, REQ-PROCESS-04 (phase-internal IDs per RESEARCH §11.2)
+**Depends on:** Phase 999.18
+**Plans:** 4/4 plans complete
+**Status:** Awaiting amendments (gaps_found per VERIFICATION.md)
+
+Plans:
+
+- [x] 999.18.1-01-PLAN.md — ADR authoring (MADR-light per CONTEXT D-14): Status / Context / Decision Drivers (C-01..C-13) / Considered Options (6 D-17 candidates) / Decision (1 finalist + 4 coupled choices + F-NN coverage table) / Consequences / Alternatives (skill cross-check matrix per rejected option) / References
+- [x] 999.18.1-02-PLAN.md — DOCKERFILE-REFERENCE.md authoring: Stage 0 (build args + F-05 PROTO_DIR kill) + Stage 1 (Builder per ADR finalist) + Stage 2 (Runner per ADR Decision (a)+(c)) + Per-Step Invariant Cross-Ref Matrix (22 I-SN.M invariants) + 3 appendices (build determinism proof / multi-arch CI / RE-EVAL cross-reference)
+- [x] 999.18.1-03-PLAN.md — MIGRATION-RUNBOOK.md (5 Waves with rollback anchors + dual-mode smoke gate per wave + canonical GSD flow) + RE-EVAL-TRIGGERS.md (19 T-NN triggers + 5-step re-evaluation contract + worked example)
+- [x] 999.18.1-04-PLAN.md — **Plan 04 amendments (gap_closure)** — переписать ADR §Decision (b) М2→М3 (`pnpm fetch` + offline install) + ADR §Decision (c) полностью (alpine+two-phase → distroless+transport-aligned healthcheck с под-решениями (c.1) gateway HTTP / (c.2) 4 gRPC services через `grpc.health.v1.Health` + `grpc_health_probe` binary / (c.3) notifier = gRPC Health-only server); обновить DOCKERFILE-REFERENCE Stage 1 (добавить `fetcher` под-этап) + Stage 2 (distroless runner + grpc_health_probe COPY); расширить MIGRATION-RUNBOOK Wave 2 (drop HTTP server из 4 gRPC сервисов + notifier; register grpc.health.v1.Health; remove HTTP ports 3001-3004 from compose); добавить RE-EVAL-TRIGGERS T-PROC-04 (k8s native gRPC probe migration); flip ADR Status `☑ Proposed` → `☑ Accepted` после amendments. Gap details: `999.18.1-HUMAN-UAT.md` §Gaps.
+
+### Phase 999.19: backing-services-canonical-cross-audit-5-layer (INSERTED)
+
+**Goal:** Cross-cutting docs-only architecture audit пяти backing-system слоёв (cache/Redis, persistence/Postgres, storage/S3, clients/gRPC, events/RabbitMQ) против единого master invariant: контракты живут в `packages/contracts/`, абстракции и сборщики (factory/proxy/builder/abstract base) в `packages/foundation/src/external/<layer>/`, реализации и DI-композиция в `apps/*/src/infrastructure/{inbound,outbound,bootstrap}/`, никаких Tier 2 raw lib instance leakов в `apps/*` без явного narrow-unlock документа симметричного Phase 999.12 D-13. По образцу Phase 999.1 (Config System Audit): output = AUDIT.md (F-NN findings с инлайн-evidence, 3-tier severity blocker/major/minor) + DESIGN.md (L0 master invariant + L1..L5 per-layer canonical invariants I-NN + cross-ref invariant↔skill↔layer matrix) + SOLUTIONS.md (variants per F-NN с 7-col trade-off таблицами + предложенные sub-phase groupings 999.19.1..N + Backlog Impact флаги для 999.13/999.14) + VERIFICATION.md (V-NN grep-proof). Cross-references: findings по слою S3 помечаются 'promote в 999.14', findings по RMQ — 'promote в 999.13'; 999.13 и 999.14 остаются в BACKLOG с усиленным контекстом из audit. Известные seed-findings (input в audit, не override его scope): F-A `CacheService.get<T>()` quality (`packages/foundation/src/external/cache/cache.service.ts:16-26` — unchecked JSON cast `as T` + silent corrupt swallow `catch { return null }`, поглощено из ABSORBED Phase 999.4), F-B `PG_POOL` Tier 2 leak (`packages/foundation/src/external/persistence/index.ts:4` + `persistence.module.ts:13` — экспорт без apps/* потребителей и без narrow-unlock-документа симметричного REDIS_CLIENT D-13, поглощено из PAUSED Phase 999.3). Cross-checks против project skills: `infrastructure-client-layering`, `nestjs-hexagonal-mapping`, `clean-ddd-hexagonal`, `composition-over-inheritance`, `env-schema`, `twelve-factor`. Out-of-scope: code changes (любые правки apps/* или packages/* — отдельные sub-phases 999.19.1..N после approve user'ом по SOLUTIONS.md), business logic, бизнес-домен, тесты.
+**Requirements**: TBD (locked via /gsd:discuss-phase 999.19)
+**Depends on:** Phase 999.18.4 (canonical 5-layer build architecture как baseline для master invariant L0..L5 cross-cutting layering); Phase 999.12 (Redis canonical alignment как эталон для cache layer); Phase 999.7.x (gRPC canonical как эталон для clients layer); Phase 999.1 (Config System Audit как template для audit-фазы output schema)
+**Plans:** 5/4 plans complete
+
+Plans:
+
+- [x] 999.19-01-PLAN.md — DESIGN.md (L0 master + L1..L5 per-layer canonical invariants + cross-ref matrix)
+- [x] 999.19-02-PLAN.md — AUDIT.md (F-NN findings grouped by L1..L5 + mandatory F-01 CacheService.get<T>() + F-02 PG_POOL leak)
+- [x] 999.19-03-PLAN.md — SOLUTIONS.md (variants per F-NN + sub-phase grouping + Backlog Impact for 999.13/999.14/22.5/999.3/999.4/999.5)
+- [x] 999.19-04-PLAN.md — VERIFICATION.md (≥30 V-NN grep-proof rows) + SUMMARY.md (closure handoff) + VALIDATION.md flip
+
+### Phase 999.19.1: pg-pool-leak-fix (INSERTED)
+
+**Goal:** Implement F-02 (PG_POOL Tier-2 leak — blocker) per 999.19-SOLUTIONS.md F-02 V1+V2 bundle (defence-in-depth combo, user-approved 2026-05-07). V1 = remove `PG_POOL` Symbol from public foundation barrel (`packages/foundation/src/external/persistence/index.ts:4`) and from `PersistenceModule.exports[]` (`persistence.module.ts:13`); add narrow-unlock-style comment block in `persistence.module.ts` symmetric to `cache.module.ts:14-18` (REDIS_CLIENT D-13 pattern from Phase 999.12) documenting that `PG_POOL` is kept private with no narrow-unlock approved as of Phase 999.19; foundation-internal-only consumers remain `PostgresHealthIndicator` + `DrizzleShutdownService`. V2 = add ESLint Override 4-style rule blocking `from 'pg'` and `@Inject(PG_POOL)` in `apps/*/src/**` (eslint.config.cjs) symmetric to ioredis ban from Phase 999.12 D-08, regression-proof against accidental future re-export. Total scope: 3 files / 2 atomic commits; behaviour-preserving (zero apps/* consumers of PG_POOL today). Out-of-scope: V3 Tier-1 `QueryRunner` port abstraction (rejected as speculative — no consumer demand).
+
+**Required reading (researcher MUST read before discuss):**
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L2 invariants (I-2.3, I-2.4) + L0 master (I-0.4 narrow-unlock rule + I-0.5 Tier 1/2/3 layering)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` § F-02 — full evidence dossier (`persistence/index.ts:1-12`, `persistence.module.ts:13`, REDIS_CLIENT D-13 exemplar at `cache.module.ts:14-18`)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` § F-02 — V1+V2 trade-off + cross-skill matrix (infrastructure-client-layering / no-magic-values / clean-ddd-hexagonal)
+
+**Requirements**: F-02 V1+V2 closure per 999.19-SOLUTIONS.md (locked decisions; no further discussion needed on variant choice — discuss-phase confirms scope + locks any remaining edge cases).
+
+**Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN invariants + F-02 evidence + V1+V2 variants).
+
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 999.19.1-01-PLAN.md — V1 close foundation public-API surface for PG_POOL + apps JSDoc reality (D-02/D-04, 4 files / 1 atomic commit)
+- [x] 999.19.1-02-PLAN.md — V2 ESLint regression guard: ban `from 'pg'` in apps Override 4 + Override 5 (D-01, 1 file / 1 atomic commit)
+
+### Phase 999.19.2: cache-service-get-quality (INSERTED)
+
+**Goal:** Close F-01 (RedisCacheService.get<T>() quality — major, L1) per 999.19-SOLUTIONS.md F-01. В audit-фазе 999.19 surface'ed: `RedisCacheService.get<T>(key)` склеивает два разных режима отказа — `key absent` и `key present but corrupt JSON / shape-mismatched` — в один `null` return; unchecked `as T` cast отключает runtime type-safety; corrupt entry лежит до TTL потому что `catch { return null }` не делает ни `del()` ни лога. Нарушает DESIGN I-1.6 (CachePort port loses information) каскадно с I-0.5 (Tier 1 abstraction MUST signal protocol failures back to caller). SOLUTIONS.md F-01 предлагает **4 варианта** (cartesian 3×3×3 = 27, picked 4 + ~22 rejected inline). **Вариант не зафиксирован — выбор делается в /gsd:discuss-phase 999.19.2**:
+- V1 (A1+B1+C3) ✅ recommended — discriminated union `{status: 'absent' | 'corrupt' | 'value', value?}` + optional Zod schema на существующем методе + severity-aware log (warn/error) + `del(key)` self-heal
+- V2 (A2+B2+C2) — new method `getValidated<T>(key, schema)` бросает `CacheParseError`, оригинальный `get<T>` без изменений, `del(key)` только в validated-path
+- V3 (A3+B1+C2) — `Result<T | null, CacheParseError>` (требует prerequisite Result utility — scope creep)
+- V4 (A1+B3+C1) — discriminated union + caller-side validation OUTSIDE CachePort, log-only (corrupt key persists till TTL)
+
+\+ ~22 rejected cartesian cells документированы inline per D-10. Out-of-scope: business-logic кеш-консьюмеры (apps/*/src), Redis client mechanism changes, observability metrics (отдельный phase). Behaviour-preserving по существующим callers: foundation-internal only (zero business-cache consumers в apps/* сегодня — verify before discuss).
+
+**Required reading (researcher MUST read before discuss):**
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-DESIGN.md` § L1 invariants (I-1.6 CachePort port loses information) + § L0 master (I-0.5 Tier 1/2/3 layering universal)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-AUDIT.md` § F-01 — full evidence dossier (`cache.service.ts:16-26` — unchecked cast + silent catch + corrupt-key persistence)
+- `.planning/phases/999.19-backing-services-canonical-cross-audit-5-layer/999.19-SOLUTIONS.md` § F-01 — **все 4 variants V1..V4** + ~22 rejected cartesian cells (D-10 audit trail) + cross-skill matrix (`clean-ddd-hexagonal` PRIMARY / `infrastructure-client-layering` / `composition-over-inheritance`)
+- `packages/foundation/src/external/cache/cache.service.ts:16-26` — current implementation (the code being refactored)
+- `packages/foundation/src/external/cache/cache.interfaces.ts` — current `CachePort` interface (will likely change shape)
+
+**Requirements**: F-01 closure per 999.19-SOLUTIONS.md — variant selection (V1 / V2 / V3 / V4 / new combinatorial cell with rationale) делается в /gsd:discuss-phase 999.19.2; researcher должен принести в discuss все 4 варианта + cross-skill compliance check; user в discuss выбирает одно и flip'ает Status в SOLUTIONS.md F-01 на ☑ Approved (→ 999.19.2).
+
+**Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN L1 invariants + F-01 evidence + 4 variants + cartesian rejection trail). Optionally читает Phase 999.19.1 (closed 2026-05-07) PATTERNS.md для understanding narrow-unlock pattern — но cache layer уже имеет свой positive-case exemplar в `cache.module.ts:14-18` (REDIS_CLIENT D-13).
+
+**Plans:** 3/3 plans complete
+
+Plans:
+- [x] 999.19.2-01-PLAN.md — V1 close F-01 (RedisCacheService.get<T>() discriminated union + opt Zod + severity log + del() self-heal + PinoLogger DI; D-07 verbatim type, D-09 guard-clauses-only, D-10 1 atomic fix commit + 1 docs housekeeping commit; 4 files / 6 tasks)
+- [x] 999.19.2-02-PLAN.md — Inline-amendment fix (post-review): close BL-01 (TRANSIENT scope bleed-through через factory-inject PinoLogger → reverts singleton via PinoLogger.root.child + TEMP marker) + WR-01 (prefixKey 1×) + WR-04 (stale comment + CacheGetResult JSDoc) + IN-02 (self-heal del() try/catch); per D-11 / 999.19.2-REVIEW.md; 3 files / 1 atomic fix commit; defers logger DI architectural decision to Phase 999.20 placeholder
+- [x] 999.19.2-03-PLAN.md — Inline-amendment fix (post-re-review): close WR-A-01 (lazy logger getter race window — Pitfall 6) — mirror PinoHttpClientLoggerAdapter shape (`implements OnModuleInit` + `ensureInit()` method + `private logger!` definitive field, drop lazy getter); per D-12 / 999.19.2-REVIEW.md; 1 file / 1 atomic fix commit
+
+### Phase 999.20: foundation-logger-port-design (BACKLOG, PLACEHOLDER)
+
+**Goal (TBD, scope locked):** Продумать систему логирования на foundation-уровне как полноценную абстракцию — что логгировать (infrastructure events vs business events vs domain events vs request-correlation), как унифицировать 7 текущих direct-PinoLogger sites (correlation.interceptor / rpc-exception.filter / grpc-to-http.filter / http-timing.interceptor / grpc-logging.interceptor / pino-http-client-logger.adapter / RedisCacheService после 999.19.2 Plan 02), решить вопрос абстракции (LoggerPort Tier-1 token + provider pattern, по аналогии с CACHE_SERVICE / PG_POOL / storage adapter — vs продолжить direct PinoLogger usage с канонизированным pattern). Surfaced 2026-05-07 в Phase 999.19.2 code review (BL-01) — `PinoLogger@nestjs-pino` декорирован `@Injectable({ scope: Scope.TRANSIENT })` → factory-inject ломает singleton, что указало на отсутствие foundation-level logger абстракции. **Variant не зафиксирован — выбор делается в /gsd:discuss-phase 999.20**: V1 (LoggerPort Tier-1 как `CachePort`, token + factory provider) / V2 (canonicalize direct `PinoLogger.root.child({ context })` pattern + ESLint rule запрет factory-inject) / V3 (hybrid — LoggerPort только для structured-payload-heavy sites, direct usage для thin loggers) / TBD-N. Out-of-scope: app-layer logging (use-case internal), business-event sourcing, telemetry/tracing infrastructure (Phase 27 distributed tracing — отдельная категория).
+
+**Required reading (researcher MUST read before discuss):**
+- `.planning/phases/999.19.2-cache-service-get-quality-inserted/999.19.2-REVIEW.md` § BL-01 — TRANSIENT bleed-through evidence + Variant A/B treatment
+- `.planning/phases/999.19.2-cache-service-get-quality-inserted/999.19.2-CONTEXT.md` § D-11 — temporary tactical fix decision-trail + 7-site audit baseline
+- `node_modules/.pnpm/nestjs-pino@4.6.1*/nestjs-pino/PinoLogger.js:123` — empirical evidence что `@Injectable({ scope: Scope.TRANSIENT })` declaration на library side
+- 7 foundation logger sites (audit baseline для unification): `packages/foundation/src/cls/correlation.interceptor.ts`, `packages/foundation/src/errors/rpc-exception.filter.ts`, `packages/foundation/src/errors/grpc-to-http.filter.ts`, `packages/foundation/src/logging/http-timing.interceptor.ts`, `packages/foundation/src/logging/grpc-logging.interceptor.ts`, `packages/foundation/src/logging/pino-http-client-logger.adapter.ts`, `packages/foundation/src/external/cache/cache.service.ts` (after 999.19.2 Plan 02)
+
+**Requirements**: TBD locked via /gsd:discuss-phase 999.20 — researcher должен принести audit 7 sites + cross-skill compliance check + variant matrix; user в discuss выбирает V1..V3 (или новую кость) и flip'ает scope-locked.
+
+**Depends on:** Phase 999.19.2 (cache-service-get-quality, closes 2026-05-07 — provides BL-01 evidence + first formally TEMP-marked PinoLogger consumer + memory anchor `project_logger_port_tbd`).
+
+**Plans:** TBD

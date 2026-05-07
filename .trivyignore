@@ -1,0 +1,33 @@
+# Phase 999.17 — trivy suppression baseline. Body intentionally empty.
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+#
+# .trivyignore — CVE IDs and check IDs Trivy should not flag.
+#
+# FORMAT (one per line):
+#   CVE-YYYY-NNNNN                  # vulnerability scan
+#   AVD-DS-NNNN                      # misconfiguration scan
+#   <secret-rule-id>                 # secret scan
+#   CVE-YYYY-NNNNN exp:YYYY-MM-DD    # with expiration date
+#
+# RULES:
+# 1. Every entry MUST have a comment line above it with:
+#    (a) the reason this is accepted (no impact in our settings, fix not yet
+#        available, etc.)
+#    (b) a ticket / issue link, and
+#    (c) a re-evaluate-by date.
+# 2. Use exp:YYYY-MM-DD when you accept a finding for a bounded window.
+# 3. Empty file = clean state.
+#
+# Example (commented out — uncomment + populate when needed):
+# # No impact: this is a Dockerfile linting rule that flags HEALTHCHECK
+# # absence, but our entrypoint container is upstream-managed.
+# # See: https://internal-tracker/issue/123 — re-evaluate 2026-09-01
+# AVD-DS-0026 exp:2026-09-01
+
+# Phase 999.17.1 — fixture path-block (D-07).
+# Trivy 0.50.4 supports path-globs in .trivyignore for fs scans; verify-mode in Wave 3
+# bypasses via explicit subdirectory path argument and `--skip-dirs` fallback.
+# If a future trivy version drops path-glob support in .trivyignore, fall back to
+# `--skip-dirs scripts/security/fixtures` flag in package.json#scripts.security:trivy-config-if-changed
+# and trivy-fs invocations.
+scripts/security/fixtures

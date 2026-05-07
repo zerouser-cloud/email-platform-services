@@ -1,0 +1,42 @@
+# Phase 999.17 — Semgrep ruleset composition baseline (D-13).
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+#
+# This file is the version-controlled source of truth for which Semgrep
+# registry rulesets the project depends on. The actual scanner CLI
+# invocation lives in package.json `security:semgrep-diff` (Plan 07) and
+# MUST mirror this list as `--config p/<id>` flags.
+#
+# WHY explicit composition (not `--config=auto`):
+#   - `auto` requires Semgrep cloud account login on every dev machine + CI runner
+#   - `auto` ruleset can change upstream without a git diff in this repo
+#   - explicit composition is reproducible, air-gappable, and code-reviewable
+#
+# CONVENTION: the `rulesets:` field below is a PROJECT convention, NOT a
+# Semgrep-native YAML key. Plan 07's `security:semgrep-diff` npm-script
+# parses this file via:
+#   grep -E '^\s+- p/' .semgrep.yml | awk '{print $2}'
+# and emits one `--config <id>` flag per entry. This keeps the registry
+# list in one greppable, code-reviewable file. If a future Semgrep version
+# adds a native YAML field for registry composition, this file migrates.
+
+rulesets:
+  - p/typescript
+  - p/javascript
+  - p/nodejs
+  - p/owasp-top-ten
+  - p/r2c-security-audit
+  - p/security-audit # D-08 — broader moderate-confidence pack closing D-3 (eval-injection silent fail-open)
+
+
+# D-10: Custom rules discovered automatically by scripts/security/semgrep-diff.sh
+# from the .semgrep/rules/ directory (file-per-rule convention) — see Plan 06.
+# rejected: --config auto (D-12, see also 999.17 D-13) — requires Semgrep cloud
+# account, may mutate without git diff, breaks reproducibility.
+
+# Local project rules (none initially per D-13 — registry composition only).
+# Add a `rules:` block here only after a follow-up phase identifies a
+# NestJS-specific gap that the registry rulesets miss. Track 2 weeks of
+# findings before considering custom rules (RESEARCH §OQ-4).
+# rules:
+#   - id: project-internal-pattern
+#     ...

@@ -1,7 +1,6 @@
 export { PersistenceModule } from './persistence.module';
 export {
   DRIZZLE,
-  PG_POOL,
   PERSISTENCE_HEALTH,
   PG_POOL_DEFAULTS,
   PG_HEALTH,

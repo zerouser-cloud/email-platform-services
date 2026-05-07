@@ -10,8 +10,9 @@
 // Terminal leaf in the module graph: imports ONLY from 'zod' (RESEARCH §Pitfall 1).
 import { z } from 'zod';
 
+// NOTIFIER_PORT field dropped в Phase 999.18.2 Wave 2 per ADR-001 §Decision (c.3) —
+// notifier = gRPC Health-only + RMQ consumer service; HTTP server removed from main.ts.
 export const NotifierTopologyShape = {
-  NOTIFIER_PORT: z.coerce.number().positive(),
   NOTIFIER_GRPC_PORT: z.coerce.number().positive(),
   NOTIFIER_GRPC_URL: z.string().min(1),
 } as const;

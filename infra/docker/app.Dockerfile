@@ -1,64 +1,148 @@
 # syntax=docker/dockerfile:1
-ARG NODE_VERSION=20-alpine
+# Phase 999.18.3 — 5-layer build architecture closure (FR-01..FR-11).
+# Two-install Vercel canonical pattern: prod-deps stage isolated from build stage.
+# All Stage 0 + Stage 2 invariants from 999.18.1-DOCKERFILE-REFERENCE preserved;
+# Stage 1.2/1.3 substrate superseded by FR-04 two-install (Plan 09 amends reference).
 
-# ─── Stage 1: Builder ─────────────────────────────────────────
-FROM node:${NODE_VERSION} AS builder
+# ─── Stage 0: Build args ──────────────────────────────────────
+# I-S0.2: APP_NAME has NO default (fail-loud).
+# I-S0.3: NODE_VERSION default = 22-alpine для builder stages.
+# I-S2.1.6: pinned grpc_health_probe version per security advisory.
+# I-S0.4 + I-S0.5: NO `ENV PROTO_DIR=...` — single source of truth in .env.docker.
+ARG APP_NAME
+ARG NODE_VERSION=22-alpine
 
-RUN apk add --no-cache libc6-compat
+# ─── Stage 1.0: gRPC health probe (binary extraction, no apk+wget) ────
+# I-S2.1.6: pinned grpc_health_probe version per security advisory; pin form is
+# an immutable manifest-list digest (Plan 04) — registry tag substitution attacks
+# neutralised by content-addressable @sha256 reference. Tag-equivalent at harvest
+# time was v0.4.48; full audit trail in infra/docker/PINS.md.
+# BuildKit resolves the right arch via $TARGETPLATFORM against the multi-arch
+# manifest list referenced by this digest (linux/amd64, linux/arm64/v8,
+# linux/arm/v7, linux/s390x, linux/ppc64le — see PINS.md "Platforms covered").
+# Binary path inside upstream image: /ko-app/grpc-health-probe (image built via
+# `ko` in GitHub Actions; path is stable across upstream releases — verified
+# empirically for v0.4.24 in Plan 01 and re-verified for v0.4.48 in Plan 03).
+# Digest harvested 2026-05-05; tag-equivalent: v0.4.48; full audit in infra/docker/PINS.md
+FROM ghcr.io/grpc-ecosystem/grpc-health-probe@sha256:b615f8b80a6796490b91bfe0f7f4d59cf73767d4921968495cb8b4024090e151 AS health-probe
 
+# ─── Stage 1.0.5: busybox (multi-call binary used as wget in Stage 2 runner) ────
+# I-S2.1.7: pinned busybox version per supply-chain hardening; pin form is an
+# immutable manifest-list digest (Plan 04). Tag-equivalent at harvest time was
+# 1.37.0-musl (musl variant — NOT glibc, because busybox:1.37.0-glibc requires
+# GLIBC_2.38 which is newer than debian-12's glibc; musl is statically linked
+# and runs anywhere). Full audit trail in infra/docker/PINS.md.
+# The distroless runner (gcr.io/distroless/nodejs22-debian12:nonroot) ships no
+# shell/curl/wget. The gateway compose healthcheck invokes `wget -qO- http://...`
+# — restoring that capability requires ONE binary. busybox is multi-call: when
+# invoked under the name `wget`, it dispatches the wget applet via argv[0].
+# Digest harvested 2026-05-05; tag-equivalent: 1.37.0-musl; full audit in infra/docker/PINS.md
+FROM busybox@sha256:19b646668802469d968a05342a601e78da4322a414a7c09b1c9ee25165042138 AS busybox
+
+# ─── Stage 1.1: Pruner ────────────────────────────────────────
+# I-S1.1: pruner stage requires full workspace для compute the dep-closure slice.
+FROM node:${NODE_VERSION} AS pruner
+WORKDIR /app
+# I-S1.2: corepack enable MUST precede pnpm dlx invocations.
+RUN corepack enable
+COPY . .
+ARG APP_NAME
+# I-S1.7 pruner half: turborepo prune carves the dep-closure slice
+RUN pnpm dlx turbo prune --docker @email-platform/${APP_NAME}
+
+# ─── Stage 1.15: base (DRY consolidation of pnpm setup — Plan 06) ────
+# Shared substrate for prod-deps + builder. Consolidates four directives
+# previously duplicated across both stages: WORKDIR + PNPM_HOME + PATH +
+# corepack-enable. Pruner does NOT inherit from `base` — pruner uses
+# `pnpm dlx` (ephemeral) and does not need the persistent PNPM_HOME store.
+# Runner does NOT inherit from `base` — runner uses distroless (no pnpm,
+# no shell). Canonical Vercel/Next.js Dockerfile pattern.
+FROM node:${NODE_VERSION} AS base
+WORKDIR /app
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
-WORKDIR /app
+# ─── Stage 1.2: prod-deps (FR-04 — production deps ONLY) ──────
+# This stage's node_modules has NO devDeps → husky never installed → no leak.
+# Inherits WORKDIR + PNPM_HOME + PATH + corepack from `base` stage (Plan 06).
+FROM base AS prod-deps
+COPY --from=pruner /app/out/json/ ./
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --prod --frozen-lockfile
 
-# Step 1: Copy manifests only (layer cache for dependencies)
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
-COPY packages/contracts/package.json packages/contracts/package.json
-COPY packages/config/package.json packages/config/package.json
-COPY packages/foundation/package.json packages/foundation/package.json
-
+# ─── Stage 1.3: Builder (FR-04 — full install + turbo build) ──
+# Full install (devDeps включены) → turbo run build delegates к L2 orchestrator.
+# NO `pnpm prune --prod` post-build (D-01 Variant 2 kostyl, superseded by FR-04).
+# NO `ENV CI=true` (D-10 kostyl, superseded — no prune step → no validateModules trigger).
+# NO `ENV HUSKY=0` — there is no husky devDep anymore (FR-03 dropped it from L1).
+# Inherits WORKDIR + PNPM_HOME + PATH + corepack from `base` stage (Plan 06).
+FROM base AS builder
+# Manifests + lockfile FIRST (Vercel canonical) — turbo prune emits lockfile only into out/json/.
+# Two-step COPY enables Docker layer cache for pnpm install when sources change but manifests don't.
+COPY --from=pruner /app/out/json/ ./
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+COPY --from=pruner /app/out/full/ ./
 ARG APP_NAME
-COPY apps/${APP_NAME}/package.json apps/${APP_NAME}/package.json
+RUN pnpm exec turbo run build --filter=@email-platform/${APP_NAME}
 
-# Step 2: Install with BuildKit cache mount
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-
-# Step 3: Copy source code (changes here don't bust install cache)
-COPY tsconfig.base.json ./
-COPY packages ./packages
-COPY apps/${APP_NAME} ./apps/${APP_NAME}
-
-# Step 4: Generate proto TypeScript, then build packages in dependency order
-RUN pnpm --filter @email-platform/contracts run generate \
-    && pnpm --filter @email-platform/contracts run build \
-    && pnpm --filter @email-platform/config run build \
-    && pnpm --filter @email-platform/foundation run build \
-    && pnpm --filter @email-platform/${APP_NAME} run build
-
-# Step 5: Deploy production bundle
-RUN pnpm deploy --filter @email-platform/${APP_NAME} --prod /prod/app
-
-# Step 6: Ensure proto files are available
-COPY packages/contracts/proto /prod/app/proto
-
-# ─── Stage 2: Runner ──────────────────────────────────────────
-FROM node:${NODE_VERSION} AS runner
-
-RUN addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
-
-WORKDIR /app
-
-COPY --from=builder /prod/app ./
-
+# Build metadata (preserved from current Dockerfile lines 95-97 — don't drop)
 ARG BUILD_COMMIT=local
 ARG BUILD_BRANCH=local
 RUN echo "{\"commit\":\"${BUILD_COMMIT}\",\"branch\":\"${BUILD_BRANCH}\",\"built\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > /app/build-info.json
 
-USER appuser
+# ─── Stage 2: Runner (distroless, non-root — FR-07 + FR-11) ───
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 
-# Ecosystem-level: V8/Express runtime optimizations (NOT read by app config)
+# I-S2.1.7: busybox-as-wget — distroless runner has no shell/curl/wget; the
+# gateway compose healthcheck `test: [CMD, wget, -qO-, http://...]` needs an
+# actual wget binary. busybox is a single ~1MB static binary; multi-call →
+# invoked under name `wget` it dispatches the wget applet via argv[0]. This
+# is a deliberate, scoped, audited point compromise on distroless minimalism
+# (Plan 02 of Phase 999.18.4). Plan 04 may tighten this to a digest pin.
+COPY --from=busybox /bin/busybox /usr/local/bin/wget
+
+# I-S2.1.5 + I-S2.1.6: grpc_health_probe binary (sourced from dedicated stage,
+# bypasses builder — no apk+wget transient dependency, no GitHub release CDN
+# dependency at build time, no sed-based arch mapping fragility).
+COPY --from=health-probe /ko-app/grpc-health-probe /usr/local/bin/grpc_health_probe
+
+ARG APP_NAME
+# pnpm-workspace runtime closure (Vercel two-install canonical):
+# pnpm install --prod creates a hoisted .pnpm store at the workspace root
+# /app/node_modules/, and per-app /app/apps/${APP_NAME}/node_modules/ with
+# the symlinks the app actually consumes. Both must travel together; the
+# resolver walks up from cwd (/app/apps/${APP_NAME}) finding the app-local
+# node_modules first then the root store.
+#
+# - /app/node_modules                from prod-deps (shared .pnpm store)
+# - /app/apps/${APP_NAME}/node_modules from prod-deps (per-app symlinks)
+# - /app/packages                    from builder   (compiled dist/ from turbo build)
+# - /app/apps/${APP_NAME}/dist       from builder   (the app's compiled output)
+# - /app/build-info.json             from builder   (CI metadata)
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=prod-deps /app/apps/${APP_NAME}/node_modules /app/apps/${APP_NAME}/node_modules
+COPY --from=builder /app/packages /app/packages
+COPY --from=builder /app/apps/${APP_NAME}/dist /app/apps/${APP_NAME}/dist
+COPY --from=builder /app/build-info.json /app/build-info.json
+# /app/proto/ — runtime proto-loader path per .env.docker `PROTO_DIR=/app/proto`.
+# F-05 single-source-of-truth (PROTO_DIR value in .env.docker only) preserved;
+# physical files MUST exist at /app/proto for ts-proto/grpc-js loader at runtime.
+COPY --from=builder /app/packages/contracts/proto /app/proto
+
+# WORKDIR last — Node module resolution starts from cwd; setting WORKDIR to
+# the app dir means require() walks /app/apps/${APP_NAME}/node_modules then
+# /app/apps/node_modules then /app/node_modules.
+WORKDIR /app/apps/${APP_NAME}
+
+# I-S0.4: NO `ENV PROTO_DIR=...` — F-05 preserved
 ENV NODE_ENV=production
-ENV PROTO_DIR=/app/proto
 
-CMD ["node", "dist/main.js"]
+# I-S2.8 + I-S2.2: USER LAST + numeric form (distroless без /etc/passwd)
+USER 65532:65532
+
+# I-S2.9: exec-form CMD — distroless nodejs ENTRYPOINT is `/nodejs/bin/node`,
+# so CMD passes ONLY the script path (no leading "node" — that resolves as
+# module-name lookup → MODULE_NOT_FOUND). Distroless canonical form.
+CMD ["dist/main.js"]

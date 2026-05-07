@@ -1,3 +1,25 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+# Phase 999.17 + 999.17-11 — supply-chain build-script trust gate.
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-11-PLAN.md.
+#
+# `strictDepBuilds: true` makes the gate fail-closed: any package with a
+# postinstall script that lacks an explicit `allowBuilds` entry causes
+# `pnpm install` to exit non-zero. Default (`false`) only warns.
+strictDepBuilds: true
+
+# `allowBuilds` is the canonical pnpm 11 trust map (replaced legacy
+# `onlyBuiltDependencies` removed in pnpm 11.0.0). Each postinstall-bearing
+# package in the transitive dep graph MUST have an explicit `true|false` entry.
+# `true` = postinstall trusted; `false` = postinstall blocked.
+# OS-specific binary packages (`@esbuild/<arch>`, etc.) get explicit entries
+# even when their current versions ship no install script — defence-in-depth
+# against future versions adding one.
+allowBuilds:
+  '@esbuild/linux-x64': false
+  '@nestjs/core': true
+  esbuild: false
+  grpc-tools: true
+  protobufjs: true

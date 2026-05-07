@@ -1,0 +1,20 @@
+# Phase 999.17 — semgrep suppression baseline. Body intentionally empty.
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+#
+# .semgrepignore — paths Semgrep should not scan. Mirrors .gitignore syntax.
+#
+# DEFAULTS already excluded by Semgrep:
+#   build/, vendor/, dist/, node_modules/, .venv/, test/
+#
+# RULES:
+# 1. Add a glob only with a comment explaining WHY this path needs to skip
+#    SAST scanning specifically (not just "code I don't care about").
+# 2. Test fixtures with intentional vulnerabilities go here.
+# 3. Generated code (proto-generated TypeScript, schema codegen) goes here.
+# 4. Empty file = clean state — Semgrep's defaults are usually sufficient.
+#
+# To ignore a single finding inline, use:  // nosemgrep: rule-id-here
+# (preferred — keeps the suppression with the suppressed code)
+
+# Phase 999.17.1 — fixture path-block (D-07). Verify mode bypasses via --disable-nosem and explicit path argument.
+scripts/security/fixtures/**

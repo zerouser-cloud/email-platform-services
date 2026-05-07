@@ -8,7 +8,7 @@
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "start:debug": "nest start --debug --watch",
-    "lint": "eslint src/ --ext .ts",
+    "lint": "eslint 'src/**/*.ts'",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
@@ -18,11 +18,11 @@
     "@email-platform/contracts": "workspace:*",
     "@email-platform/foundation": "workspace:*",
     "@grpc/grpc-js": "^1.14.3",
-    "@grpc/proto-loader": "^0.7.15",
-    "@nestjs/common": "^11.0.1",
-    "@nestjs/core": "^11.0.1",
-    "@nestjs/microservices": "^11.0.1",
-    "@nestjs/platform-express": "^11.0.1",
+    "@grpc/proto-loader": "^0.8.0",
+    "@nestjs/common": "^11.1.19",
+    "@nestjs/core": "^11.1.19",
+    "@nestjs/microservices": "^11.1.19",
+    "@nestjs/platform-express": "^11.1.19",
     "@nestjs/terminus": "^11.1.1",
     "drizzle-orm": "^0.45.2",
     "nestjs-cls": "^6.2.0",
@@ -33,12 +33,12 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.0",
-    "@nestjs/schematics": "^11.0.0",
+    "@email-platform/tsconfig-base": "workspace:*",
+    "@nestjs/cli": "^11.0.21",
+    "@nestjs/schematics": "^11.1.0",
     "@types/node": "^20.0.0",
     "drizzle-kit": "^0.31.10",
     "ts-node": "^10.0.0",
-    "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.0"
   }
 }

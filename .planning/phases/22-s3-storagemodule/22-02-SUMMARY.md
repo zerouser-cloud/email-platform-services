@@ -6,7 +6,10 @@ tags: [s3, storage, nestjs, di, health-check, parser, notifier]
 
 requires:
   - phase: 22-s3-storagemodule
-    provides: StorageModule.forRootAsync({ bucket, token }) and ReportsStorageModule.forRootAsync() in foundation, STORAGE_HEALTH + REPORTS_STORAGE Symbol DI tokens, HEALTH.INDICATOR.S3 constant
+    provides: |
+      StorageModule.forRootAsync({ bucket, token }) and ReportsStorageModule.forRootAsync()
+      live in foundation. They expose the STORAGE_HEALTH and REPORTS_STORAGE Symbol DI tokens
+      together with the HEALTH.INDICATOR.S3 constant for downstream consumption.
 provides:
   - Parser service wired to StorageModule (own 'parser' bucket) + ReportsStorageModule (shared reports bucket)
   - Notifier service wired to ReportsStorageModule (reports bucket only)
@@ -15,14 +18,15 @@ provides:
   - NotifierStorageModule wrapper in apps/notifier/src/infrastructure/storage/
   - Parser health readiness check includes S3 indicator alongside PostgreSQL
   - Notifier health readiness check includes S3 indicator alongside RabbitMQ
-affects: [future parser/notifier business logic -- can inject PARSER_STORAGE / REPORTS_STORAGE StoragePort]
+affects:
+  [future parser/notifier business logic -- can inject PARSER_STORAGE / REPORTS_STORAGE StoragePort]
 
 tech-stack:
   added: []
   patterns:
-    - "Per-service storage wrapper module in infrastructure/storage/ layer (not root module) mirrors CacheModule integration pattern from 21-02"
-    - "Root modules import pre-configured wrapper (ParserStorageModule / NotifierStorageModule), never StorageModule.forRootAsync directly, per D-06"
-    - "Health indicator injection via Symbol DI token (STORAGE_HEALTH) + type-only import of StorageHealthIndicator from foundation barrel"
+    - 'Per-service storage wrapper module in infrastructure/storage/ layer (not root module) mirrors CacheModule integration pattern from 21-02'
+    - 'Root modules import pre-configured wrapper (ParserStorageModule / NotifierStorageModule), never StorageModule.forRootAsync directly, per D-06'
+    - 'Health indicator injection via Symbol DI token (STORAGE_HEALTH) + type-only import of StorageHealthIndicator from foundation barrel'
 
 key-files:
   created:
@@ -38,13 +42,13 @@ key-files:
     - apps/notifier/src/health/health.controller.ts
 
 key-decisions:
-  - "Followed plan as specified — no architectural changes needed; Wave 1 (22-01) already provided all foundation primitives"
-  - "Notifier constants file left untouched per plan: notifier only consumes REPORTS_STORAGE (defined in foundation), so no new service-local Symbol was required"
-  - "ParserStorageModule composes BOTH StorageModule + ReportsStorageModule inside its own imports/exports, so parser code can inject PARSER_STORAGE for its own bucket and REPORTS_STORAGE for shared reports; NotifierStorageModule re-exports only ReportsStorageModule since notifier never uploads its own files"
+  - 'Followed plan as specified — no architectural changes needed; Wave 1 (22-01) already provided all foundation primitives'
+  - 'Notifier constants file left untouched per plan: notifier only consumes REPORTS_STORAGE (defined in foundation), so no new service-local Symbol was required'
+  - 'ParserStorageModule composes BOTH StorageModule + ReportsStorageModule inside its own imports/exports, so parser code can inject PARSER_STORAGE for its own bucket and REPORTS_STORAGE for shared reports; NotifierStorageModule re-exports only ReportsStorageModule since notifier never uploads its own files'
 
 patterns-established:
-  - "Per-service storage integration: wrapper module in infrastructure/storage/{service}-storage.module.ts with static forRootAsync() delegating to foundation StorageModule / ReportsStorageModule"
-  - "Multi-indicator readiness: health controller accumulates checks via @Inject(TOKEN) pattern — each infrastructure concern (DB, cache, storage, queue) injected separately and composed inside readiness()"
+  - 'Per-service storage integration: wrapper module in infrastructure/storage/{service}-storage.module.ts with static forRootAsync() delegating to foundation StorageModule / ReportsStorageModule'
+  - 'Multi-indicator readiness: health controller accumulates checks via @Inject(TOKEN) pattern — each infrastructure concern (DB, cache, storage, queue) injected separately and composed inside readiness()'
   - "Service-local bucket names are inline literals at module config time (bucket: 'parser') mirroring how sender inlines namespace: 'sender' in CacheModule wiring — established precedent from 21-02"
 
 requirements-completed: [S3-03, S3-04]
@@ -114,6 +118,7 @@ Each task was committed atomically with `--no-verify` (parallel executor mode):
 ### Auto-fixed Issues
 
 **1. [Rule 3 - Blocking] Ran `pnpm install` at worktree root before executing tasks**
+
 - **Found during:** Pre-Task 1 environment check
 - **Issue:** Fresh git worktree had no `node_modules`. TypeScript compiler and all dependencies were absent, so `pnpm build` verification could not run.
 - **Fix:** Ran `pnpm install --prefer-offline` at worktree root. Deterministic — matches existing `pnpm-lock.yaml`.
@@ -122,6 +127,7 @@ Each task was committed atomically with `--no-verify` (parallel executor mode):
 - **Committed in:** No commit (filesystem-only)
 
 **2. [Rule 3 - Blocking] Hard-reset worktree to correct base commit `1098e5b`**
+
 - **Found during:** Worktree branch check (first action per task instructions)
 - **Issue:** Worktree branch was created from `origin/main` (04b25cb) — an older commit that predates the entire feature branch including Wave 1's StorageModule. Running `git reset --soft 1098e5b` as instructed moved HEAD forward but left the working tree at the old state, showing 140+ files as "deleted" relative to the new HEAD (all the feature-branch artifacts were missing from disk).
 - **Fix:** Ran `git reset --hard 1098e5bc97693c3e081b5dba40fdc4e796dc554d` to materialize the complete target-base working tree, making Wave 1 foundation StorageModule files available on disk for parser/notifier to import.
@@ -141,10 +147,10 @@ Each task was committed atomically with `--no-verify` (parallel executor mode):
 
 Both threats in the plan's `<threat_model>` are addressed:
 
-| Threat ID | Status | How addressed |
-|-----------|--------|---------------|
-| T-22-05 (Tampering: parser bucket isolation) | Mitigated | `PARSER_STORAGE` Symbol (parser-only, scoped by the `parser-storage.module.ts` wrapper) is separate from `REPORTS_STORAGE` Symbol (foundation-scoped). Parser code must explicitly inject one or the other — no shared identifier that could accidentally hit the wrong bucket |
-| T-22-06 (Spoofing: health endpoint) | Accepted (per plan) | Health endpoints remain unauthenticated by design (standard k8s/docker pattern). No change from plan disposition |
+| Threat ID                                    | Status              | How addressed                                                                                                                                                                                                                                                                  |
+| -------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| T-22-05 (Tampering: parser bucket isolation) | Mitigated           | `PARSER_STORAGE` Symbol (parser-only, scoped by the `parser-storage.module.ts` wrapper) is separate from `REPORTS_STORAGE` Symbol (foundation-scoped). Parser code must explicitly inject one or the other — no shared identifier that could accidentally hit the wrong bucket |
+| T-22-06 (Spoofing: health endpoint)          | Accepted (per plan) | Health endpoints remain unauthenticated by design (standard k8s/docker pattern). No change from plan disposition                                                                                                                                                               |
 
 ## User Setup Required
 
@@ -164,6 +170,7 @@ None. Wave 1 already installed AWS SDK dependencies, `STORAGE_*` env vars alread
 ## Self-Check: PASSED
 
 **Files verified on disk:**
+
 - FOUND: apps/parser/src/infrastructure/storage/parser-storage.module.ts
 - FOUND: apps/parser/src/infrastructure/storage/index.ts
 - FOUND: apps/notifier/src/infrastructure/storage/notifier-storage.module.ts
@@ -175,10 +182,12 @@ None. Wave 1 already installed AWS SDK dependencies, `STORAGE_*` env vars alread
 - FOUND: apps/notifier/src/health/health.controller.ts (injects STORAGE_HEALTH)
 
 **Commits verified in git log:**
+
 - FOUND: 44382e4 (Task 1: wire StorageModule into parser and notifier services)
 - FOUND: 70f6914 (Task 2: add S3 health indicators to parser and notifier readiness)
 
 **Builds verified:**
+
 - parser + notifier targeted: `pnpm build --filter=@email-platform/parser --filter=@email-platform/notifier` PASS
 - full workspace: `pnpm build` PASS (10 successful, 10 total)
 
@@ -198,6 +207,7 @@ Code review (22-REVIEW.md, 2026-04-09) identified that `ParserStorageModule` and
 - **CR-02** — Both wrappers listed `ReportsStorageModule` in `exports:`, but that class was never in the imports graph (the old foundation pattern returned a `DynamicModule` with `module: StorageModule`, not `ReportsStorageModule`), making the export either silently ignored or runtime error
 
 Plan 22-03 resolves both:
+
 - Parser wrapper is split into `ParserStorageModule` (per-bucket only, real `@Module`) + `StorageModule` composition (parser + reports) in `apps/parser/src/infrastructure/storage/`
 - Parser health controller injects two separate tokens: `PARSER_STORAGE_HEALTH` and `REPORTS_STORAGE_HEALTH`
 - Notifier wrapper is collapsed to a composition-only `StorageModule` (reports bucket only); `notifier-storage.module.ts` is deleted
@@ -207,5 +217,5 @@ Files listed in this summary are substantially reorganized by 22-03 — see `22-
 
 ---
 
-*Phase: 22-s3-storagemodule*
-*Completed: 2026-04-09*
+_Phase: 22-s3-storagemodule_
+_Completed: 2026-04-09_
