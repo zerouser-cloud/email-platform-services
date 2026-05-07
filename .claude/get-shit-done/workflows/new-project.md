@@ -8,11 +8,10 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-
 - gsd-project-researcher — Researches project-level technical decisions
 - gsd-research-synthesizer — Synthesizes findings from parallel research agents
 - gsd-roadmapper — Creates phased execution roadmaps
-  </available_agent_types>
+</available_agent_types>
 
 <auto_mode>
 
@@ -68,7 +67,6 @@ AGENT_SKILLS_ROADMAPPER=$(gsd-sdk query agent-skills gsd-roadmapper)
 Parse JSON for: `researcher_model`, `synthesizer_model`, `roadmapper_model`, `commit_docs`, `project_exists`, `has_codebase_map`, `planning_exists`, `has_existing_code`, `has_package_file`, `is_brownfield`, `needs_codebase_map`, `has_git`, `project_path`, `agents_installed`, `missing_agents`.
 
 **If `agents_installed` is false:** Display a warning before proceeding:
-
 ```
 ⚠ GSD agents not installed. The following agents are missing from your agents directory:
   {missing_agents joined with newline}
@@ -80,20 +78,17 @@ with "agent type not found". Run the installer with --global to make agents avai
 
 Proceeding without research subagents — roadmap will be generated inline.
 ```
-
 Skip Steps 6–7 (parallel research and synthesis) and proceed directly to roadmap creation in Step 8.
 
 **Detect runtime and set instruction file name:**
 
 Derive `RUNTIME` from the invoking prompt's `execution_context` path:
-
 - Path contains `/.codex/` → `RUNTIME=codex`
 - Path contains `/.gemini/` → `RUNTIME=gemini`
 - Path contains `/.config/opencode/` or `/.opencode/` → `RUNTIME=opencode`
 - Otherwise → `RUNTIME=claude`
 
 If `execution_context` path is not available, fall back to env vars:
-
 ```bash
 if [ -n "$CODEX_HOME" ]; then RUNTIME="codex"
 elif [ -n "$GEMINI_CONFIG_DIR" ]; then RUNTIME="gemini"
@@ -102,7 +97,6 @@ else RUNTIME="claude"; fi
 ```
 
 Set the instruction file variable:
-
 ```bash
 if [ "$RUNTIME" = "codex" ]; then INSTRUCTION_FILE="AGENTS.md"; else INSTRUCTION_FILE="CLAUDE.md"; fi
 ```
@@ -122,6 +116,7 @@ git init
 **If auto mode:** Skip to Step 4 (assume greenfield, synthesize PROJECT.md from provided document).
 
 **If `needs_codebase_map` is true** (from init — existing code detected but no codebase map):
+
 
 **Text mode (`workflow.text_mode: true` in config or `--text` flag):** Set `TEXT_MODE=true` if `--text` is present in `$ARGUMENTS` OR `text_mode` from init JSON is `true`. When TEXT_MODE is active, replace every `AskUserQuestion` call with a plain-text numbered list and ask the user to type their choice number. This is required for non-Claude runtimes (OpenAI Codex, Gemini CLI, etc.) where `AskUserQuestion` is not available.
 Use AskUserQuestion:
@@ -258,10 +253,10 @@ Check for existing spike and sketch work that should inform project setup:
 
 ```bash
 # Check for spike findings skill (project-local)
-SPIKE_SKILL=$(ls ./.claude/skills/spike-findings-*/SKILL.md 2>/dev/null | head -1)
+SPIKE_SKILL=$(ls ./.claude/skills/spike-findings-*/SKILL.md 2>/dev/null | head -1 || true)
 
 # Check for sketch findings skill (project-local)
-SKETCH_SKILL=$(ls ./.claude/skills/sketch-findings-*/SKILL.md 2>/dev/null | head -1)
+SKETCH_SKILL=$(ls ./.claude/skills/sketch-findings-*/SKILL.md 2>/dev/null | head -1 || true)
 
 # Check for raw spikes/sketches in .planning/
 HAS_SPIKES=$(ls .planning/spikes/MANIFEST.md 2>/dev/null)
@@ -413,17 +408,16 @@ Initialize with any decisions made during questioning:
 ```markdown
 ## Key Decisions
 
-| Decision                  | Rationale | Outcome   |
-| ------------------------- | --------- | --------- |
-| [Choice from questioning] | [Why]     | — Pending |
+| Decision | Rationale | Outcome |
+|----------|-----------|---------|
+| [Choice from questioning] | [Why] | — Pending |
 ```
 
 **Last updated footer:**
 
 ```markdown
 ---
-
-_Last updated: [date] after initialization_
+*Last updated: [date] after initialization*
 ```
 
 **Evolution section** (include at the end of PROJECT.md, before the footer):
@@ -434,7 +428,6 @@ _Last updated: [date] after initialization_
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd-transition`):
-
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -442,7 +435,6 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone** (via `/gsd-complete-milestone`):
-
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
@@ -469,7 +461,6 @@ DEFAULTS_RAW=$(cat ~/.gsd/defaults.json 2>/dev/null)
 ```
 
 Format the JSON into human-readable bullets using these label mappings:
-
 - `mode` → "Mode"
 - `granularity` → "Granularity"
 - `parallelization` → "Execution" (`true` → "Parallel", `false` → "Sequential")
@@ -603,11 +594,11 @@ questions: [
 
 These spawn additional agents during planning/execution. They add tokens and time but improve quality.
 
-| Agent            | When it runs               | What it does                                          |
-| ---------------- | -------------------------- | ----------------------------------------------------- |
-| **Researcher**   | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
-| **Plan Checker** | After plan is created      | Verifies plan actually achieves the phase goal        |
-| **Verifier**     | After phase execution      | Confirms must-haves were delivered                    |
+| Agent | When it runs | What it does |
+|-------|--------------|--------------|
+| **Researcher** | Before planning each phase | Investigates domain, finds patterns, surfaces gotchas |
+| **Plan Checker** | After plan is created | Verifies plan actually achieves the phase goal |
+| **Verifier** | After phase execution | Confirms must-haves were delivered |
 
 All recommended for important projects. Skip for quick experiments.
 
@@ -763,8 +754,8 @@ Display spawning indicator:
 
 Spawn 4 parallel gsd-project-researcher agents with path references:
 
-```
-Task(prompt="<research_type>
+```text
+Agent(prompt="<research_type>
 Project Research — Stack dimension for [domain].
 </research_type>
 
@@ -804,7 +795,7 @@ Use template: /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platfor
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Stack research")
 
-Task(prompt="<research_type>
+Agent(prompt="<research_type>
 Project Research — Features dimension for [domain].
 </research_type>
 
@@ -844,7 +835,7 @@ Use template: /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platfor
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Features research")
 
-Task(prompt="<research_type>
+Agent(prompt="<research_type>
 Project Research — Architecture dimension for [domain].
 </research_type>
 
@@ -884,7 +875,7 @@ Use template: /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platfor
 </output>
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Architecture research")
 
-Task(prompt="<research_type>
+Agent(prompt="<research_type>
 Project Research — Pitfalls dimension for [domain].
 </research_type>
 
@@ -925,12 +916,12 @@ Use template: /home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platfor
 ", subagent_type="gsd-project-researcher", model="{researcher_model}", description="Pitfalls research")
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling all 4 researcher Task() calls above, do NOT read research files or synthesize content independently while the subagents are active. Wait for all 4 researchers to complete before spawning the synthesizer. This prevents duplicate work and wasted context.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling all 4 researcher Agent() calls above, do NOT read research files or synthesize content independently while the subagents are active. Wait for all 4 researchers to complete before spawning the synthesizer. This prevents duplicate work and wasted context.
 
 After all 4 agents complete, spawn synthesizer to create SUMMARY.md:
 
-```
-Task(prompt="
+```text
+Agent(prompt="
 <task>
 Synthesize research outputs into SUMMARY.md.
 </task>
@@ -952,7 +943,7 @@ Commit after writing.
 ", subagent_type="gsd-research-synthesizer", model="{synthesizer_model}", description="Synthesize research")
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 Display research complete banner and key findings:
 
@@ -1126,6 +1117,21 @@ If "adjust": Return to scoping.
 gsd-sdk query commit "docs: define v1 requirements" --files .planning/REQUIREMENTS.md
 ```
 
+## 7.5. Project Structure Mode
+
+**If auto mode:** Set `PROJECT_MODE=mvp` and skip this prompt.
+
+**Mode prompt: Vertical MVP vs Horizontal Layers.**
+
+Ask the user how they want to structure the project. Use `AskUserQuestion` with two options:
+
+- **Vertical MVP** — get a working app fast, add features slice by slice. Each phase delivers an end-to-end user capability. *(Recommended for new products and rapid-iteration MVPs.)*
+- **Horizontal Layers** — build complete technical layers (DB → API → UI → wiring) and assemble at the end. *(Better for infrastructure-heavy projects with multiple developers.)*
+
+Set `PROJECT_MODE=mvp` if the user picks Vertical MVP, otherwise `PROJECT_MODE=standard`.
+
+When `TEXT_MODE=true` (per the workflow's existing TEXT_MODE handling for non-Claude runtimes), present the same two options as a plain-text numbered list and ask the user to type their choice number.
+
 ## 8. Create Roadmap
 
 Display stage banner:
@@ -1138,10 +1144,27 @@ Display stage banner:
 ◆ Spawning roadmapper...
 ```
 
+**ROADMAP.md template — mode-aware emit.** When generating the initial ROADMAP.md:
+
+- If `PROJECT_MODE=mvp`: under each `### Phase N:` header, emit `**Mode:** mvp` on the line immediately following `**Goal:**`. This sets every initial phase to MVP mode (per Phase-4-Persistence decision: per-phase mode, not project-wide config).
+- If `PROJECT_MODE=standard`: emit the standard ROADMAP.md template with no `**Mode:**` lines (Horizontal Layers standard template — no behavioral change for users who pick Horizontal Layers).
+
+Example MVP-mode emit for Phase 1:
+
+```markdown
+### Phase 1: [Name]
+**Goal:** [Goal]
+**Mode:** mvp
+**Success Criteria**:
+1. [Criterion]
+```
+
+Pass `PROJECT_MODE` to the roadmapper so it applies the correct template.
+
 Spawn gsd-roadmapper agent with path references:
 
-```
-Task(prompt="
+```text
+Agent(prompt="
 <planning_context>
 
 <files_to_read>
@@ -1169,7 +1192,7 @@ Write files first, then return. This ensures artifacts persist even if context i
 ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Create roadmap")
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 **Handle roadmapper return:**
 
@@ -1239,8 +1262,8 @@ Use AskUserQuestion:
 - Get user's adjustment notes
 - Re-spawn roadmapper with revision context:
 
-  ```
-  Task(prompt="
+  ```text
+  Agent(prompt="
   <revision>
   User feedback on roadmap:
   [user's notes]
@@ -1257,7 +1280,7 @@ Use AskUserQuestion:
   ", subagent_type="gsd-roadmapper", model="{roadmapper_model}", description="Revise roadmap")
   ```
 
-  > **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+  > **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 - Present revised roadmap
 - Loop until user approves

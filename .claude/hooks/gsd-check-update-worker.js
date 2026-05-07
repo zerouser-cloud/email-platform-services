@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// gsd-hook-version: 1.40.0
+// gsd-hook-version: 1.41.0
 // Background worker spawned by gsd-check-update.js (SessionStart hook).
 // Checks for GSD updates and stale hooks, writes result to cache file.
 // Receives paths via environment variables set by the parent hook.
@@ -20,8 +20,8 @@ const globalVersionFile = process.env.GSD_GLOBAL_VERSION_FILE;
 // Compare semver: true if a > b (a is strictly newer than b)
 // Strips pre-release suffixes (e.g. '3-beta.1' → '3') to avoid NaN from Number()
 function isNewer(a, b) {
-  const pa = (a || '').split('.').map((s) => Number(s.replace(/-.*/, '')) || 0);
-  const pb = (b || '').split('.').map((s) => Number(s.replace(/-.*/, '')) || 0);
+  const pa = (a || '').split('.').map(s => Number(s.replace(/-.*/, '')) || 0);
+  const pb = (b || '').split('.').map(s => Number(s.replace(/-.*/, '')) || 0);
   for (let i = 0; i < 3; i++) {
     if (pa[i] > pb[i]) return true;
     if (pa[i] < pb[i]) return false;
@@ -66,7 +66,7 @@ if (configDir) {
   const hooksDir = path.join(configDir, 'hooks');
   try {
     if (fs.existsSync(hooksDir)) {
-      const hookFiles = fs.readdirSync(hooksDir).filter((f) => MANAGED_HOOKS.includes(f));
+      const hookFiles = fs.readdirSync(hooksDir).filter(f => MANAGED_HOOKS.includes(f));
       for (const hookFile of hookFiles) {
         try {
           const content = fs.readFileSync(path.join(hooksDir, hookFile), 'utf8');
@@ -79,11 +79,7 @@ if (configDir) {
             }
           } else {
             // No version header at all — definitely stale (pre-version-tracking)
-            staleHooks.push({
-              file: hookFile,
-              hookVersion: 'unknown',
-              installedVersion: installed,
-            });
+            staleHooks.push({ file: hookFile, hookVersion: 'unknown', installedVersion: installed });
           }
         } catch (e) {}
       }
@@ -97,6 +93,13 @@ try {
     encoding: 'utf8',
     timeout: 10000,
     windowsHide: true,
+    // On Windows, 'npm' is distributed as npm.cmd. Node's execFileSync does
+    // not apply PATHEXT resolution and looks for a literal 'npm' binary,
+    // failing with ENOENT. Setting shell:true on Windows routes through
+    // cmd.exe which resolves npm.cmd via PATHEXT.
+    // POSIX (Linux/macOS) is left untouched — no shell spawn, no extra
+    // signal/exit-code semantics, no overhead.
+    shell: process.platform === 'win32',
   }).trim();
 } catch (e) {}
 
@@ -109,7 +112,5 @@ const result = {
 };
 
 if (cacheFile) {
-  try {
-    fs.writeFileSync(cacheFile, JSON.stringify(result));
-  } catch (e) {}
+  try { fs.writeFileSync(cacheFile, JSON.stringify(result)); } catch (e) {}
 }

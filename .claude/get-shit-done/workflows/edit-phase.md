@@ -14,9 +14,9 @@ Parse the command arguments:
 - Optional flag: --force (allow editing in_progress/completed phases)
 
 Examples:
-`/gsd-edit-phase 5` → phase = 5, force = false
-`/gsd-edit-phase 5 --force` → phase = 5, force = true
-`/gsd-edit-phase 12.1` → phase = 12.1, force = false
+  `/gsd-edit-phase 5`       → phase = 5, force = false
+  `/gsd-edit-phase 5 --force` → phase = 5, force = true
+  `/gsd-edit-phase 12.1`    → phase = 12.1, force = false
 
 If no argument provided:
 
@@ -39,12 +39,10 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
 Check `roadmap_exists` from init JSON. If false:
-
 ```
 ERROR: No roadmap found (.planning/ROADMAP.md)
 Run /gsd-new-project to initialize.
 ```
-
 Exit.
 </step>
 
@@ -66,17 +64,15 @@ Available phases can be seen with /gsd-progress.
 Exit.
 
 Extract from the result:
-
 - `phase_name` — the phase title
 - `goal` — the phase goal/description
 - `success_criteria` — array of criteria
 - `section` — full raw section text (preserves depends_on, requirements, plans, etc.)
 
 Also parse the full section text to extract additional fields not in the SDK result:
-
 - `depends_on` — from `**Depends on:** ...` or `**Depends on**: ...` line
 - `requirements` — from `**Requirements:** ...` block if present
-  </step>
+</step>
 
 <step name="check_phase_status">
 Determine the phase status from disk. Compare against STATE.md current phase:
@@ -88,7 +84,6 @@ ANALYZE=$(gsd-sdk query roadmap analyze)
 Find the phase entry in the `phases` array. Extract `disk_status`.
 
 Map disk_status to a user-friendly status:
-
 - `complete` → status = `completed`
 - `planned` or `partial` → status = `in_progress`
 - `empty`, `no_directory`, `discussed`, `researched` → status = `future`
@@ -111,7 +106,6 @@ If `--force` was passed and status is `in_progress` or `completed`, continue wit
 ```
 WARNING: Editing Phase {target} which is {status}. Proceeding due to --force.
 ```
-
 </step>
 
 <step name="present_current_values">
@@ -175,13 +169,12 @@ Describe the revised intent for Phase {target} (replace the current description)
 ```
 
 Wait for user input. Use the clarified intent to rewrite all fields:
-
 - Generate a clear, concise `title` from the intent
 - Write a complete `goal` statement
 - Produce updated `requirements` if the original had them
 - Generate `success_criteria` (3-5 measurable criteria)
 - Preserve `depends_on` unless the user explicitly mentioned changing it
-  </step>
+</step>
 
 <step name="validate_depends_on">
 If `depends_on` is being updated (or preserved as non-empty), validate that every referenced phase number exists in ROADMAP.md:
@@ -193,7 +186,6 @@ ALL_PHASES=$(gsd-sdk query roadmap analyze)
 Parse the `phases` array to get all valid phase numbers.
 
 For each phase number referenced in `depends_on`:
-
 - Normalize it (strip whitespace, "Phase" prefix if present)
 - Check it is in the valid phase numbers set
 - It must not reference itself (phase {target})
@@ -252,7 +244,6 @@ gsd-sdk query state.add-roadmap-evolution \
   --action edited \
   --note "edited fields: {changed_field_list}"
 ```
-
 </step>
 
 <step name="completion">
@@ -273,13 +264,11 @@ Fields changed: {changed_field_list}
 
 ---
 ```
-
 </step>
 
 </process>
 
 <anti_patterns>
-
 - Don't renumber the phase — number and position must be preserved exactly
 - Don't modify other phases when editing one
 - Don't skip depends_on validation (invalid references block writes)
@@ -288,7 +277,7 @@ Fields changed: {changed_field_list}
 - Don't use raw Write on ROADMAP.md without reading it first; always replace section in place
 - Don't modify the phase directory structure — only ROADMAP.md changes
 - Don't commit the change — that's the user's decision
-  </anti_patterns>
+</anti_patterns>
 
 <success_criteria>
 Edit-phase is complete when:
@@ -302,4 +291,4 @@ Edit-phase is complete when:
 - [ ] Updated phase written back in place; number, position, and status preserved
 - [ ] STATE.md Roadmap Evolution updated
 - [ ] User informed of next steps
-      </success_criteria>
+</success_criteria>

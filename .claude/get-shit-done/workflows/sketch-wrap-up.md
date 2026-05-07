@@ -29,20 +29,16 @@ Read all files referenced by the invoking prompt's execution_context before star
    - If no: all sketches are candidates
 
 If no unprocessed sketches exist:
-
 ```
 No unprocessed sketches found in `.planning/sketches/`.
 Run `/gsd-sketch` first to create design explorations.
 ```
-
 Exit.
 
 Check `commit_docs` config:
-
 ```bash
 COMMIT_DOCS=$(gsd-sdk query config-get commit_docs 2>/dev/null || echo "true")
 ```
-
 </step>
 
 <step name="curate">
@@ -59,7 +55,7 @@ Present each unprocessed sketch in ascending order. For each sketch, show:
 Then ask the user:
 
 ╔══════════════════════════════════════════════════════════════╗
-║ CHECKPOINT: Decision Required ║
+║  CHECKPOINT: Decision Required                               ║
 ╚══════════════════════════════════════════════════════════════╝
 
 Sketch {NNN}: {name} — Winner: Variant {X}
@@ -71,7 +67,6 @@ Sketch {NNN}: {name} — Winner: Variant {X}
 ──────────────────────────────────────────────────────────────
 
 **If "Let me look at it":**
-
 1. Provide: `open .planning/sketches/NNN-name/index.html`
 2. Remind them which variant won and what to look for
 3. After they've looked, return to the include/exclude/partial decision
@@ -111,7 +106,7 @@ For each included sketch:
 1. Copy the winning variant's HTML file (or the full index.html with all variants) into `sources/NNN-sketch-name/`
 2. Copy the winning theme.css into `sources/themes/`
 3. Exclude node_modules, build artifacts, .DS_Store
-   </step>
+</step>
 
 <step name="synthesize">
 ## Synthesize Reference Files
@@ -122,27 +117,21 @@ For each design-area group, write a reference file at `references/[design-area-n
 # [Design Area Name]
 
 ## Design Decisions
-
 [For each validated decision: what was chosen, why it won over alternatives, the key visual properties (colors, spacing, border radius, typography)]
 
 ## CSS Patterns
-
 [Key CSS snippets from winning variants — layout structures, component patterns, animation patterns. Extracted and cleaned up for reference.]
 
 ## HTML Structures
-
 [Key HTML patterns from winning variants — page layout, component markup, navigation structures.]
 
 ## What to Avoid
-
 [Design directions that were tried and rejected. Why they didn't work.]
 
 ## Origin
-
 Synthesized from sketches: NNN, NNN
 Source files available in: sources/NNN-sketch-name/
 ```
-
 </step>
 
 <step name="write_skill">
@@ -166,18 +155,16 @@ Sketch sessions wrapped: [date(s)]
 </context>
 
 <design_direction>
-
 ## Overall Direction
 
 [Summary of the validated visual direction: palette, typography, spacing system, layout approach, interaction patterns]
 </design_direction>
 
 <findings_index>
-
 ## Design Areas
 
-| Area   | Reference            | Key Decision       |
-| ------ | -------------------- | ------------------ |
+| Area | Reference | Key Decision |
+|------|-----------|--------------|
 | [Name] | references/[name].md | [One-line summary] |
 
 ## Theme
@@ -196,9 +183,8 @@ Original sketch HTML files are preserved in `sources/` for complete reference.
 
 - 001-sketch-name
 - 002-sketch-name
-  </metadata>
+</metadata>
 ```
-
 </step>
 
 <step name="write_summary">
@@ -215,24 +201,19 @@ Write `.planning/sketches/WRAP-UP-SUMMARY.md` for project history:
 **Skill output:** `./.claude/skills/sketch-findings-[project]/`
 
 ## Included Sketches
-
-| #   | Name | Winner | Design Area |
-| --- | ---- | ------ | ----------- |
+| # | Name | Winner | Design Area |
+|---|------|--------|-------------|
 
 ## Excluded Sketches
-
-| #   | Name | Reason |
-| --- | ---- | ------ |
+| # | Name | Reason |
+|---|------|--------|
 
 ## Design Direction
-
 [consolidated design direction summary]
 
 ## Key Decisions
-
 [layout, palette, typography, spacing, interaction patterns]
 ```
-
 </step>
 
 <step name="update_claude_md">
@@ -253,7 +234,6 @@ Commit all artifacts (if `COMMIT_DOCS` is true):
 ```bash
 gsd-sdk query commit "docs(sketch-wrap-up): package [N] sketch findings into project skill" --files .planning/sketches/WRAP-UP-SUMMARY.md
 ```
-
 </step>
 
 <step name="report">
@@ -269,7 +249,6 @@ gsd-sdk query commit "docs(sketch-wrap-up): package [N] sketch findings into pro
 **CLAUDE.md:** routing line added
 
 The sketch-findings skill will auto-load when building the UI.
-
 ```
 
 ───────────────────────────────────────────────────────────────
@@ -304,4 +283,3 @@ The sketch-findings skill will auto-load when building the UI.
 - [ ] Summary presented
 - [ ] Next-step options presented (including frontier sketch exploration via `/gsd-sketch`)
 </success_criteria>
-```

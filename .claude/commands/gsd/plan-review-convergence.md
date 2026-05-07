@@ -1,7 +1,7 @@
 ---
 name: gsd:plan-review-convergence
-description: 'Cross-AI plan convergence loop — replan with review feedback until no HIGH concerns remain.'
-argument-hint: '<phase> [--codex] [--gemini] [--claude] [--opencode] [--ollama] [--lm-studio] [--llama-cpp] [--text] [--ws <name>] [--all] [--max-cycles N]'
+description: "Cross-AI plan convergence loop — replan with review feedback until no HIGH concerns remain."
+argument-hint: "<phase> [--codex] [--gemini] [--claude] [--opencode] [--ollama] [--lm-studio] [--llama-cpp] [--text] [--ws <name>] [--all] [--max-cycles N]"
 allowed-tools:
   - Read
   - Write
@@ -38,7 +38,6 @@ Replaces gsd-plan-phase's internal gsd-plan-checker with external AI reviewers (
 Phase number: extracted from $ARGUMENTS (required)
 
 **Flags:**
-
 - `--codex` — Use Codex CLI as reviewer (default if no reviewer specified)
 - `--gemini` — Use Gemini CLI as reviewer
 - `--claude` — Use Claude CLI as reviewer (separate session)
@@ -54,6 +53,6 @@ Phase number: extracted from $ARGUMENTS (required)
 </context>
 
 <process>
-Execute the plan-review-convergence workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/plan-review-convergence.md end-to-end.
+Execute end-to-end.
 Preserve all workflow gates (pre-flight, revision loop, stall detection, escalation).
 </process>

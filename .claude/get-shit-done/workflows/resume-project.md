@@ -225,10 +225,11 @@ Wait for user selection.
 </step>
 
 <step name="route_to_workflow">
-Based on user selection, route to appropriate workflow:
+Based on user selection, route to appropriate workflow.
 
-- **Execute plan** → Show command for user to run after clearing:
+Resume-specific exception: do **not** emit `/clear then:` here. Resume is already a session-entry flow, so the next command should be shown directly.
 
+- **Execute plan** → Show direct next command:
   ```
   ---
 
@@ -236,23 +237,17 @@ Based on user selection, route to appropriate workflow:
 
   **{phase}-{plan}: [Plan Name]** — [objective from PLAN.md]
 
-  `/clear` then:
-
   `/gsd-execute-phase {phase} ${GSD_WS}`
 
   ---
   ```
-
-- **Plan phase** → Show command for user to run after clearing:
-
+- **Plan phase** → Show direct next command:
   ```
   ---
 
   ## ▶ Next Up — [${PROJECT_CODE}] ${PROJECT_TITLE}
 
   **Phase [N]: [Name]** — [Goal from ROADMAP.md]
-
-  `/clear` then:
 
   `/gsd-plan-phase [phase-number] ${GSD_WS}`
 
@@ -264,12 +259,11 @@ Based on user selection, route to appropriate workflow:
 
   ---
   ```
-
 - **Advance to next phase** → ./transition.md (internal workflow, invoked inline — NOT a user command)
 - **Check todos** → Read .planning/todos/pending/, present summary
 - **Review alignment** → Read PROJECT.md, compare to current state
 - **Something else** → Ask what they need
-  </step>
+</step>
 
 <step name="update_session">
 Before proceeding to routed workflow, update session continuity:
@@ -311,7 +305,6 @@ This handles cases where:
 
 <quick_resume>
 If user says "continue" or "go":
-
 - Load state silently
 - Determine primary action
 - Execute immediately without presenting options

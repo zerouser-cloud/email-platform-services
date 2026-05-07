@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// gsd-hook-version: 1.40.0
+// gsd-hook-version: 1.41.0
 // GSD Read Guard — PreToolUse hook
 // Injects advisory guidance when Write/Edit targets an existing file,
 // reminding the model to Read the file first.
@@ -24,7 +24,7 @@ const path = require('path');
 let input = '';
 const stdinTimeout = setTimeout(() => process.exit(0), 3000);
 process.stdin.setEncoding('utf8');
-process.stdin.on('data', (chunk) => (input += chunk));
+process.stdin.on('data', chunk => input += chunk);
 process.stdin.on('end', () => {
   clearTimeout(stdinTimeout);
   try {

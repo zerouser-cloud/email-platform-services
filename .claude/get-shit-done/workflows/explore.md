@@ -12,16 +12,14 @@ Read all files referenced by the invoking prompt's execution_context before star
 
 <available_agent_types>
 Valid GSD subagent types (use exact names — do not fall back to 'general-purpose'):
-
 - gsd-phase-researcher — Researches specific questions and returns concise findings
-  </available_agent_types>
+</available_agent_types>
 
 <process>
 
 ## Step 1: Open the conversation
 
 If a topic was provided, acknowledge it and begin exploring:
-
 ```
 ## Explore: {topic}
 
@@ -30,7 +28,6 @@ before we commit to any artifacts.
 ```
 
 If no topic, ask:
-
 ```
 ## Explore
 
@@ -62,15 +59,14 @@ This would take ~30 seconds and might surface useful context.
 ```
 
 If yes, spawn a research agent:
-
 ```
-Task(
+Agent(
   prompt="Quick research: {specific_question}. Return 3-5 key findings, no more than 200 words.",
   subagent_type="gsd-phase-researcher"
 )
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 Share findings and continue the conversation.
 
@@ -80,19 +76,18 @@ If the topic doesn't warrant research, skip this step entirely. **Don't force it
 
 When the conversation reaches natural conclusions or the developer signals readiness, propose outputs. Analyze the conversation to identify what was discussed and suggest **up to 4 outputs** from:
 
-| Type              | Destination                                | When to suggest                                                                   |
-| ----------------- | ------------------------------------------ | --------------------------------------------------------------------------------- |
-| Note              | `.planning/notes/{slug}.md`                | Observations, context, decisions worth remembering                                |
-| Todo              | `.planning/todos/pending/{slug}.md`        | Concrete actionable tasks identified                                              |
-| Seed              | `.planning/seeds/{slug}.md`                | Forward-looking ideas with trigger conditions                                     |
-| Research question | `.planning/research/questions.md` (append) | Open questions that need deeper investigation                                     |
-| Requirement       | `REQUIREMENTS.md` (append)                 | Clear requirements that emerged from discussion                                   |
-| New phase         | `ROADMAP.md` (append)                      | Scope large enough to warrant its own phase                                       |
-| Spike             | `/gsd-spike` (invoke)                      | Feasibility uncertainty surfaced — "will this API work?", "can we do X?"          |
-| Sketch            | `/gsd-sketch` (invoke)                     | Design direction unclear — "what should this look like?", "how should this feel?" |
+| Type | Destination | When to suggest |
+|------|-------------|-----------------|
+| Note | `.planning/notes/{slug}.md` | Observations, context, decisions worth remembering |
+| Todo | `.planning/todos/pending/{slug}.md` | Concrete actionable tasks identified |
+| Seed | `.planning/seeds/{slug}.md` | Forward-looking ideas with trigger conditions |
+| Research question | `.planning/research/questions.md` (append) | Open questions that need deeper investigation |
+| Requirement | `REQUIREMENTS.md` (append) | Clear requirements that emerged from discussion |
+| New phase | `ROADMAP.md` (append) | Scope large enough to warrant its own phase |
+| Spike | `/gsd-spike` (invoke) | Feasibility uncertainty surfaced — "will this API work?", "can we do X?" |
+| Sketch | `/gsd-sketch` (invoke) | Design direction unclear — "what should this look like?", "how should this feel?" |
 
 Present suggestions:
-
 ```
 Based on our conversation, I'd suggest capturing:
 
@@ -119,7 +114,6 @@ For each selected output, write the file:
 - **Phases:** Use existing `/gsd-add-phase` command via SlashCommand
 
 Commit if `commit_docs` is enabled:
-
 ```bash
 gsd-sdk query commit "docs: capture exploration — {topic_slug}" --files {file_list}
 ```
@@ -133,13 +127,12 @@ gsd-sdk query commit "docs: capture exploration — {topic_slug}" --files {file_
 **Outputs:** {count} artifact(s) created
 {list of created files}
 
-Continue exploring with `/gsd-explore` or start working with `/gsd-next`.
+Continue exploring with `/gsd-explore` or start working with `/gsd-progress --next`.
 ```
 
 </process>
 
 <success_criteria>
-
 - [ ] Socratic conversation follows questioning.md principles
 - [ ] Questions asked one at a time, not in batches
 - [ ] Research offered contextually (not forced)
@@ -147,4 +140,4 @@ Continue exploring with `/gsd-explore` or start working with `/gsd-next`.
 - [ ] User explicitly selects which outputs to create
 - [ ] Files written to correct destinations
 - [ ] Commit respects commit_docs config
-      </success_criteria>
+</success_criteria>

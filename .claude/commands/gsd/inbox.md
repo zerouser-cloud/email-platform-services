@@ -1,7 +1,7 @@
 ---
 name: gsd:inbox
 description: Triage and review open GitHub issues and PRs against project templates and contribution guidelines.
-argument-hint: '[--issues] [--prs] [--label] [--close-incomplete] [--repo owner/repo]'
+argument-hint: "[--issues] [--prs] [--label] [--close-incomplete] [--repo owner/repo]"
 allowed-tools:
   - Read
   - Bash
@@ -10,7 +10,6 @@ allowed-tools:
   - Glob
   - AskUserQuestion
 ---
-
 <objective>
 One-command triage of the project's GitHub inbox. Fetches all open issues and PRs,
 reviews each against the corresponding template requirements (feature, enhancement,
@@ -34,6 +33,6 @@ and optionally applies labels or closes non-compliant submissions.
 </context>
 
 <process>
-Execute the inbox workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/inbox.md end-to-end.
+Execute end-to-end.
 Parse flags from arguments and pass to workflow.
 </process>

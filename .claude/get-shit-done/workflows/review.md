@@ -38,7 +38,6 @@ curl -s --max-time 2 "${LLAMA_CPP_HOST}/v1/models" >/dev/null 2>&1 && echo "llam
 ```
 
 Parse flags from `$ARGUMENTS`:
-
 - `--gemini` → include Gemini
 - `--claude` → include Claude
 - `--codex` → include Codex
@@ -53,7 +52,6 @@ Parse flags from `$ARGUMENTS`:
 - No flags → include all available
 
 If no CLIs are available:
-
 ```
 No external AI CLIs found. Install at least one:
 - gemini: https://github.com/google-gemini/gemini-cli
@@ -65,7 +63,6 @@ No external AI CLIs found. Install at least one:
 
 Then run /gsd-review again.
 ```
-
 Exit.
 
 Determine which CLI to skip based on the current runtime environment:
@@ -89,12 +86,11 @@ fi
 ```
 
 Rules:
-
 - If `SELF_CLI="none"` → invoke ALL available CLIs (no skip)
 - If `SELF_CLI="claude"` → skip claude, use gemini/codex
 - If `SELF_CLI="auto"` → the executing AI identifies itself and skips its own CLI
 - At least one DIFFERENT CLI must be available for the review to proceed.
-  </step>
+</step>
 
 <step name="gather_context">
 Collect phase artifacts for the review prompt:
@@ -107,14 +103,13 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 Read from init: `phase_dir`, `phase_number`, `padded_phase`.
 
 Then read:
-
 1. `.planning/PROJECT.md` (first 80 lines — project context)
 2. Phase section from `.planning/ROADMAP.md`
 3. All `*-PLAN.md` files in the phase directory
 4. `*-CONTEXT.md` if present (user decisions)
 5. `*-RESEARCH.md` if present (domain research)
 6. `.planning/REQUIREMENTS.md` (requirements this phase addresses)
-   </step>
+</step>
 
 <step name="build_prompt">
 Build a structured review prompt:
@@ -126,29 +121,22 @@ You are reviewing implementation plans for a software project phase.
 Provide structured feedback on plan quality, completeness, and risks.
 
 ## Project Context
-
 {first 80 lines of PROJECT.md}
 
 ## Phase {N}: {phase name}
-
 ### Roadmap Section
-
 {roadmap phase section}
 
 ### Requirements Addressed
-
 {requirements for this phase}
 
 ### User Decisions (CONTEXT.md)
-
 {context if present}
 
 ### Research Findings
-
 {research if present}
 
 ### Plans to Review
-
 {all PLAN.md contents}
 
 ## Review Instructions
@@ -162,7 +150,6 @@ Analyze each plan and provide:
 5. **Risk Assessment** — Overall risk level (LOW/MEDIUM/HIGH) with justification
 
 Focus on:
-
 - Missing edge cases or error handling
 - Dependency ordering issues
 - Scope creep or over-engineering
@@ -190,7 +177,6 @@ OPENCODE_MODEL=$(gsd-sdk query config-get review.models.opencode 2>/dev/null | j
 For each selected CLI, invoke in sequence (not parallel — avoid rate limits):
 
 **Gemini:**
-
 ```bash
 if [ -n "$GEMINI_MODEL" ] && [ "$GEMINI_MODEL" != "null" ]; then
   cat /tmp/gsd-review-prompt-{phase}.md | gemini -m "$GEMINI_MODEL" -p - 2>/dev/null > /tmp/gsd-review-gemini-{phase}.md
@@ -200,7 +186,6 @@ fi
 ```
 
 **Claude (separate session):**
-
 ```bash
 if [ -n "$CLAUDE_MODEL" ] && [ "$CLAUDE_MODEL" != "null" ]; then
   cat /tmp/gsd-review-prompt-{phase}.md | claude --model "$CLAUDE_MODEL" -p - 2>/dev/null > /tmp/gsd-review-claude-{phase}.md
@@ -210,7 +195,6 @@ fi
 ```
 
 **Codex:**
-
 ```bash
 if [ -n "$CODEX_MODEL" ] && [ "$CODEX_MODEL" != "null" ]; then
   cat /tmp/gsd-review-prompt-{phase}.md | codex exec --model "$CODEX_MODEL" --skip-git-repo-check - 2>/dev/null > /tmp/gsd-review-codex-{phase}.md
@@ -228,7 +212,6 @@ coderabbit review --prompt-only 2>/dev/null > /tmp/gsd-review-coderabbit-{phase}
 ```
 
 **OpenCode (via GitHub Copilot):**
-
 ```bash
 if [ -n "$OPENCODE_MODEL" ] && [ "$OPENCODE_MODEL" != "null" ]; then
   cat /tmp/gsd-review-prompt-{phase}.md | opencode run --model "$OPENCODE_MODEL" - 2>/dev/null > /tmp/gsd-review-opencode-{phase}.md
@@ -241,7 +224,6 @@ fi
 ```
 
 **Qwen Code:**
-
 ```bash
 cat /tmp/gsd-review-prompt-{phase}.md | qwen - 2>/dev/null > /tmp/gsd-review-qwen-{phase}.md
 if [ ! -s /tmp/gsd-review-qwen-{phase}.md ]; then
@@ -250,7 +232,6 @@ fi
 ```
 
 **Cursor:**
-
 ```bash
 cat /tmp/gsd-review-prompt-{phase}.md | cursor agent -p --mode ask --trust 2>/dev/null > /tmp/gsd-review-cursor-{phase}.md
 if [ ! -s /tmp/gsd-review-cursor-{phase}.md ]; then
@@ -282,7 +263,6 @@ fi
 ```
 
 **LM Studio (local, OpenAI-compatible):**
-
 ```bash
 LM_STUDIO_HOST=$(gsd-sdk query config-get review.lm_studio_host 2>/dev/null | jq -r '.' 2>/dev/null || echo "")
 if [ -z "$LM_STUDIO_HOST" ] || [ "$LM_STUDIO_HOST" = "null" ]; then LM_STUDIO_HOST="http://localhost:1234"; fi
@@ -308,7 +288,6 @@ fi
 ```
 
 **llama.cpp (local, OpenAI-compatible):**
-
 ```bash
 LLAMA_CPP_HOST=$(gsd-sdk query config-get review.llama_cpp_host 2>/dev/null | jq -r '.' 2>/dev/null || echo "")
 if [ -z "$LLAMA_CPP_HOST" ] || [ "$LLAMA_CPP_HOST" = "null" ]; then LLAMA_CPP_HOST="http://localhost:8080"; fi
@@ -332,7 +311,6 @@ fi
 If a CLI or local server fails, log the error and continue with remaining reviewers.
 
 Display progress:
-
 ```
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  GSD ► CROSS-AI REVIEW — Phase {N}
@@ -341,7 +319,6 @@ Display progress:
 ◆ Reviewing with {CLI}... done ✓
 ◆ Reviewing with {CLI}... done ✓
 ```
-
 </step>
 
 <step name="write_reviews">
@@ -349,10 +326,10 @@ Combine all review responses into `{phase_dir}/{padded_phase}-REVIEWS.md`:
 
 ```markdown
 ---
-phase: { N }
-reviewers: [gemini, claude, codex, coderabbit, opencode, qwen, cursor, ollama, lm_studio, llama_cpp] # populate at runtime with only the reviewers actually invoked
-reviewed_at: { ISO timestamp }
-plans_reviewed: [{ list of PLAN.md files }]
+phase: {N}
+reviewers: [gemini, claude, codex, coderabbit, opencode, qwen, cursor, ollama, lm_studio, llama_cpp]  # populate at runtime with only the reviewers actually invoked
+reviewed_at: {ISO timestamp}
+plans_reviewed: [{list of PLAN.md files}]
 ---
 
 # Cross-AI Plan Review — Phase {N}
@@ -422,24 +399,19 @@ plans_reviewed: [{ list of PLAN.md files }]
 {synthesize common concerns across all reviewers}
 
 ### Agreed Strengths
-
 {strengths mentioned by 2+ reviewers}
 
 ### Agreed Concerns
-
 {concerns raised by 2+ reviewers — highest priority}
 
 ### Divergent Views
-
 {where reviewers disagreed — worth investigating}
 ```
 
 Commit:
-
 ```bash
 gsd-sdk query commit "docs: cross-AI review for phase {N}" --files {phase_dir}/{padded_phase}-REVIEWS.md
 ```
-
 </step>
 
 <step name="present_results">
@@ -467,10 +439,9 @@ Clean up temp files.
 </process>
 
 <success_criteria>
-
 - [ ] At least one external CLI invoked successfully
 - [ ] REVIEWS.md written with structured feedback
 - [ ] Consensus summary synthesized from multiple reviewers
 - [ ] Temp files cleaned up
 - [ ] User knows how to use feedback (/gsd-plan-phase --reviews)
-      </success_criteria>
+</success_criteria>

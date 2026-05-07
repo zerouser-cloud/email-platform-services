@@ -45,3 +45,10 @@ npm-debug.log*
 .claude/scheduled_tasks.lock
 .claude/gsd-user-files-backup/
 .claude/worktrees/
+
+# GSD installer working directories — created by `npx get-shit-done-cc@<v> --claude --local`
+# during framework updates. They contain the pre-update pristine snapshot and a backup
+# of any locally modified framework files (see backup-meta.json). Not source — recreated
+# on next update — too large to track (~1.6M).
+.claude/gsd-pristine/
+.claude/gsd-local-patches/

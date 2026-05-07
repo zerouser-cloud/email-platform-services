@@ -1,7 +1,7 @@
 ---
 name: gsd:capture
 description: Capture ideas, tasks, notes, and seeds to their destination
-argument-hint: '[--note | --backlog | --seed | --list] [text]'
+argument-hint: "[--note | --backlog | --seed | --list] [text]"
 allowed-tools:
   - Read
   - Write
@@ -16,23 +16,22 @@ allowed-tools:
 Capture ideas, tasks, notes, and seeds to their appropriate destination in the GSD system.
 
 Mode routing:
-
 - **default** (no flag): Capture as a structured todo for later work → add-todo workflow
 - **--note**: Zero-friction idea capture (append/list/promote) → note workflow
 - **--backlog**: Add an idea to the backlog parking lot (999.x numbering) → add-backlog workflow
 - **--seed**: Capture a forward-looking idea with trigger conditions → plant-seed workflow
 - **--list**: List pending todos and select one to work on → check-todos workflow
-  </objective>
+</objective>
 
 <routing>
 
-| Flag      | Destination                              | Workflow    |
-| --------- | ---------------------------------------- | ----------- |
-| (none)    | Structured todo in .planning/todos/      | add-todo    |
-| --note    | Timestamped note file, list, or promote  | note        |
-| --backlog | ROADMAP.md backlog section (999.x)       | add-backlog |
-| --seed    | .planning/seeds/SEED-NNN-slug.md         | plant-seed  |
-| --list    | Interactive todo browser + action router | check-todos |
+| Flag | Destination | Workflow |
+|------|-------------|----------|
+| (none) | Structured todo in .planning/todos/ | add-todo |
+| --note | Timestamped note file, list, or promote | note |
+| --backlog | ROADMAP.md backlog section (999.x) | add-backlog |
+| --seed | .planning/seeds/SEED-NNN-slug.md | plant-seed |
+| --list | Interactive todo browser + action router | check-todos |
 
 </routing>
 
@@ -49,13 +48,12 @@ Mode routing:
 Arguments: $ARGUMENTS
 
 Parse the first token of $ARGUMENTS:
-
 - If it is `--note`: strip the flag, pass remainder to note workflow
 - If it is `--backlog`: strip the flag, pass remainder to add-backlog workflow
 - If it is `--seed`: strip the flag, pass remainder to plant-seed workflow
 - If it is `--list`: pass remainder (optional area filter) to check-todos workflow
 - Otherwise: pass all of $ARGUMENTS to add-todo workflow
-  </context>
+</context>
 
 <process>
 1. Parse the leading flag (if any) from $ARGUMENTS.

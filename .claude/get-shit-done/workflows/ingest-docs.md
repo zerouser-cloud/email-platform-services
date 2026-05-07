@@ -59,20 +59,17 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 Parse `project_exists`, `planning_exists`, `has_git`, `project_path` from INIT.
 
 **Auto-detect MODE** if not set:
-
 - `planning_exists: true` → `MODE=merge`
 - `planning_exists: false` → `MODE=new`
 
 If user passed `--mode new` but `.planning/` already exists: display warning and require explicit confirm via `AskUserQuestion` (approve-revise-abort from `references/gate-prompts.md`) before overwriting.
 
 If `has_git: false` and `MODE=new`: initialize git:
-
 ```bash
 git init
 ```
 
 **Detect runtime** using the same pattern as `new-project.md`:
-
 - execution_context path `/.codex/` → `RUNTIME=codex`
 - `/.gemini/` → `RUNTIME=gemini`
 - `/.opencode/` or `/.config/opencode/` → `RUNTIME=opencode`
@@ -94,7 +91,7 @@ Read `MANIFEST_PATH`. Expected YAML shape:
 docs:
   - path: docs/adr/0001-db.md
     type: ADR
-    precedence: 0 # optional, lower = higher precedence
+    precedence: 0   # optional, lower = higher precedence
   - path: docs/prd/auth.md
     type: PRD
 ```
@@ -146,7 +143,6 @@ Discovered {N} documents:
 **Text mode:** apply the same `--text`/`text_mode` rule as other workflows — replace `AskUserQuestion` with a numbered list.
 
 Use `AskUserQuestion` (approve-revise-abort):
-
 - question: "Proceed with classification of these {N} documents?"
 - header: "Approve?"
 - options: Approve | Revise | Abort
@@ -167,7 +163,6 @@ mkdir -p .planning/intel/classifications/
 For each discovered doc, spawn `gsd-doc-classifier` in parallel. In Claude Code, issue all Task calls in a single message with multiple tool uses so the harness runs them concurrently. For Copilot / sequential runtimes, fall back to sequential dispatch.
 
 Per-spawn prompt fields:
-
 - `FILEPATH` — absolute path to the doc
 - `OUTPUT_DIR` — `.planning/intel/classifications/`
 - `MANIFEST_TYPE` — the type from the manifest if present, else omit
@@ -183,7 +178,7 @@ Collect the one-line confirmations from each classifier. If any classifier error
 Spawn `gsd-doc-synthesizer` once:
 
 ```
-Task({
+Agent({
   subagent_type: "gsd-doc-synthesizer",
   prompt: "
     CLASSIFICATIONS_DIR: .planning/intel/classifications/
@@ -201,10 +196,9 @@ Task({
 })
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read or synthesize any classified documents independently while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read or synthesize any classified documents independently while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 The synthesizer writes:
-
 - `.planning/intel/decisions.md`, `.planning/intel/requirements.md`, `.planning/intel/constraints.md`, `.planning/intel/context.md`
 - `.planning/intel/SYNTHESIS.md`
 - `.planning/INGEST-CONFLICTS.md`
@@ -230,7 +224,6 @@ Exit WITHOUT writing PROJECT.md, REQUIREMENTS.md, ROADMAP.md, or STATE.md. The s
 **If WARNINGS > 0 and BLOCKERS = 0:**
 
 Render the report, then ask via AskUserQuestion (approve-revise-abort):
-
 - question: "Review the competing variants above. Resolve manually and proceed, or abort?"
 - header: "Approve?"
 - options: Approve | Abort
@@ -252,7 +245,7 @@ Audit PROJECT.md field requirements that `gsd-roadmapper` expects. For fields de
 Delegate to `gsd-roadmapper`:
 
 ```
-Task({
+Agent({
   subagent_type: "gsd-roadmapper",
   prompt: "
     Mode: new-project-from-ingest
@@ -271,7 +264,7 @@ Task({
 })
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more intel files, write planning artifacts, or create ROADMAP.md independently while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more intel files, write planning artifacts, or create ROADMAP.md independently while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 </step>
 
@@ -284,7 +277,6 @@ Load existing `.planning/ROADMAP.md`, `.planning/PROJECT.md`, `.planning/REQUIRE
 The synthesizer has already hard-blocked on any LOCKED-in-ingest vs LOCKED-in-existing contradiction; if we reach this step, no such blockers remain.
 
 Plan the merge:
-
 - **New requirements** from synthesized `.planning/intel/requirements.md` that do not overlap existing REQUIREMENTS.md entries → append to REQUIREMENTS.md
 - **New decisions** from synthesized `.planning/intel/decisions.md` that do not overlap existing CONTEXT.md `<decisions>` blocks → write to a new phase's CONTEXT.md or append to the next milestone's requirements
 - **New scope** → derive phase additions following the `new-milestone.md` pattern; append phases to `.planning/ROADMAP.md`
@@ -319,7 +311,6 @@ Display completion:
 ```
 
 Show:
-
 - Mode ran (new or merge)
 - Docs ingested (count + type breakdown)
 - Decisions locked, requirements created, constraints captured
@@ -333,7 +324,6 @@ Show:
 ## Anti-Patterns
 
 Do NOT:
-
 - Violate the shared conflict-engine contract in `references/doc-conflict-engine.md` (no markdown tables, no new severity labels, no bypass of the BLOCKER gate)
 - Write PROJECT.md, REQUIREMENTS.md, ROADMAP.md, or STATE.md when BLOCKERs exist in the conflict report
 - Skip the 50-doc cap — larger sets must use `--manifest` to narrow the scope

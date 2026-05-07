@@ -4,20 +4,20 @@ Model profiles control which Claude model each GSD agent uses. This allows balan
 
 ## Profile Definitions
 
-| Agent                    | `quality` | `balanced` | `budget` | `adaptive` | `inherit` |
-| ------------------------ | --------- | ---------- | -------- | ---------- | --------- |
-| gsd-planner              | opus      | opus       | sonnet   | opus       | inherit   |
-| gsd-roadmapper           | opus      | sonnet     | sonnet   | sonnet     | inherit   |
-| gsd-executor             | opus      | sonnet     | sonnet   | sonnet     | inherit   |
-| gsd-phase-researcher     | opus      | sonnet     | haiku    | sonnet     | inherit   |
-| gsd-project-researcher   | opus      | sonnet     | haiku    | sonnet     | inherit   |
-| gsd-research-synthesizer | sonnet    | sonnet     | haiku    | haiku      | inherit   |
-| gsd-debugger             | opus      | sonnet     | sonnet   | opus       | inherit   |
-| gsd-codebase-mapper      | sonnet    | haiku      | haiku    | haiku      | inherit   |
-| gsd-verifier             | sonnet    | sonnet     | haiku    | sonnet     | inherit   |
-| gsd-plan-checker         | sonnet    | sonnet     | haiku    | haiku      | inherit   |
-| gsd-integration-checker  | sonnet    | sonnet     | haiku    | haiku      | inherit   |
-| gsd-nyquist-auditor      | sonnet    | sonnet     | haiku    | haiku      | inherit   |
+| Agent | `quality` | `balanced` | `budget` | `adaptive` | `inherit` |
+|-------|-----------|------------|----------|------------|-----------|
+| gsd-planner | opus | opus | sonnet | opus | inherit |
+| gsd-roadmapper | opus | sonnet | sonnet | sonnet | inherit |
+| gsd-executor | opus | sonnet | sonnet | sonnet | inherit |
+| gsd-phase-researcher | opus | sonnet | haiku | sonnet | inherit |
+| gsd-project-researcher | opus | sonnet | haiku | sonnet | inherit |
+| gsd-research-synthesizer | sonnet | sonnet | haiku | haiku | inherit |
+| gsd-debugger | opus | sonnet | sonnet | opus | inherit |
+| gsd-codebase-mapper | sonnet | haiku | haiku | haiku | inherit |
+| gsd-verifier | sonnet | sonnet | haiku | sonnet | inherit |
+| gsd-plan-checker | sonnet | sonnet | haiku | haiku | inherit |
+| gsd-integration-checker | sonnet | sonnet | haiku | haiku | inherit |
+| gsd-nyquist-auditor | sonnet | sonnet | haiku | haiku | inherit |
 
 ## Per-Phase-Type Model Map (#3023)
 
@@ -42,14 +42,14 @@ Model profiles control which Claude model each GSD agent uses. This allows balan
 
 ### Phase-type → agent mapping
 
-| Phase type     | Agents                                                                                                                         |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `planning`     | gsd-planner, gsd-roadmapper, gsd-pattern-mapper                                                                                |
-| `discuss`      | (reserved — no subagent today)                                                                                                 |
-| `research`     | gsd-phase-researcher, gsd-project-researcher, gsd-research-synthesizer, gsd-codebase-mapper, gsd-ui-researcher                 |
-| `execution`    | gsd-executor, gsd-debugger, gsd-doc-writer                                                                                     |
+| Phase type | Agents |
+|---|---|
+| `planning` | gsd-planner, gsd-roadmapper, gsd-pattern-mapper |
+| `discuss` | (reserved — no subagent today) |
+| `research` | gsd-phase-researcher, gsd-project-researcher, gsd-research-synthesizer, gsd-codebase-mapper, gsd-ui-researcher |
+| `execution` | gsd-executor, gsd-debugger, gsd-doc-writer |
 | `verification` | gsd-verifier, gsd-plan-checker, gsd-integration-checker, gsd-nyquist-auditor, gsd-ui-checker, gsd-ui-auditor, gsd-doc-verifier |
-| `completion`   | (reserved — no subagent today)                                                                                                 |
+| `completion` | (reserved — no subagent today) |
 
 ### Resolution precedence (highest to lowest)
 
@@ -69,33 +69,28 @@ The three layers compose: `models` defaults a phase, `model_overrides` carves an
 ## Profile Philosophy
 
 **quality** - Maximum reasoning power
-
 - Opus for all decision-making agents
 - Sonnet for read-only verification
 - Use when: quota available, critical architecture work
 
 **balanced** (default) - Smart allocation
-
 - Opus only for planning (where architecture decisions happen)
 - Sonnet for execution and research (follows explicit instructions)
 - Sonnet for verification (needs reasoning, not just pattern matching)
 - Use when: normal development, good balance of quality and cost
 
 **budget** - Minimal Opus usage
-
 - Sonnet for anything that writes code
 - Haiku for research and verification
 - Use when: conserving quota, high-volume work, less critical phases
 
 **adaptive** — Role-based cost optimization
-
 - Opus for planning and debugging (where reasoning quality has highest impact)
 - Sonnet for execution, research, and verification (follows explicit instructions)
 - Haiku for mapping, checking, and auditing (high volume, structured output)
 - Use when: optimizing cost without sacrificing plan quality, solo development on paid API tiers
 
 **inherit** - Follow the current session model
-
 - All agents resolve to `inherit`
 - Best when you switch models interactively (for example OpenCode or Kilo `/model`)
 - **Required when using non-Anthropic providers** (OpenRouter, local models, etc.) — otherwise GSD may call Anthropic models directly, incurring unexpected costs
@@ -140,16 +135,16 @@ Without `inherit`, GSD's default `balanced` profile spawns specific Anthropic mo
 
 ## Dynamic Routing with Failure-Tier Escalation (#3024)
 
-When `dynamic_routing.enabled = true` in `.planning/config.json`, the resolver picks a model from a tier-mapped table based on the agent's _default tier_ (light / standard / heavy) and escalates to the next tier up on orchestrator-detected soft failure.
+When `dynamic_routing.enabled = true` in `.planning/config.json`, the resolver picks a model from a tier-mapped table based on the agent's *default tier* (light / standard / heavy) and escalates to the next tier up on orchestrator-detected soft failure.
 
 ```json
 {
   "dynamic_routing": {
     "enabled": true,
     "tier_models": {
-      "light": "haiku",
+      "light":    "haiku",
       "standard": "sonnet",
-      "heavy": "opus"
+      "heavy":    "opus"
     },
     "escalate_on_failure": true,
     "max_escalations": 1
@@ -159,11 +154,11 @@ When `dynamic_routing.enabled = true` in `.planning/config.json`, the resolver p
 
 **Agent default tiers** (each agent in `MODEL_PROFILES` declares one):
 
-| Tier       | Agents                                                                                                                                                                              | Use case                                                    |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| `light`    | gsd-codebase-mapper, gsd-pattern-mapper, gsd-research-synthesizer, gsd-plan-checker, gsd-integration-checker, gsd-nyquist-auditor, gsd-ui-checker, gsd-ui-auditor, gsd-doc-verifier | Cheap/fast — pure mappers, scanners, low-stakes audits      |
-| `standard` | gsd-executor, gsd-phase-researcher, gsd-project-researcher, gsd-verifier, gsd-doc-writer, gsd-ui-researcher                                                                         | Default workhorse — research, writing, primary verification |
-| `heavy`    | gsd-planner, gsd-roadmapper, gsd-debugger                                                                                                                                           | Deep reasoning — already at top, can't escalate further     |
+| Tier | Agents | Use case |
+|---|---|---|
+| `light` | gsd-codebase-mapper, gsd-pattern-mapper, gsd-research-synthesizer, gsd-plan-checker, gsd-integration-checker, gsd-nyquist-auditor, gsd-ui-checker, gsd-ui-auditor, gsd-doc-verifier | Cheap/fast — pure mappers, scanners, low-stakes audits |
+| `standard` | gsd-executor, gsd-phase-researcher, gsd-project-researcher, gsd-verifier, gsd-doc-writer, gsd-ui-researcher | Default workhorse — research, writing, primary verification |
+| `heavy` | gsd-planner, gsd-roadmapper, gsd-debugger | Deep reasoning — already at top, can't escalate further |
 
 **Escalation flow** (orchestrator-driven):
 
@@ -223,7 +218,6 @@ Overrides take precedence over the profile. Valid values: `opus`, `sonnet`, `hai
 Runtime: `/gsd-set-profile <profile>`
 
 Per-project default: Set in `.planning/config.json`:
-
 ```json
 {
   "model_profile": "balanced"
@@ -239,7 +233,7 @@ Planning involves architecture decisions, goal decomposition, and task design. T
 Executors follow explicit PLAN.md instructions. The plan already contains the reasoning; execution is implementation.
 
 **Why Sonnet (not Haiku) for verifiers in balanced?**
-Verification requires goal-backward reasoning - checking if code _delivers_ what the phase promised, not just pattern matching. Sonnet handles this well; Haiku may miss subtle gaps.
+Verification requires goal-backward reasoning - checking if code *delivers* what the phase promised, not just pattern matching. Sonnet handles this well; Haiku may miss subtle gaps.
 
 **Why Haiku for gsd-codebase-mapper?**
 Read-only exploration and pattern extraction. No reasoning required, just structured output from file contents.

@@ -7,9 +7,8 @@ Read all files referenced by the invoking prompt's execution_context before star
 </required_reading>
 
 <available_agent_types>
-
 - gsd-code-reviewer: Reviews source files for bugs and quality issues
-  </available_agent_types>
+</available_agent_types>
 
 <process>
 
@@ -25,7 +24,6 @@ if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 Parse from init JSON: `phase_found`, `phase_dir`, `phase_number`, `phase_name`, `padded_phase`, `commit_docs`.
 
 **Input sanitization (defense-in-depth):**
-
 ```bash
 # Validate PADDED_PHASE contains only digits and optional dot (e.g., "02", "03.1")
 if ! [[ "$PADDED_PHASE" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
@@ -36,7 +34,6 @@ fi
 
 **Phase validation (before config gate):**
 If `phase_found` is false, report error and exit:
-
 ```
 Error: Phase ${PHASE_ARG} not found. Run /gsd-progress to see available phases.
 ```
@@ -46,7 +43,6 @@ This runs BEFORE config gate check so user errors are surfaced immediately regar
 Parse optional flags from $ARGUMENTS:
 
 **--depth flag:**
-
 ```bash
 DEPTH_OVERRIDE=""
 for arg in "$@"; do
@@ -57,7 +53,6 @@ done
 ```
 
 **--files flag:**
-
 ```bash
 FILES_OVERRIDE=""
 for arg in "$@"; do
@@ -68,13 +63,11 @@ done
 ```
 
 If FILES_OVERRIDE is set, split by comma into array:
-
 ```bash
 if [ -n "$FILES_OVERRIDE" ]; then
   IFS=',' read -ra FILES_ARRAY <<< "$FILES_OVERRIDE"
 fi
 ```
-
 </step>
 
 <step name="check_config_gate">
@@ -85,11 +78,9 @@ CODE_REVIEW_ENABLED=$(gsd-sdk query config-get workflow.code_review 2>/dev/null 
 ```
 
 If CODE_REVIEW_ENABLED is "false":
-
 ```
 Code review skipped (workflow.code_review=false in config)
 ```
-
 Exit workflow.
 
 Default is true — only skip on explicit false. This check runs AFTER phase validation so invalid phase errors are shown first.
@@ -112,7 +103,6 @@ fi
 ```
 
 **Validate depth value:**
-
 ```bash
 case "$REVIEW_DEPTH" in
   quick|standard|deep)
@@ -124,7 +114,6 @@ case "$REVIEW_DEPTH" in
     ;;
 esac
 ```
-
 </step>
 
 <step name="compute_file_scope">
@@ -133,12 +122,11 @@ Three-tier scoping with explicit precedence:
 **Tier 1 — --files override (highest precedence per D-08):**
 
 If FILES_OVERRIDE is set (from --files flag):
-
 ```bash
 if [ -n "$FILES_OVERRIDE" ]; then
   REVIEW_FILES=()
   REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
-
+  
   for file_path in "${FILES_ARRAY[@]}"; do
     # Security: validate path is within repository (prevent path traversal)
     ABS_PATH=$(realpath -m "${file_path}" 2>/dev/null || echo "${file_path}")
@@ -146,7 +134,7 @@ if [ -n "$FILES_OVERRIDE" ]; then
       echo "Error: File path outside repository, skipping: ${file_path}"
       continue
     fi
-
+    
     # Validate path exists (relative to repo root)
     if [ -f "${REPO_ROOT}/${file_path}" ] || [ -f "${file_path}" ]; then
       REVIEW_FILES+=("$file_path")
@@ -154,7 +142,7 @@ if [ -n "$FILES_OVERRIDE" ]; then
       echo "Warning: File not found, skipping: ${file_path}"
     fi
   done
-
+  
   echo "File scope: ${#REVIEW_FILES[@]} files from --files override"
 fi
 ```
@@ -164,12 +152,11 @@ Skip SUMMARY/git scoping entirely when --files is provided.
 **Tier 2 — SUMMARY.md extraction (primary per D-01):**
 
 If --files NOT provided:
-
 ```bash
 if [ -z "$FILES_OVERRIDE" ]; then
   SUMMARIES=$(ls "${PHASE_DIR}"/*-SUMMARY.md 2>/dev/null)
   REVIEW_FILES=()
-
+  
   if [ -n "$SUMMARIES" ]; then
     for summary in $SUMMARIES; do
       # Extract key_files.created and key_files.modified using node for reliable YAML parsing
@@ -192,7 +179,7 @@ if [ -z "$FILES_OVERRIDE" ]; then
         }
         if (files.length) console.log(files.join('\n'));
       " 2>/dev/null)
-
+      
       # Add extracted files to REVIEW_FILES array
       if [ -n "$EXTRACTED" ]; then
         while IFS= read -r file; do
@@ -202,7 +189,7 @@ if [ -z "$FILES_OVERRIDE" ]; then
         done <<< "$EXTRACTED"
       fi
     done
-
+    
     if [ ${#REVIEW_FILES[@]} -eq 0 ]; then
       echo "Warning: SUMMARY artifacts found but contained no file paths. Falling back to git diff."
     fi
@@ -213,30 +200,29 @@ fi
 **Tier 3 — Git diff fallback (per D-02):**
 
 If no SUMMARY.md files found OR no files extracted from them:
-
 ```bash
 if [ ${#REVIEW_FILES[@]} -eq 0 ]; then
   # Compute diff base from phase commits — fail closed if no reliable base found
   PHASE_COMMITS=$(git log --oneline --all --grep="${PADDED_PHASE}" --format="%H" 2>/dev/null)
-
+  
   if [ -n "$PHASE_COMMITS" ]; then
     DIFF_BASE=$(echo "$PHASE_COMMITS" | tail -1)^
-
+    
     # Verify the parent commit exists (first commit in repo has no parent)
     if ! git rev-parse "${DIFF_BASE}" >/dev/null 2>&1; then
       DIFF_BASE=$(echo "$PHASE_COMMITS" | tail -1)
     fi
-
+    
     # Run git diff with specific exclusions (per D-03)
     DIFF_FILES=$(git diff --name-only "${DIFF_BASE}..HEAD" -- . \
       ':!.planning/' ':!ROADMAP.md' ':!STATE.md' \
       ':!*-SUMMARY.md' ':!*-VERIFICATION.md' ':!*-PLAN.md' \
       ':!package-lock.json' ':!yarn.lock' ':!Gemfile.lock' ':!poetry.lock' 2>/dev/null)
-
+    
     while IFS= read -r file; do
       [ -n "$file" ] && REVIEW_FILES+=("$file")
     done <<< "$DIFF_FILES"
-
+    
     echo "File scope: ${#REVIEW_FILES[@]} files from git diff (base: ${DIFF_BASE})"
   else
     # Fail closed — no reliable diff base found. Do not use arbitrary HEAD~N.
@@ -249,7 +235,6 @@ fi
 **Post-processing (all tiers):**
 
 1. **Apply exclusions (per D-03):** Remove paths matching planning artifacts
-
 ```bash
 FILTERED_FILES=()
 for file in "${REVIEW_FILES[@]}"; do
@@ -268,7 +253,6 @@ REVIEW_FILES=("${FILTERED_FILES[@]}")
 ```
 
 2. **Filter deleted files:** Remove paths that don't exist on disk
-
 ```bash
 EXISTING_FILES=()
 DELETED_COUNT=0
@@ -287,7 +271,6 @@ fi
 ```
 
 3. **Deduplicate:** Remove duplicate paths (portable — bash 3.2+ compatible, handles spaces in paths)
-
 ```bash
 DEDUPED=()
 while IFS= read -r line; do
@@ -299,7 +282,6 @@ REVIEW_FILES=("${DEDUPED[@]}")
 4. **Sort:** Alphabetical sort for reproducible agent input (already sorted by sort -u above)
 
 **Log final scope and warn if large:**
-
 ```bash
 if [ -n "$FILES_OVERRIDE" ]; then
   TIER="--files override"
@@ -320,7 +302,6 @@ if [ ${#REVIEW_FILES[@]} -gt 50 ]; then
   fi
 fi
 ```
-
 </step>
 
 <step name="check_empty_scope">
@@ -338,7 +319,6 @@ REVIEW_PATH="${PHASE_DIR}/${PADDED_PHASE}-REVIEW.md"
 ```
 
 Compute DIFF_BASE for agent context (in case agent needs it):
-
 ```bash
 PHASE_COMMITS=$(git log --oneline --all --grep="${PADDED_PHASE}" --format="%H" 2>/dev/null)
 if [ -n "$PHASE_COMMITS" ]; then
@@ -349,7 +329,6 @@ fi
 ```
 
 Build files_to_read block for agent:
-
 ```bash
 FILES_TO_READ=""
 for file in "${REVIEW_FILES[@]}"; do
@@ -358,7 +337,6 @@ done
 ```
 
 Build config block for agent:
-
 ```bash
 CONFIG_FILES=""
 for file in "${REVIEW_FILES[@]}"; do
@@ -369,7 +347,7 @@ done
 Spawn the gsd-code-reviewer agent:
 
 ```
-Task(subagent_type="gsd-code-reviewer", prompt="
+Agent(subagent_type="gsd-code-reviewer", prompt="
 <files_to_read>
 ${FILES_TO_READ}
 </files_to_read>
@@ -388,12 +366,11 @@ Do NOT commit the output — the orchestrator handles that.
 ")
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 **Agent failure handling:**
 
-If the Task() call fails (agent error, timeout, or exception):
-
+If the Agent() call fails (agent error, timeout, or exception):
 ```
 Error: Code review agent failed: ${error_message}
 
@@ -415,10 +392,10 @@ if [ -f "${REVIEW_PATH}" ]; then
     const match = content.match(/^---\n([\s\S]*?)\n---/);
     if (match && /status:/.test(match[1])) { console.log('valid'); } else { console.log('invalid'); }
   " 2>/dev/null)
-
+  
   if [ "$HAS_STATUS" = "valid" ]; then
     echo "REVIEW.md created at ${REVIEW_PATH}"
-
+    
     if [ "$COMMIT_DOCS" = "true" ]; then
       gsd-sdk query commit \
         "docs(${PADDED_PHASE}): add code review report" \
@@ -433,7 +410,6 @@ else
   echo "No REVIEW.md to commit. Please retry with /gsd-code-review ${PHASE_ARG}"
 fi
 ```
-
 </step>
 
 <step name="present_results">
@@ -470,7 +446,7 @@ Display inline summary to user:
 
   Depth:           ${REVIEW_DEPTH}
   Files Reviewed:  ${FILES_REVIEWED}
-
+  
   Findings:
     Critical:  ${CRITICAL}
     Warning:   ${WARNING}
@@ -482,7 +458,6 @@ Display inline summary to user:
 ```
 
 If status is "clean":
-
 ```
 ✓ No issues found. All ${FILES_REVIEWED} files pass review at ${REVIEW_DEPTH} depth.
 
@@ -490,7 +465,6 @@ Full report: ${REVIEW_PATH}
 ```
 
 If total findings > 0:
-
 ```
 ⚠ Issues found. Review the report for details.
 
@@ -502,7 +476,6 @@ Next steps:
 ```
 
 If critical > 0 or warning > 0, list top 3 issues inline:
-
 ```bash
 echo "Top issues:"
 grep -A 3 "^### CR-\|^### WR-" "${REVIEW_PATH}" | head -n 12
@@ -529,7 +502,6 @@ If `--files` validation fails unexpectedly on macOS, install coreutils or use ab
 </platform_notes>
 
 <success_criteria>
-
 - [ ] Phase validated before config gate check
 - [ ] Config gate checked (workflow.code_review)
 - [ ] Depth resolved with validation (quick|standard|deep)
@@ -542,4 +514,4 @@ If `--files` validation fails unexpectedly on macOS, install coreutils or use ab
 - [ ] Agent failure handled without partial commits
 - [ ] REVIEW.md committed if created
 - [ ] Results presented inline with next step suggestion
-      </success_criteria>
+</success_criteria>

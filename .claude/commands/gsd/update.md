@@ -1,7 +1,7 @@
 ---
 name: gsd:update
 description: Update GSD to latest version with changelog display
-argument-hint: '[--sync | --reapply]'
+argument-hint: "[--sync | --reapply]"
 allowed-tools:
   - Read
   - Write
@@ -16,14 +16,13 @@ allowed-tools:
 Check for GSD updates, install if available, and display what changed.
 
 Routes to the update workflow which handles:
-
 - Version detection (local vs global installation)
 - npm version checking
 - Changelog fetching and display
 - User confirmation with clean install warning
 - Update execution and cache clearing
 - Restart reminder
-  </objective>
+</objective>
 
 <execution_context>
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/update.md
@@ -39,19 +38,9 @@ Routes to the update workflow which handles:
 Parse the first token of $ARGUMENTS:
 - If it is `--sync`: strip the flag, execute the sync-skills workflow (passing remaining args for --from/--to/--dry-run/--apply).
 - If it is `--reapply`: strip the flag, execute the reapply-patches workflow.
-- Otherwise: **Follow the update workflow** from `@/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/update.md`.
+- Otherwise: execute the update workflow end-to-end.
 
-The update workflow handles all logic including:
-
-1. Installed version detection (local/global)
-2. Latest version checking via npm
-3. Version comparison
-4. Changelog fetching and extraction
-5. Clean install warning display
-6. User confirmation
-7. Update execution
-8. Cache clearing
-   </process>
+</process>
 
 <execution_context_extended>
 @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/sync-skills.md

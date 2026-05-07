@@ -5,9 +5,8 @@ after each fix, and commits atomically with finding IDs for traceability.
 </purpose>
 
 <available_agent_types>
-
 - gsd-executor — executes a specific, scoped code change
-  </available_agent_types>
+</available_agent_types>
 
 <process>
 
@@ -20,39 +19,33 @@ Extract flags from the user's invocation:
 - `--source <audit>` — which audit to run (default: **audit-uat**)
 
 Validate `--source` is a supported audit. Currently supported:
-
 - `audit-uat`
 
 If `--source` is not supported, stop with an error:
-
 ```
 Error: Unsupported audit source "{source}". Supported sources: audit-uat
 ```
-
 </step>
 
 <step name="run-audit">
 Invoke the source audit command and capture output.
 
 For `audit-uat` source:
-
 ```bash
 INIT=$(gsd-sdk query audit-uat 2>/dev/null || echo "{}")
 if [[ "$INIT" == @file:* ]]; then INIT=$(cat "${INIT#@file:}"); fi
 ```
 
 Read existing UAT and verification files to extract findings:
-
 - Glob: `.planning/phases/*/*-UAT.md`
 - Glob: `.planning/phases/*/*-VERIFICATION.md`
 
 Parse each finding into a structured record:
-
 - **ID** — sequential identifier (F-01, F-02, ...)
 - **description** — concise summary of the issue
 - **severity** — high, medium, or low
 - **file_refs** — specific file paths referenced in the finding
-  </step>
+</step>
 
 <step name="classify-findings">
 For each finding, classify as one of:
@@ -64,14 +57,12 @@ For each finding, classify as one of:
 **Classification heuristics** (err on manual-only when uncertain):
 
 Auto-fixable signals:
-
 - References a specific file path + line number
 - Describes a missing test or assertion
 - Missing export, wrong import path, typo in identifier
 - Clear single-file change with obvious expected behavior
 
 Manual-only signals:
-
 - Uses words like "consider", "evaluate", "design", "rethink"
 - Requires new architecture or API changes
 - Ambiguous scope or multiple valid approaches
@@ -103,18 +94,16 @@ final output — do not proceed to fixing.
 For each **auto-fixable** finding (up to `--max`, ordered by severity desc):
 
 **a. Spawn executor agent:**
-
 ```
-Task(
+Agent(
   prompt="Fix finding {ID}: {description}. Files: {file_refs}. Make the minimal change to resolve this specific finding. Do not refactor surrounding code.",
   subagent_type="gsd-executor"
 )
 ```
 
-> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Task() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
+> **ORCHESTRATOR RULE — CODEX RUNTIME**: After calling Agent() above, stop working on this task immediately. Do not read more files, edit code, or run tests related to this task while the subagent is active. Wait for the subagent to return its result. This prevents duplicate work, conflicting edits, and wasted context. Only resume when the subagent result is available.
 
 **b. Run tests:**
-
 ```bash
 AUDIT_TEST_CMD=$(gsd-sdk query config-get workflow.test_command --default "" 2>/dev/null || true)
 if [ -z "$AUDIT_TEST_CMD" ]; then
@@ -138,20 +127,16 @@ eval "$AUDIT_TEST_CMD" 2>&1 | tail -20
 ```
 
 **c. If tests pass** — commit atomically:
-
 ```bash
 git add {changed_files}
 git commit -m "fix({scope}): resolve {ID} — {description}"
 ```
-
 The commit message **must** include the finding ID (e.g., F-01) for traceability.
 
 **d. If tests fail** — revert changes, mark finding as `fix-failed`, and **stop the pipeline**:
-
 ```bash
 git checkout -- {changed_files} 2>/dev/null
 ```
-
 Log the failure reason and stop processing — do not continue to the next finding.
 A test failure indicates the codebase may be in an unexpected state, so the pipeline
 must halt to avoid cascading issues. Remaining auto-fixable findings will appear in the
@@ -177,13 +162,11 @@ Present the final summary:
 ### Manual-only findings (require developer attention):
 - F-02: No error handling in payment flow — requires design decisions
 ```
-
 </step>
 
 </process>
 
 <success_criteria>
-
 - Auto-fixable findings processed sequentially until --max reached or a test failure stops the pipeline
 - Tests pass after each committed fix (no broken commits)
 - Failed fixes are reverted cleanly (no partial changes left)
@@ -191,4 +174,4 @@ Present the final summary:
 - Every commit message contains the finding ID
 - Manual-only findings are surfaced for developer attention
 - --dry-run produces a useful standalone classification table
-  </success_criteria>
+</success_criteria>

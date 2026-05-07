@@ -1,7 +1,7 @@
 ---
 name: gsd:spec-phase
 description: Clarify WHAT a phase delivers with ambiguity scoring; produces a SPEC.md before discuss-phase.
-argument-hint: '<phase> [--auto] [--text]'
+argument-hint: "<phase> [--auto] [--text]"
 allowed-tools:
   - Read
   - Write
@@ -17,7 +17,6 @@ Clarify phase requirements through structured Socratic questioning with quantita
 **Position in workflow:** `spec-phase → discuss-phase → plan-phase → execute-phase → verify`
 
 **How it works:**
-
 1. Load phase context (PROJECT.md, REQUIREMENTS.md, ROADMAP.md, STATE.md)
 2. Scout the codebase — understand current state before asking questions
 3. Run Socratic interview loop (up to 6 rounds, rotating perspectives)
@@ -41,7 +40,6 @@ Clarify phase requirements through structured Socratic questioning with quantita
 Phase number: $ARGUMENTS (required)
 
 **Flags:**
-
 - `--auto` — Skip interactive questions; Claude selects recommended defaults and writes SPEC.md
 - `--text` — Use plain-text numbered lists instead of TUI menus (required for `/rc` remote sessions)
 
@@ -49,17 +47,16 @@ Context files are resolved in-workflow using `init phase-op`.
 </context>
 
 <process>
-Execute the spec-phase workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/spec-phase.md end-to-end.
+Execute end-to-end.
 
 **MANDATORY:** Read the workflow file BEFORE taking any action. The workflow contains the complete step-by-step process including the Socratic interview loop, ambiguity scoring gate, and SPEC.md generation. Do not improvise from the objective summary above.
 </process>
 
 <success_criteria>
-
 - Codebase scouted for current state before questioning begins
 - All 4 ambiguity dimensions scored after each interview round
 - Gate passed: ambiguity ≤ 0.20 AND all dimension minimums met
 - SPEC.md written with falsifiable requirements, explicit boundaries, and acceptance criteria
 - SPEC.md committed atomically
 - User knows they can now run /gsd-discuss-phase which will load SPEC.md automatically
-  </success_criteria>
+</success_criteria>

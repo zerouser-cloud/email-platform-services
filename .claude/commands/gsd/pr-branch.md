@@ -21,5 +21,5 @@ changes that are irrelevant to code review.
 </execution_context>
 
 <process>
-Execute the pr-branch workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/pr-branch.md end-to-end.
+Execute end-to-end.
 </process>

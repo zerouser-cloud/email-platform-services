@@ -1,20 +1,18 @@
 ---
 name: gsd:plan-phase
 description: Create detailed phase plan (PLAN.md) with verification loop
-argument-hint: '[phase] [--auto] [--research] [--skip-research] [--research-phase <N>] [--view] [--gaps] [--skip-verify] [--prd <file>] [--reviews] [--text] [--tdd] [--mvp]'
-agent: gsd-planner
+argument-hint: "[phase] [--auto] [--research] [--skip-research] [--research-phase <N>] [--view] [--gaps] [--skip-verify] [--prd <file>] [--reviews] [--text] [--tdd] [--mvp]"
 allowed-tools:
   - Read
   - Write
   - Bash
   - Glob
   - Grep
-  - Task
+  - Agent
   - AskUserQuestion
   - WebFetch
   - mcp__context7__*
 ---
-
 <objective>
 Create executable phase prompts (PLAN.md files) for a roadmap phase with integrated research and verification.
 
@@ -23,7 +21,6 @@ Create executable phase prompts (PLAN.md files) for a roadmap phase with integra
 **Research-only mode (`--research-phase <N>`):** Spawn `gsd-phase-researcher` for phase `N`, write `RESEARCH.md`, then exit before the planner runs. Useful for cross-phase research, doc review before committing to a planning approach, and correction-without-replanning loops where iterating on research alone is dramatically cheaper than re-spawning the planner. Replaces the deleted `/gsd-research-phase` command (#3042).
 
 **Research-only modifiers:**
-
 - **No flag** — when `RESEARCH.md` already exists, prompt the user to choose `update / view / skip`.
 - **`--research`** — force-refresh: re-spawn the researcher unconditionally, no prompt. Skips the existing-RESEARCH.md menu.
 - **`--view`** — view-only: print existing `RESEARCH.md` to stdout. Does not spawn the researcher. Cheapest mode for the correction-without-replanning loop. If no `RESEARCH.md` exists yet, errors with a hint to drop `--view`.
@@ -44,7 +41,6 @@ Create executable phase prompts (PLAN.md files) for a roadmap phase with integra
 Phase number: $ARGUMENTS (optional — auto-detects next unplanned phase if omitted)
 
 **Flags:**
-
 - `--research` — Force re-research even if RESEARCH.md exists
 - `--skip-research` — Skip research, go straight to planning
 - `--gaps` — Gap closure mode (reads VERIFICATION.md, skips research)
@@ -58,6 +54,6 @@ Normalize phase input in step 2 before any directory lookups.
 </context>
 
 <process>
-Execute the plan-phase workflow from @/home/mr/Hellkitchen/workspace/projects/tba-tech/api/email-platform_claude/.claude/get-shit-done/workflows/plan-phase.md end-to-end.
+Execute end-to-end.
 Preserve all workflow gates (validation, research, planning, verification loop, routing).
 </process>

@@ -33,14 +33,12 @@ npx get-shit-done-cc@latest
 Initialize new project through unified flow.
 
 One command takes you from idea to ready-for-planning:
-
 - Deep questioning to understand what you're building
 - Optional domain research (spawns 4 parallel researcher agents)
 - Requirements definition with v1/v2/out-of-scope scoping
 - Roadmap creation with phase breakdown and success criteria
 
 Creates all `.planning/` artifacts:
-
 - `PROJECT.md` — vision and requirements
 - `config.json` — workflow mode (interactive/yolo)
 - `research/` — domain research (if selected)
@@ -66,12 +64,13 @@ Usage: `/gsd-map-codebase`
 
 ### Phase Planning
 
-**`/gsd-discuss-phase <number> [--chain | --analyze | --power] [--batch[=N]]`**
+**`/gsd-discuss-phase <number> [--chain | --analyze | --power | --assumptions] [--batch[=N]]`**
 Help articulate your vision for a phase before planning.
 
 - `--chain` — chained-prompt discuss flow
 - `--analyze` — deep assumption analysis pass
 - `--power` — power-user mode with extended question set
+- `--assumptions` — surface Claude's implementation assumptions about the phase without an interactive session
 
 - Captures how you imagine this phase working
 - Creates CONTEXT.md with your vision, essentials, and boundaries
@@ -81,6 +80,17 @@ Help articulate your vision for a phase before planning.
 Usage: `/gsd-discuss-phase 2`
 Usage: `/gsd-discuss-phase 2 --batch`
 Usage: `/gsd-discuss-phase 2 --batch=3`
+
+**`/gsd-mvp-phase <number> [--force]`**
+Plan a phase as a vertical MVP slice — three structured user-story prompts (`As a / I want to / So that`), SPIDR splitting if the story is too large, then delegates to `/gsd-plan-phase` with MVP mode active.
+
+- Mutates the phase's ROADMAP entry: writes `**Mode:** mvp` + replaces `**Goal:**` with the assembled user story
+- Validates the story via `gsd-sdk query user-story.validate` (canonical regex `/^As a .+, I want to .+, so that .+\.$/`)
+- `--force` overrides the status guard (required if the phase is already `in_progress` or `completed`)
+- Pairs with the new-project mode prompt (Vertical MVP vs Horizontal Layers)
+
+Usage: `/gsd-mvp-phase 1`
+Usage: `/gsd-mvp-phase 2 --force`
 
 **`/gsd-plan-phase <number> [--research] [--skip-research] [--research-phase <N>] [--view] [--gaps] [--skip-verify] [--tdd] [--mvp]`**
 Create detailed execution plan for a specific phase.
@@ -111,7 +121,7 @@ Result: Creates `.planning/phases/01-foundation/01-01-PLAN.md`
 **`/gsd-execute-phase <phase-number> [--wave N] [--gaps-only] [--tdd]`**
 Execute all plans in a phase, or run a specific wave.
 
-- `--wave N` — execute only wave N (see _Plans within each wave_ below)
+- `--wave N` — execute only wave N (see *Plans within each wave* below)
 - `--gaps-only` — re-run only plans flagged as gaps by a prior verifier
 - `--tdd` — enforce test-driven order during execution
 
@@ -144,13 +154,11 @@ Usage: `/gsd-progress --do "I want to start a new milestone"`
 Execute small, ad-hoc tasks with GSD guarantees but skip optional agents.
 
 Quick mode uses the same system with a shorter path:
-
 - Spawns planner + executor (skips researcher, checker, verifier by default)
 - Quick tasks live in `.planning/quick/` separate from planned phases
 - Updates STATE.md tracking (not ROADMAP.md)
 
 Flags enable additional quality steps:
-
 - `--full` — Complete quality pipeline: discussion + research + plan-checking + verification
 - `--validate` — Plan-checking (max 2 iterations) and post-execution verification only
 - `--discuss` — Lightweight discussion to surface gray areas before planning
@@ -255,11 +263,10 @@ Check project status and intelligently route to next action.
 - Detects 100% milestone completion
 
 Modes:
-
 - **default** — progress report + intelligent routing
 - **`--next`** — auto-advance to the next logical step (use `--next --force` to bypass safety gates)
 - **`--forensic`** — append a 6-check integrity audit after the progress report
-- **`--do "<text>"`** — smart router: dispatch freeform intent to the matching `/gsd-*` command (see _Smart Router_ above)
+- **`--do "<text>"`** — smart router: dispatch freeform intent to the matching `/gsd-*` command (see *Smart Router* above)
 
 Usage: `/gsd-progress`
 Usage: `/gsd-progress --next`
@@ -276,9 +283,10 @@ Resume work from previous session with full context restoration.
 
 Usage: `/gsd-resume-work`
 
-**`/gsd-pause-work`**
+**`/gsd-pause-work [--report]`**
 Create context handoff when pausing work mid-phase.
 
+- `--report` — generate a post-session summary in `.planning/reports/` capturing commits, file changes, and phase progress
 - Creates .continue-here file with current state
 - Updates STATE.md session continuity section
 - Captures in-progress work context
@@ -465,7 +473,6 @@ Usage: `/gsd-capture --backlog "real-time notifications when events ship"`
 
 **`/gsd-audit-uat`**
 Cross-phase audit of all outstanding UAT and verification items.
-
 - Scans every phase for pending, skipped, blocked, and human_needed items
 - Cross-references against codebase to detect stale documentation
 - Produces prioritized human test plan grouped by testability
@@ -549,7 +556,7 @@ The commands above cover the most common day-to-day flows. Every command listed 
 - **`/gsd-spec-phase <phase> [--auto] [--text]`** — Clarify WHAT a phase delivers with ambiguity scoring; produces a SPEC.md before discuss-phase.
 - **`/gsd-ai-integration-phase [phase]`** — Generate an AI-SPEC.md design contract for phases that involve building AI systems.
 - **`/gsd-ui-phase [phase]`** — Generate UI design contract (UI-SPEC.md) for frontend phases.
-- **`/gsd-import --from <filepath>`** — Ingest external plans with conflict detection against project decisions before writing anything.
+- **`/gsd-import --from <filepath> | --from-gsd2`** — Ingest external plans with conflict detection, or reverse-migrate a GSD-2 (`.gsd/`) project back to GSD v1 (`.planning/`) format.
 - **`/gsd-ingest-docs [path] [--mode new|merge] [--manifest <file>] [--resolve auto|interactive]`** — Bootstrap or merge a `.planning/` setup from existing ADRs, PRDs, SPECs, and docs in a repo.
 
 ### Planning & Execution
@@ -585,7 +592,7 @@ The commands above cover the most common day-to-day flows. Every command listed 
 
 ### Workflow & Orchestration
 
-- **`/gsd-manager`** — Interactive command center for managing multiple phases from one terminal.
+- **`/gsd-manager [--analyze-deps]`** — Interactive command center for managing multiple phases from one terminal. `--analyze-deps` scans ROADMAP phases for dependency relationships before parallel execution.
 - **`/gsd-workspace [--new | --list | --remove] [name]`** — Manage GSD workspaces: create, list, or remove isolated workspace environments.
 - **`/gsd-workstreams`** — Manage parallel workstreams: list, create, switch, status, progress, complete, and resume.
 - **`/gsd-review-backlog`** — Review and promote backlog items to active milestone.
@@ -673,23 +680,19 @@ Change anytime by editing `.planning/config.json`
 Configure how planning artifacts are managed in `.planning/config.json`:
 
 **`planning.commit_docs`** (default: `true`)
-
 - `true`: Planning artifacts committed to git (standard workflow)
 - `false`: Planning artifacts kept local-only, not committed
 
 When `commit_docs: false`:
-
 - Add `.planning/` to your `.gitignore`
 - Useful for OSS contributions, client projects, or keeping planning private
 - All planning files still work normally, just not tracked in git
 
 **`planning.search_gitignored`** (default: `false`)
-
 - `true`: Add `--no-ignore` to broad ripgrep searches
 - Only needed when `.planning/` is gitignored and you want project-wide searches to include it
 
 Example config:
-
 ```json
 {
   "planning": {
@@ -759,4 +762,4 @@ Example config:
 - Read `.planning/STATE.md` for current context
 - Check `.planning/ROADMAP.md` for phase status
 - Run `/gsd-progress` to check where you're up to
-  </reference>
+</reference>
