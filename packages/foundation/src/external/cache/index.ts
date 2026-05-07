@@ -8,6 +8,7 @@ export {
   CACHE_CONFIG_PORT,
 } from './cache.constants';
 export type {
+  CacheGetResult,
   CachePort,
   CacheHealthIndicator,
   CacheModuleOptions,

@@ -1,5 +1,6 @@
 import type { Provider } from '@nestjs/common';
 import Redis from 'ioredis';
+import { PinoLogger } from 'nestjs-pino';
 import {
   CACHE_SERVICE,
   REDIS_CLIENT,
@@ -26,9 +27,9 @@ export function cacheProviders(options: CacheModuleOptions): Provider[] {
 
   const cacheServiceProvider: Provider = {
     provide: CACHE_SERVICE,
-    inject: [REDIS_CLIENT],
-    useFactory: (redis: Redis): RedisCacheService =>
-      new RedisCacheService(redis, options.namespace),
+    inject: [REDIS_CLIENT, PinoLogger],
+    useFactory: (redis: Redis, logger: PinoLogger): RedisCacheService =>
+      new RedisCacheService(redis, logger, options.namespace),
   };
 
   const cacheHealthProvider: Provider = {

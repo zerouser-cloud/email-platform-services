@@ -1,7 +1,13 @@
 import type { HealthIndicatorResult } from '@nestjs/terminus';
+import type { ZodType } from 'zod';
+
+export type CacheGetResult<T> =
+  | { readonly status: 'absent' }
+  | { readonly status: 'corrupt'; readonly reason: 'json-parse' | 'schema-mismatch' }
+  | { readonly status: 'value'; readonly value: T };
 
 export interface CachePort {
-  get<T>(key: string): Promise<T | null>;
+  get<T>(key: string, schema?: ZodType<T>): Promise<CacheGetResult<T>>;
   set(key: string, value: unknown, ttlMs: number): Promise<void>;
   del(key: string): Promise<void>;
 }
