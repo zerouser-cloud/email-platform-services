@@ -202,13 +202,18 @@ module.exports = [
                             message:
                                 'Apps must not import ioredis directly — use CACHE_SERVICE token from @email-platform/foundation. See .agents/skills/infrastructure-client-layering/SKILL.md and Phase 999.12 D-08.',
                         },
+                        {
+                            group: ['pg', 'pg/*'],
+                            message:
+                                'Apps must not import pg directly — use DRIZZLE token from @email-platform/foundation. See .claude/skills/infrastructure-client-layering/SKILL.md and Phase 999.19 F-02.',
+                        },
                     ],
                 },
             ],
         },
     },
 
-    // Override 5: apps/*/src/infrastructure — same as Override 4 minus ioredis (infrastructure may use it).
+    // Override 5: apps/*/src/infrastructure — same as Override 4 minus ioredis (infrastructure may use Redis via narrow-unlock); pg banned in both per Phase 999.19 F-02 V2.
     // Preserves verbatim semantics of legacy .eslintrc.js lines 108-125.
     {
         files: ['apps/*/src/infrastructure/**/*.ts'],
@@ -234,6 +239,11 @@ module.exports = [
                             ],
                             message:
                                 'Apps cannot import from other apps. Use contracts for shared types. (Foundation internal is allowed in infrastructure/ per Phase 22.1.)',
+                        },
+                        {
+                            group: ['pg', 'pg/*'],
+                            message:
+                                'Apps must not import pg directly — use DRIZZLE token from @email-platform/foundation. See .claude/skills/infrastructure-client-layering/SKILL.md and Phase 999.19 F-02.',
                         },
                     ],
                 },
