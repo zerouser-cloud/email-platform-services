@@ -1045,11 +1045,11 @@ Plans:
 
 **Depends on:** Phase 999.19 (backing-services audit; closed 2026-05-06; provides DESIGN L1 invariants + F-01 evidence + 4 variants + cartesian rejection trail). Optionally читает Phase 999.19.1 (closed 2026-05-07) PATTERNS.md для understanding narrow-unlock pattern — но cache layer уже имеет свой positive-case exemplar в `cache.module.ts:14-18` (REDIS_CLIENT D-13).
 
-**Plans:** 1/2 plans complete
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 999.19.2-01-PLAN.md — V1 close F-01 (RedisCacheService.get<T>() discriminated union + opt Zod + severity log + del() self-heal + PinoLogger DI; D-07 verbatim type, D-09 guard-clauses-only, D-10 1 atomic fix commit + 1 docs housekeeping commit; 4 files / 6 tasks)
-- [ ] 999.19.2-02-PLAN.md — Inline-amendment fix (post-review): close BL-01 (TRANSIENT scope bleed-through через factory-inject PinoLogger → reverts singleton via PinoLogger.root.child + TEMP marker) + WR-01 (prefixKey 1×) + WR-04 (stale comment + CacheGetResult JSDoc) + IN-02 (self-heal del() try/catch); per D-11 / 999.19.2-REVIEW.md; 3 files / 1 atomic fix commit; defers logger DI architectural decision to Phase 999.20 placeholder
+- [x] 999.19.2-02-PLAN.md — Inline-amendment fix (post-review): close BL-01 (TRANSIENT scope bleed-through через factory-inject PinoLogger → reverts singleton via PinoLogger.root.child + TEMP marker) + WR-01 (prefixKey 1×) + WR-04 (stale comment + CacheGetResult JSDoc) + IN-02 (self-heal del() try/catch); per D-11 / 999.19.2-REVIEW.md; 3 files / 1 atomic fix commit; defers logger DI architectural decision to Phase 999.20 placeholder
 
 ### Phase 999.20: foundation-logger-port-design (BACKLOG, PLACEHOLDER)
 
