@@ -1,6 +1,14 @@
-# Dependencies (installed fresh inside container)
-node_modules
-dist
+# Dependencies (installed fresh inside container).
+# Patterns must use `**/` to match nested workspace package node_modules
+# and dist directories — top-level pattern matches only repo-root path.
+# Without `**/`, host's stale packages/*/node_modules and apps/*/node_modules
+# leak into container via `COPY packages ./packages` (infra/docker/app.Dockerfile
+# Step 3), overriding fresh `pnpm install --frozen-lockfile` from Step 2 with
+# host-resolved symlinks pinned to host /home/<user>/... and stale package
+# versions. Discovered as 999.17.3 W5 ts-proto 2.11.4→2.11.6 transitive bump
+# regression in /gsd:verify-work 999.17.3 UAT.
+**/node_modules
+**/dist
 
 # Version control
 .git

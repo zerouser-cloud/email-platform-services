@@ -1,0 +1,102 @@
+# ===========================================
+# Phase 999.17 — GitLab CI security pipeline reference template.
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+# ===========================================
+# Copy to .gitlab-ci.yml (or include via GitLab `include:`) and customize.
+# Owner: DevOps. Activation: post-GitLab-migration.
+# ===========================================
+# Image tags below MUST match the dev-side pins in package.json security:* scripts
+# and scripts/security/*.sh — drift between dev and CI = false-positive churn.
+# Dev-side canonical tags (Phase 999.17 Plans 06–08):
+#   zricethezav/gitleaks:v8.30.1
+#   returntocorp/semgrep:1.50
+#   aquasec/trivy:0.50.4
+#   anchore/syft:v1.40
+# ===========================================
+
+# --- stages ---
+stages:
+  - security-fast    # secret-detection + sast (parallel-eligible, fail-fast, no build dep)
+  - security-deep    # container-config + container-cve + license + sbom (slower, may run after build)
+
+# --- secret-detection (gitleaks, full repo scan vs dev-side staged-only) ---
+# Canonical post-v8.19 syntax per RESEARCH §Pattern 3 + §State of the Art line 786:
+#   `gitleaks git --no-banner --redact` is the documented full-history scan form.
+#   The pre-v8.19 sub-commands (the deprecated d-e-t-e-c-t and p-r-o-t-e-c-t
+#   forms) are HIDDEN post-v8.19 per RESEARCH §State of the Art line 794 — do
+#   NOT use them. `--redact` is mandatory in CI (avoids leaking matched secrets
+#   to job logs).
+secret-detection:
+  stage: security-fast
+  image: zricethezav/gitleaks:v8.30.1
+  script:
+    - gitleaks git --no-banner --redact
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false  # secrets always block per D-07
+
+# --- sast (Semgrep, full scan vs dev-side diff) ---
+# Five rulesets matching .semgrep.yml (Plan 04). D-13 forbids the
+# auto-discovery flag (`--config` set to `auto`): it requires a Semgrep
+# cloud account and the resolved ruleset is not reproducible across runs.
+sast:
+  stage: security-fast
+  image: returntocorp/semgrep:1.50
+  script:
+    - semgrep scan --config p/typescript --config p/javascript --config p/nodejs --config p/owasp-top-ten --config p/r2c-security-audit --error
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false  # SAST HIGH+ always blocks per D-07
+
+# --- container-config (Trivy config — same as dev-side pre-push) ---
+container-config:
+  stage: security-deep
+  image: aquasec/trivy:0.50.4
+  script:
+    - trivy config --severity HIGH,CRITICAL --exit-code 1 .
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false  # IaC misconfig HIGH+ blocks per D-07
+
+# --- container-cve (Trivy fs — CI ONLY per D-06; needs CVE feed ~1GB) ---
+container-cve:
+  stage: security-deep
+  image: aquasec/trivy:0.50.4
+  script:
+    - trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false  # CVE HIGH+ blocks per D-07
+
+# --- license-scan (Trivy fs license — CI ONLY) ---
+# Severity UNKNOWN,HIGH,CRITICAL captures Trivy's GPL/AGPL/SSPL classification.
+# Permissive licenses (MIT/Apache/BSD/ISC) classify under LOW/MEDIUM and pass.
+license-scan:
+  stage: security-deep
+  image: aquasec/trivy:0.50.4
+  script:
+    - trivy fs --scanners license --license-full --exit-code 1 --severity UNKNOWN,HIGH,CRITICAL .
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false  # GPL/AGPL/SSPL blocks per D-07
+
+# --- sbom (Syft — CI ONLY, after build) ---
+# CycloneDX JSON format per OWASP standard. Artifact retained 90 days for
+# supply-chain forensics + compliance.
+sbom:
+  stage: security-deep
+  image: anchore/syft:v1.40
+  script:
+    - syft scan dir:. -o cyclonedx-json=sbom.cdx.json
+  artifacts:
+    paths:
+      - sbom.cdx.json
+    expire_in: 90 days
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  allow_failure: false

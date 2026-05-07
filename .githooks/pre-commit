@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Phase 999.18.3 — migrated from .husky/pre-commit (FR-03 drop husky).
+# Phase 999.17.1 origin (D-18 decoupled pre-commit). Quality (lint-staged: eslint+prettier
+# on staged files) and Security (gitleaks staged-only) run sequentially because pre-commit
+# budget is <5s and there's nothing to parallelize across at this stage.
+pnpm run quality:staged && pnpm run security:secrets-staged

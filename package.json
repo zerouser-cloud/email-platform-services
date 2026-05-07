@@ -23,30 +23,48 @@
     "storage:bootstrap": "bash infra/docker/storage-bootstrap.sh",
     "docker:up": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml up --build",
     "docker:down": "docker compose --env-file .env.docker -f infra/docker-compose.yml -f infra/docker-compose.webui-ports.yml down",
-    "prepare": "husky"
+    "quality:lint": "turbo run lint",
+    "quality:typecheck": "turbo run typecheck",
+    "quality:format": "prettier --check 'apps/*/src/**/*.ts' 'packages/*/src/**/*.ts'",
+    "quality:check": "pnpm run quality:lint && pnpm run quality:typecheck && pnpm run quality:format",
+    "quality:staged": "lint-staged",
+    "security:secrets-staged": "bash scripts/security/secrets-staged.sh",
+    "security:secrets-full": "bash scripts/security/secrets-full.sh",
+    "security:semgrep-diff": "bash scripts/security/semgrep-diff.sh",
+    "security:audit-if-changed": "bash scripts/security/audit-if-lock-changed.sh",
+    "security:trivy-config-if-changed": "bash scripts/security/trivy-config-if-changed.sh",
+    "security:scan": "pnpm run security:secrets-full && pnpm run security:semgrep-diff && pnpm run security:audit-if-changed && pnpm run security:trivy-config-if-changed",
+    "security:verify": "bash scripts/security/verify.sh",
+    "security:verify-if-changed": "bash scripts/security/verify-if-changed.sh",
+    "hygiene:env-parity": "bash scripts/check-env-parity.sh",
+    "hygiene:check": "pnpm run hygiene:env-parity",
+    "setup-hooks": "git config core.hooksPath .githooks",
+    "verify:image-determinism": "bash scripts/verify-image-determinism.sh",
+    "verify:injection-extinct": "bash scripts/verify-injection-extinct.sh",
+    "verify:multiarch": "bash scripts/verify-multiarch-manifests.sh",
+    "verify:per-service-smoke": "bash scripts/verify-per-service-smoke.sh",
+    "verify:k8s-rollout": "bash scripts/verify-k8s-rollout.sh",
+    "clean:docker:diagnose": "bash scripts/clean-docker.sh diagnose",
+    "clean:docker:dangling": "bash scripts/clean-docker.sh dangling",
+    "clean:docker:builder": "bash scripts/clean-docker.sh builder",
+    "clean:docker:safe": "bash scripts/clean-docker.sh safe",
+    "clean:docker:nuclear": "bash scripts/clean-docker.sh nuclear"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
     "dotenv-cli": "^11.0.0",
-    "eslint": "^8.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-check-file": "^2.8.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "husky": "^9.1.7",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-check-file": "^3.3.1",
+    "eslint-plugin-prettier": "^5.5.5",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.0.0",
-    "turbo": "^2.8.14"
+    "turbo": "^2.9.7"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "node": ">=22.13.0",
+    "pnpm": ">=11.0.0"
   },
-  "packageManager": "pnpm@9.0.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@nestjs/core",
-      "grpc-tools",
-      "protobufjs"
-    ]
-  }
+  "packageManager": "pnpm@11.0.0"
 }

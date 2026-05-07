@@ -12,7 +12,9 @@ replication_factor = 1
 
 rpc_bind_addr   = "[::]:3901"
 rpc_public_addr = "127.0.0.1:3901"
-rpc_secret      = "1f9b0c4e5d8a6723b4c5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7"
+# rpc_secret intentionally omitted — sourced from GARAGE_RPC_SECRET env var (12-Factor pattern).
+# See Phase 999.17.2 D-10 + RESEARCH §Garage envsubst mechanism Q1.
+# Native env-var override since Garage v0.8.2 (we're on v2.1.0).
 
 [s3_api]
 api_bind_addr = "[::]:3900"

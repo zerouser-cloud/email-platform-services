@@ -1,0 +1,20 @@
+# Build output (mirrors .eslintignore + tsconfig out)
+dist/
+node_modules/
+**/dist/**
+**/node_modules/**
+
+# Generated proto code — regenerated from packages/contracts/proto/ via
+# `pnpm generate:contracts`. Hand-formatting is wasted work because the
+# next regen overwrites it. ESLint already excludes packages/contracts/generated.
+packages/contracts/src/generated/
+**/generated/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Coverage / artifacts
+coverage/
+.turbo/

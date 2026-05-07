@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: email-platform-prod
+
+resources:
+  - ../../base
+
+# Image references: placeholder names matching base/*.yaml `image:` fields.
+# CI overrides via `kustomize edit set image registry.example.com/email-platform-{svc}=${CI_REGISTRY_IMAGE}/email-platform-{svc}:${CI_COMMIT_SHORT_SHA}`
+# (see .gitlab-ci.yml deploy-prod script for substitution loop).
+# Manual local apply requires running the same command before `kubectl apply -k`.
+# `prod-placeholder` tag (NOT `latest`) is fail-loud canary: deploy without CI
+# substitution → manifest references non-existent tag → fast ImagePullBackOff.
+images:
+  - name: registry.example.com/email-platform-gateway
+    newName: registry.example.com/email-platform-gateway
+    newTag: prod-placeholder
+  - name: registry.example.com/email-platform-auth
+    newName: registry.example.com/email-platform-auth
+    newTag: prod-placeholder
+  - name: registry.example.com/email-platform-sender
+    newName: registry.example.com/email-platform-sender
+    newTag: prod-placeholder
+  - name: registry.example.com/email-platform-parser
+    newName: registry.example.com/email-platform-parser
+    newTag: prod-placeholder
+  - name: registry.example.com/email-platform-audience
+    newName: registry.example.com/email-platform-audience
+    newTag: prod-placeholder
+  - name: registry.example.com/email-platform-notifier
+    newName: registry.example.com/email-platform-notifier
+    newTag: prod-placeholder
+
+# Prod: 2 replicas per service for HA (patches base replicas)
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+    target:
+      kind: Deployment

@@ -1,0 +1,130 @@
+# Phase 999.17 — gitleaks suppression baseline. Body intentionally empty.
+# See .planning/phases/999.17-devsecops-shift-left-security-tooling/.
+#
+# .gitleaksignore — fingerprints of secret findings to ignore.
+#
+# FORMAT:  <commit-sha>:<file-path>:<rule-id>:<line-number>
+# EXAMPLE: cd5226711335c68be1e720b318b7bc3135a30eb2:apps/auth/test/fixture.ts:generic-api-key:42
+#
+# RULES:
+# 1. Every entry MUST have a comment line above it explaining WHY it is ignored.
+# 2. Comment must include: (a) reason it's a false positive OR (b) ticket
+#    link if it's an accepted risk, AND (c) re-evaluate-by date if accepted.
+# 3. Secrets are ALWAYS preferred to be rotated, not ignored. Add an entry
+#    here only after rotation is impossible AND the value is verified to be
+#    a fixture / test data / non-production.
+# 4. Empty file = clean state. Do not add entries proactively.
+
+# Phase 999.17.1 (2026-04-29): Plan 05 markdown describes future gitleaks NEGATIVE
+# fixture content — synthetic AWS keys (AKIA...EXAMPLE2 per 999.17 Plan 12). These
+# are PLANNING ARTIFACTS, not secrets in source code. Path-block via .gitleaks.toml
+# [allowlist] is preferred but doesn't apply to top-level allowlists in gitleaks v8.30
+# when extending default rules; per-finding fingerprint suppression is the working
+# alternative. Re-evaluate after 999.17.1 ships and Plan 03 adds path-block for
+# `scripts/security/fixtures/**` in this same file.
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:175
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:189
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:191
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:243
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:301
+.planning/phases/999.17.1-quality-security-decouple-and-prove-fixtures/999.17.1-05-PLAN.md:aws-access-token:345
+
+# === Historical findings — POST-ROTATION ACCEPTANCE SIGNATURE, pending DevOps rotation per 999.17.2-DEVOPS-HANDOFF.md § 1.1 ===
+#
+# Two fingerprint entries below silence the historical Telegram-bot-token literal that was
+# tracked in .env.docker at commit c638e69 (2026-04-15, "set real Telegram bot token") and
+# remained at commit 382fc1f (preceding placeholder commit; gitleaks v8.30.1 may not flag it
+# directly but second fingerprint is defensive). Token will be revoked by DevOps; revoke
+# renders value worthless. Literal remains in commits as historical record (BFG/git-filter-repo
+# NOT applied per CONTEXT.md D-12 — risky for shared repo, no incremental safety post-revoke).
+#
+# IMPORTANT — pre-rotation acceptance window: until DevOps confirms revoke, these suppressions
+# silence findings whose values are still LIVE. This is an accepted known-risk window
+# coordinated with DevOps (see 999.17.2-DEVOPS-HANDOFF.md § 1.1). Do NOT merge to main without
+# DevOps rotation confirmation.
+#
+# Re-evaluation trigger: GitLab migration (project_gitlab_migration.md memory). Two scenarios:
+#   (a) Full-history migration (default): suppressions migrate as-is with the repo. No action.
+#   (b) Fresh-repo migration (clean break): suppressions become moot — delete entries below
+#       and verify pnpm security:secrets-full exits 0 without them.
+#
+# Discipline rule (Rule-of-thumb): do NOT add new entries here. New leaks → rotate + history
+# rewrite via git-filter-repo, do NOT suppress. This entry exists as one-time historical
+# acceptance only. Each new finding requires its own evaluation + own comment + own rotation
+# evidence. The 2 entries below are SCOPED to the specific commit-SHA-equivalent fingerprint
+# of the historical Telegram-token leak — never reuse this suppression for any new finding.
+c638e69e4c6a4ca9c269d92b676219640279f0d5:.env.docker:telegram-bot-api-token:52
+382fc1f2885444a54a584a82c53433bf1502706a:.env.docker:telegram-bot-api-token:52
+
+# === Phase 999.17.2 Plan 02 follow-up — D-08 historical-content suppressions ===
+#
+# Plan 02 redacted 19 D-08-scope literal occurrences in current HEAD across 8 planning/
+# research docs. Because `gitleaks git /repo` scans full commit history (not the working
+# tree), the 19 findings continue to fire from their introducing commits. The values were
+# never live (planning-doc examples — fake AWS literals from gitleaks fixture-selection
+# discussions, expired Garage rpc_secret, smoke-test filenames triggering entropy heuristic,
+# garage-webui admin-token examples). BFG / git-filter-repo NOT applied per CONTEXT.md D-12.
+# Adding 1 entry per (commit, file, rule, line) tuple from the empirical
+# `gitleaks git /repo --report-format json` output captured 2026-04-30 post-Plan-02-Tasks-1-3.
+#
+# These suppressions are INFORMATIONAL — values were never live. Re-evaluation trigger
+# matches OQ-5 above: GitLab migration cutover (a) full-history → keep, (b) fresh-repo → delete.
+# See 999.17.2-DEVOPS-HANDOFF.md § 4.1 + § 6.1.
+#
+# Discipline rule continues to apply: each new D-08 follow-up entry MUST have its own
+# context comment when added. Bulk-suppressing future findings without per-finding evaluation
+# is forbidden — see Plan 01 Task 4 OQ-5 commentary above.
+
+# 22-02-SUMMARY.md generic-api-key — line 9 entropy false-positive (S3 token concatenation,
+# never a real key). HEAD redacted in commit e523c7c per Plan 02 Task 1.
+a29e8b842dfd2dd4d8dd15343fac9a4424f38dfd:.planning/phases/22-s3-storagemodule/22-02-SUMMARY.md:generic-api-key:9
+
+# 22.5-01-PLAN.md generic-api-key — line 184, expired Garage rpc_secret literal in code-block
+# example. HEAD redacted in commit 5e13a89 per Plan 02 Task 1. Value rotated post-D-10.
+c28b0a658d83fccb0eaed72ed3cffac858be75b0:.planning/phases/22.5-local-garage-unification/22.5-01-PLAN.md:generic-api-key:184
+
+# 22.5-RESEARCH.md generic-api-key — same expired Garage rpc_secret literal repeated
+# across two example sections (lines 285 and 787). Two distinct introducing commits because
+# the file was edited mid-research; gitleaks reports first-introduction per occurrence.
+# HEAD redacted in commit 55f42d3 per Plan 02 Task 1.
+48dc1230f07770067480940f2866ec7a7789a533:.planning/phases/22.5-local-garage-unification/22.5-RESEARCH.md:generic-api-key:285
+3c93cd6a8200568bfa4ca1f7ee49cb1a8629d627:.planning/phases/22.5-local-garage-unification/22.5-RESEARCH.md:generic-api-key:787
+
+# 24.1-04-PLAN.md generic-api-key — line 39, narrative reference to Telegram-bot-token literal
+# (same value as OQ-5 above). HEAD redacted in commits c0d561e + 793c300 per Plan 02 Task 2 +
+# OQ-3 strict-D-09 follow-up. Value rotation precedence shared with OQ-5 above (DevOps revoke).
+d2d9114e0a6a0b599859f184bf82b2babc9b6fc2:.planning/phases/24.1-http-client-foundation-hardening-di-env-hygiene-magic-values/24.1-04-PLAN.md:generic-api-key:39
+
+# 999.10.1-03-SUMMARY.md generic-api-key — lines 177, 202 entropy false-positives (smoke-test
+# JSON adjacencies misread as generic-api-key; never real keys). HEAD redacted in commit
+# 7846081 per Plan 02 Task 3.
+307697f5b667c156e000193967ce9e161ad26095:.planning/phases/999.10.1-hexagonal-naming-convention-refactor/999.10.1-03-SUMMARY.md:generic-api-key:177
+307697f5b667c156e000193967ce9e161ad26095:.planning/phases/999.10.1-hexagonal-naming-convention-refactor/999.10.1-03-SUMMARY.md:generic-api-key:202
+
+# 999.17-12-SUMMARY.md aws-access-token — 7 occurrences at lines 36, 42, 97 (×2), 109, 144, 199.
+# All literals were FAKE AWS keys used in gitleaks-fixture-selection discussions (the doc
+# explains why one specific fake literal was chosen over another — each pair literal triggers).
+# HEAD redacted in commit b14e04d per Plan 02 Task 3.
+d6d6a738ae35bb8edb1a56387ffee19c10e1debe:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-12-SUMMARY.md:aws-access-token:36
+d6d6a738ae35bb8edb1a56387ffee19c10e1debe:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-12-SUMMARY.md:aws-access-token:42
+d6d6a738ae35bb8edb1a56387ffee19c10e1debe:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-12-SUMMARY.md:aws-access-token:97
+d6d6a738ae35bb8edb1a56387ffee19c10e1debe:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-12-SUMMARY.md:aws-access-token:109
+d6d6a738ae35bb8edb1a56387ffee19c10e1debe:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-12-SUMMARY.md:aws-access-token:144
+d6d6a738ae35bb8edb1a56387ffee19c10e1debe:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-12-SUMMARY.md:aws-access-token:199
+
+# 999.17-VERIFICATION.md aws-access-token — 3 occurrences at lines 71, 187, 223. Same
+# fake-AWS-literal context as 999.17-12-SUMMARY (verifier-side reproduction notes referring
+# to the same fixture-selection literals). HEAD redacted in commit 65e390d per Plan 02 Task 3.
+5cb2cf50a78c2f85ca8867448de653353442a115:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-VERIFICATION.md:aws-access-token:71
+5cb2cf50a78c2f85ca8867448de653353442a115:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-VERIFICATION.md:aws-access-token:187
+5cb2cf50a78c2f85ca8867448de653353442a115:.planning/phases/999.17-devsecops-shift-left-security-tooling/999.17-VERIFICATION.md:aws-access-token:223
+
+# garage-webui.md generic-api-key — lines 38, 74 expired Garage admin-token literal in
+# Coolify-deployment example yaml. HEAD redacted in commit 730c563 per Plan 02 Task 3.
+8abc9696e3b63bb45e52b8b4a9ac3ba1e51b07d6:.planning/research/garage-webui.md:generic-api-key:38
+8abc9696e3b63bb45e52b8b4a9ac3ba1e51b07d6:.planning/research/garage-webui.md:generic-api-key:74
+
+# infra/docker/garage.toml generic-api-key — line 14 (initial commit 1427558) expired Garage
+# rpc_secret 32-byte hex literal. HEAD redacted in commit 6b3b952 per Plan 02 Task 4 (D-10
+# native env override). Value rotated by DevOps post-D-10 per DEVOPS-HANDOFF §1.2.
+142755856893e0395c555e839882d74dd3a63265:infra/docker/garage.toml:generic-api-key:14

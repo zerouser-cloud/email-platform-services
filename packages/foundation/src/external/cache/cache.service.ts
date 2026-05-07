@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import type Redis from 'ioredis';
-import type { CachePort } from './cache.interfaces';
+import { PinoLogger } from 'nestjs-pino';
+import type { Logger as PinoBaseLogger } from 'pino';
+import type { ZodType } from 'zod';
+import type { CacheGetResult, CachePort } from './cache.interfaces';
 
 @Injectable()
-export class RedisCacheService implements CachePort {
+export class RedisCacheService implements CachePort, OnModuleInit {
   private readonly prefix: string;
+  private logger!: PinoBaseLogger;
 
   constructor(
     private readonly redis: Redis,
@@ -13,16 +17,66 @@ export class RedisCacheService implements CachePort {
     this.prefix = `${namespace}:`;
   }
 
-  async get<T>(key: string): Promise<T | null> {
-    const raw = await this.redis.get(this.prefixKey(key));
+  // TEMP: foundation logger DI pattern under design — see Phase 999.20 (Logger Port).
+  // 7 foundation sites currently use PinoLogger directly через 3 разных способа
+  // (auto-context inference / setContext / root.child). LoggerPort Tier-1 abstraction
+  // TBD; current `PinoLogger.root.child(...)` is tactical, not architectural.
+  private ensureInit(): void {
+    if (!this.logger) {
+      this.logger = PinoLogger.root.child({ context: RedisCacheService.name });
+    }
+  }
+
+  onModuleInit(): void {
+    this.ensureInit();
+  }
+
+  async get<T>(key: string, schema?: ZodType<T>): Promise<CacheGetResult<T>> {
+    this.ensureInit();
+    const prefixed = this.prefixKey(key);
+    const raw = await this.redis.get(prefixed);
     if (raw === null) {
-      return null;
+      return { status: 'absent' };
     }
+
+    let parsed: unknown;
     try {
-      return JSON.parse(raw) as T;
-    } catch {
-      return null;
+      parsed = JSON.parse(raw);
+    } catch (err) {
+      this.logger.error({ key: prefixed, err }, 'cache: JSON.parse failed; deleting corrupt entry');
+      try {
+        await this.del(key);
+      } catch (delErr) {
+        this.logger.error(
+          { key: prefixed, delErr },
+          'cache: self-heal del() failed; corrupt entry persists',
+        );
+      }
+      return { status: 'corrupt', reason: 'json-parse' };
     }
+
+    if (!schema) {
+      return { status: 'value', value: parsed as T };
+    }
+
+    const result = schema.safeParse(parsed);
+    if (!result.success) {
+      this.logger.warn(
+        { key: prefixed, issues: result.error.issues },
+        'cache: schema mismatch; deleting corrupt entry',
+      );
+      try {
+        await this.del(key);
+      } catch (delErr) {
+        this.logger.error(
+          { key: prefixed, delErr },
+          'cache: self-heal del() failed; corrupt entry persists',
+        );
+      }
+      return { status: 'corrupt', reason: 'schema-mismatch' };
+    }
+
+    return { status: 'value', value: result.data };
   }
 
   async set(key: string, value: unknown, ttlMs: number): Promise<void> {

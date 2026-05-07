@@ -1,6 +1,11 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { HealthCheckService, HealthCheck, type HealthIndicatorResult } from '@nestjs/terminus';
+import {
+  HealthCheckService,
+  HealthCheck,
+  type HealthCheckResult,
+  type HealthIndicatorResult,
+} from '@nestjs/terminus';
 import {
   HEALTH,
   CACHE_HEALTH,
@@ -67,7 +72,7 @@ export class HealthController {
    */
   @Get(HEALTH.READY)
   @HealthCheck()
-  async readiness() {
+  async readiness(): Promise<HealthCheckResult> {
     const results = await Promise.allSettled(
       this.upstreams.map(({ key, indicator }) => indicator.isHealthy(key)),
     );

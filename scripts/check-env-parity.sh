@@ -107,6 +107,7 @@ compare .env .env.example
 # Provenance (infra/docker-compose.infra.yml):
 #   POSTGRES_USER / POSTGRES_PASSWORD / POSTGRES_DB -> postgres container init
 #   GARAGE_ADMIN_TOKEN                              -> garage + garage-webui sidecars
+#   GARAGE_RPC_SECRET                               -> garage container (native v2 env override per Phase 999.17.2 D-10)
 #
 # When adding another orchestrator-only var (e.g., for a new infra container),
 # append its key here and document its docker-compose consumption site above.
@@ -116,6 +117,7 @@ ORCHESTRATOR_ONLY_KEYS=$(printf '%s\n' \
   POSTGRES_PASSWORD \
   POSTGRES_DB \
   GARAGE_ADMIN_TOKEN \
+  GARAGE_RPC_SECRET \
   | sort -u)
 
 # Extract all UPPER_SNAKE_CASE env keys declared in Zod-schemas under
